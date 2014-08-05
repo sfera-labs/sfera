@@ -71,7 +71,7 @@ public class Sfera {
 	//		    	}
 	//		    });
 	//		} catch (Exception e) {
-	//			//TODO
+	//			
 	//		}
 			
 			
@@ -131,6 +131,7 @@ public class Sfera {
 			} catch (InterruptedException e) {}
 			
 			ResourcesUtils.close();
+			Database.close();
 			
 			SystemLogger.SYSTEM.info("Bye!");
 			System.exit(0);
@@ -144,7 +145,7 @@ public class Sfera {
 	 * 
 	 */
 	private static List<Driver> loadDrivers() {
-		// TODO read config file and manifest file
+		// TODO read config and manifest files
 		String[][] declaredDrivers = {
 				{"http", "com.homesystemsconsulting.drivers.webserver.HttpServer"}, 
 //				{"https", "com.homesystemsconsulting.drivers.webserver.HttpsServer"},

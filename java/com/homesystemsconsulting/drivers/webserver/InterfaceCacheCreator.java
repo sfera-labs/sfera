@@ -53,8 +53,6 @@ public class InterfaceCacheCreator {
 	 */
 	public InterfaceCacheCreator(String interfaceName) throws IOException {
 		this.interfaceName = interfaceName;
-		//this.interfaceTmpCacheRoot = WebServer.CACHE_ROOT.resolve(interfaceName + "/");
-		//TODO
 		this.interfaceTmpCacheRoot = Files.createTempDirectory("webappTmp");
 	}
 
@@ -68,8 +66,8 @@ public class InterfaceCacheCreator {
 		createLoginCache(createManifest);
 		
 		Path interfaceCacheRoot = WebServer.CACHE_ROOT.resolve(interfaceName + "/");
-		Files.createDirectories(interfaceCacheRoot);
 		ResourcesUtils.deleteRecursive(interfaceCacheRoot);
+		Files.createDirectories(WebServer.CACHE_ROOT);
 		Files.move(interfaceTmpCacheRoot, interfaceCacheRoot);
 	}
 

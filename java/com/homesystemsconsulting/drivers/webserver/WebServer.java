@@ -25,9 +25,9 @@ import com.homesystemsconsulting.core.Configuration;
 import com.homesystemsconsulting.core.Sfera;
 import com.homesystemsconsulting.core.Task;
 import com.homesystemsconsulting.core.TasksManager;
-import com.homesystemsconsulting.data.Database;
 import com.homesystemsconsulting.drivers.Driver;
 import com.homesystemsconsulting.drivers.webserver.HttpRequestHeader.Method;
+import com.homesystemsconsulting.drivers.webserver.access.Access;
 import com.homesystemsconsulting.util.files.ResourcesUtils;
 
 public abstract class WebServer extends Driver {
@@ -91,6 +91,15 @@ public abstract class WebServer extends Driver {
 		createCache();
 		
 		log.info("accepting connections on port " + socket.getLocalPort());
+		
+		//TODO read from access.ini ============
+		try {
+			Access.addUser("user", "12345");
+			Access.addUser("test", "55555");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		//======================================
 		
 		return true;
 	}
@@ -163,11 +172,11 @@ public abstract class WebServer extends Driver {
 			
 		} catch (IOException e) {
 			log.error("error accepting connection: " + e);
-			try {
-				if (connection != null) {
+			if (connection != null) {
+				try {
 					connection.close();
-				}
-			} catch (IOException ioe) {}
+				} catch (IOException ioe) {}
+			}
 			
 			return false;
 		}
@@ -260,6 +269,7 @@ public abstract class WebServer extends Driver {
 				
 			} catch (Exception e) {
 				log.warning("error processing request: " + e);
+				e.printStackTrace();
 			}
 			
 			log.debug("request process for " + connection.getInetAddress() + " terminated");
@@ -270,18 +280,27 @@ public abstract class WebServer extends Driver {
 		 * @param httpRequestHeader
 		 * @param in
 		 * @param out
-		 * @param dataOut 
+		 * @param dataOut
 		 * @return
-		 * @throws IOException
+		 * @throws Exception
 		 */
 		private boolean processRequest(HttpRequestHeader httpRequestHeader, 
-				BufferedReader in, PrintWriter out, BufferedOutputStream dataOut) throws IOException {
+				BufferedReader in, PrintWriter out, BufferedOutputStream dataOut) throws Exception {
 			
 			String uri = httpRequestHeader.getURI();
 			log.debug("processing request from: " + connection.getInetAddress() + " URI: " + uri);
 			
+			int qmIdx = uri.indexOf('?');
+			String query;
+			if (qmIdx >= 0) {
+				query = uri.substring(qmIdx);
+				uri = uri.substring(0, qmIdx);
+			} else {
+				query = null;
+			}
+			
 			if (uri.startsWith(API_BASE_URI)) {
-				return processApiRequest(uri.substring(API_BASE_URI.length()), httpRequestHeader, in, out);
+				return processApiRequest(uri.substring(API_BASE_URI.length()), query, httpRequestHeader, in, out);
 			
 			} else {
 				return processFileRequest(uri, httpRequestHeader, out, dataOut);
@@ -542,42 +561,53 @@ public abstract class WebServer extends Driver {
 		/**
 		 * 
 		 * @param command
+		 * @param query 
 		 * @param httpRequestHeader
 		 * @param in
 		 * @param out
 		 * @return
+		 * @throws Exception 
 		 */
-		private boolean processApiRequest(String command, HttpRequestHeader httpRequestHeader, 
-				BufferedReader in, PrintWriter out) {
+		private boolean processApiRequest(String command, String query, HttpRequestHeader httpRequestHeader, 
+				BufferedReader in, PrintWriter out) throws Exception {
 			
 			// TODO
 			
-			System.out.println(command);
-			if (command.startsWith("user")) {
-				String user = "pippo";
-				String psw = "papapapap";
-				try {
-					Database.addUser(user, psw);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+			System.out.println("command: " + command);
+			System.out.println("query: " + query);
+			
+			if (command.equals("login")) {
 				
-				
-				try {
-					byte[] hashedPassword = Database.getUserPassword("pippo");
+				String username = getQueryValue("user", query);
+				String password = getQueryValue("password", query);
+				if (Access.authenticate(username, password)) {
 					
-					System.out.println("++++");
-					String pswStr = "";
-					for (int i = 0; i < hashedPassword.length; i++) {
-						pswStr += " " + (hashedPassword[i] & 0xff);
-					}
-					System.out.println(pswStr);
-				} catch (Exception e) {
-					e.printStackTrace();
 				}
 			}
 			
 			return false;
+		}
+
+		/**
+		 * 
+		 * @param key
+		 * @param query
+		 * @return
+		 */
+		private String getQueryValue(String key, String query) {
+			int start = query.indexOf("?" + key + "=");
+			if (start < 0) {
+				start = query.indexOf("&" + key + "=");
+				if (start < 0) {
+					return null;
+				}
+			}
+			start += key.length() + 2;
+			int end = query.indexOf('&', start);
+			if (end < 0) {
+				end = query.length();
+			}
+			return query.substring(start, end);
 		}
 	}
 }
