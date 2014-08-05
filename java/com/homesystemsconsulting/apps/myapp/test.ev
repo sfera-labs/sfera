@@ -1,0 +1,43 @@
+/*
+mydr.dp1 == true && knx.dimmer.a1 > 50 || clock.simpleTime > '0800' : { if (true) { var a = 0; } } 
+mydr.dp1 == true && knx && dmx || !dmx && !clock.simpleTime > "0800" : { print('Hello, World\n'); }
+mydr.dp1 == true : { print("Hello, World\n"); }
+mydr.dp1 == true && knx.dimmer.a1 > 50 || tck && clock.simpleTime > 0800 : { print('Hello, World\n'); }
+mydr.dp1 == true && knx.dimmer.a1 > 50 || tck && clock.simpleTime > 0800 : { print('Hello\n'); }
+
+
+mydr.dp1 == "dsd" : { 
+	if (skjdks) var a = "}";
+	
+		
+	sjdhjs;
+	// ajksl {asodjkod
+	sjs;
+	//{ 
+}
+*/
+
+/*
+system.reload : {
+	print('decl\n');
+	
+	var myVar = "sdasd";
+	
+	function myFunction(p1, p2) {
+    	return p1 * p2;              
+	}
+}
+
+mydr.text : {
+	print('ret: ' + myFunction(3,5) + '\n');
+	print('var: ' + myVar + '\n');
+}
+
+mydr : {
+	if (ev instanceof com.sfera.events.NumberEvent) {
+		print('num: ' + ev.getValue() + '\n');
+	}
+	print('ev: ' + ev.getValue() + '\n');
+	mydr.doSomething("it");
+}
+*/

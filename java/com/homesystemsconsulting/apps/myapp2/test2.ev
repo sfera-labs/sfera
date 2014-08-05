@@ -1,0 +1,3 @@
+//mydr.dp1 != true : { print('Hello, World\n'); }
+
+//mydr.dp1 : { print('var: ' + myVar + '\n'); }

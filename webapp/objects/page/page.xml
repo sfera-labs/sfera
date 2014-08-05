@@ -1,0 +1,7 @@
+<obj name="page" hidden="true">
+	<attributes>
+		<attr name="title" type="string" default="" />
+		<attr name="orientation" type="string" default="" />
+		<attr name="gestures" type="gestures" default="" />
+	</attributes>
+</obj>
