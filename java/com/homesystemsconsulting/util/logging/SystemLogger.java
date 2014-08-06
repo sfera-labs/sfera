@@ -1,6 +1,8 @@
 package com.homesystemsconsulting.util.logging;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -23,8 +25,9 @@ public class SystemLogger {
 	final static Level DEBUG = new DebugLevel();
 	final static Level VERBOSE = new VerboseLevel();
 
-	private static final String TEXT_LOG_FILE = "logs/log.txt";
-	private static final String JSON_LOG_FILE = "logs/log.json";
+	private static final String LOG_DIR = "logs/";
+	private static final String TEXT_LOG_FILE = LOG_DIR + "log.txt";
+	private static final String JSON_LOG_FILE = LOG_DIR + "log.json";
 	
 	private static final Logger BASE_LOGGER = Logger.getLogger("sfera");
 	
@@ -57,6 +60,8 @@ public class SystemLogger {
 	static public void setup() throws SecurityException, IOException {
 		LogManager.getLogManager().reset();
 		BASE_LOGGER.setUseParentHandlers(false);
+		
+		Files.createDirectories(Paths.get(LOG_DIR));
 		
 		FileHandler fileTxt;
 		fileTxt = new FileHandler(TEXT_LOG_FILE, true);

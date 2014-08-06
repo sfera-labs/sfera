@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileSystem;
+import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
@@ -22,7 +24,11 @@ public class ResourcesUtils {
 	 */
 	public static FileSystem getJarFileSystem() throws IOException {
 		if (jarFileSystem == null) {
-			jarFileSystem = FileSystems.newFileSystem(Paths.get("sfera.jar"), null);
+			try {
+				jarFileSystem = FileSystems.newFileSystem(Paths.get("sfera.jar"), null);
+			} catch (FileSystemNotFoundException e) {
+				// no jar
+			}
 		}
 		
 		return jarFileSystem;
@@ -45,22 +51,32 @@ public class ResourcesUtils {
 	 * @return
 	 * @throws IOException
 	 */
-	public static Path getResourceFromJar(Path path) throws IOException {
-		return getJarFileSystem().getPath(path.toString());
+	private static Path getResourceFromJar(Path path) throws IOException {
+		FileSystem jfs = getJarFileSystem();
+		if (jfs == null) {
+			return null;
+		}
+		return jfs.getPath(path.toString());
 	}
 	
 	/**
 	 * 
 	 * @param path
 	 * @return
+	 * @throws NoSuchFileException 
 	 * @throws IOException
 	 */
-	public static Path getResourceFromJarIfNotInFileSystem(Path path) throws IOException {
+	public static Path getResourceFromJarIfNotInFileSystem(Path path) throws NoSuchFileException, IOException {
 		if (Files.exists(path)) {
 			return path;
 		}
 		
-		return getResourceFromJar(path);
+		Path jPath = getResourceFromJar(path);
+		if (jPath != null && Files.exists(jPath)) {
+			return jPath;
+		}
+		
+		throw new NoSuchFileException(path.toString());
 	}
 	
 	/**
@@ -94,22 +110,24 @@ public class ResourcesUtils {
 		}
 		
 		FileSystem jfs = getJarFileSystem();
-		Path jarDir = jfs.getPath(dir.toString());
-		if (Files.exists(jarDir) && Files.isDirectory(jarDir)) {
-			if (list == null) {
-				list = new HashSet<String>();
-			}
-			try (DirectoryStream<Path> stream = Files.newDirectoryStream(jarDir)) {
-			    for (Path file : stream) {
-			    	if (Files.isDirectory(file) && !Files.isHidden(file)) {
-			    		String dirName = file.getFileName().toString();
-			    		if (dirName.endsWith("/")) {
-			    			dirName = dirName.substring(0, dirName.length() - 1);
-			    		}
-			    		
-			    		list.add(dirName);
-			    	}
-			    }
+		if (jfs != null) {
+			Path jarDir = jfs.getPath(dir.toString());
+			if (Files.exists(jarDir) && Files.isDirectory(jarDir)) {
+				if (list == null) {
+					list = new HashSet<String>();
+				}
+				try (DirectoryStream<Path> stream = Files.newDirectoryStream(jarDir)) {
+				    for (Path file : stream) {
+				    	if (Files.isDirectory(file) && !Files.isHidden(file)) {
+				    		String dirName = file.getFileName().toString();
+				    		if (dirName.endsWith("/")) {
+				    			dirName = dirName.substring(0, dirName.length() - 1);
+				    		}
+				    		
+				    		list.add(dirName);
+				    	}
+				    }
+				}
 			}
 		}
 		
@@ -164,15 +182,17 @@ public class ResourcesUtils {
 		Set<Path> list = null;
 		
 		FileSystem jfs = getJarFileSystem();
-		Path jarDir = jfs.getPath(dir.toString());
-		if (Files.exists(jarDir) && Files.isDirectory(jarDir)) {
-			list = new HashSet<Path>();
-			try (DirectoryStream<Path> stream = Files.newDirectoryStream(jarDir)) {
-			    for (Path file : stream) {
-			    	if (Files.isRegularFile(file) && !Files.isHidden(file)) {
-			    		list.add(file);
-			    	}
-			    }
+		if (jfs != null) {
+			Path jarDir = jfs.getPath(dir.toString());
+			if (Files.exists(jarDir) && Files.isDirectory(jarDir)) {
+				list = new HashSet<Path>();
+				try (DirectoryStream<Path> stream = Files.newDirectoryStream(jarDir)) {
+				    for (Path file : stream) {
+				    	if (Files.isRegularFile(file) && !Files.isHidden(file)) {
+				    		list.add(file);
+				    	}
+				    }
+				}
 			}
 		}
 		
@@ -191,8 +211,10 @@ public class ResourcesUtils {
 		
 		if (includeFilesInJar) {
 			FileSystem jfs = getJarFileSystem();
-			Path jarSource = jfs.getPath(source.toString());
-			list.addAll(copyRecursive(jarSource, target));
+			if (jfs != null) {
+				Path jarSource = jfs.getPath(source.toString());
+				list.addAll(copyRecursive(jarSource, target));
+			}
 		}
 		
 		return list;
