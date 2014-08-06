@@ -2,6 +2,8 @@
 /logs/
 /data/
 
+/sfera.jar
+
 .DS_Store
 .DS_Store?
 ._*
