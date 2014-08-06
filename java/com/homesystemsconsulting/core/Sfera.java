@@ -141,7 +141,6 @@ public class Sfera {
 		}
 	}
 
-	
 	/**
 	 * 
 	 */
