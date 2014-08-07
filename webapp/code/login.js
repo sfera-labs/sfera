@@ -283,11 +283,11 @@ req.onLoaded = function () {
 	*/
 }
 req.onError = function () {
-	clearTimeout(checkTimeout);
 	resetCheck();
 }
 
 function doLogin() {
+	resetCheck();
 	var user = document.getElementById("user").value;
 	var password = document.getElementById("password").value;
 	req.open("/x/login?user="+user+"&password="+password,100);
@@ -298,6 +298,7 @@ function checkLogin() {
 }
 
 function resetCheck() {
+	clearTimeout(checkTimeout);
 	checkTimeout = setTimeout(checkLogin, checkMs);
 }
 
