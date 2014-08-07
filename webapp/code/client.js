@@ -260,6 +260,7 @@ function XMLReq() {
 	}
 } // XMLReq Class
 
+var clientID;
 
 window.onload = function() {
 	var req = new XMLReq("GET");
@@ -278,9 +279,33 @@ window.onload = function() {
 		case "index":
 			console.log("index loaded");
 			e.innerHTML += "dictionary index:<br><textarea style='width:500px; height:200px'>"+req.getResponseText()+"</textarea><br><br>";
+			what = "subscribe";
+			e.innerHTML += "<br><br>Subscribing...";
+			req.open("/x/subscribe?nodes=*",100); // first subscribe
+			break;
+		case "subscribe":
+			console.log("subscribe loaded");
+			what = "state";
+			var json = JSON.parse(req.getResponseText());
+			clientID = json.id;
+			e.innerHTML += "Done<br><br>ID:"+clientID+"<br><br>"; 
+			req.open("/x/status/"+clientID+"?ts="+(new Date()).getTime(),100);
+			break;
+		case "state":
+			console.log("status loaded");
+			e.innerHTML += "status:<br><textarea style='width:500px; height:200px'>"+req.getResponseText()+"</textarea><br><br>";
+			req.open("/x/status/"+clientID+"?ts="+(new Date()).getTime(),100);
 			break;
 		}
+	}
+	
+	req.onError = function () {
+		console.log("error");
+		var e = document.getElementById("contents");
+		e.innerHTML += "<br><br>Error.<br><br>";
 	}
 
 	req.open("/"+interf+"/dictionary.xml",100);
 }
+
+var Objects = {};

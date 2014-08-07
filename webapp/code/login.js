@@ -301,6 +301,6 @@ function resetCheck() {
 	checkTimeout = setTimeout(checkLogin, checkMs);
 }
 
-window.onload = function() {
+window.onload = function () {
 	resetCheck(); // start now
 }
