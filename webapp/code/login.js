@@ -294,9 +294,13 @@ function doLogin() {
 }
 
 function checkLogin() {
-	req.open("/x/login?user="+user+"&password="+password,100);
+	req.open("/x/login",100);
 }
 
 function resetCheck() {
 	checkTimeout = setTimeout(checkLogin, checkMs);
+}
+
+window.onload = function() {
+	resetCheck(); // start now
 }
