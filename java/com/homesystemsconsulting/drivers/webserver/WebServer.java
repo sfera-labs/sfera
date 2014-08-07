@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -15,6 +16,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 
 import javax.xml.stream.XMLStreamException;
@@ -44,7 +46,6 @@ public abstract class WebServer extends Driver {
 	private static final int SOCKET_TIMEOUT = 60000;
 	
 	private static final String HTTP_HEADER_FIELD_SERVER = "Sfera " + Sfera.VERSION;
-	private static final String HTTP_CONTENT_FILE_NOT_FOUND = "<html><head><title>File Not Found</title></head><body>Sorry, the object you requested was not found.</body><html>";
 
 	private static TasksManager tasksManager;
 	private static Object tasksManagerLock = new Object();
@@ -407,7 +408,7 @@ public abstract class WebServer extends Driver {
 						
 					} else {
 						log.debug("unauthorized file request: " + path);
-			    		fileNotFoundError(out);
+			    		notFoundError(out);
 					}
 				}
 			}
@@ -466,7 +467,7 @@ public abstract class WebServer extends Driver {
 	    		}
 			} catch (NoSuchFileException e) {
 	    		log.warning("file not found: " + ABSOLUTE_CACHE_ROOT_PATH.relativize(path));
-	    		fileNotFoundError(out);
+	    		notFoundError(out);
 			}
 		}
 		
@@ -496,15 +497,13 @@ public abstract class WebServer extends Driver {
 		 * 
 		 * @param out
 		 */
-		private void fileNotFoundError(PrintWriter out) {
-			out.print("HTTP/1.1 404 File Not Found\r\n");
+		private void notFoundError(PrintWriter out) {
+			out.print("HTTP/1.1 404 Not Found\r\n");
 			out.print("Date: " + DATE_FORMAT.format(new Date()) + "\r\n");
 			out.print("Server: " + HTTP_HEADER_FIELD_SERVER + "\r\n");
-			out.print("Content-length: " + HTTP_CONTENT_FILE_NOT_FOUND.getBytes().length + "\r\n");
 			out.print("Content-type: text/html\r\n");
 			out.write("Cache-Control: max-age=0, no-cache, no-store\r\n");
 			out.print("\r\n");
-			out.print(HTTP_CONTENT_FILE_NOT_FOUND);
 			out.flush();
 		}
 		
@@ -588,7 +587,39 @@ public abstract class WebServer extends Driver {
 				return false;
 			}
 			
+			if (command.equals("subscribe")) {
+				subscribe(token, query, out);
+				return true;
+			}
+			
+			if (command.startsWith("status/")) {
+				status(command.substring(7), token, query, out);
+				return true;
+			}
+			
 			return false;
+		}
+
+		private void status(String substring, Token token, String query,
+				PrintWriter out) {
+			// TODO Auto-generated method stub
+			
+			ok(out, null, null);
+		}
+
+		/**
+		 * 
+		 * @param token
+		 * @param query
+		 * @param out
+		 */
+		private void subscribe(Token token, String query, PrintWriter out) {
+			//TODO
+			String id = getQueryValue("id", query);
+			if (id == null) {
+				id = UUID.randomUUID().toString();
+			}
+			ok(out, "{\"id\":\"" + id + "\"}", "application/json");
 		}
 
 		/**
@@ -603,7 +634,7 @@ public abstract class WebServer extends Driver {
 			User user = null;
 			if (query == null) {
 				if (token != null) {
-					ok(out);
+					ok(out, null, null);
 				} else {
 					notAuthorizedError(out);
 				}
@@ -659,13 +690,19 @@ public abstract class WebServer extends Driver {
 		 * 
 		 * @param out
 		 */
-		private void ok(PrintWriter out) {
+		private void ok(PrintWriter out, String body, String contentType) {
 			out.print("HTTP/1.1 200 OK\r\n");
-			out.print("Date: " + DATE_FORMAT.format(new Date()) + "\r\n");
-			out.print("Server: " + HTTP_HEADER_FIELD_SERVER + "\r\n");
-			out.write("Cache-Control: max-age=0, no-cache, no-store\r\n");
-			out.print("\r\n");
-			out.flush();
+	        out.print("Date: " + DATE_FORMAT.format(new Date()) + "\r\n");
+	        out.print("Server: " + HTTP_HEADER_FIELD_SERVER + "\r\n");
+	        out.write("Cache-Control: max-age=0, no-cache, no-store\r\n");
+	        if (contentType != null) {
+	        	out.print("Content-type: " + contentType + "\r\n");
+	        }
+	        if (body != null) {
+	        	out.print("Content-length: " + body.getBytes(Charset.forName("UTF-8")).length + "\r\n");
+	        }
+	        out.print("\r\n");
+	        out.flush();
 		}
 		
 		/**
