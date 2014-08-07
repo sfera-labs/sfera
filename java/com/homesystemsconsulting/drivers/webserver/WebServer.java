@@ -575,8 +575,6 @@ public abstract class WebServer extends Driver {
 		private boolean processApiRequest(String command, Token token, String query, HttpRequestHeader httpRequestHeader, 
 				BufferedReader in, PrintWriter out) throws Exception {
 			
-			// TODO
-			
 			System.out.println("command: " + command);
 			System.out.println("query: " + query);
 			

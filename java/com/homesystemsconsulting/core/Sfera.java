@@ -45,36 +45,36 @@ public class Sfera {
 			SystemNode.init();
 			Database.init();
 			
+			/*
 			// connects to HTTPS servers without validating the certificates
-	//		TrustManager[] trustAllCerts = new TrustManager[]{
-	//			new X509TrustManager() {
-	//				public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-	//					return null;
-	//				}
-	//
-	//				public void checkClientTrusted(
-	//					java.security.cert.X509Certificate[] certs, String authType) {
-	//				}
-	//				
-	//				public void checkServerTrusted(
-	//					java.security.cert.X509Certificate[] certs, String authType) {
-	//				}
-	//			}
-	//		};
-	//		try { // this is for javax.net.ssl
-	//		    SSLContext sc = SSLContext.getInstance("TLS");
-	//		    sc.init(null, trustAllCerts, new java.security.SecureRandom());
-	//		    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-	//		    HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier(){
-	//		    	public boolean verify(String string,SSLSession ssls) {
-	//		    		return true;
-	//		    	}
-	//		    });
-	//		} catch (Exception e) {
-	//			
-	//		}
-			
-			
+			TrustManager[] trustAllCerts = new TrustManager[]{
+				new X509TrustManager() {
+					public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+						return null;
+					}
+	
+					public void checkClientTrusted(
+						java.security.cert.X509Certificate[] certs, String authType) {
+					}
+					
+					public void checkServerTrusted(
+						java.security.cert.X509Certificate[] certs, String authType) {
+					}
+				}
+			};
+			try { // this is for javax.net.ssl
+			    SSLContext sc = SSLContext.getInstance("TLS");
+			    sc.init(null, trustAllCerts, new java.security.SecureRandom());
+			    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+			    HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier(){
+			    	public boolean verify(String string,SSLSession ssls) {
+			    		return true;
+			    	}
+			    });
+			} catch (Exception e) {
+				
+			}
+			*/
 			
 			List<Driver> drivers = loadDrivers();
 			for (Driver d : drivers) {
@@ -138,6 +138,8 @@ public class Sfera {
 			
 		} catch (Throwable t) {
 			SystemLogger.SYSTEM.error("exception in main thread: " + t);
+		} finally {
+			SystemLogger.close();
 		}
 	}
 

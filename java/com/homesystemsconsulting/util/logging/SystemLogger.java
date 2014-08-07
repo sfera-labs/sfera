@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.logging.FileHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -63,18 +64,24 @@ public class SystemLogger {
 		
 		Files.createDirectories(Paths.get(LOG_DIR));
 		
-		FileHandler fileTxt;
-		fileTxt = new FileHandler(TEXT_LOG_FILE, true);
-		fileTxt.setFormatter(new TextFormatter());
-		BASE_LOGGER.addHandler(fileTxt);
+		try {
+			Files.delete(Paths.get(TEXT_LOG_FILE + ".lck"));
+		} catch (Exception e) {}
+		try {
+			Files.delete(Paths.get(JSON_LOG_FILE + ".lck"));
+		} catch (Exception e) {}
 		
-		fileTxt = new FileHandler(JSON_LOG_FILE, true);
-		fileTxt.setFormatter(new JSONFormatter());
-		BASE_LOGGER.addHandler(fileTxt);
+		FileHandler fh = new FileHandler(TEXT_LOG_FILE, true);
+		fh.setFormatter(new TextFormatter());
+		BASE_LOGGER.addHandler(fh);
+		
+		fh = new FileHandler(JSON_LOG_FILE, true);
+		fh.setFormatter(new JSONFormatter());
+		BASE_LOGGER.addHandler(fh);
 		
 		Level level = getLevel(Configuration.getProperty("log_level", "INFO"));
 		
-		BASE_LOGGER.setLevel(level);	
+		BASE_LOGGER.setLevel(level);
 	}
 	
 	/**
@@ -200,6 +207,17 @@ public class SystemLogger {
 	 */
 	public void verbose(String tag, String message) {
 		Logger.getLogger(id + "." + tag).log(VERBOSE, message);
+	}
+
+	/**
+	 * 
+	 */
+	public static void close() {
+		for (Handler fh : BASE_LOGGER.getHandlers()) {
+			try {
+				fh.close();
+			} catch (Throwable t) {}
+		}
 	}
 }
 	 

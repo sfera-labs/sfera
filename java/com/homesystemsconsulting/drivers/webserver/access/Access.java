@@ -1,8 +1,6 @@
 package com.homesystemsconsulting.drivers.webserver.access;
 
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Arrays;
 import java.util.Map;
@@ -24,10 +22,9 @@ public abstract class Access {
 	 * @param username
 	 * @param password
 	 * @throws UsernameAlreadyUsedException
-	 * @throws NoSuchAlgorithmException
-	 * @throws InvalidKeySpecException
+	 * @throws Exception
 	 */
-	public static void addUser(String username, String password) throws UsernameAlreadyUsedException, NoSuchAlgorithmException, InvalidKeySpecException {
+	public static void addUser(String username, String password) throws UsernameAlreadyUsedException, Exception {
 		if (existsUser(username)) {
 			throw new UsernameAlreadyUsedException();
 		}
@@ -71,9 +68,9 @@ public abstract class Access {
 	/**
 	 * 
 	 * @return
-	 * @throws NoSuchAlgorithmException
+	 * @throws Exception
 	 */
-	private static byte[] generateSalt() throws NoSuchAlgorithmException {
+	private static byte[] generateSalt() throws Exception {
 		SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
 		byte[] salt = new byte[8];
 		random.nextBytes(salt);
@@ -86,10 +83,9 @@ public abstract class Access {
 	 * @param password
 	 * @param salt
 	 * @return
-	 * @throws NoSuchAlgorithmException
-	 * @throws InvalidKeySpecException
+	 * @throws Exception
 	 */
-	private static byte[] getEncryptedPassword(String password, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
+	private static byte[] getEncryptedPassword(String password, byte[] salt) throws Exception {
 		KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, 20000, 20 * 8);
 		SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
 
