@@ -604,6 +604,9 @@ public abstract class WebServer extends Driver {
 				PrintWriter out) {
 			// TODO Auto-generated method stub
 			
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {}
 			ok(out, null, null);
 		}
 
@@ -689,6 +692,8 @@ public abstract class WebServer extends Driver {
 		/**
 		 * 
 		 * @param out
+		 * @param body
+		 * @param contentType
 		 */
 		private void ok(PrintWriter out, String body, String contentType) {
 			out.print("HTTP/1.1 200 OK\r\n");
@@ -702,6 +707,7 @@ public abstract class WebServer extends Driver {
 	        	out.print("Content-length: " + body.getBytes(Charset.forName("UTF-8")).length + "\r\n");
 	        }
 	        out.print("\r\n");
+	        out.print(body);
 	        out.flush();
 		}
 		
