@@ -2,6 +2,8 @@
 // XMLReq ------------------------------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------------------------
 function XMLReq(method) {
+	if (!method) method = 
+	
 	var req = null; // request
 
 	var status; // -1: aborted, 0: ready, 1:loading, 2:loaded
@@ -261,21 +263,40 @@ function XMLReq(method) {
 } // XMLReq Class
 
 
+var checkTimeout = null;
+var checkMs = 500;
 var req = new XMLReq("GET");
 
 var what = "login";
 
 req.onLoaded = function () {
+	clearTimeout(checkTimeout);
+	window.location.replace("/"+interf);
+
+	/*
 	var e = document.getElementById("contents");
 	switch (what) {
 	case "login":
 		window.location.replace("/"+interf);
 		break;
 	}
+	*/
+}
+req.onError = function () {
+	clearTimeout(checkTimeout);
+	resetCheck();
 }
 
 function doLogin() {
 	var user = document.getElementById("user").value;
 	var password = document.getElementById("password").value;
 	req.open("/x/login?user="+user+"&password="+password,100);
+}
+
+function checkLogin() {
+	req.open("/x/login?user="+user+"&password="+password,100);
+}
+
+function resetCheck() {
+	checkTimeout = setTimeout(checkLogin, checkMs);
 }
