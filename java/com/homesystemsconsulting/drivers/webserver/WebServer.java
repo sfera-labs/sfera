@@ -28,6 +28,8 @@ import com.homesystemsconsulting.core.TasksManager;
 import com.homesystemsconsulting.drivers.Driver;
 import com.homesystemsconsulting.drivers.webserver.HttpRequestHeader.Method;
 import com.homesystemsconsulting.drivers.webserver.access.Access;
+import com.homesystemsconsulting.drivers.webserver.access.Token;
+import com.homesystemsconsulting.drivers.webserver.access.User;
 import com.homesystemsconsulting.util.files.ResourcesUtils;
 
 public abstract class WebServer extends Driver {
@@ -50,8 +52,10 @@ public abstract class WebServer extends Driver {
 	private static Set<String> interfaces;
 	
 	private ServerSocket socket;
+	
 	private String defaultInterface;
 	private boolean usePermanentCache;
+	private int passwordMaxAgeSeconds;
 	
 	/**
 	 * 
@@ -87,6 +91,7 @@ public abstract class WebServer extends Driver {
 		}
 		
 		usePermanentCache = Configuration.getBoolProperty("web.use_permanent_cache", true);
+		passwordMaxAgeSeconds = Configuration.getIntProperty("web.password_validity_hours", 5) * 60 * 60;
 		
 		createCache();
 		
@@ -253,7 +258,7 @@ public abstract class WebServer extends Driver {
 							try {
 								httpRequestHeader = new HttpRequestHeader(reqLine);
 							} catch (NotImplementedRequestMethodException e) {
-								respondWithNotImplementedError(out);
+								notImplementedError(out);
 								keepAlive = false;
 								break;
 							}
@@ -288,7 +293,8 @@ public abstract class WebServer extends Driver {
 				BufferedReader in, PrintWriter out, BufferedOutputStream dataOut) throws Exception {
 			
 			String uri = httpRequestHeader.getURI();
-			log.debug("processing request from: " + connection.getInetAddress() + " URI: " + uri);
+			Token token = getToken(httpRequestHeader);
+			log.debug("processing request from: " + connection.getInetAddress() + " URI: " + uri + (token == null ? "" : " User: " + token.getUser().getUsername()));
 			
 			int qmIdx = uri.indexOf('?');
 			String query;
@@ -300,23 +306,37 @@ public abstract class WebServer extends Driver {
 			}
 			
 			if (uri.startsWith(API_BASE_URI)) {
-				return processApiRequest(uri.substring(API_BASE_URI.length()), query, httpRequestHeader, in, out);
+				return processApiRequest(uri.substring(API_BASE_URI.length()), token, query, httpRequestHeader, in, out);
 			
 			} else {
-				return processFileRequest(uri, httpRequestHeader, out, dataOut);
+				return processFileRequest(uri, token, httpRequestHeader, out, dataOut);
 			}
 		}
 
 		/**
 		 * 
+		 * @param httpRequestHeader
+		 * @return
+		 */
+		private Token getToken(HttpRequestHeader httpRequestHeader) {
+			String token = getCookieValue("token", httpRequestHeader.getCookies());
+			if (token == null) {
+				return null;
+			}
+			return Access.getToken(token, httpRequestHeader);
+		}
+
+		/**
+		 * 
 		 * @param uri
+		 * @param token
 		 * @param httpRequestHeader
 		 * @param out
 		 * @param dataOut
 		 * @return
 		 * @throws IOException
 		 */
-		private boolean processFileRequest(String uri, HttpRequestHeader httpRequestHeader,
+		private boolean processFileRequest(String uri, Token token, HttpRequestHeader httpRequestHeader,
 				PrintWriter out, BufferedOutputStream dataOut) throws IOException {
 			
 			if (uri.charAt(0) == '/') {
@@ -350,7 +370,7 @@ public abstract class WebServer extends Driver {
 			}
 			
 			if (httpRequestHeader.method != HttpRequestHeader.Method.GET && httpRequestHeader.method != HttpRequestHeader.Method.HEAD) {
-				respondWithNotImplementedError(out);
+				notImplementedError(out);
 				return false;
 			}
 			
@@ -359,7 +379,7 @@ public abstract class WebServer extends Driver {
 				
 			} else {
 				if (isLoginAlias(path)) { // GET /<interface>/login
-					if (isAuthenticated(httpRequestHeader.getCookies())) {
+					if (token != null) { // already authenticated
 						redirectTo(requestedInterface, out, httpRequestHeader);
 						return false;
 						
@@ -368,25 +388,26 @@ public abstract class WebServer extends Driver {
 					}
 					
 				} else if (isInterfaceAlias(path)) { // GET /<interface>
-					if (isAuthenticated(httpRequestHeader.getCookies())) {
-						if (isAuthorized(path, httpRequestHeader.getCookies())) {
+					if (token != null) {
+						if (token.getUser().isAuthorized(path)) {
 							serveCacheFile(httpRequestHeader.method, path.resolve("index.html"), out, dataOut, httpRequestHeader);
 						} else {
 							log.warning("unauthorized interface request: " + path);
 							return false;
 						}
+						
 					} else {
 						redirectTo(requestedInterface + "/login", out, httpRequestHeader);
 						return false;
 					}
 					
 				} else { // GET /<interface>/<any_other_resource>
-					if (isAuthenticated(httpRequestHeader.getCookies()) && isAuthorized(path, httpRequestHeader.getCookies())) {
+					if (token != null && token.getUser().isAuthorized(path)) {
 						serveCacheFile(httpRequestHeader.method, path, out, dataOut, httpRequestHeader);
 						
 					} else {
 						log.debug("unauthorized file request: " + path);
-			    		respondWithFileNotFoundError(out);
+			    		fileNotFoundError(out);
 					}
 				}
 			}
@@ -445,7 +466,7 @@ public abstract class WebServer extends Driver {
 	    		}
 			} catch (NoSuchFileException e) {
 	    		log.warning("file not found: " + ABSOLUTE_CACHE_ROOT_PATH.relativize(path));
-	    		respondWithFileNotFoundError(out);
+	    		fileNotFoundError(out);
 			}
 		}
 		
@@ -465,7 +486,9 @@ public abstract class WebServer extends Driver {
 			}
 			out.print('/');
 			out.print(page);
-			out.print("\r\n\r\n");
+			out.print("\r\n");
+			out.write("Cache-Control: max-age=0, no-cache, no-store\r\n");
+			out.print("\r\n");
 			out.flush();
 		}
 
@@ -473,12 +496,13 @@ public abstract class WebServer extends Driver {
 		 * 
 		 * @param out
 		 */
-		private void respondWithFileNotFoundError(PrintWriter out) {
+		private void fileNotFoundError(PrintWriter out) {
 			out.print("HTTP/1.1 404 File Not Found\r\n");
 			out.print("Date: " + DATE_FORMAT.format(new Date()) + "\r\n");
 			out.print("Server: " + HTTP_HEADER_FIELD_SERVER + "\r\n");
 			out.print("Content-length: " + HTTP_CONTENT_FILE_NOT_FOUND.getBytes().length + "\r\n");
 			out.print("Content-type: text/html\r\n");
+			out.write("Cache-Control: max-age=0, no-cache, no-store\r\n");
 			out.print("\r\n");
 			out.print(HTTP_CONTENT_FILE_NOT_FOUND);
 			out.flush();
@@ -488,33 +512,12 @@ public abstract class WebServer extends Driver {
 		 * 
 		 * @param out
 		 */
-		private void respondWithNotImplementedError(PrintWriter out) {
+		private void notImplementedError(PrintWriter out) {
 			out.print("HTTP/1.1 501 Not implemented\r\n");
 			out.print("Date: " + DATE_FORMAT.format(new Date()) + "\r\n");
 			out.print("Server: " + HTTP_HEADER_FIELD_SERVER + "\r\n");
 			out.print("\r\n");
 			out.flush();
-		}
-
-		/**
-		 * 
-		 * @param path
-		 * @param cookies
-		 * @return
-		 */
-		private boolean isAuthorized(Path path, String cookies) {
-			// TODO Auto-generated method stub
-			return true;
-		}
-
-		/**
-		 * 
-		 * @param cookies
-		 * @return
-		 */
-		private boolean isAuthenticated(String cookies) {
-			// TODO Auto-generated method stub
-			return true;
 		}
 		
 		/**
@@ -561,14 +564,15 @@ public abstract class WebServer extends Driver {
 		/**
 		 * 
 		 * @param command
-		 * @param query 
+		 * @param token
+		 * @param query
 		 * @param httpRequestHeader
 		 * @param in
 		 * @param out
 		 * @return
-		 * @throws Exception 
+		 * @throws Exception
 		 */
-		private boolean processApiRequest(String command, String query, HttpRequestHeader httpRequestHeader, 
+		private boolean processApiRequest(String command, Token token, String query, HttpRequestHeader httpRequestHeader, 
 				BufferedReader in, PrintWriter out) throws Exception {
 			
 			// TODO
@@ -577,15 +581,109 @@ public abstract class WebServer extends Driver {
 			System.out.println("query: " + query);
 			
 			if (command.equals("login")) {
-				
-				String username = getQueryValue("user", query);
-				String password = getQueryValue("password", query);
-				if (Access.authenticate(username, password)) {
-					
-				}
+				login(token, query, httpRequestHeader, out);
+				return false;
+			}
+			
+			if (command.equals("logout")) {
+				logout(token, out);
+				return false;
 			}
 			
 			return false;
+		}
+
+		/**
+		 * 
+		 * @param token
+		 * @param query
+		 * @param httpRequestHeader
+		 * @param out
+		 * @throws Exception
+		 */
+		private void login(Token token, String query, HttpRequestHeader httpRequestHeader, PrintWriter out) throws Exception {
+			User user = null;
+			if (query == null) {
+				if (token != null) {
+					ok(out);
+				} else {
+					notAuthorizedError(out);
+				}
+				
+			} else {
+				String username = getQueryValue("user", query);
+				String password = getQueryValue("password", query);
+				
+				if (token != null) {
+					Access.removeToken(token.getUUID());
+				}
+				user = Access.authenticate(username, password);
+				if (user != null) {
+					String tokenUUID = Access.assignToken(user, httpRequestHeader);
+					setTokenCookie(out, tokenUUID);
+					log.info("login: " + username);
+					
+				} else {
+					log.warning("failed login attempt - username: " + username);
+					notAuthorizedError(out);
+				}
+			}
+		}
+		
+		/**
+		 * 
+		 * @param token
+		 * @param out
+		 * @return
+		 */
+		private void logout(Token token, PrintWriter out) {
+			Access.removeToken(token.getUUID());
+			setTokenCookie(out, null);
+			log.info("logout: " + token.getUser().getUsername());
+		}
+
+		/**
+		 * 
+		 * @param out
+		 */
+		private void notAuthorizedError(PrintWriter out) {
+			out.print("HTTP/1.1 401 Unauthorized\r\n");
+			out.print("Date: " + DATE_FORMAT.format(new Date()) + "\r\n");
+			out.print("Server: " + HTTP_HEADER_FIELD_SERVER + "\r\n");
+			out.write("Cache-Control: max-age=0, no-cache, no-store\r\n");
+			out.print("\r\n");
+			out.flush();
+		}
+		
+		/**
+		 * 
+		 * @param out
+		 */
+		private void ok(PrintWriter out) {
+			out.print("HTTP/1.1 200 OK\r\n");
+			out.print("Date: " + DATE_FORMAT.format(new Date()) + "\r\n");
+			out.print("Server: " + HTTP_HEADER_FIELD_SERVER + "\r\n");
+			out.write("Cache-Control: max-age=0, no-cache, no-store\r\n");
+			out.print("\r\n");
+			out.flush();
+		}
+		
+		/**
+		 * 
+		 * @param out
+		 */
+		private void setTokenCookie(PrintWriter out, String tokenUUID) {
+			out.print("HTTP/1.1 200 OK\r\n");
+			out.print("Date: " + DATE_FORMAT.format(new Date()) + "\r\n");
+			out.print("Server: " + HTTP_HEADER_FIELD_SERVER + "\r\n");
+			if (tokenUUID == null) {
+				out.print("Set-Cookie: token=removed; Path=/; Max-Age=0\r\n");
+			} else {
+				out.print("Set-Cookie: token=" + tokenUUID + "; Path=/; Max-Age=" + passwordMaxAgeSeconds + "\r\n");
+			}
+			out.write("Cache-Control: max-age=0, no-cache, no-store\r\n");
+			out.print("\r\n");
+			out.flush();
 		}
 
 		/**
@@ -595,6 +693,9 @@ public abstract class WebServer extends Driver {
 		 * @return
 		 */
 		private String getQueryValue(String key, String query) {
+			if (query == null) {
+				return null;
+			}
 			int start = query.indexOf("?" + key + "=");
 			if (start < 0) {
 				start = query.indexOf("&" + key + "=");
@@ -608,6 +709,26 @@ public abstract class WebServer extends Driver {
 				end = query.length();
 			}
 			return query.substring(start, end);
+		}
+		
+		/**
+		 * 
+		 * @param key
+		 * @param cookies
+		 * @return
+		 */
+		private String getCookieValue(String key, String cookies) {
+			if (cookies == null) {
+				return null;
+			}
+			String[] entries = cookies.split("[ ,;]+");
+			for (String entry : entries) {
+				if (entry.startsWith(key + "=")) {
+					return entry.substring(key.length() + 1);
+				}
+			}
+			return null;
+			
 		}
 	}
 }

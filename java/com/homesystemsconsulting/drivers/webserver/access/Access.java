@@ -6,15 +6,19 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
+import com.homesystemsconsulting.drivers.webserver.HttpRequestHeader;
+
 public abstract class Access {
 	
-	private static final  Map<String, User> users = new TreeMap<String, User>(String.CASE_INSENSITIVE_ORDER);
-
+	private static final  Map<String, User> users = new ConcurrentSkipListMap<String, User>(String.CASE_INSENSITIVE_ORDER);
+	private static final  Map<String, Token> tokens = new ConcurrentHashMap<String, Token>();
+	
 	/**
 	 * 
 	 * @param username
@@ -23,15 +27,24 @@ public abstract class Access {
 	 * @throws NoSuchAlgorithmException
 	 * @throws InvalidKeySpecException
 	 */
-	synchronized public static void addUser(String username, String password) throws UsernameAlreadyUsedException, NoSuchAlgorithmException, InvalidKeySpecException {
+	public static void addUser(String username, String password) throws UsernameAlreadyUsedException, NoSuchAlgorithmException, InvalidKeySpecException {
 		if (existsUser(username)) {
 			throw new UsernameAlreadyUsedException();
 		}
 		
 		byte[] salt = generateSalt();
 		byte[] hashedPassword = getEncryptedPassword(password, salt);	
-		
+	
 		users.put(username, new User(username, hashedPassword, salt));
+	}
+	
+	/**
+	 * 
+	 * @param username
+	 * @return
+	 */
+	private static boolean existsUser(String username) {
+		return users.containsKey(username);
 	}
 	
 	/**
@@ -41,14 +54,18 @@ public abstract class Access {
 	 * @return
 	 * @throws Exception
 	 */
-	synchronized public static boolean authenticate(String username, String attemptedPassword) throws Exception {
+	public static User authenticate(String username, String attemptedPassword) throws Exception {
 		User u = users.get(username);
 		if (u == null) {
-			return false;
+			return null;
 		}
 		
 		byte[] hashedPassword = getEncryptedPassword(attemptedPassword, u.salt); 
-		return Arrays.equals(hashedPassword, u.hashedPassword);
+		if (Arrays.equals(hashedPassword, u.hashedPassword)) {
+			return u;
+		}
+		
+		return null;
 	}
 	
 	/**
@@ -81,10 +98,39 @@ public abstract class Access {
 
 	/**
 	 * 
-	 * @param username
+	 * @param user
+	 * @param httpRequestHeader 
 	 * @return
 	 */
-	private static boolean existsUser(String username) {
-		return users.containsKey(username);
+	public static String assignToken(User user, HttpRequestHeader httpRequestHeader) {
+		Token token = new Token(user, httpRequestHeader);
+		tokens.put(token.getUUID(), token);
+        return token.getUUID();
+	}
+
+	/**
+	 * 
+	 * @param tokenUUID
+	 * @param httpRequestHeader
+	 * @return
+	 */
+	public static Token getToken(String tokenUUID, HttpRequestHeader httpRequestHeader) {
+		Token token = tokens.get(tokenUUID);
+		if (token == null) {
+			return null;
+		}
+		if (token.match(httpRequestHeader)) {
+			return token;
+		}
+		
+		return null;
+	}
+
+	/**
+	 * 
+	 * @param token
+	 */
+	public static void removeToken(String tokenUUID) {
+		tokens.remove(tokenUUID);
 	}
 }

@@ -107,4 +107,8 @@ public class HttpRequestHeader {
 	public long getIfModifiedSinceTime() {
 		return ifModifiedSinceTime;
 	}
+	
+	public String getUserAgent() {
+		return userAgent;
+	}
 }
