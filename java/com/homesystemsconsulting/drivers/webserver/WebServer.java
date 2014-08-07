@@ -441,6 +441,7 @@ public abstract class WebServer extends Driver {
 			        out.print("Server: " + HTTP_HEADER_FIELD_SERVER + "\r\n");
 			        out.print("Last-Modified: " + DATE_FORMAT.format(lastModified) + "\r\n");
 	    			out.write("Cache-Control: max-age=0, no-cache, no-store\r\n");
+	    			out.print("Content-length: 0\r\n");
 	    			out.print("\r\n");
 	    			out.flush();
 	    			
@@ -489,6 +490,7 @@ public abstract class WebServer extends Driver {
 			out.print(page);
 			out.print("\r\n");
 			out.write("Cache-Control: max-age=0, no-cache, no-store\r\n");
+			out.print("Content-length: 0\r\n");
 			out.print("\r\n");
 			out.flush();
 		}
@@ -501,8 +503,8 @@ public abstract class WebServer extends Driver {
 			out.print("HTTP/1.1 404 Not Found\r\n");
 			out.print("Date: " + DATE_FORMAT.format(new Date()) + "\r\n");
 			out.print("Server: " + HTTP_HEADER_FIELD_SERVER + "\r\n");
-			out.print("Content-type: text/html\r\n");
 			out.write("Cache-Control: max-age=0, no-cache, no-store\r\n");
+			out.print("Content-length: 0\r\n");
 			out.print("\r\n");
 			out.flush();
 		}
@@ -515,6 +517,7 @@ public abstract class WebServer extends Driver {
 			out.print("HTTP/1.1 501 Not implemented\r\n");
 			out.print("Date: " + DATE_FORMAT.format(new Date()) + "\r\n");
 			out.print("Server: " + HTTP_HEADER_FIELD_SERVER + "\r\n");
+			out.print("Content-length: 0\r\n");
 			out.print("\r\n");
 			out.flush();
 		}
@@ -579,6 +582,11 @@ public abstract class WebServer extends Driver {
 			
 			if (command.equals("login")) {
 				login(token, query, httpRequestHeader, out);
+				return true;
+			}
+			
+			if (token == null) {
+				notAuthorizedError(out);
 				return false;
 			}
 			
@@ -597,16 +605,25 @@ public abstract class WebServer extends Driver {
 				return true;
 			}
 			
+			log.warning("unknown API request: " + command);
 			return false;
 		}
 
+		/**
+		 * 
+		 * @param substring
+		 * @param token
+		 * @param query
+		 * @param out
+		 */
 		private void status(String substring, Token token, String query,
 				PrintWriter out) {
-			// TODO Auto-generated method stub
-			
+
+			// TODO
 			try {
 				Thread.sleep(5000);
 			} catch (InterruptedException e) {}
+			
 			ok(out, null, null);
 		}
 
@@ -669,10 +686,8 @@ public abstract class WebServer extends Driver {
 		 * @return
 		 */
 		private void logout(Token token, PrintWriter out) {
-			if (token != null) {
-				Access.removeToken(token.getUUID());
-				log.info("logout: " + token.getUser().getUsername());
-			}
+			Access.removeToken(token.getUUID());
+			log.info("logout: " + token.getUser().getUsername());
 			setTokenCookie(out, null);
 		}
 
@@ -685,6 +700,7 @@ public abstract class WebServer extends Driver {
 			out.print("Date: " + DATE_FORMAT.format(new Date()) + "\r\n");
 			out.print("Server: " + HTTP_HEADER_FIELD_SERVER + "\r\n");
 			out.write("Cache-Control: max-age=0, no-cache, no-store\r\n");
+			out.print("Content-length: 0\r\n");
 			out.print("\r\n");
 			out.flush();
 		}
@@ -705,9 +721,13 @@ public abstract class WebServer extends Driver {
 	        }
 	        if (body != null) {
 	        	out.print("Content-length: " + body.getBytes(Charset.forName("UTF-8")).length + "\r\n");
+	        } else {
+	        	out.print("Content-length: 0\r\n");
 	        }
 	        out.print("\r\n");
-	        out.print(body);
+	        if (body != null) {
+	        	out.print(body);
+	        }
 	        out.flush();
 		}
 		
@@ -725,6 +745,7 @@ public abstract class WebServer extends Driver {
 				out.print("Set-Cookie: token=" + tokenUUID + "; Path=/; Max-Age=" + passwordMaxAgeSeconds + "\r\n");
 			}
 			out.write("Cache-Control: max-age=0, no-cache, no-store\r\n");
+			out.print("Content-length: 0\r\n");
 			out.print("\r\n");
 			out.flush();
 		}
@@ -771,7 +792,6 @@ public abstract class WebServer extends Driver {
 				}
 			}
 			return null;
-			
 		}
 	}
 }
