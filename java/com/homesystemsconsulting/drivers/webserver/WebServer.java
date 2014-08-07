@@ -635,9 +635,11 @@ public abstract class WebServer extends Driver {
 		 * @return
 		 */
 		private void logout(Token token, PrintWriter out) {
-			Access.removeToken(token.getUUID());
+			if (token != null) {
+				Access.removeToken(token.getUUID());
+				log.info("logout: " + token.getUser().getUsername());
+			}
 			setTokenCookie(out, null);
-			log.info("logout: " + token.getUser().getUsername());
 		}
 
 		/**
