@@ -11,11 +11,12 @@ import com.homesystemsconsulting.util.logging.SystemLogger;
 public abstract class Driver extends Task implements Node {
 	
 	private final String id;
-	protected final SystemLogger log;
 	private boolean quit = false;
 	private Future<?> future;
 	private boolean enabled = true;
 
+	protected final SystemLogger log;
+	
 	/**
 	 * 
 	 * @param id

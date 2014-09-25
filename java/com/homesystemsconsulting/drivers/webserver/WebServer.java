@@ -1,17 +1,11 @@
 package com.homesystemsconsulting.drivers.webserver;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+<<<<<<< HEAD
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -23,68 +17,70 @@ import java.util.concurrent.Executors;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.http.client.utils.DateUtils;
+=======
+>>>>>>> giampiero_interface_cache
 
 import com.homesystemsconsulting.core.Configuration;
 import com.homesystemsconsulting.core.Sfera;
-import com.homesystemsconsulting.core.Task;
-import com.homesystemsconsulting.core.TasksManager;
 import com.homesystemsconsulting.drivers.Driver;
-import com.homesystemsconsulting.drivers.webserver.HttpRequestHeader.Method;
 import com.homesystemsconsulting.drivers.webserver.access.Access;
-import com.homesystemsconsulting.drivers.webserver.access.Token;
-import com.homesystemsconsulting.drivers.webserver.access.User;
-import com.homesystemsconsulting.util.files.ResourcesUtils;
+import com.homesystemsconsulting.util.logging.SystemLogger;
 
 public abstract class WebServer extends Driver {
 	
+	static final String WEB_SERVER_DRIVER_ID = "web";
 	static final Path ROOT = Paths.get("webapp/");
-	static final Path CACHE_ROOT = ROOT.resolve("cache/");
+	static final String HTTP_HEADER_FIELD_SERVER = "Sfera " + Sfera.VERSION;
+	static final String API_BASE_URI = "/x/";
 	
-	private static final Path ABSOLUTE_CACHE_ROOT_PATH = CACHE_ROOT.toAbsolutePath();
-	private static final String API_BASE_URI = "/x/";
+	private static boolean initialized = false;
+	private static final Object initLock = new Object();
 	
-	static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(DateUtils.PATTERN_RFC1123);
-	private static final int SOCKET_TIMEOUT = 60000;
-	
-	private static final String HTTP_HEADER_FIELD_SERVER = "Sfera " + Sfera.VERSION;
-
-	private static TasksManager tasksManager;
-	private static Object tasksManagerLock = new Object();
-	
-	private static Set<String> interfaces;
+	static SystemLogger log;
 	
 	private ServerSocket socket;
 	
+<<<<<<< HEAD
 	private String defaultInterface;
 	private boolean useApplicationCache;
 	private int passwordMaxAgeSeconds;
 	
+=======
+>>>>>>> giampiero_interface_cache
 	/**
 	 * 
-	 * @param id
 	 */
-	protected WebServer(String id) {
-		super(id);
+	protected WebServer() {
+		super(WEB_SERVER_DRIVER_ID);
 	}
 
 	@Override
 	protected boolean onInit() throws InterruptedException {
-		synchronized (tasksManagerLock) {
-			if (tasksManager == null) {
-				Integer maxRequestThreads = Configuration.getIntProperty("web.max_threads", null);
-				if (maxRequestThreads == null) {
-					int availableProcessors = Runtime.getRuntime().availableProcessors();
-					maxRequestThreads = availableProcessors * 128;
+		synchronized (initLock) {
+			if (!initialized) {
+				log = super.log;
+				
+				ConnectionHandler.init();
+				try {
+					InterfaceCache.init();
+				} catch (Exception e) {
+					log.error("error creating cache: " + e);
 				}
 				
-				tasksManager = new TasksManager(Executors.newFixedThreadPool(maxRequestThreads));
-			}
+				//TODO read from access.ini ============
+				try {
+					Access.addUser("user", "12345");
+					Access.addUser("test", "55555");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				//======================================
+				
+				initialized = true;
+			}			
 		}
 		
-		defaultInterface = Configuration.getProperty("web.default_interface", null);
-		
-		Integer port = Configuration.getIntProperty("web." + getId() + ".port", getDefaultPort());
-		
+		Integer port = Configuration.getIntProperty(WEB_SERVER_DRIVER_ID + "." + getProtocolName() + ".port", getDefaultPort());
 		try {
 			socket = getServerSocket(port);
 		} catch (Exception e) {
@@ -92,27 +88,22 @@ public abstract class WebServer extends Driver {
 			return false;
 		}
 		
+<<<<<<< HEAD
 		useApplicationCache = Configuration.getBoolProperty("web.application_cache", true);
 		passwordMaxAgeSeconds = Configuration.getIntProperty("web.password_validity_hours", 5) * 60 * 60;
 		
 		createCache();
 		
+=======
+>>>>>>> giampiero_interface_cache
 		log.info("accepting connections on port " + socket.getLocalPort());
-		
-		//TODO read from access.ini ============
-		try {
-			Access.addUser("user", "12345");
-			Access.addUser("test", "55555");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		//======================================
 		
 		return true;
 	}
 
 	/**
 	 * 
+<<<<<<< HEAD
 	 */
 	private void createCache() {
 		interfaces = new HashSet<String>();
@@ -150,6 +141,8 @@ public abstract class WebServer extends Driver {
 
 	/**
 	 * 
+=======
+>>>>>>> giampiero_interface_cache
 	 * @return
 	 */
 	protected abstract int getDefaultPort();
@@ -174,8 +167,7 @@ public abstract class WebServer extends Driver {
 		try {
 			connection = socket.accept();
 			log.debug("accepted connection from: " + connection.getInetAddress());
-			connection.setSoTimeout(SOCKET_TIMEOUT);
-			delegateRequestProcess(connection);
+			new ConnectionHandler(connection, getProtocolName());
 			
 		} catch (IOException e) {
 			log.error("error accepting connection: " + e);
@@ -191,20 +183,13 @@ public abstract class WebServer extends Driver {
 		return true;
 	}
 
-	/**
-	 * 
-	 * @param connection
-	 */
-	private void delegateRequestProcess(Socket connection) {
-		tasksManager.execute(new RequestProcessor(connection));
-	}
-
 	@Override
 	protected void onQuit() throws InterruptedException {
 		try {
 			socket.close();
 		} catch (Exception e) {}
 		
+<<<<<<< HEAD
 		synchronized (tasksManagerLock) {			
 			if (tasksManager != null) {
 				tasksManager.getExecutorService().shutdownNow();
@@ -814,5 +799,8 @@ public abstract class WebServer extends Driver {
 			}
 			return null;
 		}
+=======
+		ConnectionHandler.quit();
+>>>>>>> giampiero_interface_cache
 	}
 }
