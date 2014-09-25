@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -55,7 +56,7 @@ public abstract class WebServer extends Driver {
 	private ServerSocket socket;
 	
 	private String defaultInterface;
-	private boolean usePermanentCache;
+	private boolean useApplicationCache;
 	private int passwordMaxAgeSeconds;
 	
 	/**
@@ -91,7 +92,7 @@ public abstract class WebServer extends Driver {
 			return false;
 		}
 		
-		usePermanentCache = Configuration.getBoolProperty("web.use_permanent_cache", true);
+		useApplicationCache = Configuration.getBoolProperty("web.application_cache", true);
 		passwordMaxAgeSeconds = Configuration.getIntProperty("web.password_validity_hours", 5) * 60 * 60;
 		
 		createCache();
@@ -143,7 +144,7 @@ public abstract class WebServer extends Driver {
 	private void createCacheFor(String interfaceName) throws IOException, XMLStreamException {
 		log.debug("creating cache for interface: " + interfaceName);
 		InterfaceCacheCreator icc = new InterfaceCacheCreator(interfaceName);
-		icc.create(usePermanentCache);
+		icc.create(useApplicationCache);
 		log.debug("created cache for interface: " + interfaceName);
 	}
 
@@ -297,21 +298,41 @@ public abstract class WebServer extends Driver {
 			Token token = getToken(httpRequestHeader);
 			log.debug("processing request from: " + connection.getInetAddress() + " URI: " + uri + (token == null ? "" : " User: " + token.getUser().getUsername()));
 			
-			int qmIdx = uri.indexOf('?');
-			String query;
-			if (qmIdx >= 0) {
-				query = uri.substring(qmIdx);
-				uri = uri.substring(0, qmIdx);
-			} else {
-				query = null;
-			}
-			
 			if (uri.startsWith(API_BASE_URI)) {
-				return processApiRequest(uri.substring(API_BASE_URI.length()), token, query, httpRequestHeader, in, out);
+				HashMap<String, String> queryParams;
+				int qmIdx = uri.indexOf('?');
+				
+				if (qmIdx < 0) {
+					queryParams = null;
+					
+				} else {
+					queryParams = getQueryParameters(uri, qmIdx + 1);
+					uri = uri.substring(0, qmIdx);
+				}
+				
+				return processApiRequest(uri.substring(API_BASE_URI.length()), token, queryParams, httpRequestHeader, in, out);
 			
 			} else {
 				return processFileRequest(uri, token, httpRequestHeader, out, dataOut);
 			}
+		}
+
+		/**
+		 * 
+		 * @param uri
+		 * @param offset
+		 * @return
+		 */
+		private HashMap<String, String> getQueryParameters(String uri, int offset) {
+			String queryString = uri.substring(offset);
+			String[] queryArray = queryString.split("&");
+			HashMap<String, String> queryParams = new HashMap<String, String>(queryArray.length);
+			for (String queryParam : queryArray) {
+				String[] paramVal = queryParam.split("=");
+				queryParams.put(paramVal[0], paramVal[1]);
+			}
+			
+			return queryParams;
 		}
 
 		/**
@@ -436,11 +457,11 @@ public abstract class WebServer extends Driver {
 	    		long lastModified = Files.getLastModifiedTime(path).toMillis();
 	    		
 				if (lastModified <= httpRequestHeader.getIfModifiedSinceTime()) {
-	    			out.write("HTTP/1.1 304 Not Modified\r\n");
+	    			out.print("HTTP/1.1 304 Not Modified\r\n");
 	    			out.print("Date: " + DATE_FORMAT.format(new Date()) + "\r\n");
 			        out.print("Server: " + HTTP_HEADER_FIELD_SERVER + "\r\n");
 			        out.print("Last-Modified: " + DATE_FORMAT.format(lastModified) + "\r\n");
-	    			out.write("Cache-Control: max-age=0, no-cache, no-store\r\n");
+	    			out.print("Cache-Control: max-age=0, no-cache, no-store\r\n");
 	    			out.print("Content-length: 0\r\n");
 	    			out.print("\r\n");
 	    			out.flush();
@@ -453,7 +474,7 @@ public abstract class WebServer extends Driver {
 			        out.print("Date: " + DATE_FORMAT.format(new Date()) + "\r\n");
 			        out.print("Server: " + HTTP_HEADER_FIELD_SERVER + "\r\n");
 			        out.print("Last-Modified: " + DATE_FORMAT.format(lastModified) + "\r\n");
-			        out.write("Cache-Control: max-age=0, no-cache, no-store\r\n");
+			        out.print("Cache-Control: max-age=0, no-cache, no-store\r\n");
 			        if (contentType != null) {
 			        	out.print("Content-type: " + contentType + "\r\n");
 			        }
@@ -489,7 +510,7 @@ public abstract class WebServer extends Driver {
 			out.print('/');
 			out.print(page);
 			out.print("\r\n");
-			out.write("Cache-Control: max-age=0, no-cache, no-store\r\n");
+			out.print("Cache-Control: max-age=0, no-cache, no-store\r\n");
 			out.print("Content-length: 0\r\n");
 			out.print("\r\n");
 			out.flush();
@@ -503,7 +524,7 @@ public abstract class WebServer extends Driver {
 			out.print("HTTP/1.1 404 Not Found\r\n");
 			out.print("Date: " + DATE_FORMAT.format(new Date()) + "\r\n");
 			out.print("Server: " + HTTP_HEADER_FIELD_SERVER + "\r\n");
-			out.write("Cache-Control: max-age=0, no-cache, no-store\r\n");
+			out.print("Cache-Control: max-age=0, no-cache, no-store\r\n");
 			out.print("Content-length: 0\r\n");
 			out.print("\r\n");
 			out.flush();
@@ -571,17 +592,17 @@ public abstract class WebServer extends Driver {
 		 * @param httpRequestHeader
 		 * @param in
 		 * @param out
+		 * @param queryParams
 		 * @return
 		 * @throws Exception
 		 */
-		private boolean processApiRequest(String command, Token token, String query, HttpRequestHeader httpRequestHeader, 
-				BufferedReader in, PrintWriter out) throws Exception {
+		private boolean processApiRequest(String command, Token token, HashMap<String, String> queryParams, 
+				HttpRequestHeader httpRequestHeader, BufferedReader in, PrintWriter out) throws Exception {
 			
 			System.out.println("command: " + command);
-			System.out.println("query: " + query);
 			
 			if (command.equals("login")) {
-				login(token, query, httpRequestHeader, out);
+				login(token, queryParams, httpRequestHeader, out);
 				return true;
 			}
 			
@@ -596,12 +617,12 @@ public abstract class WebServer extends Driver {
 			}
 			
 			if (command.equals("subscribe")) {
-				subscribe(token, query, out);
+				subscribe(token, queryParams, out);
 				return true;
 			}
 			
 			if (command.startsWith("status/")) {
-				status(command.substring(7), token, query, out);
+				status(command.substring(7), token, queryParams, out);
 				return true;
 			}
 			
@@ -613,11 +634,11 @@ public abstract class WebServer extends Driver {
 		 * 
 		 * @param substring
 		 * @param token
-		 * @param query
+		 * @param queryParams
 		 * @param out
 		 */
-		private void status(String substring, Token token, String query,
-				PrintWriter out) {
+		private void status(String substring, Token token, 
+				HashMap<String, String> queryParams, PrintWriter out) {
 
 			// TODO
 			try {
@@ -630,12 +651,12 @@ public abstract class WebServer extends Driver {
 		/**
 		 * 
 		 * @param token
-		 * @param query
+		 * @param queryParams
 		 * @param out
 		 */
-		private void subscribe(Token token, String query, PrintWriter out) {
+		private void subscribe(Token token, HashMap<String, String> queryParams, PrintWriter out) {
 			//TODO
-			String id = getQueryValue("id", query);
+			String id = queryParams.get("id");
 			if (id == null) {
 				id = UUID.randomUUID().toString();
 			}
@@ -645,14 +666,14 @@ public abstract class WebServer extends Driver {
 		/**
 		 * 
 		 * @param token
-		 * @param query
+		 * @param queryParams
 		 * @param httpRequestHeader
 		 * @param out
 		 * @throws Exception
 		 */
-		private void login(Token token, String query, HttpRequestHeader httpRequestHeader, PrintWriter out) throws Exception {
+		private void login(Token token, HashMap<String, String> queryParams, HttpRequestHeader httpRequestHeader, PrintWriter out) throws Exception {
 			User user = null;
-			if (query == null) {
+			if (queryParams == null) {
 				if (token != null) {
 					ok(out, null, null);
 				} else {
@@ -660,8 +681,8 @@ public abstract class WebServer extends Driver {
 				}
 				
 			} else {
-				String username = getQueryValue("user", query);
-				String password = getQueryValue("password", query);
+				String username = queryParams.get("user");
+				String password = queryParams.get("password");
 				
 				if (token != null) {
 					Access.removeToken(token.getUUID());
@@ -699,7 +720,7 @@ public abstract class WebServer extends Driver {
 			out.print("HTTP/1.1 401 Unauthorized\r\n");
 			out.print("Date: " + DATE_FORMAT.format(new Date()) + "\r\n");
 			out.print("Server: " + HTTP_HEADER_FIELD_SERVER + "\r\n");
-			out.write("Cache-Control: max-age=0, no-cache, no-store\r\n");
+			out.print("Cache-Control: max-age=0, no-cache, no-store\r\n");
 			out.print("Content-length: 0\r\n");
 			out.print("\r\n");
 			out.flush();
@@ -715,7 +736,7 @@ public abstract class WebServer extends Driver {
 			out.print("HTTP/1.1 200 OK\r\n");
 	        out.print("Date: " + DATE_FORMAT.format(new Date()) + "\r\n");
 	        out.print("Server: " + HTTP_HEADER_FIELD_SERVER + "\r\n");
-	        out.write("Cache-Control: max-age=0, no-cache, no-store\r\n");
+	        out.print("Cache-Control: max-age=0, no-cache, no-store\r\n");
 	        if (contentType != null) {
 	        	out.print("Content-type: " + contentType + "\r\n");
 	        }
@@ -744,7 +765,7 @@ public abstract class WebServer extends Driver {
 			} else {
 				out.print("Set-Cookie: token=" + tokenUUID + "; Path=/; Max-Age=" + passwordMaxAgeSeconds + "\r\n");
 			}
-			out.write("Cache-Control: max-age=0, no-cache, no-store\r\n");
+			out.print("Cache-Control: max-age=0, no-cache, no-store\r\n");
 			out.print("Content-length: 0\r\n");
 			out.print("\r\n");
 			out.flush();
@@ -756,24 +777,24 @@ public abstract class WebServer extends Driver {
 		 * @param query
 		 * @return
 		 */
-		private String getQueryValue(String key, String query) {
-			if (query == null) {
-				return null;
-			}
-			int start = query.indexOf("?" + key + "=");
-			if (start < 0) {
-				start = query.indexOf("&" + key + "=");
-				if (start < 0) {
-					return null;
-				}
-			}
-			start += key.length() + 2;
-			int end = query.indexOf('&', start);
-			if (end < 0) {
-				end = query.length();
-			}
-			return query.substring(start, end);
-		}
+//		private String getQueryValue(String key, String query) {
+//			if (query == null) {
+//				return null;
+//			}
+//			int start = query.indexOf("?" + key + "=");
+//			if (start < 0) {
+//				start = query.indexOf("&" + key + "=");
+//				if (start < 0) {
+//					return null;
+//				}
+//			}
+//			start += key.length() + 2;
+//			int end = query.indexOf('&', start);
+//			if (end < 0) {
+//				end = query.length();
+//			}
+//			return query.substring(start, end);
+//		}
 		
 		/**
 		 * 
