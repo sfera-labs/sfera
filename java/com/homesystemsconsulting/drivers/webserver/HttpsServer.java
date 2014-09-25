@@ -9,6 +9,8 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 
+import com.homesystemsconsulting.core.Configuration;
+
 public class HttpsServer extends WebServer {
 
 	public HttpsServer(String id) {
@@ -25,8 +27,7 @@ public class HttpsServer extends WebServer {
 		SSLContext context = SSLContext.getInstance("SSLv3");
 		KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
 		KeyStore ks = KeyStore.getInstance("JKS");
-		//TODO get password from config
-		char[] kspwd = "hsycopass".toCharArray();
+		char[] kspwd = Configuration.getProperty(WEB_SERVER_DRIVER_ID + ".ssl_password", "sferapass").toCharArray();
 		ks.load(new FileInputStream("sfera.keys"), kspwd);
 		kmf.init(ks, kspwd);
 		context.init(kmf.getKeyManagers(), null, null);

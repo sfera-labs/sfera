@@ -150,7 +150,7 @@ public class Sfera {
 		// TODO read config and manifest files
 		String[][] declaredDrivers = {
 				{"http", "com.homesystemsconsulting.drivers.webserver.HttpServer"}, 
-//				{"https", "com.homesystemsconsulting.drivers.webserver.HttpsServer"},
+				{"https", "com.homesystemsconsulting.drivers.webserver.HttpsServer"},
 //				{"mydr", "com.homesystemsconsulting.drivers.mydriver.MyDriver"},
 		};
 		List<Driver> drivers = new ArrayList<Driver>();
