@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -25,28 +26,17 @@ import javax.xml.stream.events.StartDocument;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
-import com.homesystemsconsulting.core.Configuration;
-import com.homesystemsconsulting.drivers.webserver.HttpRequestHeader.Method;
-import com.homesystemsconsulting.drivers.webserver.access.Token;
 import com.homesystemsconsulting.util.files.ResourcesUtils;
 
-public class InterfaceCache {
+public class InterfaceCacheCreator {
 	
-	static final Path CACHE_ROOT = WebServer.ROOT.resolve("cache/");
-	static final Path ABSOLUTE_CACHE_ROOT_PATH = CACHE_ROOT.toAbsolutePath();
+	private static final XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+	private static final XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
+	private static final XMLEventFactory eventFactory = XMLEventFactory.newInstance();
 	
-	private static final XMLInputFactory INPUT_FACTORY = XMLInputFactory.newInstance();
-	private static final XMLOutputFactory OUTPUT_FACTORY = XMLOutputFactory.newInstance();
-	private static final XMLEventFactory EVENT_FACTORY = XMLEventFactory.newInstance();
+	private static final XMLEvent nl = eventFactory.createDTD("\n");
 	
-	private static final XMLEvent NL = EVENT_FACTORY.createDTD("\n");
-	
-	private static final Charset UTF8_CS = Charset.forName("UTF-8");
-	
-	private static Set<String> interfaces;
-	
-	private static String defaultInterface;
-	private static boolean usePermanentCache;
+	private static final Charset utf8cs = Charset.forName("UTF-8");
 
 	private final String interfaceName;
 	private final Path interfaceTmpCacheRoot;
@@ -55,51 +45,13 @@ public class InterfaceCache {
 	private String skin = null;
 	private String language = null;
 	private String iconSet = null;
-	
-	/**
-	 * 
-	 */
-	public synchronized static void init() throws Exception {
-		if (interfaces == null) {
-			defaultInterface = Configuration.getProperty("web.default_interface", null);
-			usePermanentCache = Configuration.getBoolProperty("web.use_permanent_cache", true);
-			
-			interfaces = new HashSet<String>();
-			
-			Set<String> interfaceNames = ResourcesUtils.listDirectoriesNamesInDirectory(WebServer.ROOT.resolve("interfaces/"), true);
-			if (interfaceNames != null) {
-				for (String interfaceName : interfaceNames) {
-					try {
-						createCacheFor(interfaceName);
-						interfaces.add(interfaceName);
-					} catch (Exception e) {
-						WebServer.log.error("error creating cache for interface '" + interfaceName + "': " + e);
-						e.printStackTrace();
-					}
-				}
-			}
-		}
-	}
-	
-	/**
-	 * 
-	 * @param interfaceName
-	 * @throws IOException
-	 * @throws XMLStreamException
-	 */
-	private synchronized static void createCacheFor(String interfaceName) throws IOException, XMLStreamException {
-		WebServer.log.debug("creating cache for interface: " + interfaceName);
-		InterfaceCache icc = new InterfaceCache(interfaceName);
-		icc.create();
-		WebServer.log.debug("created cache for interface: " + interfaceName);
-	}
 
 	/**
 	 * 
 	 * @param interfaceName
 	 * @throws IOException 
 	 */
-	private InterfaceCache(String interfaceName) throws IOException {
+	public InterfaceCacheCreator(String interfaceName) throws IOException {
 		this.interfaceName = interfaceName;
 		this.interfaceTmpCacheRoot = Files.createTempDirectory("webappTmp");
 	}
@@ -109,29 +61,30 @@ public class InterfaceCache {
 	 * @throws XMLStreamException
 	 * @throws IOException
 	 */
-	private void create() throws XMLStreamException, IOException {
-		createIntefaceCache();
-		createLoginCache();
+	public void create(boolean createManifest) throws XMLStreamException, IOException {
+		createIntefaceCache(createManifest);
+		createLoginCache(createManifest);
 		
-		Path interfaceCacheRoot = CACHE_ROOT.resolve(interfaceName + "/");
+		Path interfaceCacheRoot = WebServer.CACHE_ROOT.resolve(interfaceName + "/");
 		ResourcesUtils.deleteRecursive(interfaceCacheRoot);
-		Files.createDirectories(CACHE_ROOT);
+		Files.createDirectories(WebServer.CACHE_ROOT);
 		Files.move(interfaceTmpCacheRoot, interfaceCacheRoot);
 	}
 
 	/**
 	 * 
+	 * @param createManifest
 	 * @throws IOException
 	 * @throws XMLStreamException
 	 */
-	private void createIntefaceCache() throws IOException, XMLStreamException {
+	private void createIntefaceCache(boolean createManifest) throws IOException, XMLStreamException {
 		createInterfaceXmlAndExtractAttributes();
 		createDictionaryAndExtractSkinIconSet();
 		Set<Path> resources = copyResources();
-		createIndex("skins/index.html", "index.html", "/manifest", false);
+		createIndex("skins/index.html", "index.html", createManifest, "/manifest", false);
 		createInterfaceCode();
 		createInterfaceCSS();
-		if (usePermanentCache) {
+		if (createManifest) {
 			resources.add(interfaceTmpCacheRoot.resolve("style.css"));
 			resources.add(interfaceTmpCacheRoot.resolve("code.js"));
 			createManifest("manifest", resources);
@@ -140,16 +93,17 @@ public class InterfaceCache {
 	
 	/**
 	 * 
+	 * @param createManifest
 	 * @throws IOException
 	 */
-	private void createLoginCache() throws IOException {
+	private void createLoginCache(boolean createManifest) throws IOException {
 		Files.createDirectories(interfaceTmpCacheRoot.resolve("login"));
 		
-		Set<String> imgs = createIndex("skins/login.html", "login/index.html", "/login/manifest", true);
+		Set<String> imgs = createIndex("skins/login.html", "login/index.html", createManifest, "/login/manifest", true);
 		Set<Path> loginResources = copyLoginResources(imgs);
 		createLoginCode();
 		createLoginCSS();
-		if (usePermanentCache) {
+		if (createManifest) {
 			loginResources.add(interfaceTmpCacheRoot.resolve("login/style.css"));
 			loginResources.add(interfaceTmpCacheRoot.resolve("login/code.js"));
 			createManifest("login/manifest", loginResources);
@@ -162,7 +116,7 @@ public class InterfaceCache {
 	 */
 	private void createInterfaceCSS() throws IOException {
 		try (BufferedWriter writer = Files.newBufferedWriter(
-				interfaceTmpCacheRoot.resolve("style.css"), UTF8_CS)) {
+				interfaceTmpCacheRoot.resolve("style.css"), utf8cs)) {
 			
 			writeContentFrom("skins/" + skin + "/style.css", writer);
 			
@@ -184,7 +138,7 @@ public class InterfaceCache {
 	 */
 	private void createLoginCSS() throws IOException {
 		try (BufferedWriter writer = Files.newBufferedWriter(
-				interfaceTmpCacheRoot.resolve("login/style.css"), UTF8_CS)) {
+				interfaceTmpCacheRoot.resolve("login/style.css"), utf8cs)) {
 			
 			writeContentFrom("skins/" + skin + "/login/style.css", writer);
 		}
@@ -196,7 +150,7 @@ public class InterfaceCache {
 	 */
 	private void createInterfaceCode() throws IOException {
 		try (BufferedWriter writer = Files.newBufferedWriter(
-				interfaceTmpCacheRoot.resolve("code.js"), UTF8_CS)) {
+				interfaceTmpCacheRoot.resolve("code.js"), utf8cs)) {
 			
 			try {
 				writeContentFrom("code/client.min.js", writer);
@@ -232,7 +186,7 @@ public class InterfaceCache {
 	 */
 	private void createLoginCode() throws IOException {
 		try (BufferedWriter writer = Files.newBufferedWriter(
-				interfaceTmpCacheRoot.resolve("login/code.js"), UTF8_CS)) {
+				interfaceTmpCacheRoot.resolve("login/code.js"), utf8cs)) {
 			
 			try {
 				writeContentFrom("code/login.min.js", writer);
@@ -251,7 +205,7 @@ public class InterfaceCache {
 	 */
 	private void writeContentFrom(String file, BufferedWriter writer) throws IOException, NoSuchFileException {
 		Path filePath = ResourcesUtils.getResourceFromJarIfNotInFileSystem(WebServer.ROOT.resolve(file));
-		try (BufferedReader reader = Files.newBufferedReader(filePath, UTF8_CS)) {
+		try (BufferedReader reader = Files.newBufferedReader(filePath, utf8cs)) {
 			String line = null;
 		    while ((line = reader.readLine()) != null) {
 		    	writer.write(line);
@@ -269,19 +223,19 @@ public class InterfaceCache {
 	 * @param extractImages
 	 * @throws IOException
 	 */
-	private Set<String> createIndex(String source, String target, String manifestPath, boolean extractImages) throws IOException {
+	private Set<String> createIndex(String source, String target, boolean addManifest, String manifestPath, boolean extractImages) throws IOException {
 		Path indexPath = ResourcesUtils.getResourceFromJarIfNotInFileSystem(
 				WebServer.ROOT.resolve(source));
 
 		Set<String> imgs = new HashSet<String>();
 		List<String> lines = new ArrayList<String>();
-		try (BufferedReader reader = Files.newBufferedReader(indexPath, UTF8_CS)) {
+		try (BufferedReader reader = Files.newBufferedReader(indexPath, utf8cs)) {
 			boolean manifestReplaced = false;
 			String line = null;
 		    while ((line = reader.readLine()) != null) {
 		    	if (!manifestReplaced && line.contains("$manifest;")) {
 					String replacement;
-					if (usePermanentCache) {
+					if (addManifest) {
 						replacement = "manifest=\"/" + interfaceName + manifestPath + "\"";
 					} else {
 						replacement = "";
@@ -302,7 +256,7 @@ public class InterfaceCache {
 		    }
 		}
 		
-		Files.write(interfaceTmpCacheRoot.resolve(target), lines, UTF8_CS);
+		Files.write(interfaceTmpCacheRoot.resolve(target), lines, utf8cs);
 		
 		return imgs;
 	}
@@ -400,10 +354,10 @@ public class InterfaceCache {
 	 */
 	private void createManifest(String path, Set<Path> resources) throws IOException {
 		try (BufferedWriter writer = Files.newBufferedWriter(
-				interfaceTmpCacheRoot.resolve(path), UTF8_CS)) {
+				interfaceTmpCacheRoot.resolve(path), utf8cs)) {
 			
 			writer.write("CACHE MANIFEST\r\n\r\n# ");
-			writer.write(DateUtil.now());
+			writer.write(WebServer.DATE_FORMAT.format(new Date()));
 			writer.write("\r\n\r\nCACHE:\r\n");
 			
 			for (Path r : resources) {
@@ -429,25 +383,25 @@ public class InterfaceCache {
 	private void createDictionaryAndExtractSkinIconSet() throws IOException, XMLStreamException {
 		XMLEventWriter eventWriter = null;
 		try (BufferedWriter out = Files.newBufferedWriter(
-				interfaceTmpCacheRoot.resolve("dictionary.xml"), UTF8_CS)) {
-			eventWriter = OUTPUT_FACTORY.createXMLEventWriter(out);
+				interfaceTmpCacheRoot.resolve("dictionary.xml"), utf8cs)) {
+			eventWriter = outputFactory.createXMLEventWriter(out);
 			
-			StartDocument startDocument = EVENT_FACTORY.createStartDocument();
+			StartDocument startDocument = eventFactory.createStartDocument();
 		    eventWriter.add(startDocument);
-		    eventWriter.add(NL);
+		    eventWriter.add(nl);
 		    
-		    StartElement dictionaryStartElement = EVENT_FACTORY.createStartElement("", "", "dictionary");
+		    StartElement dictionaryStartElement = eventFactory.createStartElement("", "", "dictionary");
 		    eventWriter.add(dictionaryStartElement);
-		    eventWriter.add(NL);
+		    eventWriter.add(nl);
 		    
 		    addSkinDefinitionAndExtractIconSet(eventWriter);
 		    
 		    addObjects(eventWriter);
 		    
-		    eventWriter.add(EVENT_FACTORY.createEndElement("", "", "dictionary"));
-		    eventWriter.add(NL);
+		    eventWriter.add(eventFactory.createEndElement("", "", "dictionary"));
+		    eventWriter.add(nl);
 		    
-		    eventWriter.add(EVENT_FACTORY.createEndDocument());
+		    eventWriter.add(eventFactory.createEndDocument());
 		    
 		} finally {
 			try { eventWriter.close(); } catch (Exception e) {}
@@ -461,16 +415,16 @@ public class InterfaceCache {
 	 * @throws IOException
 	 */
 	private void addObjects(XMLEventWriter eventWriter) throws XMLStreamException, IOException {
-		eventWriter.add(EVENT_FACTORY.createStartElement("", "", "objects"));
-	    eventWriter.add(NL);
+		eventWriter.add(eventFactory.createStartElement("", "", "objects"));
+	    eventWriter.add(nl);
 	    
 		for (String obj : objects) {
 			XMLEventReader eventReader = null;
 			Path objXmlPath = ResourcesUtils.getResourceFromJarIfNotInFileSystem(
 					WebServer.ROOT.resolve("objects/" + obj + "/" + obj + ".xml"));
 			
-			try (BufferedReader in = Files.newBufferedReader(objXmlPath, UTF8_CS)) {
-				eventReader = INPUT_FACTORY.createXMLEventReader(in);
+			try (BufferedReader in = Files.newBufferedReader(objXmlPath, utf8cs)) {
+				eventReader = inputFactory.createXMLEventReader(in);
 				while (eventReader.hasNext()) {
 					XMLEvent event = eventReader.nextEvent();
 					if (!event.isStartDocument() && !event.isEndDocument()) {
@@ -478,12 +432,12 @@ public class InterfaceCache {
 							EndElement objEnd = event.asEndElement();
 							if (objEnd.getName().getLocalPart().equals("obj")) {
 								try {
-									addElementWithCDataContentFromFile(WebServer.ROOT.resolve("objects/" + obj + "/" + obj + ".shtml"), "src", eventWriter, EVENT_FACTORY);
+									addElementWithCDataContentFromFile(WebServer.ROOT.resolve("objects/" + obj + "/" + obj + ".shtml"), "src", eventWriter, eventFactory);
 								} catch (NoSuchFileException e) {
 									// this object has no src, and that's fine
 								}
 								try {
-									addElementWithCDataContentFromFile(WebServer.ROOT.resolve("objects/" + obj + "/languages/" + language + ".ini"), "language", eventWriter, EVENT_FACTORY);
+									addElementWithCDataContentFromFile(WebServer.ROOT.resolve("objects/" + obj + "/languages/" + language + ".ini"), "language", eventWriter, eventFactory);
 								} catch (NoSuchFileException e) {
 									// this object has no languages, and that's fine
 								}
@@ -493,15 +447,15 @@ public class InterfaceCache {
 						eventWriter.add(event);
 					}
 				}
-				eventWriter.add(NL);
+				eventWriter.add(nl);
 				
 			} finally {
 				try { eventReader.close(); } catch (Exception e) {}
 			}
 		}
 	    
-	    eventWriter.add(EVENT_FACTORY.createEndElement("", "", "objects"));
-	    eventWriter.add(NL);
+	    eventWriter.add(eventFactory.createEndElement("", "", "objects"));
+	    eventWriter.add(nl);
 	}
 
 	/**
@@ -515,8 +469,8 @@ public class InterfaceCache {
 				WebServer.ROOT.resolve("skins/" + skin + "/" + "definition.xml"));
 		
 		XMLEventReader eventReader = null;
-		try (BufferedReader in = Files.newBufferedReader(skinXmlPath, UTF8_CS)) {
-	    	eventReader = INPUT_FACTORY.createXMLEventReader(in);
+		try (BufferedReader in = Files.newBufferedReader(skinXmlPath, utf8cs)) {
+	    	eventReader = inputFactory.createXMLEventReader(in);
 	    	boolean nextIsIconSet = false;
 			while (eventReader.hasNext()) {
 				XMLEvent event = eventReader.nextEvent();
@@ -533,7 +487,7 @@ public class InterfaceCache {
 					}
 				}
 			}
-			eventWriter.add(NL);
+			eventWriter.add(nl);
 			
 		} finally {
 			try { eventReader.close(); } catch (Exception e) {}
@@ -553,8 +507,8 @@ public class InterfaceCache {
 		Files.copy(indexXml, cacheXml);
 		
 		XMLEventReader eventReader = null;
-		try (BufferedReader in = Files.newBufferedReader(cacheXml, UTF8_CS)) {
-			eventReader = INPUT_FACTORY.createXMLEventReader(in);
+		try (BufferedReader in = Files.newBufferedReader(cacheXml, utf8cs)) {
+			eventReader = inputFactory.createXMLEventReader(in);
 			
 			while (eventReader.hasNext()) {
 				XMLEvent event = eventReader.nextEvent();
@@ -597,9 +551,9 @@ public class InterfaceCache {
 		
 		Path filePath = ResourcesUtils.getResourceFromJarIfNotInFileSystem(file);
 		
-		try (BufferedReader reader = Files.newBufferedReader(filePath, UTF8_CS)) {
+		try (BufferedReader reader = Files.newBufferedReader(filePath, utf8cs)) {
 			eventWriter.add(eventFactory.createStartElement("", "", elementLocalName));
-		    eventWriter.add(NL);
+		    eventWriter.add(nl);
 		    
 		    StringBuilder content = new StringBuilder("\n");
 		    String line = null;
@@ -608,194 +562,10 @@ public class InterfaceCache {
 		    }
 		    
 		    eventWriter.add(eventFactory.createCData(content.toString()));
-		    eventWriter.add(NL);
+		    eventWriter.add(nl);
 		    
 		    eventWriter.add(eventFactory.createEndElement("", "", elementLocalName));
-		    eventWriter.add(NL);
+		    eventWriter.add(nl);
 		}
 	}
-	
-	/**
-	 * 
-	 * @param uri
-	 * @param token
-	 * @param httpRequestHeader
-	 * @param connectionHandler
-	 * @return
-	 * @throws IOException
-	 */
-	public static boolean processFileRequest(String uri, Token token, 
-			HttpRequestHeader httpRequestHeader,
-			ConnectionHandler connectionHandler) throws IOException {
-		
-		if (uri.charAt(0) == '/') {
-			uri = uri.substring(1);
-		}
-		Path path = CACHE_ROOT.resolve(uri).toAbsolutePath().normalize();
-		
-		if (!path.startsWith(ABSOLUTE_CACHE_ROOT_PATH)) {
-			WebServer.log.warning("resource out of root requested: " + path);
-			return false;
-		}
-		
-		path = ABSOLUTE_CACHE_ROOT_PATH.relativize(path);
-		
-		String pathStr = path.toString();
-		if (pathStr.equals("favicon.ico") || pathStr.equals("favicon.png")) {
-			serveCacheFile(httpRequestHeader.method, path, connectionHandler, httpRequestHeader);
-			return true;
-		}
-		
-		String requestedInterface = path.getName(0).toString();
-		
-		if (requestedInterface.length() == 0 && defaultInterface != null) {
-			connectionHandler.redirectTo(defaultInterface, httpRequestHeader);
-			return false;
-		}
-		
-		if (!interfaces.contains(requestedInterface)) {
-			WebServer.log.warning("non-existing interface requested: " + requestedInterface);
-			return false;
-		}
-		
-		if (httpRequestHeader.method != HttpRequestHeader.Method.GET && httpRequestHeader.method != HttpRequestHeader.Method.HEAD) {
-			connectionHandler.notImplementedError();
-			return false;
-		}
-		
-		if (isLoginComponent(path)) { // GET /<interface>/login/...
-			serveCacheFile(httpRequestHeader.method, path, connectionHandler, httpRequestHeader);
-			
-		} else {
-			if (isLoginAlias(path)) { // GET /<interface>/login
-				if (token != null) { // already authenticated
-					connectionHandler.redirectTo(requestedInterface, httpRequestHeader);
-					return false;
-					
-				} else {
-					serveCacheFile(httpRequestHeader.method, path.resolve("index.html"), connectionHandler, httpRequestHeader);
-				}
-				
-			} else if (isInterfaceAlias(path)) { // GET /<interface>
-				if (token != null) {
-					if (token.getUser().isAuthorized(path)) {
-						serveCacheFile(httpRequestHeader.method, path.resolve("index.html"), connectionHandler, httpRequestHeader);
-					} else {
-						WebServer.log.warning("unauthorized interface request: " + path);
-						return false;
-					}
-					
-				} else {
-					connectionHandler.redirectTo(requestedInterface + "/login", httpRequestHeader);
-					return false;
-				}
-				
-			} else { // GET /<interface>/<any_other_resource>
-				if (token != null && token.getUser().isAuthorized(path)) {
-					serveCacheFile(httpRequestHeader.method, path, connectionHandler, httpRequestHeader);
-					
-				} else {
-					WebServer.log.debug("unauthorized file request: " + path);
-					connectionHandler.notFoundError();
-				}
-			}
-		}
-		
-	    return true;
-	}
-	
-	/**
-	 * 
-	 * @param method
-	 * @param path
-	 * @param out
-	 * @param dataOut
-	 * @param httpRequestHeader
-	 * @throws IOException
-	 */
-	private synchronized static void serveCacheFile(Method method, Path path, 
-			ConnectionHandler connectionHandler, HttpRequestHeader httpRequestHeader) throws IOException {
-		
-		path = ABSOLUTE_CACHE_ROOT_PATH.resolve(path);
-		
-		try {
-    		long lastModified = Files.getLastModifiedTime(path).toMillis();
-    		
-			if (lastModified <= httpRequestHeader.getIfModifiedSinceTime()) {
-				connectionHandler.write("HTTP/1.1 304 Not Modified\r\n");
-    			connectionHandler.write("Date: " + DateUtil.now() + "\r\n");
-		        connectionHandler.write("Server: " + WebServer.HTTP_HEADER_FIELD_SERVER + "\r\n");
-		        connectionHandler.write("Last-Modified: " + DateUtil.format(lastModified) + "\r\n");
-    			connectionHandler.write("Cache-Control: max-age=0, no-cache, no-store\r\n");
-    			connectionHandler.write("Content-length: 0\r\n");
-    			connectionHandler.write("\r\n");
-    			connectionHandler.flush();
-    			
-    		} else {
-				byte[] fileData = Files.readAllBytes(path);
-	    		String contentType = getMimeContentType(path);
-		    	
-		        connectionHandler.write("HTTP/1.1 200 OK\r\n");
-		        connectionHandler.write("Date: " + DateUtil.now() + "\r\n");
-		        connectionHandler.write("Server: " + WebServer.HTTP_HEADER_FIELD_SERVER + "\r\n");
-		        connectionHandler.write("Last-Modified: " + DateUtil.format(lastModified) + "\r\n");
-		        connectionHandler.write("Cache-Control: max-age=0, no-cache, no-store\r\n");
-		        if (contentType != null) {
-		        	connectionHandler.write("Content-type: " + contentType + "\r\n");
-		        }
-		        connectionHandler.write("Content-length: " + fileData.length + "\r\n");
-		        connectionHandler.write("\r\n");
-		        connectionHandler.flush();
-
-		        if (method == HttpRequestHeader.Method.GET) {
-		        	connectionHandler.write(fileData);
-		        	connectionHandler.flush();
-		        }
-    		}
-		} catch (NoSuchFileException e) {
-    		WebServer.log.warning("file not found: " + ABSOLUTE_CACHE_ROOT_PATH.relativize(path));
-    		connectionHandler.notFoundError();
-		}
-	}
-	
-	/**
-	 * 
-	 * @param path
-	 * @return
-	 */
-	private static boolean isInterfaceAlias(Path path) {
-		return path.getNameCount() == 1;
-	}
-
-	/**
-	 * 
-	 * @param path
-	 * @return
-	 */
-	private static boolean isLoginAlias(Path path) {
-		return (path.getNameCount() == 2 && path.getName(1).toString().equals("login"));
-	}
-
-	/**
-	 * 
-	 * @param path
-	 * @return
-	 */
-	private static boolean isLoginComponent(Path path) {
-		return (path.getNameCount() > 2 && path.getName(1).toString().equals("login"));
-	}
-
-	/**
-	 * 
-	 * @param path
-	 * @return
-	 * @throws IOException
-	 */
-	private static String getMimeContentType(Path path) throws IOException {
-		if (path.getFileName().toString().equals("manifest")) {
-			return "text/cache-manifest";
-		}
-		// TODO test on linux, on OS X it looks like it's not working...
-		return Files.probeContentType(path);
-	}	
 }

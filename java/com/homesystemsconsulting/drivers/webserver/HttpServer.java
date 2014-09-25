@@ -6,7 +6,7 @@ import java.net.ServerSocket;
 public class HttpServer extends WebServer {
 
 	public HttpServer(String id) {
-		super();
+		super(id);
 	}
 	
 	@Override

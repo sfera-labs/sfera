@@ -12,7 +12,7 @@ import javax.net.ssl.SSLServerSocketFactory;
 public class HttpsServer extends WebServer {
 
 	public HttpsServer(String id) {
-		super();
+		super(id);
 	}
 
 	@Override
