@@ -1,5 +1,6 @@
 package com.homesystemsconsulting.drivers.mydriver;
 
+import com.homesystemsconsulting.core.Configuration;
 import com.homesystemsconsulting.drivers.Driver;
 import com.homesystemsconsulting.events.Bus;
 import com.homesystemsconsulting.events.NumberEvent;
@@ -15,7 +16,7 @@ public class MyDriver extends Driver {
 	}
 	
 	@Override
-	public boolean onInit() {
+	public boolean onInit(Configuration configuration) {
 		return true;
 	}
 

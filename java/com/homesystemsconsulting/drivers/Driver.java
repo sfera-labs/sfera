@@ -2,6 +2,7 @@ package com.homesystemsconsulting.drivers;
 
 import java.util.concurrent.Future;
 
+import com.homesystemsconsulting.core.Configuration;
 import com.homesystemsconsulting.core.Task;
 import com.homesystemsconsulting.core.TasksManager;
 import com.homesystemsconsulting.events.Node;
@@ -36,10 +37,11 @@ public abstract class Driver extends Task implements Node {
 	
 	/**
 	 * 
+	 * @param configuration
 	 * @return
 	 * @throws InterruptedException
 	 */
-	protected abstract boolean onInit() throws InterruptedException;
+	protected abstract boolean onInit(Configuration configuration) throws InterruptedException;
 	
 	/**
 	 * 
@@ -97,7 +99,7 @@ public abstract class Driver extends Task implements Node {
 	public void execute() {
 		try {
 			log.info("starting...");
-			if (onInit()) {
+			if (onInit(new Configuration(getId()))) {
 				log.info("started");
 			} else {
 				log.warning("initialization failed");

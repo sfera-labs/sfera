@@ -14,7 +14,7 @@ import com.homesystemsconsulting.core.Configuration;
 public class HttpsServer extends WebServer {
 
 	public HttpsServer(String id) {
-		super();
+		super(id);
 	}
 
 	@Override
@@ -23,11 +23,11 @@ public class HttpsServer extends WebServer {
 	}
 
 	@Override
-	protected ServerSocket getServerSocket(int port) throws Exception {
+	protected ServerSocket getServerSocket(int port, Configuration configuration) throws Exception {
 		SSLContext context = SSLContext.getInstance("SSLv3");
 		KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
 		KeyStore ks = KeyStore.getInstance("JKS");
-		char[] kspwd = Configuration.getProperty(WEB_SERVER_DRIVER_ID + ".ssl_password", "sferapass").toCharArray();
+		char[] kspwd = configuration.getProperty("ssl_password", "sferapass").toCharArray();
 		ks.load(new FileInputStream("sfera.keys"), kspwd);
 		kmf.init(ks, kspwd);
 		context.init(kmf.getKeyManagers(), null, null);

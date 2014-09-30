@@ -11,7 +11,18 @@ public class Configuration {
 	private static final String CONFIG_DIR = "config/";
 	private static final String SYSTEM_CONFIG_FILE = CONFIG_DIR + "system.conf";
 	
+	public static final Configuration SYSTEM = new Configuration("system");
+	
 	private static Properties props;
+	
+	private final String prefix;
+	
+	/**
+	 * 
+	 */
+	public Configuration(String prefix) {
+		this.prefix = prefix + ".";
+	}
 	
 	/**
 	 * 
@@ -31,10 +42,19 @@ public class Configuration {
 	
 	/**
 	 * 
+	 * @return
+	 */
+	public static Properties getProperties() {
+		return props;
+	}
+	
+	/**
+	 * 
 	 * @param key
 	 * @return
 	 */
-	public static String getProperty(String key, String defaultValue) {
+	public String getProperty(String key, String defaultValue) {
+		key = prefix + key;
 		String val = props.getProperty(key, defaultValue);
 		if (val == null) {
 			return null;
@@ -48,7 +68,7 @@ public class Configuration {
 	 * @param key
 	 * @return
 	 */
-	public static Integer getIntProperty(String key, Integer defaultValue) {
+	public Integer getIntProperty(String key, Integer defaultValue) {
 		String val = getProperty(key, null);
 		if (val == null) {
 			return defaultValue;
@@ -67,7 +87,7 @@ public class Configuration {
 	 * @param defaultValue
 	 * @return
 	 */
-	public static Boolean getBoolProperty(String key, Boolean defaultValue) {
+	public Boolean getBoolProperty(String key, Boolean defaultValue) {
 		String val = getProperty(key, null);
 		if (val == null) {
 			return defaultValue;

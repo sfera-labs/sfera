@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
+import com.homesystemsconsulting.core.Sfera;
 import com.homesystemsconsulting.drivers.webserver.HttpRequestHeader;
 import com.homesystemsconsulting.drivers.webserver.WebServer;
 
@@ -31,7 +32,7 @@ public abstract class Access {
 	 * @throws Exception
 	 */
 	public static void init() throws Exception {
-		List<String> lines = Files.readAllLines(USERS_FILE_PATH, WebServer.UTF8_CS);
+		List<String> lines = Files.readAllLines(USERS_FILE_PATH, Sfera.CHARSET);
 		int lineNum = 0;
 		for (String line : lines) {
 	    	line = line.trim();
@@ -69,7 +70,7 @@ public abstract class Access {
 		userLine += Base64.getEncoder().encodeToString(hashedPassword) + ":";
 		userLine += Base64.getEncoder().encodeToString(salt) + "\n";
 		
-		Files.write(USERS_FILE_PATH, userLine.getBytes(WebServer.UTF8_CS), StandardOpenOption.APPEND);
+		Files.write(USERS_FILE_PATH, userLine.getBytes(Sfera.CHARSET), StandardOpenOption.APPEND);
 	}
 	
 	/**

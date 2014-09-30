@@ -3,7 +3,6 @@ package com.homesystemsconsulting.drivers.webserver;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -16,12 +15,9 @@ import com.homesystemsconsulting.util.logging.SystemLogger;
 
 public abstract class WebServer extends Driver {
 	
-	static final String WEB_SERVER_DRIVER_ID = "web";
 	static final Path ROOT = Paths.get("webapp/");
 	static final String HTTP_HEADER_FIELD_SERVER = "Sfera " + Sfera.VERSION;
 	static final String API_BASE_URI = "/x/";
-	
-	public static final Charset UTF8_CS = Charset.forName("UTF-8");
 	
 	private static boolean initialized = false;
 	private static final Object initLock = new Object();
@@ -33,19 +29,19 @@ public abstract class WebServer extends Driver {
 	/**
 	 * 
 	 */
-	protected WebServer() {
-		super(WEB_SERVER_DRIVER_ID);
+	protected WebServer(String id) {
+		super(id);
 	}
 
 	@Override
-	protected boolean onInit() throws InterruptedException {
+	protected boolean onInit(Configuration configuration) throws InterruptedException {
 		synchronized (initLock) {
 			if (!initialized) {
 				log = super.log;
 				
-				ConnectionHandler.init();
+				ConnectionHandler.init(configuration);
 				try {
-					InterfaceCache.init();
+					InterfaceCache.init(configuration);
 				} catch (Exception e) {
 					log.error("error creating cache: " + e);
 				}
@@ -56,15 +52,15 @@ public abstract class WebServer extends Driver {
 					return false;
 				}
 				
-				Token.maxAgeSeconds = Configuration.getIntProperty(WEB_SERVER_DRIVER_ID + ".password_validity_minutes", 60) * 60;
+				Token.maxAgeSeconds = configuration.getIntProperty("password_validity_minutes", 60) * 60;
 				
 				initialized = true;
 			}			
 		}
 		
-		Integer port = Configuration.getIntProperty(WEB_SERVER_DRIVER_ID + "." + getProtocolName() + ".port", getDefaultPort());
+		Integer port = configuration.getIntProperty(getProtocolName() + ".port", getDefaultPort());
 		try {
-			socket = getServerSocket(port);
+			socket = getServerSocket(port, configuration);
 		} catch (Exception e) {
 			log.error("error instantiating socket: " + e);
 			return false;
@@ -98,10 +94,11 @@ public abstract class WebServer extends Driver {
 	/**
 	 * 
 	 * @param port
+	 * @param configuration
 	 * @return
 	 * @throws Exception
 	 */
-	protected abstract ServerSocket getServerSocket(int port) throws Exception;
+	protected abstract ServerSocket getServerSocket(int port, Configuration configuration) throws Exception;
 
 	@Override
 	protected boolean loop() throws InterruptedException {
@@ -109,7 +106,7 @@ public abstract class WebServer extends Driver {
 		try {
 			connection = socket.accept();
 			log.debug("accepted connection from: " + connection.getInetAddress());
-			new ConnectionHandler(connection, getProtocolName());
+			new ConnectionHandler(getId(), connection, getProtocolName());
 			
 		} catch (IOException e) {
 			log.error("error accepting connection: " + e);

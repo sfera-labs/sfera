@@ -33,12 +33,13 @@ public class ConnectionHandler extends Task {
 	
 	/**
 	 * 
+	 * @param driverId
 	 * @param connection
-	 * @param string 
-	 * @throws SocketException 
+	 * @param protocol
+	 * @throws SocketException
 	 */
-	public ConnectionHandler(Socket connection, String protocol) throws SocketException {
-		super(WebServer.WEB_SERVER_DRIVER_ID + "#" + connection.getInetAddress());
+	public ConnectionHandler(String driverId, Socket connection, String protocol) throws SocketException {
+		super(driverId + "#" + connection.getInetAddress());
 		this.connection = connection;
 		this.connection.setSoTimeout(SOCKET_TIMEOUT);
 		this.protocol = protocol;
@@ -47,11 +48,12 @@ public class ConnectionHandler extends Task {
 	
 	/**
 	 * 
+	 * @param configuration
 	 */
-	public static void init() {
+	public static void init(Configuration configuration) {
 		synchronized (tasksManagerLock) {
 			if (tasksManager == null) {
-				Integer maxRequestThreads = Configuration.getIntProperty("web.max_threads", null);
+				Integer maxRequestThreads = configuration.getIntProperty("max_threads", null);
 				if (maxRequestThreads == null) {
 					int availableProcessors = Runtime.getRuntime().availableProcessors();
 					maxRequestThreads = availableProcessors * 128;

@@ -3,10 +3,12 @@ package com.homesystemsconsulting.drivers.webserver;
 import java.io.IOException;
 import java.net.ServerSocket;
 
+import com.homesystemsconsulting.core.Configuration;
+
 public class HttpServer extends WebServer {
 
 	public HttpServer(String id) {
-		super();
+		super(id);
 	}
 	
 	@Override
@@ -15,7 +17,7 @@ public class HttpServer extends WebServer {
 	}
 
 	@Override
-	protected ServerSocket getServerSocket(int port) throws IOException {
+	protected ServerSocket getServerSocket(int port, Configuration configuration) throws IOException {
 		return new ServerSocket(port);
 	}
 

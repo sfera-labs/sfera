@@ -1,16 +1,36 @@
 package com.homesystemsconsulting.core;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.nio.charset.Charset;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.EventListener;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
+import javax.xml.stream.FactoryConfigurationError;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.EndElement;
+import javax.xml.stream.events.XMLEvent;
 
 import com.homesystemsconsulting.apps.Application;
 import com.homesystemsconsulting.apps.myapp.MyApp;
 import com.homesystemsconsulting.apps.myapp2.MyApp2;
 import com.homesystemsconsulting.drivers.Driver;
+import com.homesystemsconsulting.drivers.webserver.WebServer;
 import com.homesystemsconsulting.events.Bus;
 import com.homesystemsconsulting.events.EventsMonitor;
 import com.homesystemsconsulting.script.EventsScriptEngine;
@@ -21,6 +41,8 @@ import com.homesystemsconsulting.util.logging.SystemLogger;
 public class Sfera {
 	
 	public static final String VERSION = "0.0.1";
+	
+	public static final Charset CHARSET = Charset.forName("UTF-8");
 
 	private static boolean run = true;
 
@@ -113,33 +135,91 @@ public class Sfera {
 
 	/**
 	 * 
+	 * @return
 	 */
 	private static List<Driver> loadDrivers() {
-		// TODO read config and manifest files
-		String[][] declaredDrivers = {
-				{"http", "com.homesystemsconsulting.drivers.webserver.HttpServer"}, 
-				{"https", "com.homesystemsconsulting.drivers.webserver.HttpsServer"},
-//				{"mydr", "com.homesystemsconsulting.drivers.mydriver.MyDriver"},
-		};
 		List<Driver> drivers = new ArrayList<Driver>();
 		
-		for (String[] driver : declaredDrivers) {
-			String id = driver[0];
-			String type = driver[1];
-			
-			try {
-				Class<?> driverClass = Class.forName(type);
-				Constructor<?> constructor = driverClass.getConstructor(new Class[]{String.class});
-				Object driverInstance = constructor.newInstance(id);
-				if (driverInstance instanceof Driver) {
-					drivers.add((Driver) driverInstance);
-					SystemLogger.SYSTEM.info("drivers", "driver '" + id + "' of type '" + type + "' instantiated");
+		Properties props = Configuration.getProperties();
+		for (String propName : props.stringPropertyNames()) {
+			if (propName.indexOf('.') < 0) {
+				// it's a driver definition
+				String driverType = props.getProperty(propName);
+				if (driverType != null) {
+					FileSystem pluginFileSystem = null;
+					try {
+						pluginFileSystem = FileSystems.newFileSystem(Paths.get("plugins/" + driverType + ".jar"), null);
+					} catch (FileSystemNotFoundException e) {
+						SystemLogger.SYSTEM.error("drivers", "plugin '" + driverType + "' not found");
+					} catch (IOException e) {
+						SystemLogger.SYSTEM.error("drivers", "error loading plugin '" + driverType + "': " + e);
+					}
+					
+					if (pluginFileSystem != null) {
+						Set<String> driverClasses;
+						try {
+							driverClasses = getDriverClassesInManifest(pluginFileSystem.getPath("manifest.xml"));
+							
+							for (String driverClassName : driverClasses) {
+								try {
+									Class<?> driverClass = Class.forName(driverClassName);
+									Constructor<?> constructor = driverClass.getConstructor(new Class[]{String.class});
+									Object driverInstance = constructor.newInstance(propName);
+									if (driverInstance instanceof Driver) {
+										drivers.add((Driver) driverInstance);
+										SystemLogger.SYSTEM.info("drivers", "driver '" + propName + "' of type '" + driverClassName + "' instantiated");
+									}
+								} catch (Throwable e) {
+									SystemLogger.SYSTEM.error("drivers", "error instantiating driver '" + propName + "' of type '" + driverClassName + "': " + e);
+								}
+							}
+						} catch (Exception e) {
+							SystemLogger.SYSTEM.error("drivers", "error reading manifest file in plugin '" + driverType + "': " + e);
+						}
+					}
 				}
-			} catch (Throwable e) {
-				SystemLogger.SYSTEM.error("drivers", "error instantiating driver '" + id + "' of type '" + type + "': " + e);
 			}
 		}
 		
 		return drivers;
+	}
+
+	/**
+	 * 
+	 * @param manifestPath
+	 * @return
+	 * @throws Exception
+	 */
+	private static Set<String> getDriverClassesInManifest(Path manifestPath) throws Exception {
+		Set<String> classes = new HashSet<String>();
+		
+		XMLEventReader eventReader = null;
+		try (BufferedReader in = Files.newBufferedReader(manifestPath, CHARSET)) {
+			eventReader = XMLInputFactory.newInstance().createXMLEventReader(in);
+			boolean inDriver = false;
+			while (eventReader.hasNext()) {
+				XMLEvent event = eventReader.nextEvent();
+				if (event.isStartElement()) {
+					String tag = event.asStartElement().getName().getLocalPart();
+					if (tag.equals("driver")) {
+						inDriver = true;
+						
+					} else if (inDriver && tag.equals("class")) {
+						event = eventReader.nextEvent();
+			            classes.add(event.asCharacters().getData());
+					}
+				
+				} else if (event.isEndElement()) {
+					String tag = event.asEndElement().getName().getLocalPart();
+					if (tag.equals("driver")) {
+						inDriver = false;
+					}
+				}
+			}
+		} finally {
+			try { eventReader.close(); } catch (Exception e) {}
+		}
+		
+		return classes;
 	}
 }

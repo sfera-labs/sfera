@@ -79,7 +79,7 @@ public class SystemLogger {
 		fh.setFormatter(new JSONFormatter());
 		BASE_LOGGER.addHandler(fh);
 		
-		Level level = getLevel(Configuration.getProperty("log_level", "INFO"));
+		Level level = getLevel(Configuration.SYSTEM.getProperty("log_level", "INFO"));
 		
 		BASE_LOGGER.setLevel(level);
 	}

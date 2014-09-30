@@ -25,6 +25,7 @@ import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
 import com.homesystemsconsulting.core.Configuration;
+import com.homesystemsconsulting.core.Sfera;
 import com.homesystemsconsulting.drivers.webserver.HttpRequestHeader.Method;
 import com.homesystemsconsulting.drivers.webserver.access.Token;
 import com.homesystemsconsulting.util.files.ResourcesUtils;
@@ -56,10 +57,10 @@ public class InterfaceCache {
 	/**
 	 * 
 	 */
-	public synchronized static void init() throws Exception {
+	public synchronized static void init(Configuration configuration) throws Exception {
 		if (interfaces == null) {
-			defaultInterface = Configuration.getProperty("web.default_interface", null);
-			usePermanentCache = Configuration.getBoolProperty("web.use_permanent_cache", true);
+			defaultInterface = configuration.getProperty("default_interface", null);
+			usePermanentCache = configuration.getBoolProperty("use_permanent_cache", true);
 			
 			interfaces = new HashSet<String>();
 			
@@ -159,7 +160,7 @@ public class InterfaceCache {
 	 */
 	private void createInterfaceCSS() throws IOException {
 		try (BufferedWriter writer = Files.newBufferedWriter(
-				interfaceTmpCacheRoot.resolve("style.css"), WebServer.UTF8_CS)) {
+				interfaceTmpCacheRoot.resolve("style.css"), Sfera.CHARSET)) {
 			
 			writeContentFrom("skins/" + skin + "/style.css", writer);
 			
@@ -181,7 +182,7 @@ public class InterfaceCache {
 	 */
 	private void createLoginCSS() throws IOException {
 		try (BufferedWriter writer = Files.newBufferedWriter(
-				interfaceTmpCacheRoot.resolve("login/style.css"), WebServer.UTF8_CS)) {
+				interfaceTmpCacheRoot.resolve("login/style.css"), Sfera.CHARSET)) {
 			
 			writeContentFrom("skins/" + skin + "/login/style.css", writer);
 		}
@@ -193,7 +194,7 @@ public class InterfaceCache {
 	 */
 	private void createInterfaceCode() throws IOException {
 		try (BufferedWriter writer = Files.newBufferedWriter(
-				interfaceTmpCacheRoot.resolve("code.js"), WebServer.UTF8_CS)) {
+				interfaceTmpCacheRoot.resolve("code.js"), Sfera.CHARSET)) {
 			
 			try {
 				writeContentFrom("code/client.min.js", writer);
@@ -229,7 +230,7 @@ public class InterfaceCache {
 	 */
 	private void createLoginCode() throws IOException {
 		try (BufferedWriter writer = Files.newBufferedWriter(
-				interfaceTmpCacheRoot.resolve("login/code.js"), WebServer.UTF8_CS)) {
+				interfaceTmpCacheRoot.resolve("login/code.js"), Sfera.CHARSET)) {
 			
 			try {
 				writeContentFrom("code/login.min.js", writer);
@@ -248,7 +249,7 @@ public class InterfaceCache {
 	 */
 	private void writeContentFrom(String file, BufferedWriter writer) throws IOException, NoSuchFileException {
 		Path filePath = ResourcesUtils.getResourceFromJarIfNotInFileSystem(WebServer.ROOT.resolve(file));
-		try (BufferedReader reader = Files.newBufferedReader(filePath, WebServer.UTF8_CS)) {
+		try (BufferedReader reader = Files.newBufferedReader(filePath, Sfera.CHARSET)) {
 			String line = null;
 		    while ((line = reader.readLine()) != null) {
 		    	writer.write(line);
@@ -272,7 +273,7 @@ public class InterfaceCache {
 
 		Set<String> imgs = new HashSet<String>();
 		List<String> lines = new ArrayList<String>();
-		try (BufferedReader reader = Files.newBufferedReader(indexPath, WebServer.UTF8_CS)) {
+		try (BufferedReader reader = Files.newBufferedReader(indexPath, Sfera.CHARSET)) {
 			boolean manifestReplaced = false;
 			String line = null;
 		    while ((line = reader.readLine()) != null) {
@@ -299,7 +300,7 @@ public class InterfaceCache {
 		    }
 		}
 		
-		Files.write(interfaceTmpCacheRoot.resolve(target), lines, WebServer.UTF8_CS);
+		Files.write(interfaceTmpCacheRoot.resolve(target), lines, Sfera.CHARSET);
 		
 		return imgs;
 	}
@@ -397,7 +398,7 @@ public class InterfaceCache {
 	 */
 	private void createManifest(String path, Set<Path> resources) throws IOException {
 		try (BufferedWriter writer = Files.newBufferedWriter(
-				interfaceTmpCacheRoot.resolve(path), WebServer.UTF8_CS)) {
+				interfaceTmpCacheRoot.resolve(path), Sfera.CHARSET)) {
 			
 			writer.write("CACHE MANIFEST\r\n\r\n# ");
 			writer.write(DateUtil.now());
@@ -426,7 +427,7 @@ public class InterfaceCache {
 	private void createDictionaryAndExtractSkinIconSet() throws IOException, XMLStreamException {
 		XMLEventWriter eventWriter = null;
 		try (BufferedWriter out = Files.newBufferedWriter(
-				interfaceTmpCacheRoot.resolve("dictionary.xml"), WebServer.UTF8_CS)) {
+				interfaceTmpCacheRoot.resolve("dictionary.xml"), Sfera.CHARSET)) {
 			eventWriter = OUTPUT_FACTORY.createXMLEventWriter(out);
 			
 			StartDocument startDocument = EVENT_FACTORY.createStartDocument();
@@ -466,7 +467,7 @@ public class InterfaceCache {
 			Path objXmlPath = ResourcesUtils.getResourceFromJarIfNotInFileSystem(
 					WebServer.ROOT.resolve("objects/" + obj + "/" + obj + ".xml"));
 			
-			try (BufferedReader in = Files.newBufferedReader(objXmlPath, WebServer.UTF8_CS)) {
+			try (BufferedReader in = Files.newBufferedReader(objXmlPath, Sfera.CHARSET)) {
 				eventReader = INPUT_FACTORY.createXMLEventReader(in);
 				while (eventReader.hasNext()) {
 					XMLEvent event = eventReader.nextEvent();
@@ -512,7 +513,7 @@ public class InterfaceCache {
 				WebServer.ROOT.resolve("skins/" + skin + "/" + "definition.xml"));
 		
 		XMLEventReader eventReader = null;
-		try (BufferedReader in = Files.newBufferedReader(skinXmlPath, WebServer.UTF8_CS)) {
+		try (BufferedReader in = Files.newBufferedReader(skinXmlPath, Sfera.CHARSET)) {
 	    	eventReader = INPUT_FACTORY.createXMLEventReader(in);
 	    	boolean nextIsIconSet = false;
 			while (eventReader.hasNext()) {
@@ -550,7 +551,7 @@ public class InterfaceCache {
 		Files.copy(indexXml, cacheXml);
 		
 		XMLEventReader eventReader = null;
-		try (BufferedReader in = Files.newBufferedReader(cacheXml, WebServer.UTF8_CS)) {
+		try (BufferedReader in = Files.newBufferedReader(cacheXml, Sfera.CHARSET)) {
 			eventReader = INPUT_FACTORY.createXMLEventReader(in);
 			
 			while (eventReader.hasNext()) {
@@ -594,7 +595,7 @@ public class InterfaceCache {
 		
 		Path filePath = ResourcesUtils.getResourceFromJarIfNotInFileSystem(file);
 		
-		try (BufferedReader reader = Files.newBufferedReader(filePath, WebServer.UTF8_CS)) {
+		try (BufferedReader reader = Files.newBufferedReader(filePath, Sfera.CHARSET)) {
 			eventWriter.add(eventFactory.createStartElement("", "", elementLocalName));
 		    eventWriter.add(NL);
 		    
