@@ -10,7 +10,6 @@ import java.util.concurrent.TimeUnit;
 import com.homesystemsconsulting.apps.Application;
 import com.homesystemsconsulting.apps.myapp.MyApp;
 import com.homesystemsconsulting.apps.myapp2.MyApp2;
-import com.homesystemsconsulting.data.Database;
 import com.homesystemsconsulting.drivers.Driver;
 import com.homesystemsconsulting.events.Bus;
 import com.homesystemsconsulting.events.EventsMonitor;
@@ -35,46 +34,15 @@ public class Sfera {
 			
 			Thread.setDefaultUncaughtExceptionHandler(new SystemExceptionHandler());
 			
-//			ImageIO.setUseCache(false);
-			
 			Configuration.load();
 			
 			SystemLogger.setup();
 			SystemLogger.SYSTEM.info("STARTED - version " + VERSION);
 			
 			SystemNode.init();
-			Database.init();
 			
-			/*
-			// connects to HTTPS servers without validating the certificates
-			TrustManager[] trustAllCerts = new TrustManager[]{
-				new X509TrustManager() {
-					public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-						return null;
-					}
-	
-					public void checkClientTrusted(
-						java.security.cert.X509Certificate[] certs, String authType) {
-					}
-					
-					public void checkServerTrusted(
-						java.security.cert.X509Certificate[] certs, String authType) {
-					}
-				}
-			};
-			try { // this is for javax.net.ssl
-			    SSLContext sc = SSLContext.getInstance("TLS");
-			    sc.init(null, trustAllCerts, new java.security.SecureRandom());
-			    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-			    HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier(){
-			    	public boolean verify(String string,SSLSession ssls) {
-			    		return true;
-			    	}
-			    });
-			} catch (Exception e) {
-				
-			}
-			*/
+			// Maybe we don't need a general database... maybe just a "Variables" module
+//			Database.init();
 			
 			List<Driver> drivers = loadDrivers();
 			for (Driver d : drivers) {
@@ -131,7 +99,7 @@ public class Sfera {
 			} catch (InterruptedException e) {}
 			
 			ResourcesUtils.close();
-			Database.close();
+//			Database.close();
 			
 			SystemLogger.SYSTEM.info("Bye!");
 			System.exit(0);

@@ -8,6 +8,8 @@ public class Database {
 
 	private static final String DB_FILE = "data/sfera";
 	private static final String DB_PROPERTIES = ";hsqldb.write_delay_millis=100";
+	private static final String DB_USER = "sfera";
+	private static final String DB_PASSWORD = "cduxg678df2";
 	
 	private static Connection dbConnection = null;
 	
@@ -16,7 +18,7 @@ public class Database {
 			System.setProperty("hsqldb.reconfig_logging", "false");
 			
 			Class.forName("org.hsqldb.jdbc.JDBCDriver");
-			dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:" + DB_FILE + DB_PROPERTIES, "sfera", "cduxg678df2");
+			dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:" + DB_FILE + DB_PROPERTIES, DB_USER, DB_PASSWORD);
 			dbConnection.setAutoCommit(true);
 		}
 	}

@@ -1,8 +1,14 @@
 package com.homesystemsconsulting.drivers.webserver.access;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.security.SecureRandom;
 import java.security.spec.KeySpec;
 import java.util.Arrays;
+import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -11,28 +17,59 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 import com.homesystemsconsulting.drivers.webserver.HttpRequestHeader;
+import com.homesystemsconsulting.drivers.webserver.WebServer;
 
 public abstract class Access {
 	
-	private static final  Map<String, User> users = new ConcurrentSkipListMap<String, User>(String.CASE_INSENSITIVE_ORDER);
-	private static final  Map<String, Token> tokens = new ConcurrentHashMap<String, Token>();
+	private static final Map<String, User> users = new ConcurrentSkipListMap<String, User>(String.CASE_INSENSITIVE_ORDER);
+	private static final Map<String, Token> tokens = new ConcurrentHashMap<String, Token>();
+	
+	private static final Path USERS_FILE_PATH = Paths.get("data/webserver/passwd");
+	
+	/**
+	 * 
+	 * @throws Exception
+	 */
+	public static void init() throws Exception {
+		List<String> lines = Files.readAllLines(USERS_FILE_PATH, WebServer.UTF8_CS);
+		int lineNum = 0;
+		for (String line : lines) {
+	    	line = line.trim();
+	    	if (line.length() > 0) {
+		    	try {
+			    	String[] splitted = line.split(":");
+			    	User u = new User(splitted[0], splitted[1], splitted[2]);
+			    	users.put(u.getUsername(), u);
+		    	} catch (Exception e) {
+		    		WebServer.getLogger().error("error reading file " + USERS_FILE_PATH + " on line " + lineNum);
+		    	}
+	    	}
+	    	lineNum++;
+	    }
+	}
 	
 	/**
 	 * 
 	 * @param username
-	 * @param password
+	 * @param plainPassword
 	 * @throws UsernameAlreadyUsedException
 	 * @throws Exception
 	 */
-	public static void addUser(String username, String password) throws UsernameAlreadyUsedException, Exception {
+	public static void addUser(String username, String plainPassword) throws UsernameAlreadyUsedException, Exception {
 		if (existsUser(username)) {
 			throw new UsernameAlreadyUsedException();
 		}
 		
 		byte[] salt = generateSalt();
-		byte[] hashedPassword = getEncryptedPassword(password, salt);	
+		byte[] hashedPassword = getEncryptedPassword(plainPassword, salt);	
 	
 		users.put(username, new User(username, hashedPassword, salt));
+		
+		String userLine = username + ":";
+		userLine += Base64.getEncoder().encodeToString(hashedPassword) + ":";
+		userLine += Base64.getEncoder().encodeToString(salt) + "\n";
+		
+		Files.write(USERS_FILE_PATH, userLine.getBytes(WebServer.UTF8_CS), StandardOpenOption.APPEND);
 	}
 	
 	/**
@@ -113,6 +150,10 @@ public abstract class Access {
 	public static Token getToken(String tokenUUID, HttpRequestHeader httpRequestHeader) {
 		Token token = tokens.get(tokenUUID);
 		if (token == null) {
+			return null;
+		}
+		if (token.isExpired()) {
+			tokens.remove(tokenUUID);
 			return null;
 		}
 		if (token.match(httpRequestHeader)) {

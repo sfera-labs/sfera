@@ -3,6 +3,7 @@ package com.homesystemsconsulting.drivers.webserver;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -10,6 +11,7 @@ import com.homesystemsconsulting.core.Configuration;
 import com.homesystemsconsulting.core.Sfera;
 import com.homesystemsconsulting.drivers.Driver;
 import com.homesystemsconsulting.drivers.webserver.access.Access;
+import com.homesystemsconsulting.drivers.webserver.access.Token;
 import com.homesystemsconsulting.util.logging.SystemLogger;
 
 public abstract class WebServer extends Driver {
@@ -19,10 +21,12 @@ public abstract class WebServer extends Driver {
 	static final String HTTP_HEADER_FIELD_SERVER = "Sfera " + Sfera.VERSION;
 	static final String API_BASE_URI = "/x/";
 	
+	public static final Charset UTF8_CS = Charset.forName("UTF-8");
+	
 	private static boolean initialized = false;
 	private static final Object initLock = new Object();
 	
-	static SystemLogger log;
+	private static SystemLogger log;
 	
 	private ServerSocket socket;
 	
@@ -45,15 +49,14 @@ public abstract class WebServer extends Driver {
 				} catch (Exception e) {
 					log.error("error creating cache: " + e);
 				}
-				
-				//TODO read from access.ini ============
 				try {
-					Access.addUser("user", "12345");
-					Access.addUser("test", "55555");
+					Access.init();
 				} catch (Exception e) {
-					e.printStackTrace();
+					log.error("error initializing access: " + e);
+					return false;
 				}
-				//======================================
+				
+				Token.maxAgeSeconds = Configuration.getIntProperty(WEB_SERVER_DRIVER_ID + ".password_validity_minutes", 60) * 60;
 				
 				initialized = true;
 			}			
@@ -70,6 +73,14 @@ public abstract class WebServer extends Driver {
 		log.info("accepting connections on port " + socket.getLocalPort());
 		
 		return true;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public static SystemLogger getLogger() {
+		return log;
 	}
 
 	/**

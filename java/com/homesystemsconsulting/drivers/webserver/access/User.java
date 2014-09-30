@@ -1,6 +1,7 @@
 package com.homesystemsconsulting.drivers.webserver.access;
 
 import java.nio.file.Path;
+import java.util.Base64;
 
 
 public class User {
@@ -15,6 +16,10 @@ public class User {
 		this.salt = salt;
 	}
 	
+	public User(String username, String hashedPassword, String salt) {
+		this(username, Base64.getDecoder().decode(hashedPassword), Base64.getDecoder().decode(salt));
+	}
+
 	public String getUsername() {
 		return username;
 	}
