@@ -11,6 +11,7 @@ import com.homesystemsconsulting.core.Sfera;
 import com.homesystemsconsulting.drivers.Driver;
 import com.homesystemsconsulting.drivers.webserver.access.Access;
 import com.homesystemsconsulting.drivers.webserver.access.Token;
+import com.homesystemsconsulting.drivers.webserver.util.ResourcesUtil;
 import com.homesystemsconsulting.util.logging.SystemLogger;
 
 public abstract class WebServer extends Driver {
@@ -41,9 +42,15 @@ public abstract class WebServer extends Driver {
 				
 				ConnectionHandler.init(configuration);
 				try {
+					ResourcesUtil.lookForPluginsOverwritingWebapp();
+				} catch (IOException e) {
+					log.error("error scanning plugins directory: " + e);
+				}
+				try {
 					InterfaceCache.init(configuration);
 				} catch (Exception e) {
 					log.error("error creating cache: " + e);
+					e.printStackTrace();
 				}
 				try {
 					Access.init();
@@ -127,7 +134,6 @@ public abstract class WebServer extends Driver {
 		try {
 			socket.close();
 		} catch (Exception e) {}
-		
 		ConnectionHandler.quit();
 	}
 }

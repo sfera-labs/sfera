@@ -28,7 +28,8 @@ import com.homesystemsconsulting.core.Configuration;
 import com.homesystemsconsulting.core.Sfera;
 import com.homesystemsconsulting.drivers.webserver.HttpRequestHeader.Method;
 import com.homesystemsconsulting.drivers.webserver.access.Token;
-import com.homesystemsconsulting.util.files.ResourcesUtils;
+import com.homesystemsconsulting.drivers.webserver.util.DateUtil;
+import com.homesystemsconsulting.drivers.webserver.util.ResourcesUtil;
 
 public class InterfaceCache {
 	
@@ -64,18 +65,16 @@ public class InterfaceCache {
 			
 			interfaces = new HashSet<String>();
 			
-			Set<String> interfaceNames = ResourcesUtils.listDirectoriesNamesInDirectory(WebServer.ROOT.resolve("interfaces/"), true);
-			if (interfaceNames != null) {
-				for (String interfaceName : interfaceNames) {
+			try {
+				for (String interfaceName : ResourcesUtil.listDirectoriesNamesInDirectory(WebServer.ROOT.resolve("interfaces/"), true)) {
 					try {
 						createCacheFor(interfaceName);
 						interfaces.add(interfaceName);
 					} catch (Exception e) {
 						WebServer.getLogger().error("error creating cache for interface '" + interfaceName + "': " + e);
-						e.printStackTrace();
 					}
 				}
-			}
+			} catch (NoSuchFileException nsfe) {}
 		}
 	}
 	
@@ -89,6 +88,7 @@ public class InterfaceCache {
 		WebServer.getLogger().debug("creating cache for interface: " + interfaceName);
 		InterfaceCache icc = new InterfaceCache(interfaceName);
 		icc.create();
+		ResourcesUtil.release();
 		WebServer.getLogger().debug("created cache for interface: " + interfaceName);
 	}
 
@@ -112,7 +112,7 @@ public class InterfaceCache {
 		createLoginCache();
 		
 		Path interfaceCacheRoot = CACHE_ROOT.resolve(interfaceName + "/");
-		ResourcesUtils.deleteRecursive(interfaceCacheRoot);
+		ResourcesUtil.deleteRecursive(interfaceCacheRoot);
 		Files.createDirectories(CACHE_ROOT);
 		Files.move(interfaceTmpCacheRoot, interfaceCacheRoot);
 	}
@@ -212,15 +212,15 @@ public class InterfaceCache {
 				}
 			}
 			
-			Set<String> files = ResourcesUtils.listRegularFilesNamesInDirectory(
-					WebServer.ROOT.resolve("interfaces/" + interfaceName + "/"), true);
-			if (files != null) {
+			String interfacePath = "interfaces/" + interfaceName + "/";
+			try {
+				Set<String> files = ResourcesUtil.listRegularFilesNamesInDirectory(WebServer.ROOT.resolve(interfacePath), true);
 				for (String file : files) {
 					if (file.toLowerCase().endsWith(".js")) {
-						writeContentFrom("interfaces/" + interfaceName + "/" + file, writer);
+						writeContentFrom(interfacePath + file, writer);
 					}
 				}
-			}
+			} catch (NoSuchFileException nsfe) {}
 		}
 	}
 	
@@ -248,7 +248,7 @@ public class InterfaceCache {
 	 * @throws NoSuchFileException
 	 */
 	private void writeContentFrom(String file, BufferedWriter writer) throws IOException, NoSuchFileException {
-		Path filePath = ResourcesUtils.getResourceFromJarIfNotInFileSystem(WebServer.ROOT.resolve(file));
+		Path filePath = ResourcesUtil.getResourceFromPluginsIfNotInLocalDirectory(WebServer.ROOT.resolve(file));
 		try (BufferedReader reader = Files.newBufferedReader(filePath, Sfera.CHARSET)) {
 			String line = null;
 		    while ((line = reader.readLine()) != null) {
@@ -268,7 +268,7 @@ public class InterfaceCache {
 	 * @throws IOException
 	 */
 	private Set<String> createIndex(String source, String target, String manifestPath, boolean extractImages) throws IOException {
-		Path indexPath = ResourcesUtils.getResourceFromJarIfNotInFileSystem(
+		Path indexPath = ResourcesUtil.getResourceFromPluginsIfNotInLocalDirectory(
 				WebServer.ROOT.resolve(source));
 
 		Set<String> imgs = new HashSet<String>();
@@ -337,26 +337,26 @@ public class InterfaceCache {
 	private Set<Path> copyResources() throws IOException {
 		Set<Path> resources = new HashSet<Path>();
 		
-		resources.addAll(ResourcesUtils.copyRecursive(
+		resources.addAll(ResourcesUtil.copyRecursive(
 						WebServer.ROOT.resolve("interfaces/" + interfaceName + "/assets/"), 
 						interfaceTmpCacheRoot.resolve("assets/"), 
 						true));
 		
 		Files.createDirectories(interfaceTmpCacheRoot.resolve("images/objects/"));
 		
-		resources.addAll(ResourcesUtils.copyRecursive(
+		resources.addAll(ResourcesUtil.copyRecursive(
 				WebServer.ROOT.resolve("skins/" + skin + "/images/"), 
 				interfaceTmpCacheRoot.resolve("images/skin/"), 
 				true));
 		
 		for (String o : objects) {
-			resources.addAll(ResourcesUtils.copyRecursive(
+			resources.addAll(ResourcesUtil.copyRecursive(
 					WebServer.ROOT.resolve("objects/" + o + "/images/" + iconSet + "/"), 
 					interfaceTmpCacheRoot.resolve("images/objects/" + o + "/"), 
 					true));
 		}
 		
-		resources.addAll(ResourcesUtils.copyRecursive(
+		resources.addAll(ResourcesUtil.copyRecursive(
 				WebServer.ROOT.resolve("icons/" + iconSet + "/"), 
 				interfaceTmpCacheRoot.resolve("icons/"), 
 				true));
@@ -375,7 +375,7 @@ public class InterfaceCache {
 		
 		Files.createDirectories(interfaceTmpCacheRoot.resolve("login/images/"));
 		
-		loginResources.addAll(ResourcesUtils.copyRecursive(
+		loginResources.addAll(ResourcesUtil.copyRecursive(
 				WebServer.ROOT.resolve("skins/" + skin + "/login/images/"), 
 				interfaceTmpCacheRoot.resolve("login/images/skin/"), 
 				true));
@@ -383,7 +383,7 @@ public class InterfaceCache {
 		Files.createDirectories(interfaceTmpCacheRoot.resolve("login/icons/"));
 		
 		for (String img : images) {
-			Files.copy(ResourcesUtils.getResourceFromJarIfNotInFileSystem(
+			Files.copy(ResourcesUtil.getResourceFromPluginsIfNotInLocalDirectory(
 					WebServer.ROOT.resolve("icons/" + iconSet + "/" + img)), 
 					interfaceTmpCacheRoot.resolve("login/icons/" + img));
 		}
@@ -464,7 +464,7 @@ public class InterfaceCache {
 	    
 		for (String obj : objects) {
 			XMLEventReader eventReader = null;
-			Path objXmlPath = ResourcesUtils.getResourceFromJarIfNotInFileSystem(
+			Path objXmlPath = ResourcesUtil.getResourceFromPluginsIfNotInLocalDirectory(
 					WebServer.ROOT.resolve("objects/" + obj + "/" + obj + ".xml"));
 			
 			try (BufferedReader in = Files.newBufferedReader(objXmlPath, Sfera.CHARSET)) {
@@ -509,7 +509,7 @@ public class InterfaceCache {
 	 * @throws XMLStreamException
 	 */
 	private void addSkinDefinitionAndExtractIconSet(XMLEventWriter eventWriter) throws IOException, XMLStreamException {
-		Path skinXmlPath = ResourcesUtils.getResourceFromJarIfNotInFileSystem(
+		Path skinXmlPath = ResourcesUtil.getResourceFromPluginsIfNotInLocalDirectory(
 				WebServer.ROOT.resolve("skins/" + skin + "/" + "definition.xml"));
 		
 		XMLEventReader eventReader = null;
@@ -545,7 +545,7 @@ public class InterfaceCache {
 	 * @throws XMLStreamException
 	 */
 	private void createInterfaceXmlAndExtractAttributes() throws IOException, XMLStreamException {
-		Path indexXml = ResourcesUtils.getResourceFromJarIfNotInFileSystem(
+		Path indexXml = ResourcesUtil.getResourceFromPluginsIfNotInLocalDirectory(
 				WebServer.ROOT.resolve("interfaces/" + interfaceName + "/index.xml"));
 		Path cacheXml = interfaceTmpCacheRoot.resolve("index.xml");		
 		Files.copy(indexXml, cacheXml);
@@ -593,7 +593,7 @@ public class InterfaceCache {
 	private void addElementWithCDataContentFromFile(Path file, String elementLocalName, XMLEventWriter eventWriter,
 			XMLEventFactory eventFactory) throws XMLStreamException, IOException {
 		
-		Path filePath = ResourcesUtils.getResourceFromJarIfNotInFileSystem(file);
+		Path filePath = ResourcesUtil.getResourceFromPluginsIfNotInLocalDirectory(file);
 		
 		try (BufferedReader reader = Files.newBufferedReader(filePath, Sfera.CHARSET)) {
 			eventWriter.add(eventFactory.createStartElement("", "", elementLocalName));

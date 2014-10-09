@@ -8,7 +8,6 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -19,22 +18,17 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.XMLEvent;
 
 import com.homesystemsconsulting.apps.Application;
 import com.homesystemsconsulting.apps.myapp.MyApp;
 import com.homesystemsconsulting.apps.myapp2.MyApp2;
 import com.homesystemsconsulting.drivers.Driver;
-import com.homesystemsconsulting.drivers.webserver.WebServer;
 import com.homesystemsconsulting.events.Bus;
 import com.homesystemsconsulting.events.EventsMonitor;
 import com.homesystemsconsulting.script.EventsScriptEngine;
-import com.homesystemsconsulting.util.files.ResourcesUtils;
 import com.homesystemsconsulting.util.logging.SystemLogger;
 
 
@@ -120,7 +114,6 @@ public class Sfera {
 				TasksManager.DEFAULT.getExecutorService().awaitTermination(5, TimeUnit.SECONDS);
 			} catch (InterruptedException e) {}
 			
-			ResourcesUtils.close();
 //			Database.close();
 			
 			SystemLogger.SYSTEM.info("Bye!");
