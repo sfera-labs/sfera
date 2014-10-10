@@ -2,6 +2,7 @@ package com.homesystemsconsulting.core;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.nio.charset.Charset;
 import java.nio.file.FileSystem;
@@ -80,6 +81,8 @@ public class Sfera {
 	//			Bus.register((EventListener) myApp2);
 			}
 			
+			BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+			
 			while (run) {
 				for (final Driver d : drivers) {
 					d.startIfNotActive();
@@ -93,10 +96,25 @@ public class Sfera {
 						break;
 					}
 				}
+				
+				try {
+					if (input.ready()) {
+						String cmd;
+						while(input.ready() && ((cmd = input.readLine()) != null)) {
+							if (cmd.trim().equalsIgnoreCase("quit")) {
+								run = false;
+							}
+						}
+					} 
+				} catch (Exception e) {}
 			}
 	
 			SystemLogger.SYSTEM.warning("System stopped");
 			SystemLogger.SYSTEM.info("Quitting modules...");
+			
+			try {
+				input.close();
+			} catch (Exception e) {}
 			
 			for (final Driver d : drivers) {
 				d.quit();
