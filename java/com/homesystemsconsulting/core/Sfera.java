@@ -57,7 +57,7 @@ public class Sfera {
 			
 			SystemNode.init();
 			
-			// Maybe we don't need a general database... maybe just a "Variables" module
+			// TODO Maybe we don't need a general database... maybe just a "Variables" module
 //			Database.init();
 			
 			List<Driver> drivers = loadDrivers();
@@ -86,9 +86,10 @@ public class Sfera {
 				}
 				
 				try {
-					Thread.sleep(5000);
+					FilesWatcher.watch(5, TimeUnit.SECONDS);
 				} catch (InterruptedException e) {
 					if (!run) {
+						Thread.currentThread().interrupt();
 						break;
 					}
 				}
@@ -109,12 +110,14 @@ public class Sfera {
 			
 			SystemLogger.SYSTEM.debug("Shutting down remaining threads...");
 			
+			FilesWatcher.quit();
+			
 			try {
 				TasksManager.DEFAULT.getExecutorService().shutdownNow();
 				TasksManager.DEFAULT.getExecutorService().awaitTermination(5, TimeUnit.SECONDS);
 			} catch (InterruptedException e) {}
 			
-//			Database.close();
+//			TODO Database.close();
 			
 			SystemLogger.SYSTEM.info("Bye!");
 			System.exit(0);
@@ -160,10 +163,10 @@ public class Sfera {
 									Object driverInstance = constructor.newInstance(propName);
 									if (driverInstance instanceof Driver) {
 										drivers.add((Driver) driverInstance);
-										SystemLogger.SYSTEM.info("drivers", "driver '" + propName + "' of type '" + driverClassName + "' instantiated");
+										SystemLogger.SYSTEM.info("drivers", "driver '" + propName + "' of type '" + driverType + "' instantiated");
 									}
 								} catch (Throwable e) {
-									SystemLogger.SYSTEM.error("drivers", "error instantiating driver '" + propName + "' of type '" + driverClassName + "': " + e);
+									SystemLogger.SYSTEM.error("drivers", "error instantiating driver '" + propName + "' of type '" + driverType + "': " + e);
 								}
 							}
 						} catch (Exception e) {

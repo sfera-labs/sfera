@@ -16,11 +16,11 @@ import com.homesystemsconsulting.core.Task;
 import com.homesystemsconsulting.util.logging.SystemLogger;
 
 
-public class FilesWatcher extends Task {
+public class ScriptFilesWatcher extends Task {
 
 	WatchService watcher;
 	
-	public FilesWatcher(List<String> dirs) throws IOException {
+	public ScriptFilesWatcher(List<String> dirs) throws IOException {
 		super("Application files watcher");
 		watcher = FileSystems.getDefault().newWatchService();
 		for (String dir : dirs) {

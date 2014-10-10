@@ -27,7 +27,7 @@ import com.homesystemsconsulting.util.logging.SystemLogger;
 
 public abstract class EventsScriptEngine {
 	
-	static final String APPS_DIRECTORY = "src/com/sfera/apps/";
+	static final String APPS_DIRECTORY = "java/com/homesystemsconsulting/apps/";
 
 	private static ScriptEngineManager manager = new ScriptEngineManager();
     
@@ -81,6 +81,8 @@ public abstract class EventsScriptEngine {
      * @throws IOException
      */
     public synchronized static void loadScriptFiles() {
+    	// TODO check correct folder and use core.FileWatcher (delete ScriptFilesWatcher)
+    	
     	triggerActionsMap = new HashMap<String, HashSet<ConditionAction>>();
     	errors = new HashMap<String, HashMap<String, ArrayList<String>>>();
     	
@@ -147,7 +149,7 @@ public abstract class EventsScriptEngine {
     	Bus.post(new SystemEvent("reload", null));
     	
 		try {
-			TasksManager.DEFAULT.execute(new FilesWatcher(toWatch));
+			TasksManager.DEFAULT.execute(new ScriptFilesWatcher(toWatch));
 		} catch (IOException e) {
 			SystemLogger.SYSTEM.error("Exception creating script files watcher: " + e.getLocalizedMessage());
 		}
