@@ -6,11 +6,15 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 
 import java.io.IOException;
 import java.nio.file.FileSystems;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.nio.file.Watchable;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -24,7 +28,7 @@ public class FilesWatcher {
 
 	private static final FilesWatcher INSTANCE = new FilesWatcher();
 	private static final Map<Path, Set<Task>> PATHS_TASKS_MAP = new HashMap<Path, Set<Task>>();
-	private static final Set<Path> INVALIDATED = new HashSet<Path>();
+	private static final Set<Path> INVALIDATED_PATHS = new HashSet<Path>();
 	
 	private final WatchService watcher;
 	
@@ -35,6 +39,7 @@ public class FilesWatcher {
 		WatchService watcher = null;
 		try {
 			watcher = FileSystems.getDefault().newWatchService();
+			SystemLogger.SYSTEM.debug("File Watcher ready");
 		} catch (IOException e) {
 			SystemLogger.SYSTEM.error("Error instantiating File Watcher: " + e);
 		}
@@ -49,17 +54,36 @@ public class FilesWatcher {
 	 * @throws InterruptedException
 	 */
 	static void watch(long timeout, TimeUnit unit) throws InterruptedException {
-		WatchKey key = INSTANCE.watcher.poll(timeout, unit);
+		if (INSTANCE.watcher == null) {
+			return;
+		}
 		
-		if (key != null) {
+		WatchKey wkey = INSTANCE.watcher.poll(timeout, unit);
+		Set<WatchKey> keys = new HashSet<WatchKey>();
+		if (wkey != null) {
+			do {
+				keys.add(wkey);
+			} while ((wkey = INSTANCE.watcher.poll(1, TimeUnit.SECONDS)) != null && keys.size() < 10);
+		}
+		
+		Set<Task> toExecute = new HashSet<Task>();
+		for (WatchKey key : keys) {
 			key.pollEvents();
 			Watchable path = key.watchable();
 			if (path instanceof Path) {
+				SystemLogger.SYSTEM.debug("File Watcher: " + path + " modified");
 				synchronized (PATHS_TASKS_MAP) {
 					Set<Task> ts = PATHS_TASKS_MAP.remove(path);
 					if (ts != null) {
-						for (Task t : ts) {
-							TasksManager.DEFAULT.execute(t);
+						toExecute.addAll(ts);
+					} else {
+						for (Iterator<Path> it = PATHS_TASKS_MAP.keySet().iterator(); it.hasNext(); ) {
+							Path parent = it.next();
+							if (((Path) path).startsWith(parent)) {
+								ts = PATHS_TASKS_MAP.get(parent);
+								it.remove();
+								toExecute.addAll(ts);
+							}
 						}
 					}
 				}
@@ -68,11 +92,15 @@ public class FilesWatcher {
 			}
 		}
 		
-		synchronized (INVALIDATED) {
-			for (Iterator<Path> it = INVALIDATED.iterator(); it.hasNext(); ) {
+		executeTasks(toExecute);
+		
+		synchronized (INVALIDATED_PATHS) {
+			for (Iterator<Path> it = INVALIDATED_PATHS.iterator(); it.hasNext(); ) {
 				try {
-					it.next().register(INSTANCE.watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
+					Path path = it.next();
+					registerRecursive(path);
 					it.remove();
+					executeTasks(PATHS_TASKS_MAP.remove(path));
 				} catch (IOException e) {}
 			}
 		}
@@ -81,11 +109,26 @@ public class FilesWatcher {
 	/**
 	 * 
 	 * @param path
+	 */
+	private static void executeTasks(Set<Task> tasks) {
+		if (tasks != null) {
+			for (Task t : tasks) {
+				TasksManager.DEFAULT.execute(t);
+			}
+		}
+	}
+
+	/**
+	 * 
+	 * @param path
 	 * @param task
-	 * @param events
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static void register(Path path, Task task) throws IOException {
+		if (INSTANCE.watcher == null) {
+			return;
+		}
+		
 		synchronized (PATHS_TASKS_MAP) {
 			Set<Task> ts = PATHS_TASKS_MAP.get(path);
 			if (ts == null) {
@@ -95,14 +138,30 @@ public class FilesWatcher {
 			PATHS_TASKS_MAP.put(path, ts);
 		}
 		try {
-			path.register(INSTANCE.watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
+			registerRecursive(path);
 		} catch (NoSuchFileException nsfe) {
-			synchronized (INVALIDATED) {
-				INVALIDATED.add(path);
+			synchronized (INVALIDATED_PATHS) {
+				INVALIDATED_PATHS.add(path);
 			}
 		}
+		SystemLogger.SYSTEM.debug("File Watcher: watching " + path);
 	}
 	
+	/**
+	 * 
+	 * @param path
+	 * @throws IOException
+	 */
+	private static void registerRecursive(Path path) throws IOException {
+		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+	        @Override
+	        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+	            dir.register(INSTANCE.watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
+	            return FileVisitResult.CONTINUE;
+	        }
+	    });
+	}
+
 	/**
 	 * 
 	 */

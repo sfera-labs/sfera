@@ -50,7 +50,6 @@ public abstract class WebServer extends Driver {
 					InterfaceCache.init(configuration);
 				} catch (Exception e) {
 					log.error("error creating cache: " + e);
-					e.printStackTrace();
 				}
 				try {
 					Access.init();

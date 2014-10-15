@@ -39,6 +39,7 @@ public class Sfera {
 	
 	public static final Charset CHARSET = Charset.forName("UTF-8");
 
+	private static final BufferedReader STD_INPUT = new BufferedReader(new InputStreamReader(System.in));
 	private static boolean run = true;
 
 	/**
@@ -81,8 +82,6 @@ public class Sfera {
 	//			Bus.register((EventListener) myApp2);
 			}
 			
-			BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
-			
 			while (run) {
 				for (final Driver d : drivers) {
 					d.startIfNotActive();
@@ -97,23 +96,14 @@ public class Sfera {
 					}
 				}
 				
-				try {
-					if (input.ready()) {
-						String cmd;
-						while(input.ready() && ((cmd = input.readLine()) != null)) {
-							if (cmd.trim().equalsIgnoreCase("quit")) {
-								run = false;
-							}
-						}
-					} 
-				} catch (Exception e) {}
+				checkStandardInput();
 			}
 	
 			SystemLogger.SYSTEM.warning("System stopped");
 			SystemLogger.SYSTEM.info("Quitting modules...");
 			
 			try {
-				input.close();
+				STD_INPUT.close();
 			} catch (Exception e) {}
 			
 			for (final Driver d : drivers) {
@@ -142,9 +132,32 @@ public class Sfera {
 			
 		} catch (Throwable t) {
 			SystemLogger.SYSTEM.error("exception in main thread: " + t);
+			
 		} finally {
 			SystemLogger.close();
 		}
+	}
+
+	/**
+	 * 
+	 */
+	private static void checkStandardInput() {
+		try {
+			if (STD_INPUT.ready()) {
+				String cmd;
+				while(STD_INPUT.ready() && ((cmd = STD_INPUT.readLine()) != null)) {
+					cmd = cmd.trim().toLowerCase();
+					switch (cmd) {
+					case "quit":
+						run = false;
+						break;
+
+					default:
+						break;
+					}
+				}
+			} 
+		} catch (Exception e) {}
 	}
 
 	/**

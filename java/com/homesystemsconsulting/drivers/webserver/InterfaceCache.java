@@ -25,7 +25,9 @@ import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
 import com.homesystemsconsulting.core.Configuration;
+import com.homesystemsconsulting.core.FilesWatcher;
 import com.homesystemsconsulting.core.Sfera;
+import com.homesystemsconsulting.core.Task;
 import com.homesystemsconsulting.drivers.webserver.HttpRequestHeader.Method;
 import com.homesystemsconsulting.drivers.webserver.access.Token;
 import com.homesystemsconsulting.drivers.webserver.util.DateUtil;
@@ -48,6 +50,7 @@ public class InterfaceCache {
 	private static boolean usePermanentCache;
 
 	private final String interfaceName;
+	private final Path interfaceCacheRoot;
 	private final Path interfaceTmpCacheRoot;
 	
 	private Set<String> objects = new HashSet<String>();
@@ -57,16 +60,37 @@ public class InterfaceCache {
 	
 	/**
 	 * 
+	 * @param interfaceName
+	 * @throws IOException 
+	 */
+	private InterfaceCache(String interfaceName) throws IOException {
+		this.interfaceName = interfaceName;
+		this.interfaceTmpCacheRoot = Files.createTempDirectory("webappTmp");
+		this.interfaceCacheRoot = CACHE_ROOT.resolve(interfaceName + "/");
+	}
+	
+	/**
+	 * 
 	 */
 	public synchronized static void init(Configuration configuration) throws Exception {
 		if (interfaces == null) {
 			defaultInterface = configuration.getProperty("default_interface", null);
 			usePermanentCache = configuration.getBoolProperty("use_permanent_cache", true);
 			
+			createCache();
+		}
+	}
+	
+	/**
+	 * 
+	 * @throws IOException
+	 */
+	private static void createCache() throws IOException {
+		Path interfacesPath = WebServer.ROOT.resolve("interfaces/");
+		try {
 			interfaces = new HashSet<String>();
-			
 			try {
-				for (String interfaceName : ResourcesUtil.listDirectoriesNamesInDirectory(WebServer.ROOT.resolve("interfaces/"), true)) {
+				for (String interfaceName : ResourcesUtil.listDirectoriesNamesInDirectory(interfacesPath, true)) {
 					try {
 						createCacheFor(interfaceName);
 						interfaces.add(interfaceName);
@@ -74,10 +98,35 @@ public class InterfaceCache {
 						WebServer.getLogger().error("error creating cache for interface '" + interfaceName + "': " + e);
 					}
 				}
-			} catch (NoSuchFileException nsfe) {}
+				
+				for (String interfaceName : ResourcesUtil.listDirectoriesNamesInDirectory(CACHE_ROOT, false)) {
+					if (!interfaces.contains(interfaceName)) {
+						ResourcesUtil.deleteRecursive(CACHE_ROOT.resolve(interfaceName + "/"));
+					}
+				}
+			} catch (NoSuchFileException nsfe) {
+				ResourcesUtil.deleteRecursive(CACHE_ROOT);
+			}
+			
+		} finally {
+			try {
+				FilesWatcher.register(interfacesPath, new Task("WebApp files watcher") {
+					
+					@Override
+					public void execute() {
+						try {
+							createCache();
+						} catch (IOException e) {
+							WebServer.getLogger().error("error creating cache: " + e);
+						}
+					}
+				});
+			} catch (Exception e) {
+				WebServer.getLogger().error("error registering WebApp files watcher: " + e);
+			}
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @param interfaceName
@@ -94,16 +143,6 @@ public class InterfaceCache {
 
 	/**
 	 * 
-	 * @param interfaceName
-	 * @throws IOException 
-	 */
-	private InterfaceCache(String interfaceName) throws IOException {
-		this.interfaceName = interfaceName;
-		this.interfaceTmpCacheRoot = Files.createTempDirectory("webappTmp");
-	}
-
-	/**
-	 * 
 	 * @throws XMLStreamException
 	 * @throws IOException
 	 */
@@ -111,7 +150,6 @@ public class InterfaceCache {
 		createIntefaceCache();
 		createLoginCache();
 		
-		Path interfaceCacheRoot = CACHE_ROOT.resolve(interfaceName + "/");
 		ResourcesUtil.deleteRecursive(interfaceCacheRoot);
 		Files.createDirectories(CACHE_ROOT);
 		Files.move(interfaceTmpCacheRoot, interfaceCacheRoot);
