@@ -29,7 +29,7 @@ public abstract class EventsScriptEngine {
 	
 	static final String APPS_DIRECTORY = "java/com/homesystemsconsulting/apps/";
 
-	private static ScriptEngineManager manager = new ScriptEngineManager();
+	private static final ScriptEngineManager SCRIPT_ENGINE_MANAGER = new ScriptEngineManager();
     
     private static HashMap<String, HashSet<ConditionAction>> triggerActionsMap;
     
@@ -73,7 +73,7 @@ public abstract class EventsScriptEngine {
      * @param driver
      */
     public synchronized static void addDriver(Driver driver) {
-    	manager.put(driver.getId(), driver);
+    	SCRIPT_ENGINE_MANAGER.put(driver.getId(), driver);
 	}
     
     /**
@@ -100,7 +100,7 @@ public abstract class EventsScriptEngine {
 		        		File[] appFiles = appDir.listFiles();
 		        		if (appFiles != null) {
 		        			// A script engine for each app
-		        			Compilable engine = (Compilable) manager.getEngineByName("JavaScript");
+		        			Compilable engine = (Compilable) SCRIPT_ENGINE_MANAGER.getEngineByName("JavaScript");
 		        			
 			        		for (File appFile : appFiles) {
 			        			if (appFile.isFile() && appFile.getName().endsWith(".ev")) {

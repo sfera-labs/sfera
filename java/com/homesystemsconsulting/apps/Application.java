@@ -7,11 +7,17 @@ public abstract class Application {
 	
 	protected final SystemLogger log;
 	
-	public Application() {
-		log = SystemLogger.getLogger("app." + this.getClass().getSimpleName());
+	/**
+	 * 
+	 * @param id
+	 */
+	public Application(String id) {
+		log = SystemLogger.getLogger("app." + id);
 	}
 
-	public abstract boolean onInit();
-
-	public abstract boolean onQuit();
+	/**
+	 * 
+	 * @return
+	 */
+	public abstract boolean onRemove();
 }

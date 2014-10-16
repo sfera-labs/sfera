@@ -10,13 +10,12 @@ import com.homesystemsconsulting.events.NumberEvent;
 
 public class MyApp extends Application implements EventListener {
 
-	@Override
-	public boolean onInit() {
-		return true;
+	public MyApp(String id) {
+		super(id);
 	}
 	
 	@Override
-	public boolean onQuit() {
+	public boolean onRemove() {
 		return true;
 	}
 	
