@@ -9,12 +9,14 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
+
+import com.homesystemsconsulting.core.Plugin;
+import com.homesystemsconsulting.core.Sfera;
 
 public class ResourcesUtil {
 	
@@ -36,28 +38,14 @@ public class ResourcesUtil {
 	 */
 	public static void lookForPluginsOverwritingWebapp() throws IOException {
 		pluginsOverwritingWebapp = new TreeSet<Path>(PLUGINS_NAME_COMPARATOR);
-		Path pluginsDir = Paths.get("plugins");
-		if (Files.exists(pluginsDir) && Files.isDirectory(pluginsDir)) {
-			try (DirectoryStream<Path> stream = Files.newDirectoryStream(pluginsDir)) {
-			    for (Path plugin : stream) {
-			    	if (plugin.getFileName().toString().endsWith(".jar")) {
-				    	FileSystem pluginFs = null;
-				    	try {
-					    	pluginFs = FileSystems.newFileSystem(plugin, null);
-					    	Path webappDir = pluginFs.getPath("webapp/");
-					    	if (Files.exists(webappDir)) {
-					    		pluginsOverwritingWebapp.add(plugin);
-					    	}
-				    	} catch (Exception e) {
-				    	} finally {
-				    		try {
-				    			pluginFs.close();
-				    		} catch (Exception e) {}
-				    	}
-			    	}
-			    }
-			}
-		}
+		for (Plugin plugin : Sfera.getPlugins()) {
+			try (FileSystem pluginFs = FileSystems.newFileSystem(plugin.getPath(), null)) {
+				Path webappDir = pluginFs.getPath("webapp");
+				if (Files.exists(webappDir) && Files.isDirectory(webappDir)) {
+					pluginsOverwritingWebapp.add(plugin.getPath());
+				}
+			} catch (Exception e) {}
+	    }
 	}
 	
 	/**

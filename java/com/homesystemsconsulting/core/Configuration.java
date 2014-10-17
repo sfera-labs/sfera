@@ -1,15 +1,17 @@
 package com.homesystemsconsulting.core;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Properties;
 
 public class Configuration {
 	
-	private static final String CONFIG_DIR = "config/";
-	private static final String SYSTEM_CONFIG_FILE = CONFIG_DIR + "system.conf";
+	private static final Path CONFIG_DIR = Paths.get("config");
+	private static final Path SYSTEM_CONFIG_FILE = CONFIG_DIR.resolve("sfera.ini");
 	
 	public static final Configuration SYSTEM = new Configuration("system");
 	
@@ -30,12 +32,10 @@ public class Configuration {
 	 */
 	public static void load() throws IOException {
 		props = new Properties();
-		InputStream input = null;
 		
-		try {
-			input = new FileInputStream(SYSTEM_CONFIG_FILE);
-			props.load(input);
-		} catch (FileNotFoundException e) {
+		try (BufferedReader r = Files.newBufferedReader(SYSTEM_CONFIG_FILE)) {
+			props.load(r);
+		} catch (NoSuchFileException e) {
 			// no config file, that's fine...
 		}
 	}

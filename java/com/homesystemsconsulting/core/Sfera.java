@@ -35,7 +35,7 @@ public class Sfera {
 	private static final BufferedReader STD_INPUT = new BufferedReader(new InputStreamReader(System.in));
 	private static boolean run = true;
 	
-	private static List<PluginSchema> plugins;
+	private static List<Plugin> plugins;
 	
 	private static List<Driver> drivers;
 	private static List<Application> applications;
@@ -50,12 +50,23 @@ public class Sfera {
 			
 			Thread.setDefaultUncaughtExceptionHandler(new SystemExceptionHandler());
 			
-			Configuration.load();
+			try {
+				Configuration.load();
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
 			
-			SystemLogger.setup();
+			try {
+				SystemLogger.setup();
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+			
 			SystemLogger.SYSTEM.info("STARTED - version " + VERSION);
 			
 			SystemNode.init();
+			
+			Bus.register(EventsMonitor.INSTANCE);
 			
 			// TODO Maybe we don't need a general database... maybe just a "Variables" module
 //			Database.init();
@@ -63,11 +74,12 @@ public class Sfera {
 			loadPlugins();
 			loadDrivers();
 			loadApplications();
-			loadScripts();
-			
-			Bus.register(EventsMonitor.INSTANCE);
-			
-			EventsScriptEngine.loadScriptFiles();
+			try {
+				EventsScriptEngine.loadScriptFiles();
+			} catch (IOException e) {
+				SystemLogger.SYSTEM.error("error loading script files: " + e);
+				e.printStackTrace();
+			}
 			
 			while (run) {
 				for (final Driver d : drivers) {
@@ -119,7 +131,7 @@ public class Sfera {
 			SystemLogger.SYSTEM.info("Bye!");
 			System.exit(0);
 			
-		} catch (Throwable t) {
+		} catch (RuntimeException t) {
 			SystemLogger.SYSTEM.error("exception in main thread: " + t);
 			t.printStackTrace();
 			
@@ -137,9 +149,10 @@ public class Sfera {
 		String appList = Configuration.SYSTEM.getProperty("apps", null);
 		if (appList != null) {
 			for (String appName : appList.split(",")) {
+				appName = appName.trim();
 				try {
 					String appClassName = null;
-					for (PluginSchema ps : plugins) {
+					for (Plugin ps : plugins) {
 						if ((appClassName = ps.getApplicationClass(appName)) != null) {
 							Class<?> appClass = Class.forName(appClassName);
 							Constructor<?> constructor = appClass.getConstructor(new Class[]{String.class});
@@ -181,7 +194,7 @@ public class Sfera {
 				if (driverType != null) {
 					try {
 						Set<String> driverClasses = null;
-						for (PluginSchema ps : plugins) {
+						for (Plugin ps : plugins) {
 							if ((driverClasses = ps.getDriverClasses(driverType)) != null) {
 								for (String driverClassName : driverClasses) {
 									Class<?> driverClass = Class.forName(driverClassName);
@@ -236,20 +249,32 @@ public class Sfera {
 	 * 
 	 * @throws IOException
 	 */
-	private static void loadPlugins() throws IOException {
-		plugins = new ArrayList<PluginSchema>();
+	private static void loadPlugins() {
+		plugins = new ArrayList<Plugin>();
 		
 		try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get("plugins"))) {
 		    for (Path file : stream) {
-		    	if (!Files.isHidden(file)) {
-			    	try {
-			    		PluginSchema ps = new PluginSchema(file);
-			    		plugins.add(ps);
-			    	} catch (Exception e) {
-			    		SystemLogger.SYSTEM.warning("Error loading file " + file + " in plugins folder - " + e);
-			    	}
-		    	}
+		    	try {
+					if (!Files.isHidden(file)) {
+						Plugin ps = new Plugin(file);
+						plugins.add(ps);
+					}
+		    	} catch (Exception e) {
+					SystemLogger.SYSTEM.warning("Error loading file " + file + " in plugins folder - " + e);
+				}
 		    }
-		} catch (NoSuchFileException e) {}
+		} catch (NoSuchFileException e) {
+			
+		} catch (IOException e) {
+			SystemLogger.SYSTEM.error("Error loading plugins - " + e);
+		}
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public static List<Plugin> getPlugins() {
+		return plugins;
 	}
 }

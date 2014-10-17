@@ -1,5 +1,6 @@
 package com.homesystemsconsulting.script;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,22 +16,19 @@ import com.homesystemsconsulting.script.parser.EventsGrammarParser.TriggerContex
 
 public class TriggerActionMapListener extends EventsGrammarBaseListener {
 	
-	public final HashMap<String, HashSet<ConditionAction>> triggerActionsMap = new HashMap<String, HashSet<ConditionAction>>();
+	public final HashMap<String, HashSet<Rule>> triggerActionsMap = new HashMap<String, HashSet<Rule>>();
 	public final ArrayList<String> errors = new ArrayList<String>();
-	public final String appName;
-	public final String scriptFile;
+	public final Path scriptFile;
 	private final Compilable engine;
 	
-	private ConditionAction currentConditionAction;
+	private Rule currentConditionAction;
 	
 	/**
 	 * 
-	 * @param appName
 	 * @param scriptFile
-	 * @param engine 
+	 * @param engine
 	 */
-	public TriggerActionMapListener(String appName, String scriptFile, Compilable engine) {
-		this.appName = appName;
+	public TriggerActionMapListener(Path scriptFile, Compilable engine) {
 		this.scriptFile = scriptFile;
 		this.engine = engine;
 	}
@@ -42,7 +40,7 @@ public class TriggerActionMapListener extends EventsGrammarBaseListener {
 		String action = ctx.action().Script().getText();
 		action = action.substring(1, action.length() - 1).trim();
 		try {
-			currentConditionAction = new ConditionAction(condition, action, appName, scriptFile, engine);
+			currentConditionAction = new Rule(condition, action, scriptFile, engine);
 		} catch (ScriptException e) {
 			int line = ctx.getStart().getLine();
 			if (e.getLineNumber() >= 0) {
@@ -68,9 +66,9 @@ public class TriggerActionMapListener extends EventsGrammarBaseListener {
 	 */
 	private void addTrigger(String id) {
 		if (currentConditionAction != null) {
-			HashSet<ConditionAction> actions = triggerActionsMap.get(id);
+			HashSet<Rule> actions = triggerActionsMap.get(id);
 			if (actions == null) {
-				actions = new HashSet<ConditionAction>();
+				actions = new HashSet<Rule>();
 				triggerActionsMap.put(id, actions);
 			}
 			actions.add(currentConditionAction);

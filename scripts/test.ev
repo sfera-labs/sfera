@@ -17,9 +17,9 @@ mydr.dp1 == "dsd" : {
 }
 */
 
-/*
+
 system.reload : {
-	print('decl\n');
+	print('system.reload');
 	
 	var myVar = "sdasd";
 	
@@ -40,4 +40,3 @@ mydr : {
 	print('ev: ' + ev.getValue() + '\n');
 	mydr.doSomething("it");
 }
-*/

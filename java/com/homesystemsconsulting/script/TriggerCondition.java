@@ -2,15 +2,8 @@ package com.homesystemsconsulting.script;
 
 import java.util.List;
 
-import javax.script.Compilable;
-import javax.script.CompiledScript;
-import javax.script.ScriptException;
-
-import com.homesystemsconsulting.core.Task;
-import com.homesystemsconsulting.core.TasksManager;
 import com.homesystemsconsulting.events.Event;
 import com.homesystemsconsulting.events.EventsMonitor;
-import com.homesystemsconsulting.script.parser.EventsGrammarParser;
 import com.homesystemsconsulting.script.parser.EventsGrammarParser.AndExpressionContext;
 import com.homesystemsconsulting.script.parser.EventsGrammarParser.AtomExpressionContext;
 import com.homesystemsconsulting.script.parser.EventsGrammarParser.BooleanComparisonContext;
@@ -21,70 +14,28 @@ import com.homesystemsconsulting.script.parser.EventsGrammarParser.OrExpressionC
 import com.homesystemsconsulting.script.parser.EventsGrammarParser.StableEventContext;
 import com.homesystemsconsulting.script.parser.EventsGrammarParser.StringComparisonContext;
 import com.homesystemsconsulting.script.parser.EventsGrammarParser.TransientEventContext;
+import com.homesystemsconsulting.script.parser.EventsGrammarParser.TriggerContext;
 import com.homesystemsconsulting.script.parser.EventsGrammarParser.UnknownComparisonContext;
-import com.homesystemsconsulting.util.logging.SystemLogger;
 
-public class ConditionAction extends Task {
+public class TriggerCondition {
 
-	private final EventsGrammarParser.TriggerContext condition;
-	private final String action;
-	private final CompiledScript script;
-	private final String appName;
-	private final String scriptFile;
+	private final TriggerContext condition;
 	
 	/**
 	 * 
 	 * @param condition
-	 * @param action
-	 * @param appName
-	 * @param scriptFile
-	 * @param engine
-	 * @throws ScriptException
 	 */
-	public ConditionAction(EventsGrammarParser.TriggerContext condition, String action, String appName, String scriptFile, Compilable engine) throws ScriptException {
-		super("app." + appName + ".script:" + scriptFile + ":" + condition.getStart().getLine());
+	public TriggerCondition(TriggerContext condition) {
 		this.condition = condition;
-		this.action = action;
-		this.script = engine.compile(action);
-		this.appName = appName;
-		this.scriptFile = scriptFile;
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	public EventsGrammarParser.TriggerContext getCondition() {
-		return condition;
-	}
-
-	@Override
-	public void execute() {
-		try {
-			script.eval();
-		} catch (ScriptException e) {
-			int line = condition.getStart().getLine();
-			if (e.getLineNumber() >= 0) {
-				line += e.getLineNumber() - 1;
-			}
-			SystemLogger.getLogger("app." + appName).error("Error executing action - file '" + scriptFile + "' line " + line + ": " + e.getLocalizedMessage());
-		}
-	}
-	
-	/**
-	 * 
-	 * @return
-	 */
-	public String getAction() {
-		return action;
 	}
 
 	/**
 	 * 
 	 * @param event
 	 * @return
+	 * @throws Exception 
 	 */
-	public boolean checkCondition(Event event) {
+	public boolean eval(Event event) throws Exception {
 		return eval(condition.orExpression(), event);
 	}
 
@@ -93,8 +44,9 @@ public class ConditionAction extends Task {
 	 * @param ctx
 	 * @param event
 	 * @return
+	 * @throws Exception 
 	 */
-	private boolean eval(OrExpressionContext ctx, Event event) {
+	private boolean eval(OrExpressionContext ctx, Event event) throws Exception {
 		List<AndExpressionContext> ands = ctx.andExpression();
 		
 		boolean res = eval(ands.get(0), event);
@@ -110,8 +62,9 @@ public class ConditionAction extends Task {
 	 * @param ctx
 	 * @param event
 	 * @return
+	 * @throws Exception 
 	 */
-	private boolean eval(AndExpressionContext ctx, Event event) {
+	private boolean eval(AndExpressionContext ctx, Event event) throws Exception {
 		List<NotExpressionContext> nots = ctx.notExpression();
 		
 		boolean res = eval(nots.get(0), event);
@@ -127,8 +80,9 @@ public class ConditionAction extends Task {
 	 * @param ctx
 	 * @param event
 	 * @return
+	 * @throws Exception 
 	 */
-	private boolean eval(NotExpressionContext ctx, Event event) {
+	private boolean eval(NotExpressionContext ctx, Event event) throws Exception {
 		if (ctx.NOT() != null) {
 			return !eval(ctx.atomExpression(), event);
 		} else {
@@ -141,8 +95,9 @@ public class ConditionAction extends Task {
 	 * @param ctx
 	 * @param event
 	 * @return
+	 * @throws Exception 
 	 */
-	private boolean eval(AtomExpressionContext ctx, Event event) {
+	private boolean eval(AtomExpressionContext ctx, Event event) throws Exception {
 		if (ctx.event() != null) {
 			return eval(ctx.event(), event);
 		} else {
@@ -155,8 +110,9 @@ public class ConditionAction extends Task {
 	 * @param ctx
 	 * @param event
 	 * @return
+	 * @throws Exception 
 	 */
-	private boolean eval(EventContext ctx, Event event) {
+	private boolean eval(EventContext ctx, Event event) throws Exception {
 		if (ctx.stableEvent() != null) {
 			return eval(ctx.stableEvent());
 		} else {
@@ -178,8 +134,9 @@ public class ConditionAction extends Task {
 	 * 
 	 * @param ctx
 	 * @return
+	 * @throws Exception 
 	 */
-	private boolean eval(StableEventContext ctx) {
+	private boolean eval(StableEventContext ctx) throws Exception {
 		if (ctx.stringComparison() != null) {
 			return eval(ctx.stringComparison());
 		} else if (ctx.numberComparison() != null) {
@@ -195,8 +152,9 @@ public class ConditionAction extends Task {
 	 * 
 	 * @param ctx
 	 * @return
+	 * @throws Exception 
 	 */
-	private boolean eval(StringComparisonContext ctx) {
+	private boolean eval(StringComparisonContext ctx) throws Exception {
 		Object value = EventsMonitor.getEventValue(ctx.FinalNodeId().getText());
 		
 		if (value == null) {
@@ -205,8 +163,7 @@ public class ConditionAction extends Task {
 		
 		if (!(value instanceof String)) {
 			int line = ctx.getStart().getLine();
-			SystemLogger.getLogger("app." + appName).error("Error executing action - file '" + scriptFile + "' line " + line + ": Type error: " + ctx.FinalNodeId().getText() + " not a string");
-			return false;
+			throw new Exception("line " + line + ": Type error: " + ctx.FinalNodeId().getText() + " not a string");
 		}
 		
 		String literal = ctx.StringLiteral().getText();
@@ -231,8 +188,9 @@ public class ConditionAction extends Task {
 	 * 
 	 * @param ctx
 	 * @return
+	 * @throws Exception 
 	 */
-	private boolean eval(NumberComparisonContext ctx) {
+	private boolean eval(NumberComparisonContext ctx) throws Exception {
 		Object value = EventsMonitor.getEventValue(ctx.FinalNodeId().getText());
 		
 		if (value == null) {
@@ -241,8 +199,7 @@ public class ConditionAction extends Task {
 		
 		if (!(value instanceof Double)) {
 			int line = ctx.getStart().getLine();
-			SystemLogger.getLogger("app." + appName).error("Error executing action - file '" + scriptFile + "' line " + line + ": Type error: " + ctx.FinalNodeId().getText() + " not a number");
-			return false;
+			throw new Exception("line " + line + ": Type error: " + ctx.FinalNodeId().getText() + " not a number");
 		}
 		
 		if (ctx.ET() != null) {
@@ -264,8 +221,9 @@ public class ConditionAction extends Task {
 	 * 
 	 * @param ctx
 	 * @return
+	 * @throws Exception 
 	 */
-	private boolean eval(BooleanComparisonContext ctx) {
+	private boolean eval(BooleanComparisonContext ctx) throws Exception {
 		Object value = EventsMonitor.getEventValue(ctx.FinalNodeId().getText());
 		
 		if (value == null) {
@@ -274,8 +232,7 @@ public class ConditionAction extends Task {
 		
 		if (!(value instanceof Boolean)) {
 			int line = ctx.getStart().getLine();
-			SystemLogger.getLogger("app." + appName).error("Error executing action - file '" + scriptFile + "' line " + line + ": Type error: " + ctx.FinalNodeId().getText() + " not a boolean");
-			return false;
+			throw new Exception("line " + line + ": Type error: " + ctx.FinalNodeId().getText() + " not a boolean");
 		}
 		
 		if (ctx.ET() != null) {
@@ -300,12 +257,4 @@ public class ConditionAction extends Task {
 		}
 	}
 
-	/**
-	 * 
-	 * @param triggerEvent
-	 */
-	public void execute(Event triggerEvent) {
-		script.getEngine().put("ev", triggerEvent);
-		TasksManager.DEFAULT.execute(this);
-	}
 }
