@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.EventListener;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -20,7 +21,6 @@ import java.util.concurrent.TimeUnit;
 import com.homesystemsconsulting.apps.Application;
 import com.homesystemsconsulting.drivers.Driver;
 import com.homesystemsconsulting.events.Bus;
-import com.homesystemsconsulting.events.EventsMonitor;
 import com.homesystemsconsulting.events.SystemEvent;
 import com.homesystemsconsulting.script.EventsScriptEngine;
 import com.homesystemsconsulting.util.logging.SystemLogger;
@@ -66,7 +66,7 @@ public class Sfera {
 			
 			SystemNode.init();
 			
-			Bus.register(EventsMonitor.INSTANCE);
+			Bus.register(EventsScriptEngine.INSTANCE);
 			
 			// TODO Maybe we don't need a general database... maybe just a "Variables" module
 //			Database.init();
@@ -152,8 +152,8 @@ public class Sfera {
 				appName = appName.trim();
 				try {
 					String appClassName = null;
-					for (Plugin ps : plugins) {
-						if ((appClassName = ps.getApplicationClass(appName)) != null) {
+					for (Plugin plugin : plugins) {
+						if ((appClassName = plugin.getApplicationClass(appName)) != null) {
 							Class<?> appClass = Class.forName(appClassName);
 							Constructor<?> constructor = appClass.getConstructor(new Class[]{String.class});
 							Object appInstance = constructor.newInstance(appName);
@@ -194,25 +194,35 @@ public class Sfera {
 				if (driverType != null) {
 					try {
 						Set<String> driverClasses = null;
-						for (Plugin ps : plugins) {
-							if ((driverClasses = ps.getDriverClasses(driverType)) != null) {
-								for (String driverClassName : driverClasses) {
-									Class<?> driverClass = Class.forName(driverClassName);
-									Constructor<?> constructor = driverClass.getConstructor(new Class[]{String.class});
-									Object driverInstance = constructor.newInstance(propName);
-									if (driverInstance instanceof Driver) {
-										drivers.add((Driver) driverInstance);
-										EventsScriptEngine.addDriver((Driver) driverInstance);
-										SystemLogger.SYSTEM.info("drivers", "driver '" + propName + "' of type '" + driverType + "' instantiated");
-									}
-								}
-								
+						for (Plugin plugin : plugins) {
+							if ((driverClasses = plugin.getDriverClasses(driverType)) != null) {
 								break;
 							}
 						}
 						
 						if (driverClasses == null) {
-							SystemLogger.SYSTEM.error("drivers", "driver '" + driverType + "' not found");
+							/*
+							 * If the class is not found in the plugins
+							 * we try using the declared type
+							 * as the driver class
+							 */
+							driverClasses = new HashSet<String>();
+							driverClasses.add(driverType);
+						}
+						
+						for (String driverClassName : driverClasses) {
+							Class<?> driverClass = Class.forName(driverClassName);
+							Constructor<?> constructor = driverClass.getConstructor(new Class[]{String.class});
+							Object driverInstance = constructor.newInstance(propName);
+							if (driverInstance instanceof Driver) {
+								Driver d = (Driver) driverInstance;
+								drivers.add(d);
+								EventsScriptEngine.putInGlobalScope(d.getId(), d);
+								if (d instanceof EventListener) {
+									Bus.register((EventListener) d);
+								}
+								SystemLogger.SYSTEM.info("drivers", "driver '" + propName + "' of type '" + driverType + "' instantiated");
+							}
 						}
 					} catch (Throwable e) {
 						SystemLogger.SYSTEM.error("drivers", "error instantiating driver '" + propName + "' of type '" + driverType + "': " + e);

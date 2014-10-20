@@ -95,7 +95,7 @@ Unknown
     ;
     
 NodeId
-    : NodeFirstLetter LetterOrDigit*
+    : NodeFirstLetter LetterOrDigit* (LPAREN [0-9]+ RPAREN)?
     ;
 
 fragment

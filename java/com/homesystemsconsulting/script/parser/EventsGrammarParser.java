@@ -160,13 +160,13 @@ public class EventsGrammarParser extends Parser {
 	}
 
 	public static class RuleLineContext extends ParserRuleContext {
-		public ActionContext action() {
-			return getRuleContext(ActionContext.class,0);
-		}
 		public TriggerContext trigger() {
 			return getRuleContext(TriggerContext.class,0);
 		}
 		public TerminalNode COLON() { return getToken(EventsGrammarParser.COLON, 0); }
+		public ActionContext action() {
+			return getRuleContext(ActionContext.class,0);
+		}
 		public RuleLineContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -338,15 +338,15 @@ public class EventsGrammarParser extends Parser {
 	}
 
 	public static class AndExpressionContext extends ParserRuleContext {
-		public NotExpressionContext notExpression(int i) {
-			return getRuleContext(NotExpressionContext.class,i);
-		}
-		public List<TerminalNode> AND() { return getTokens(EventsGrammarParser.AND); }
 		public TerminalNode AND(int i) {
 			return getToken(EventsGrammarParser.AND, i);
 		}
 		public List<NotExpressionContext> notExpression() {
 			return getRuleContexts(NotExpressionContext.class);
+		}
+		public List<TerminalNode> AND() { return getTokens(EventsGrammarParser.AND); }
+		public NotExpressionContext notExpression(int i) {
+			return getRuleContext(NotExpressionContext.class,i);
 		}
 		public AndExpressionContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -398,10 +398,10 @@ public class EventsGrammarParser extends Parser {
 	}
 
 	public static class NotExpressionContext extends ParserRuleContext {
+		public TerminalNode NOT() { return getToken(EventsGrammarParser.NOT, 0); }
 		public AtomExpressionContext atomExpression() {
 			return getRuleContext(AtomExpressionContext.class,0);
 		}
-		public TerminalNode NOT() { return getToken(EventsGrammarParser.NOT, 0); }
 		public NotExpressionContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -453,11 +453,11 @@ public class EventsGrammarParser extends Parser {
 	}
 
 	public static class AtomExpressionContext extends ParserRuleContext {
-		public TerminalNode RPAREN() { return getToken(EventsGrammarParser.RPAREN, 0); }
+		public TerminalNode LPAREN() { return getToken(EventsGrammarParser.LPAREN, 0); }
 		public OrExpressionContext orExpression() {
 			return getRuleContext(OrExpressionContext.class,0);
 		}
-		public TerminalNode LPAREN() { return getToken(EventsGrammarParser.LPAREN, 0); }
+		public TerminalNode RPAREN() { return getToken(EventsGrammarParser.RPAREN, 0); }
 		public EventContext event() {
 			return getRuleContext(EventContext.class,0);
 		}
@@ -512,11 +512,11 @@ public class EventsGrammarParser extends Parser {
 	}
 
 	public static class EventContext extends ParserRuleContext {
-		public StableEventContext stableEvent() {
-			return getRuleContext(StableEventContext.class,0);
-		}
 		public TransientEventContext transientEvent() {
 			return getRuleContext(TransientEventContext.class,0);
+		}
+		public StableEventContext stableEvent() {
+			return getRuleContext(StableEventContext.class,0);
 		}
 		public EventContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -565,17 +565,17 @@ public class EventsGrammarParser extends Parser {
 	}
 
 	public static class StableEventContext extends ParserRuleContext {
-		public NumberComparisonContext numberComparison() {
-			return getRuleContext(NumberComparisonContext.class,0);
+		public UnknownComparisonContext unknownComparison() {
+			return getRuleContext(UnknownComparisonContext.class,0);
 		}
 		public StringComparisonContext stringComparison() {
 			return getRuleContext(StringComparisonContext.class,0);
 		}
-		public UnknownComparisonContext unknownComparison() {
-			return getRuleContext(UnknownComparisonContext.class,0);
-		}
 		public BooleanComparisonContext booleanComparison() {
 			return getRuleContext(BooleanComparisonContext.class,0);
+		}
+		public NumberComparisonContext numberComparison() {
+			return getRuleContext(NumberComparisonContext.class,0);
 		}
 		public StableEventContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -639,13 +639,13 @@ public class EventsGrammarParser extends Parser {
 
 	public static class StringComparisonContext extends ParserRuleContext {
 		public TerminalNode ET() { return getToken(EventsGrammarParser.ET, 0); }
+		public TerminalNode GE() { return getToken(EventsGrammarParser.GE, 0); }
 		public TerminalNode FinalNodeId() { return getToken(EventsGrammarParser.FinalNodeId, 0); }
+		public TerminalNode StringLiteral() { return getToken(EventsGrammarParser.StringLiteral, 0); }
 		public TerminalNode LT() { return getToken(EventsGrammarParser.LT, 0); }
+		public TerminalNode GT() { return getToken(EventsGrammarParser.GT, 0); }
 		public TerminalNode LE() { return getToken(EventsGrammarParser.LE, 0); }
 		public TerminalNode NE() { return getToken(EventsGrammarParser.NE, 0); }
-		public TerminalNode StringLiteral() { return getToken(EventsGrammarParser.StringLiteral, 0); }
-		public TerminalNode GT() { return getToken(EventsGrammarParser.GT, 0); }
-		public TerminalNode GE() { return getToken(EventsGrammarParser.GE, 0); }
 		public StringComparisonContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -689,14 +689,14 @@ public class EventsGrammarParser extends Parser {
 	}
 
 	public static class NumberComparisonContext extends ParserRuleContext {
-		public TerminalNode NumberLiteral() { return getToken(EventsGrammarParser.NumberLiteral, 0); }
 		public TerminalNode ET() { return getToken(EventsGrammarParser.ET, 0); }
+		public TerminalNode GE() { return getToken(EventsGrammarParser.GE, 0); }
 		public TerminalNode FinalNodeId() { return getToken(EventsGrammarParser.FinalNodeId, 0); }
+		public TerminalNode NumberLiteral() { return getToken(EventsGrammarParser.NumberLiteral, 0); }
 		public TerminalNode LT() { return getToken(EventsGrammarParser.LT, 0); }
+		public TerminalNode GT() { return getToken(EventsGrammarParser.GT, 0); }
 		public TerminalNode LE() { return getToken(EventsGrammarParser.LE, 0); }
 		public TerminalNode NE() { return getToken(EventsGrammarParser.NE, 0); }
-		public TerminalNode GT() { return getToken(EventsGrammarParser.GT, 0); }
-		public TerminalNode GE() { return getToken(EventsGrammarParser.GE, 0); }
 		public NumberComparisonContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -742,8 +742,8 @@ public class EventsGrammarParser extends Parser {
 	public static class BooleanComparisonContext extends ParserRuleContext {
 		public TerminalNode ET() { return getToken(EventsGrammarParser.ET, 0); }
 		public TerminalNode FinalNodeId() { return getToken(EventsGrammarParser.FinalNodeId, 0); }
-		public TerminalNode NE() { return getToken(EventsGrammarParser.NE, 0); }
 		public TerminalNode BooleanLiteral() { return getToken(EventsGrammarParser.BooleanLiteral, 0); }
+		public TerminalNode NE() { return getToken(EventsGrammarParser.NE, 0); }
 		public BooleanComparisonContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -787,9 +787,9 @@ public class EventsGrammarParser extends Parser {
 	}
 
 	public static class UnknownComparisonContext extends ParserRuleContext {
-		public TerminalNode Unknown() { return getToken(EventsGrammarParser.Unknown, 0); }
 		public TerminalNode ET() { return getToken(EventsGrammarParser.ET, 0); }
 		public TerminalNode FinalNodeId() { return getToken(EventsGrammarParser.FinalNodeId, 0); }
+		public TerminalNode Unknown() { return getToken(EventsGrammarParser.Unknown, 0); }
 		public TerminalNode NE() { return getToken(EventsGrammarParser.NE, 0); }
 		public UnknownComparisonContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);

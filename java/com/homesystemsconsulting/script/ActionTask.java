@@ -29,10 +29,12 @@ public class ActionTask extends Task {
 			b.put("ev", triggerEvent); // add "ev" variable
 			rule.action.eval(b);
 			EventsScriptEngine.LOG.info("action executed - file '" + rule.scriptFile + "' line " + rule.startLine);
-		} catch (ScriptException e) {
+		} catch (Throwable e) {
 			int line = rule.startLine;
-			if (e.getLineNumber() >= 0) {
-				line += e.getLineNumber() - 1;
+			if (e instanceof ScriptException) {
+				if (((ScriptException) e).getLineNumber() >= 0) {
+					line += ((ScriptException) e).getLineNumber() - 1;
+				}
 			}
 			EventsScriptEngine.LOG.error("Error executing action - file '" + rule.scriptFile + "' line " + line + ": " + e.getLocalizedMessage());
 		}

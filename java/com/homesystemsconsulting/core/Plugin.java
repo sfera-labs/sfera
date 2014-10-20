@@ -70,7 +70,7 @@ public class Plugin {
 					
 					if (driverNode.getElementsByTagName("name").item(0).getTextContent().equalsIgnoreCase(driverName)) {
 						NodeList classList = driverNode.getElementsByTagName("class");
-						Set<String> classNames = new HashSet<>(classList.getLength());
+						Set<String> classNames = new HashSet<String>(classList.getLength());
 						for (int j = 0; j < classList.getLength(); j++) {
 							classNames.add(classList.item(j).getTextContent());
 						}

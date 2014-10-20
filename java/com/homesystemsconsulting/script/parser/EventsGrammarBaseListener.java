@@ -17,123 +17,6 @@ public class EventsGrammarBaseListener implements EventsGrammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTrigger(@NotNull EventsGrammarParser.TriggerContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitTrigger(@NotNull EventsGrammarParser.TriggerContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterStableEvent(@NotNull EventsGrammarParser.StableEventContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitStableEvent(@NotNull EventsGrammarParser.StableEventContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterBooleanComparison(@NotNull EventsGrammarParser.BooleanComparisonContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitBooleanComparison(@NotNull EventsGrammarParser.BooleanComparisonContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterNotExpression(@NotNull EventsGrammarParser.NotExpressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitNotExpression(@NotNull EventsGrammarParser.NotExpressionContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterOrExpression(@NotNull EventsGrammarParser.OrExpressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitOrExpression(@NotNull EventsGrammarParser.OrExpressionContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterRuleLine(@NotNull EventsGrammarParser.RuleLineContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitRuleLine(@NotNull EventsGrammarParser.RuleLineContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterRules(@NotNull EventsGrammarParser.RulesContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitRules(@NotNull EventsGrammarParser.RulesContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterTransientEvent(@NotNull EventsGrammarParser.TransientEventContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitTransientEvent(@NotNull EventsGrammarParser.TransientEventContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterAndExpression(@NotNull EventsGrammarParser.AndExpressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitAndExpression(@NotNull EventsGrammarParser.AndExpressionContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterNumberComparison(@NotNull EventsGrammarParser.NumberComparisonContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -141,45 +24,6 @@ public class EventsGrammarBaseListener implements EventsGrammarListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitNumberComparison(@NotNull EventsGrammarParser.NumberComparisonContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterAtomExpression(@NotNull EventsGrammarParser.AtomExpressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitAtomExpression(@NotNull EventsGrammarParser.AtomExpressionContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterEvent(@NotNull EventsGrammarParser.EventContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitEvent(@NotNull EventsGrammarParser.EventContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterAction(@NotNull EventsGrammarParser.ActionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitAction(@NotNull EventsGrammarParser.ActionContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
@@ -199,6 +43,45 @@ public class EventsGrammarBaseListener implements EventsGrammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterTransientEvent(@NotNull EventsGrammarParser.TransientEventContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTransientEvent(@NotNull EventsGrammarParser.TransientEventContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterRules(@NotNull EventsGrammarParser.RulesContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitRules(@NotNull EventsGrammarParser.RulesContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterNotExpression(@NotNull EventsGrammarParser.NotExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNotExpression(@NotNull EventsGrammarParser.NotExpressionContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterParse(@NotNull EventsGrammarParser.ParseContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -212,6 +95,58 @@ public class EventsGrammarBaseListener implements EventsGrammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterTrigger(@NotNull EventsGrammarParser.TriggerContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTrigger(@NotNull EventsGrammarParser.TriggerContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterBooleanComparison(@NotNull EventsGrammarParser.BooleanComparisonContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitBooleanComparison(@NotNull EventsGrammarParser.BooleanComparisonContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterRuleLine(@NotNull EventsGrammarParser.RuleLineContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitRuleLine(@NotNull EventsGrammarParser.RuleLineContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterOrExpression(@NotNull EventsGrammarParser.OrExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitOrExpression(@NotNull EventsGrammarParser.OrExpressionContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterStringComparison(@NotNull EventsGrammarParser.StringComparisonContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -219,6 +154,71 @@ public class EventsGrammarBaseListener implements EventsGrammarListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitStringComparison(@NotNull EventsGrammarParser.StringComparisonContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterAndExpression(@NotNull EventsGrammarParser.AndExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAndExpression(@NotNull EventsGrammarParser.AndExpressionContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterAtomExpression(@NotNull EventsGrammarParser.AtomExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAtomExpression(@NotNull EventsGrammarParser.AtomExpressionContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterAction(@NotNull EventsGrammarParser.ActionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAction(@NotNull EventsGrammarParser.ActionContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterEvent(@NotNull EventsGrammarParser.EventContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitEvent(@NotNull EventsGrammarParser.EventContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterStableEvent(@NotNull EventsGrammarParser.StableEventContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitStableEvent(@NotNull EventsGrammarParser.StableEventContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

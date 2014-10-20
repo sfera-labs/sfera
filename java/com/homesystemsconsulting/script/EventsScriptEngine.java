@@ -13,9 +13,12 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.script.Compilable;
 import javax.script.ScriptEngineManager;
@@ -24,11 +27,11 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
+import com.google.common.eventbus.Subscribe;
 import com.homesystemsconsulting.core.FilesWatcher;
 import com.homesystemsconsulting.core.Plugin;
 import com.homesystemsconsulting.core.Sfera;
 import com.homesystemsconsulting.core.Task;
-import com.homesystemsconsulting.drivers.Driver;
 import com.homesystemsconsulting.drivers.webserver.WebServer;
 import com.homesystemsconsulting.events.Bus;
 import com.homesystemsconsulting.events.Event;
@@ -39,39 +42,40 @@ import com.homesystemsconsulting.script.parser.EventsGrammarParser.ParseContext;
 import com.homesystemsconsulting.util.logging.SystemLogger;
 
 
-public abstract class EventsScriptEngine {
+public class EventsScriptEngine implements EventListener {
 
+	public static final EventsScriptEngine INSTANCE = new EventsScriptEngine();
 	private static final ScriptEngineManager SCRIPT_ENGINE_MANAGER = new ScriptEngineManager();
 	static final SystemLogger LOG = SystemLogger.getLogger("scripts");
 	
-    private static HashMap<String, HashSet<Rule>> triggerActionsMap;
-    private static HashMap<Path, ArrayList<String>> errors;
+    private static HashMap<String, HashSet<Rule>> triggersActionsMap;
+    private static HashMap<Path, List<String>> errors;
     
     /**
      * 
      * @param event
      */
+    @Subscribe
     public synchronized static void executeActionsTriggeredBy(Event event) {
     	try {
-    		HashSet<Rule> actionsToRun = new HashSet<Rule>();
+    		Set<Rule> toExecute = new HashSet<Rule>();
 			String id = event.getId();
 			
-			int dotIdx = id.length();
-			do {
-				   String idPart = id.substring(0, dotIdx);
-				   HashSet<Rule> triggeredActions = triggerActionsMap.get(idPart);
-				   if (triggeredActions != null) {
-				 	   for (Rule action : triggeredActions) {
-				 		   if (action.eval(event)) {
-				 			   actionsToRun.add(action);
-				 		   }
-				 	   }
-				   }
-				   dotIdx = id.lastIndexOf('.', dotIdx - 1);
-			} while (dotIdx > 0);
+			List<String> idParts = getParts(id);
 			
-			for (Rule action : actionsToRun) {
-				   action.execute(event);
+			for (String idPart : idParts) {
+				HashSet<Rule> triggeredActions = triggersActionsMap.get(idPart);
+				if (triggeredActions != null) {
+					for (Rule rule : triggeredActions) {
+						if (rule.eval(event)) {
+							toExecute.add(rule);
+						}
+					}
+				}
+			}
+			
+			for (Rule rule : toExecute) {
+				   rule.execute(event);
 			}
     	} catch (Exception e) {
     		e.printStackTrace();
@@ -80,10 +84,48 @@ public abstract class EventsScriptEngine {
     
     /**
      * 
-     * @param driver
+     * @param id
+     * @return
      */
-    public synchronized static void addDriver(Driver driver) {
-    	SCRIPT_ENGINE_MANAGER.put(driver.getId(), driver);
+    private static List<String> getParts(String id) {
+    	List<String> parts = new ArrayList<String>();
+    	int dotIdx = id.length();
+		do {
+			String idPart = id.substring(0, dotIdx);
+			parts.add(idPart);
+			dotIdx = lastIndexOf(id, dotIdx - 1, '.', '(');
+		} while (dotIdx > 0);
+		
+		return parts;
+	}
+    
+    /**
+     * 
+     * @param string
+     * @param fromIndex
+     * @param chs
+     * @return
+     */
+    private static int lastIndexOf(String string, int fromIndex, char ... chs) {
+        int i = Math.min(fromIndex, string.length() - 1);
+        for (; i >= 0; i--) {
+        	for (char ch : chs) {
+        		if (string.charAt(i) == ch) {
+                    return i;
+                }
+        	}
+        }
+        return -1;
+        
+	}
+
+	/**
+     * 
+     * @param key
+     * @param value
+     */
+    public synchronized static void putInGlobalScope(String key, Object value) {
+    	SCRIPT_ENGINE_MANAGER.put(key, value);
 	}
     
     /**
@@ -93,20 +135,20 @@ public abstract class EventsScriptEngine {
     public synchronized static void loadScriptFiles() throws IOException {
     	Path localScriptsDir = Paths.get("scripts");
     	try {
-	    	triggerActionsMap = new HashMap<String, HashSet<Rule>>();
-	    	errors = new HashMap<Path, ArrayList<String>>();
+	    	triggersActionsMap = new HashMap<String, HashSet<Rule>>();
+	    	errors = new HashMap<Path, List<String>>();
 	    	
-	    	loadScriptFiles(localScriptsDir);
+	    	loadScriptFilesIn(localScriptsDir);
 	    	for (Plugin plugin : Sfera.getPlugins()) {
 				try (FileSystem pluginFs = FileSystems.newFileSystem(plugin.getPath(), null)) {
-					loadScriptFiles(pluginFs.getPath("scripts"));
+					loadScriptFilesIn(pluginFs.getPath("scripts"));
 				}
 		    }
 	    	
 	    	if (!errors.isEmpty()) {
 	    		SystemLogger.SYSTEM.error("scripts", "Errors in script files");
 		    	
-		    	for (Entry<Path, ArrayList<String>> error : errors.entrySet()) {
+		    	for (Entry<Path, List<String>> error : errors.entrySet()) {
 	    			Path file = error.getKey();
 	    			for (String message : error.getValue()) {
 	    				LOG.error("File: " + file + " - " + message);
@@ -144,7 +186,7 @@ public abstract class EventsScriptEngine {
      * @param scriptsDirectory
      * @throws IOException
      */
-    private static void loadScriptFiles(Path scriptsDirectory) throws IOException {
+    private static void loadScriptFilesIn(Path scriptsDirectory) throws IOException {
     	try {
     		Files.walkFileTree(scriptsDirectory, new SimpleFileVisitor<Path>() {
     			
@@ -176,7 +218,7 @@ public abstract class EventsScriptEngine {
      * @param message
      */
     private static void addError(Path file, String message) {
-		ArrayList<String> messages = errors.get(file);
+		List<String> messages = errors.get(file);
 		if (messages == null) {
 			messages = new ArrayList<String>();
 			errors.put(file, messages);
@@ -226,10 +268,10 @@ public abstract class EventsScriptEngine {
         	
         	for (Entry<String, HashSet<Rule>> entry : triggerActionMapListener.triggerActionsMap.entrySet()) {
         		String trigger = entry.getKey();
-        		HashSet<Rule> actions = triggerActionsMap.get(trigger);
+        		HashSet<Rule> actions = triggersActionsMap.get(trigger);
         		if (actions == null) {
         			actions = new HashSet<Rule>();
-        			triggerActionsMap.put(trigger, actions);
+        			triggersActionsMap.put(trigger, actions);
         		}
         		actions.addAll(entry.getValue());
         	}

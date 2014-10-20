@@ -1,4 +1,4 @@
-package com.homesystemsconsulting.apps.myapp;
+package test.apps;
 
 import java.util.EventListener;
 
@@ -8,9 +8,9 @@ import com.homesystemsconsulting.apps.Application;
 import com.homesystemsconsulting.events.NumberEvent;
 
 
-public class MyApp extends Application implements EventListener {
+public class TestApp extends Application implements EventListener {
 
-	public MyApp(String id) {
+	public TestApp(String id) {
 		super(id);
 	}
 	
@@ -22,10 +22,10 @@ public class MyApp extends Application implements EventListener {
 	@Subscribe
 	@AllowConcurrentEvents
     public void handleMyEvent(NumberEvent event) throws Exception {
-		log.debug("MyEvent: " + event.getId() + " = " + event.getValue());
+		log.info("NumberEvent: " + event.getId() + " = " + event.getValue());
 		try {
 			Thread.sleep(3000);
 		} catch (InterruptedException e) {}
-		log.debug("EXIT: " + event.getId() + " = " + event.getValue());
+		log.info("EXIT: " + event.getId() + " = " + event.getValue());
     }
 }

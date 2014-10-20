@@ -2,8 +2,8 @@ package com.homesystemsconsulting.script;
 
 import java.util.List;
 
+import com.homesystemsconsulting.events.Bus;
 import com.homesystemsconsulting.events.Event;
-import com.homesystemsconsulting.events.EventsMonitor;
 import com.homesystemsconsulting.script.parser.EventsGrammarParser.AndExpressionContext;
 import com.homesystemsconsulting.script.parser.EventsGrammarParser.AtomExpressionContext;
 import com.homesystemsconsulting.script.parser.EventsGrammarParser.BooleanComparisonContext;
@@ -127,7 +127,25 @@ public class TriggerCondition {
 	 * @return
 	 */
 	private boolean eval(TransientEventContext ctx, Event event) {
-		return event.getId().equals(ctx.getText()) || event.getId().startsWith(ctx.getText() + ".");
+		String eventId = event.getId();
+		String condition = ctx.getText();
+		if (event.getId().startsWith(ctx.getText())) {
+			if (eventId.length() == condition.length()) { // equal
+				return true;
+			}
+			
+			if (eventId.charAt(condition.length()) == '.' ||
+					eventId.charAt(condition.length()) == '(') {
+				/*
+				 *  meaning: 
+				 *  eventId.startsWith(condition + ".") || 
+				 *  	eventId.startsWith(condition + "(")
+				 */
+				return true;
+			}
+		}
+			
+		return false;
 	}
 	
 	/**
@@ -155,7 +173,7 @@ public class TriggerCondition {
 	 * @throws Exception 
 	 */
 	private boolean eval(StringComparisonContext ctx) throws Exception {
-		Object value = EventsMonitor.getEventValue(ctx.FinalNodeId().getText());
+		Object value = Bus.getEventValue(ctx.FinalNodeId().getText());
 		
 		if (value == null) {
 			return false;
@@ -174,13 +192,13 @@ public class TriggerCondition {
 		} else if (ctx.NE() != null) {
 			return !literal.equals(value);
 		} else if (ctx.GT() != null) {
-			return literal.compareTo((String) value) < 0;
+			return ((String) value).compareTo(literal) > 0;
 		} else if (ctx.LT() != null) {
-			return literal.compareTo((String) value) > 0;
+			return ((String) value).compareTo(literal) < 0;
 		} else if (ctx.GE() != null) {
-			return literal.compareTo((String) value) <= 0;
+			return ((String) value).compareTo(literal) >= 0;
 		} else { // LE
-			return literal.compareTo((String) value) >= 0;
+			return ((String) value).compareTo(literal) <= 0;
 		}
 	}
 	
@@ -191,7 +209,7 @@ public class TriggerCondition {
 	 * @throws Exception 
 	 */
 	private boolean eval(NumberComparisonContext ctx) throws Exception {
-		Object value = EventsMonitor.getEventValue(ctx.FinalNodeId().getText());
+		Object value = Bus.getEventValue(ctx.FinalNodeId().getText());
 		
 		if (value == null) {
 			return false;
@@ -203,17 +221,17 @@ public class TriggerCondition {
 		}
 		
 		if (ctx.ET() != null) {
-			return Double.parseDouble(ctx.NumberLiteral().getText()) == (Double) value;
+			return (Double) value == Double.parseDouble(ctx.NumberLiteral().getText());
 		} else if (ctx.NE() != null) {
-			return Double.parseDouble(ctx.NumberLiteral().getText()) != (Double) value;
+			return (Double) value != Double.parseDouble(ctx.NumberLiteral().getText());
 		} else if (ctx.GT() != null) {
-			return Double.parseDouble(ctx.NumberLiteral().getText()) > (Double) value;
+			return (Double) value > Double.parseDouble(ctx.NumberLiteral().getText());
 		} else if (ctx.LT() != null) {
-			return Double.parseDouble(ctx.NumberLiteral().getText()) < (Double) value;
+			return (Double) value < Double.parseDouble(ctx.NumberLiteral().getText());
 		} else if (ctx.GE() != null) {
-			return Double.parseDouble(ctx.NumberLiteral().getText()) >= (Double) value;
+			return (Double) value >= Double.parseDouble(ctx.NumberLiteral().getText());
 		} else { // LE
-			return Double.parseDouble(ctx.NumberLiteral().getText()) <= (Double) value;
+			return (Double) value <= Double.parseDouble(ctx.NumberLiteral().getText());
 		}
 	}
 	
@@ -224,7 +242,7 @@ public class TriggerCondition {
 	 * @throws Exception 
 	 */
 	private boolean eval(BooleanComparisonContext ctx) throws Exception {
-		Object value = EventsMonitor.getEventValue(ctx.FinalNodeId().getText());
+		Object value = Bus.getEventValue(ctx.FinalNodeId().getText());
 		
 		if (value == null) {
 			return false;
@@ -248,7 +266,7 @@ public class TriggerCondition {
 	 * @return
 	 */
 	private boolean eval(UnknownComparisonContext ctx) {
-		Object value = EventsMonitor.getEventValue(ctx.FinalNodeId().getText());
+		Object value = Bus.getEventValue(ctx.FinalNodeId().getText());
 		
 		if (ctx.ET() != null) {
 			return value == null;

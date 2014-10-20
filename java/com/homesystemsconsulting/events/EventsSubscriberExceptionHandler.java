@@ -12,7 +12,7 @@ public class EventsSubscriberExceptionHandler implements
 		String listener = context.getSubscriber().getClass().getSimpleName();
 		String method = context.getSubscriberMethod().getName();
 		String event = context.getEvent().getClass().getSimpleName();
-		SystemLogger.SYSTEM.error("events", "Uncought exception dispatching event '" + event + "' to '" + listener + "." + method + "': " + exception.getLocalizedMessage());
+		SystemLogger.SYSTEM.error("events", "Uncought exception dispatching event '" + event + "' to '" + listener + "." + method + "': " + exception);
 	}
 
 }
