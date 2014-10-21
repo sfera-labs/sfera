@@ -10,11 +10,14 @@ import javax.script.ScriptException;
 
 import org.antlr.v4.runtime.misc.NotNull;
 
-import com.homesystemsconsulting.script.parser.EventsGrammarBaseListener;
-import com.homesystemsconsulting.script.parser.EventsGrammarParser;
-import com.homesystemsconsulting.script.parser.EventsGrammarParser.TriggerContext;
+import com.homesystemsconsulting.script.parser.SferaScriptGrammarBaseListener;
+import com.homesystemsconsulting.script.parser.SferaScriptGrammarParser.InitContext;
+import com.homesystemsconsulting.script.parser.SferaScriptGrammarParser.RuleLineContext;
+import com.homesystemsconsulting.script.parser.SferaScriptGrammarParser.StableEventContext;
+import com.homesystemsconsulting.script.parser.SferaScriptGrammarParser.TransientEventContext;
+import com.homesystemsconsulting.script.parser.SferaScriptGrammarParser.TriggerContext;
 
-public class TriggerActionMapListener extends EventsGrammarBaseListener {
+public class TriggerActionMapListener extends SferaScriptGrammarBaseListener {
 	
 	public final HashMap<String, HashSet<Rule>> triggerActionsMap = new HashMap<String, HashSet<Rule>>();
 	public final ArrayList<String> errors = new ArrayList<String>();
@@ -32,13 +35,30 @@ public class TriggerActionMapListener extends EventsGrammarBaseListener {
 		this.scriptFile = scriptFile;
 		this.engine = engine;
 	}
+	
+	@Override
+	public void enterInit(@NotNull InitContext ctx) {
+		String action = ctx.Script().getText();
+		action = action.substring(1, action.length() - 1);
+		try {
+			engine.compile(action).eval();
+		} catch (Throwable e) {
+			int line = ctx.getStart().getLine();
+			if (e instanceof ScriptException) {
+				if (((ScriptException) e).getLineNumber() >= 0) {
+					line += ((ScriptException) e).getLineNumber() - 1;
+				}
+			}
+			errors.add("line " + line + ": " + e.getLocalizedMessage());
+		}
+	}
 
 	@Override
-	public void enterRuleLine(@NotNull EventsGrammarParser.RuleLineContext ctx) {
+	public void enterRuleLine(@NotNull RuleLineContext ctx) {
 		currentConditionAction = null;
 		TriggerContext condition = ctx.trigger();
 		String action = ctx.action().Script().getText();
-		action = action.substring(1, action.length() - 1).trim();
+		action = action.substring(1, action.length() - 1);
 		try {
 			currentConditionAction = new Rule(condition, action, scriptFile, engine);
 		} catch (ScriptException e) {
@@ -46,17 +66,17 @@ public class TriggerActionMapListener extends EventsGrammarBaseListener {
 			if (e.getLineNumber() >= 0) {
 				line += e.getLineNumber() - 1;
 			}
-			errors.add("line " + line + " - script syntax error");
+			errors.add("line " + line + ": " + e.getLocalizedMessage());
 		}
 	}
 	
 	@Override
-	public void enterStableEvent(@NotNull EventsGrammarParser.StableEventContext ctx) {
+	public void enterStableEvent(@NotNull StableEventContext ctx) {
 		addTrigger(ctx.getChild(0).getChild(0).getText());
 	}
 
 	@Override
-	public void enterTransientEvent(@NotNull EventsGrammarParser.TransientEventContext ctx) {
+	public void enterTransientEvent(@NotNull TransientEventContext ctx) {
 		addTrigger(ctx.getChild(0).getText());
 	}
 	

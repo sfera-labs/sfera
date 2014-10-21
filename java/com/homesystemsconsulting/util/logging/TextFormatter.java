@@ -7,7 +7,7 @@ import java.util.logging.LogRecord;
 
 public class TextFormatter extends Formatter {
 	
-	private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS", Locale.ENGLISH);
+	private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.ENGLISH);
 	
 	@Override
 	public String format(LogRecord record) {

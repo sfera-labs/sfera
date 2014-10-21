@@ -1,4 +1,4 @@
-// Generated from EventsGrammar.g4 by ANTLR 4.3
+// Generated from SferaScriptGrammar.g4 by ANTLR 4.3
 package com.homesystemsconsulting.script.parser;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
@@ -10,7 +10,7 @@ import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.misc.*;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
-public class EventsGrammarLexer extends Lexer {
+public class SferaScriptGrammarLexer extends Lexer {
 	static { RuntimeMetaData.checkVersion("4.3", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
@@ -40,13 +40,13 @@ public class EventsGrammarLexer extends Lexer {
 	};
 
 
-	public EventsGrammarLexer(CharStream input) {
+	public SferaScriptGrammarLexer(CharStream input) {
 		super(input);
 		_interp = new LexerATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);
 	}
 
 	@Override
-	public String getGrammarFileName() { return "EventsGrammar.g4"; }
+	public String getGrammarFileName() { return "SferaScriptGrammar.g4"; }
 
 	@Override
 	public String[] getTokenNames() { return tokenNames; }

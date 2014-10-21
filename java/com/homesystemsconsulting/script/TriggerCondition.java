@@ -4,18 +4,18 @@ import java.util.List;
 
 import com.homesystemsconsulting.events.Bus;
 import com.homesystemsconsulting.events.Event;
-import com.homesystemsconsulting.script.parser.EventsGrammarParser.AndExpressionContext;
-import com.homesystemsconsulting.script.parser.EventsGrammarParser.AtomExpressionContext;
-import com.homesystemsconsulting.script.parser.EventsGrammarParser.BooleanComparisonContext;
-import com.homesystemsconsulting.script.parser.EventsGrammarParser.EventContext;
-import com.homesystemsconsulting.script.parser.EventsGrammarParser.NotExpressionContext;
-import com.homesystemsconsulting.script.parser.EventsGrammarParser.NumberComparisonContext;
-import com.homesystemsconsulting.script.parser.EventsGrammarParser.OrExpressionContext;
-import com.homesystemsconsulting.script.parser.EventsGrammarParser.StableEventContext;
-import com.homesystemsconsulting.script.parser.EventsGrammarParser.StringComparisonContext;
-import com.homesystemsconsulting.script.parser.EventsGrammarParser.TransientEventContext;
-import com.homesystemsconsulting.script.parser.EventsGrammarParser.TriggerContext;
-import com.homesystemsconsulting.script.parser.EventsGrammarParser.UnknownComparisonContext;
+import com.homesystemsconsulting.script.parser.SferaScriptGrammarParser.AndExpressionContext;
+import com.homesystemsconsulting.script.parser.SferaScriptGrammarParser.AtomExpressionContext;
+import com.homesystemsconsulting.script.parser.SferaScriptGrammarParser.BooleanComparisonContext;
+import com.homesystemsconsulting.script.parser.SferaScriptGrammarParser.EventContext;
+import com.homesystemsconsulting.script.parser.SferaScriptGrammarParser.NotExpressionContext;
+import com.homesystemsconsulting.script.parser.SferaScriptGrammarParser.NumberComparisonContext;
+import com.homesystemsconsulting.script.parser.SferaScriptGrammarParser.OrExpressionContext;
+import com.homesystemsconsulting.script.parser.SferaScriptGrammarParser.StableEventContext;
+import com.homesystemsconsulting.script.parser.SferaScriptGrammarParser.StringComparisonContext;
+import com.homesystemsconsulting.script.parser.SferaScriptGrammarParser.TransientEventContext;
+import com.homesystemsconsulting.script.parser.SferaScriptGrammarParser.TriggerContext;
+import com.homesystemsconsulting.script.parser.SferaScriptGrammarParser.UnknownComparisonContext;
 
 public class TriggerCondition {
 

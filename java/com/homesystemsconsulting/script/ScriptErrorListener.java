@@ -6,7 +6,7 @@ import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
-public class EventsGrammarErrorListener extends BaseErrorListener {
+public class ScriptErrorListener extends BaseErrorListener {
     
 	public final ArrayList<String> errors = new ArrayList<String>();
 	

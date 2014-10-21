@@ -1,6 +1,7 @@
 package com.homesystemsconsulting.script;
 
 import javax.script.Bindings;
+import javax.script.ScriptContext;
 import javax.script.ScriptException;
 
 import com.homesystemsconsulting.core.Task;
@@ -26,9 +27,10 @@ public class ActionTask extends Task {
 	public void execute() {
 		try {
 			Bindings b = rule.action.getEngine().createBindings();
+			b.putAll(rule.action.getEngine().getBindings(ScriptContext.ENGINE_SCOPE));
 			b.put("ev", triggerEvent); // add "ev" variable
 			rule.action.eval(b);
-			EventsScriptEngine.LOG.info("action executed - file '" + rule.scriptFile + "' line " + rule.startLine);
+			SferaScriptEngine.LOG.info("action executed - file '" + rule.scriptFile + "' line " + rule.startLine);
 		} catch (Throwable e) {
 			int line = rule.startLine;
 			if (e instanceof ScriptException) {
@@ -36,7 +38,7 @@ public class ActionTask extends Task {
 					line += ((ScriptException) e).getLineNumber() - 1;
 				}
 			}
-			EventsScriptEngine.LOG.error("Error executing action - file '" + rule.scriptFile + "' line " + line + ": " + e.getLocalizedMessage());
+			SferaScriptEngine.LOG.error("Error executing action - file '" + rule.scriptFile + "' line " + line + ": " + e.getLocalizedMessage());
 		}
 	}
 }

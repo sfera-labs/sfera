@@ -8,7 +8,7 @@ import javax.script.ScriptException;
 
 import com.homesystemsconsulting.core.TasksManager;
 import com.homesystemsconsulting.events.Event;
-import com.homesystemsconsulting.script.parser.EventsGrammarParser.TriggerContext;
+import com.homesystemsconsulting.script.parser.SferaScriptGrammarParser.TriggerContext;
 
 public class Rule {
 	
@@ -49,7 +49,7 @@ public class Rule {
 		try {
 			return condition.eval(event);
 		} catch (Exception e) {
-			EventsScriptEngine.LOG.error("Error evaluating trigger condition - file " + scriptFile + ": " + e.getLocalizedMessage());
+			SferaScriptEngine.LOG.error("Error evaluating trigger condition - file " + scriptFile + ": " + e.getLocalizedMessage());
 			return false;
 		}
 	}

@@ -22,7 +22,7 @@ import com.homesystemsconsulting.apps.Application;
 import com.homesystemsconsulting.drivers.Driver;
 import com.homesystemsconsulting.events.Bus;
 import com.homesystemsconsulting.events.SystemEvent;
-import com.homesystemsconsulting.script.EventsScriptEngine;
+import com.homesystemsconsulting.script.SferaScriptEngine;
 import com.homesystemsconsulting.util.logging.SystemLogger;
 
 
@@ -66,7 +66,7 @@ public class Sfera {
 			
 			SystemNode.init();
 			
-			Bus.register(EventsScriptEngine.INSTANCE);
+			Bus.register(SferaScriptEngine.INSTANCE);
 			
 			// TODO Maybe we don't need a general database... maybe just a "Variables" module
 //			Database.init();
@@ -75,7 +75,7 @@ public class Sfera {
 			loadDrivers();
 			loadApplications();
 			try {
-				EventsScriptEngine.loadScriptFiles();
+				SferaScriptEngine.loadScriptFiles();
 			} catch (IOException e) {
 				SystemLogger.SYSTEM.error("error loading script files: " + e);
 				e.printStackTrace();
@@ -217,7 +217,7 @@ public class Sfera {
 							if (driverInstance instanceof Driver) {
 								Driver d = (Driver) driverInstance;
 								drivers.add(d);
-								EventsScriptEngine.putInGlobalScope(d.getId(), d);
+								SferaScriptEngine.putInGlobalScope(d.getId(), d);
 								if (d instanceof EventListener) {
 									Bus.register((EventListener) d);
 								}

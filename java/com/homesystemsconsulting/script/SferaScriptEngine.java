@@ -33,18 +33,16 @@ import com.homesystemsconsulting.core.Plugin;
 import com.homesystemsconsulting.core.Sfera;
 import com.homesystemsconsulting.core.Task;
 import com.homesystemsconsulting.drivers.webserver.WebServer;
-import com.homesystemsconsulting.events.Bus;
 import com.homesystemsconsulting.events.Event;
-import com.homesystemsconsulting.events.SystemEvent;
-import com.homesystemsconsulting.script.parser.EventsGrammarLexer;
-import com.homesystemsconsulting.script.parser.EventsGrammarParser;
-import com.homesystemsconsulting.script.parser.EventsGrammarParser.ParseContext;
+import com.homesystemsconsulting.script.parser.SferaScriptGrammarLexer;
+import com.homesystemsconsulting.script.parser.SferaScriptGrammarParser;
+import com.homesystemsconsulting.script.parser.SferaScriptGrammarParser.ParseContext;
 import com.homesystemsconsulting.util.logging.SystemLogger;
 
 
-public class EventsScriptEngine implements EventListener {
+public class SferaScriptEngine implements EventListener {
 
-	public static final EventsScriptEngine INSTANCE = new EventsScriptEngine();
+	public static final SferaScriptEngine INSTANCE = new SferaScriptEngine();
 	private static final ScriptEngineManager SCRIPT_ENGINE_MANAGER = new ScriptEngineManager();
 	static final SystemLogger LOG = SystemLogger.getLogger("scripts");
 	
@@ -146,7 +144,7 @@ public class EventsScriptEngine implements EventListener {
 		    }
 	    	
 	    	if (!errors.isEmpty()) {
-	    		SystemLogger.SYSTEM.error("scripts", "Errors in script files");
+	    		LOG.error("Errors in script files");
 		    	
 		    	for (Entry<Path, List<String>> error : errors.entrySet()) {
 	    			Path file = error.getKey();
@@ -155,8 +153,6 @@ public class EventsScriptEngine implements EventListener {
 	    			}
 	    		}
 	    	}
-	    	
-	    	Bus.post(new SystemEvent("reload", null));
 	    	
     	} finally {
 	    	try {
@@ -193,13 +189,11 @@ public class EventsScriptEngine implements EventListener {
     			@Override
     			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
     				try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
-    					// A script engine for each folder
-    					Compilable engine = (Compilable) SCRIPT_ENGINE_MANAGER.getEngineByName("nashorn");
     					for (Path file : stream) {
     						if (Files.isRegularFile(file) && file.getFileName().toString().endsWith(".ev")) {
     							LOG.debug("loading script file " + file);
     							try {
-    								parseScriptFile(file, engine);
+    								parseScriptFile(file);
     							} catch (IOException e) {
     								addError(file, "IOException: " + e.getLocalizedMessage());
     							}
@@ -228,18 +222,16 @@ public class EventsScriptEngine implements EventListener {
 
 	/**
 	 * 
-	 * @param appName
 	 * @param scriptFile
-	 * @param engine
 	 * @throws IOException
 	 */
-    private static void parseScriptFile(Path scriptFile, Compilable engine) throws IOException {
+    private static void parseScriptFile(Path scriptFile) throws IOException {
     	try (BufferedReader r = Files.newBufferedReader(scriptFile, Sfera.CHARSET)) {
-    		EventsGrammarLexer lexer = new EventsGrammarLexer(new ANTLRInputStream(r));
+    		SferaScriptGrammarLexer lexer = new SferaScriptGrammarLexer(new ANTLRInputStream(r));
         	CommonTokenStream tokens = new CommonTokenStream(lexer);
-            EventsGrammarParser parser = new EventsGrammarParser(tokens);
+        	SferaScriptGrammarParser parser = new SferaScriptGrammarParser(tokens);
             
-            EventsGrammarErrorListener grammarErrorListener = new EventsGrammarErrorListener();
+            ScriptErrorListener grammarErrorListener = new ScriptErrorListener();
             lexer.removeErrorListeners();
         	lexer.addErrorListener(grammarErrorListener);
             parser.removeErrorListeners();
@@ -253,7 +245,9 @@ public class EventsScriptEngine implements EventListener {
             	}
             	
             	return;
-        	} 
+        	}
+            
+            Compilable engine = (Compilable) SCRIPT_ENGINE_MANAGER.getEngineByName("nashorn");
             
         	TriggerActionMapListener triggerActionMapListener = new TriggerActionMapListener(scriptFile, engine);
         	ParseTreeWalker.DEFAULT.walk(triggerActionMapListener, tree);
