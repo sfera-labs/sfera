@@ -1,33 +1,18 @@
 // text class
-Objects.text = function (e, id) {
-	this.e = e;
-	this.id = id;
-	this.type = "";
-
-	var _base = null; // base delegate
-
-	var foo = this;
-
-	// init, called by client.initObjss after assigning type
-	this.init = function () {
-		_base = new Objects._base(this); // setup delegate
-		if (e.style.display == "none") // can be set as style
-			this.visible = false;
-	}
-
-	// events. not to be assigned externally
-	this.onShow = function () {}
-	this.onHide = function () {}
-
+Objects.text = function () {
 	// set attribute
-	this.setAttribute = function (attr, value) {
-		switch (attr) {
+	var _setAttribute = this.setAttribute;
+	this.setAttribute = function (name, value) {
+		var v;
+		switch (name) {
 		case "width":
-			e.style.width = value+"px";
+		case "height":
+			v = parseInt(value);
+			this.e.style[name] = v+"px";
 			break;
 		case "text":
-		case "value":
-			e.innerHTML = value;
+			v = value;
+			this.e.innerHTML = v;
 			/* ??????????????????????
 			var d = e.childNodes[0];
 			e.removeChild(d);
@@ -36,26 +21,35 @@ Objects.text = function (e, id) {
 			*/
 			break;
 		case "add":
-			e.innerHTML += value;
+			this.e.innerHTML += value;
 			break;
 		case "size":
-			e.style.fontSize = value+"px";
+			v = parseInt(value);
+			this.e.style.fontSize = value+"px";
 			break;
 		case "color":
-			e.style.color = value;
+			v = value;
+			this.e.style.color = value;
 			break;
 		case "fontstyle":
-			e.style.fontStyle = value;
+			v = value;
+			this.e.style.fontStyle = value;
 			break;
 		case "weight":
 		case "fontweight":
-			e.style.fontWeight = value;
+			v = value;
+			this.e.style.fontWeight = value;
 			break;
 		case "align":
-			e.style.textAlign = value;
+			v = value;
+			this.e.style.textAlign = value;
 			break;
 		default:
-			_base.setAttribute(attr,value);
+			return _setAttribute.call(this, name, value);
 		}
+
+		return this.updateAttribute(name, v);
 	} // setAttribute()
 } // Objects.text class
+
+Objects.extend("text","__base","__pos");

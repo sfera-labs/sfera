@@ -1,34 +1,17 @@
 // page class
-Objects.page = function (e, id) {
-	this.e = e;
-	this.id = id;
-	this.type = "";
-
-	var title = e.getAttribute("data-title");
-	var prot = e.getAttribute("data-protected"); // pin/puk
-	var orientation = e.getAttribute("data-orientation");
+Objects.page = function () {
 	var gestures = {}; // default gestures, null same as "off"
-	var scope = e.getAttribute("data-scope");
-
-	// on before/after show/hide events, externally assigned
-	this.onBeforeShow = null;
-	this.onAfterShow = null;
-	this.onBeforeHide = null;
-	this.onAfterHide = null;
-
-	var _container = null; // container delegate
-	var _page = null; // page delegate
-
+	
 	// init
-	this.init = function () {
-		_container = new Objects._container(this); // setup delegate
-		_page = new Objects._page(this); // setup delegate
+	var _init = this.init;
+	this.init = function (e, obj) {
+		_init.call(this, e, obj);
+		
+		if (this.getAttribute("title") == null) this.setAttribute("title","");
+		if (this.getAttribute("orientation") != null) client.rotationEnabled = true;
 
-		if (title == null) title = "";
-		if (orientation) client.rotationEnabled = true;
-
-		if (gestures)
-			setGestures(e.getAttribute("data-gestures"));
+		if (this.getAttribute("gestures") != null)
+			setGestures(this.getAttribute("gestures"));
 
 		//pinPages["page-"+this.id] = prot; <------------ todo
 	}
@@ -55,54 +38,75 @@ Objects.page = function (e, id) {
 	}
 
 	this.getOrientation = function () {
-		return orientation;
+		return this.getAttribute("orientation");
 	}
 
 	this.getScope = function () {
-		return scope;
+		return ""; //scope;
 	}
-
+	
+	var _addObject = this.addObject;
+	this.addObject = function (o,pos) {
+		_addObject.call(this, o, pos);
+		
+	}
 	// show/hide
+	var _show = this.show;
 	this.show = function () {
 		// before show?
 		if (this.onBeforeShow)
 			this.onBeforeShow();
 
 		// delegate events
-		_container.onShow();
-		_page.show();
-		_container.onAfterShow();
+		this.onShow();
+		_show.call(this);
+		//this.onAfterShow(); ???
 		client.focus();
 
 		// show title
-		client.setPageTitle(title);
+		client.setPageTitle(this.getAttribute("title"));
 
 		// after show? (init the page? ex. btsave on camerapanel)
 		if (this.onAfterShow)
 			this.onAfterShow();
 	}
+	var _hide = this.hide;
 	this.hide = function () {
 		// before hide?
 		if (this.onBeforeHide)
 			this.onBeforeHide();
 
 		// delegate events
-		_container.onHide();
-		_page.hide();
+		this.onHide.call(this);
+		_hide.call(this);
 
 		// after hide? (ex. pages opened by user buttons)
 		if (this.onAfterHide)
 			this.onAfterHide();
 	}
-
+	
 	// set attribute
-	this.setAttribute = function (attr, value) {
-		// general attributes (for every kind of object)
-		switch (attr) {
-		case "gestures":
-			setGestures(value);
+	var _setAttribute = this.setAttribute;
+	this.setAttribute = function (name, value) {
+		var v;
+		switch (name) {
+		case "title":
+		case "prot":
+		case "orientation":
+		case "scope":
+			v = value;
 			break;
+		case "gestures":
+			v = value;
+			setGestures(v);
+			break;
+		default:
+			return _setAttribute.call(this, name, value);
 		}
+
+		return this.updateAttribute(name, v);
 	} // setAttribute()
 
 } // Objects.page class
+
+Objects.extend("page","__base","__container","__page");

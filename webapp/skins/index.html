@@ -10,14 +10,49 @@
 <link rel="icon" href="favicon.png" type="image/png" />
 <link rel="stylesheet" type="text/css" href="/$interface;/style.css">
 <script type="text/javascript" src="/$interface;/code.js"></script>
-<script type="text/javascript">var interf="$interface;"</script>
+<script type="text/javascript">config.interf="$interface;"</script>
+
+<script type="text/javascript">
+var cosoOpen = true;
+function cosoGo() {
+	cosoOpen = !cosoOpen;
+	var e = document.getElementById("output");
+	e.style.overflow = cosoOpen?"":"hidden";
+	e.style.width = cosoOpen?"":"20px";
+	e.style.height = cosoOpen?"":"20px";
+}
+</script>
+
+<style>
+.cButton {
+	position:absolute;
+}
+#output {
+	position:absolute;
+	background:white;
+	border:1px solid black;
+	opacity:0.95;
+	z-index:1000;
+}
+
+.bodyBackground {
+	position:absolute;
+	width:100%;
+	height:100%;
+	text-align:right;
+}
+a, a:visited {
+	color:white;
+}
+</style>
+
 </head>
 
 <body id="sfera" class="body">
-	<img src="/$interface;/icons/power.png">
-	<br><br>
-	<a href="/x/logout">logout</a>
-	<br><br>
-	HTML Loaded.<br><br>
-	<div id="contents"></div>
+	<!-- img src="/$interface;/icons/power.png" -->
+	<div class="bodyBackground"><a href="/x/logout">logout</a>&nbsp;</div>
+	<div id="output" onclick="cosoGo()"></div>
+	<div id="container" class="hsc container" style="width:800px; height:800px">
+		<div id="pagescontainer" class="pagesContainer"></div>
+	</div>
 </body>

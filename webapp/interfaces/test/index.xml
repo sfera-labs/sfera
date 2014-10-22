@@ -1,7 +1,0 @@
-<interface id="test" skin="blue" language="it_IT" title="My New Project" width="700" height="500">
-
-	<page id="page:homepage" title="" orientation="landscape" gestures="">
-		
-	</page>
-
-</interface>

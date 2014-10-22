@@ -1,15 +1,33 @@
-// project class
-Objects.project = function (e) {
+// interface class
+Objects["interface"] = function (e, id) {
+	this.e = e;
+	this.id = id;
+	this.type = "";
+
 	this.autoReload = true; // auto reload on changes
 	this.accessibility = false; // accessibility: support for voiceover (set title on buttons)
 
-	var foo = this;
-	
 	this.pages = []; // array of pages (objInstance) for quick reference
+	this.includes = {}; // include containers
+	this.includesNeeded = []; // list of needed includes, to load
+
+	var foo = this;
+
+	// init, called by client.initObjss after assigning type
+	this.init = function () {
+	}
 
 	// events. not to be assigned externally
 	this.onShow = function () {}
 	this.onHide = function () {}
+	
+	// updates with current dictionary data
+	this.selectDictionary = function () {
+		if (dictionary.size) {
+			if (!this.width) this.width = parseInt(dictionary.size[0]);
+			if (!this.height) this.height = parseInt(dictionary.size[1]);
+		}
+	} // selectDictionary()
 
 	// add page and set size. obj, pos (order, used in undo)
 	this.addPage = function (page,pos) {
@@ -18,7 +36,6 @@ Objects.project = function (e) {
 		else
 			this.pages.splice(pos,0,page);
 		//page.resetPageSize();
-		this.e.appendChild(page.e);
 	} // addPage()
 
 	// delete page
@@ -32,10 +49,10 @@ Objects.project = function (e) {
 	} // delPage()
 
 	// sort function for pages.sort
-	function pagesSortFunc(a,b) {
-		if (a.obj.id == "homepage" && b.obj.id != "homepage")
+	this.pagesSortFunc = function (a,b) {
+		if (a.obj.id == "menu" && b.obj.id != "menu")
 			return -1;
-		if (a.obj.id != "homepage" && b.obj.id == "homepage")
+		if (a.obj.id != "menu" && b.obj.id == "menu")
 			return 1;
 		// both the same, check name
 		if (a.attrValues[0] > b.attrValues[0])
@@ -53,9 +70,14 @@ Objects.project = function (e) {
 
 	// sort pages alphabetically
 	this.sortPages = function () {
-//		this.pages.sort(pagesSortFunc);
+		this.pages.sort(this.pagesSortFunc);
 	} // sortPages()
-	
+
+	// is compact?
+	this.isPageCompact = function (w,h) {
+		return (w<=500);
+	} // isPageCompact()
+
 	// update project, pages sizes, sets page orientation
 	this.updateSize = function (w,h,w2,h2) {
 		if (w != null) this.width = w;
@@ -75,25 +97,101 @@ Objects.project = function (e) {
 					this.pages[i].orientation = "portrait";
 				}
 				// reset size
-//				this.pages[i].resetPageSize();
+				//this.pages[i].resetPageSize();
 			}
 		}
 	} // updateSize()
-	
+
+	// add include. object (to redraw)
+	this.addInclude = function (obj) {
+		// already loaded?
+		if (this.includes[obj.attrValues[0]]) {
+			obj.redraw(); // redraw now
+			return;
+		}
+
+		for (var i=0; i<this.includesNeeded.length; i++) {
+			if (this.includesNeeded[i].file == obj.attrValues[0]) { // already to be loaded?
+				this.includesNeeded[i].objs.push(obj);
+				return;
+			}
+		}
+
+		project.includesNeeded.push({file:obj.attrValues[0], objs:[obj]});
+
+		return true;
+	} // addInclude()
+
+	// reset all objects
+	this.reset = function () {
+		for (var i=0; i<this.pages.length; i++) {
+			for (var k=0; k<this.pages[i].objs.length; k++) {
+				this.pages[i].objs[k].reset();
+			}
+		}
+	} // reset all
+
+	// get all objects in the project. parent object
+	this.getAllObjs = function (p) {
+		var a = [];
+		var r;
+		var i;
+		// no parent, all pages
+		if (!p) {
+			for (i=0; i<project.pages.length; i++) {
+				r = this.getAllObjs(project.pages[i]);
+				if (r) a = a.concat(r);
+			}
+		} else {
+			a.push(p);
+			if (p.objs && p.objs.length) {
+				for (i=0; i<p.objs.length; i++) {
+					r = this.getAllObjs(p.objs[i]);
+					if (r) a = a.concat(r);
+				}
+			}
+		}
+		return a;
+	} // getAllObjs()
+
+	// to JSON
+	this.toJSON = function () {
+		/*
+		var s = { language: this.language,
+				  header: this.header,
+				  orientationMode: this.orientationMode,
+				  width: this.width,
+				  height: this.height,
+				  deviceImage: this.deviceImage,
+				  scale: this.scale,
+				  style: this.style,
+				  uiset: this.uiset,
+				  cameraList: this.cameraList,
+				  cameraGridList: this.cameraGridList,
+				  cameraOverlay: this.cameraOverlay };
+		return s;
+		*/
+	} // toJSON()
+
+	// from JSON. return all the attribute ids that changed
+	this.fromJSON = function (o) {
+		/*
+		var c = []; // what changed. indexes of the attributes
+		var k = 0;
+		for (var i in s) {
+			if (this[i]!=s[i]) {
+				c.push((k<2)?k:(k<5)?2:k-2);
+				this[i] = s[i];
+			}
+			k++;
+		}
+		return c.unique();
+		*/
+	} // fromJSON()
+
 	// set attribute
-	var _setAttribute = this.setAttribute;
-	this.setAttribute = function (name, value) {
-		var v;
-		switch (name) {
-		case "skin":
-		case "title":
-		case "language":
-			v = value;
-			break;
-		case "width":
-		case "height":
-			v = parseInt(value);
-			break;
+	this.setAttribute = function (attr, value) {
+		switch (attr) {
 		// kiosk
 		case "kiosk":
 			switch (value) {
@@ -157,15 +255,8 @@ Objects.project = function (e) {
 			break;
 		// auto reload, default true
 		case "autoreload":
-			v = parseBool(value);
-			this.autoReload = v;
+			this.autoReload = (value != "false" && value != false);
 			break;
-		default:
-			return _setAttribute.call(this, name, value);
 		}
-
-		return this.updateAttribute(name, v);
 	} // setAttribute()
-} // Objects.project class
-
-Objects.extend("project","__base");
+} // Objects.text class

@@ -1,6 +1,3 @@
-//--------------------------------------------------------------------------------------------------------------------------
-// XMLReq ------------------------------------------------------------------------------------------------------------------
-//--------------------------------------------------------------------------------------------------------------------------
 function XMLReq() {
 	var req = null; // request
 
@@ -38,6 +35,9 @@ function XMLReq() {
 	this.ERROR_LOCK = 4;
 	this.ERROR_NOACCESS = 5;
 
+    /**
+     * Initialize
+     */
 	this.init = function () {
 		status = 0; // ready
 		// init req
@@ -262,7 +262,7 @@ function XMLReq() {
 
 var clientID;
 
-window.onload = function() {
+window.onload = function () {
 	var req = new XMLReq("GET");
 
 	var what = "dictionary";

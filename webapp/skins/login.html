@@ -21,8 +21,8 @@
 	<br><br>
 	HTML Loaded. Static content.<br><br>
 	<div id="contents">
-		<input id="user" type="input">
-		<input id="password" type="input">
+		<input id="user" type="input" value="admin" onkeydown="if(event.keyCode == 13) { doLogin() }">
+		<input id="password" type="input" value="00000" onkeydown="if(event.keyCode == 13) { doLogin() }">
 		<input id="loginBt" type="button" value="loginBt" onclick="doLogin();" />
 	</div>
 </body>
