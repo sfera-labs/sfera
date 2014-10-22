@@ -1,0 +1,7 @@
+local {
+	load("scripts/mylib.js");
+}
+
+td.count : {
+	print("> " + add(_e.value, 100));
+}

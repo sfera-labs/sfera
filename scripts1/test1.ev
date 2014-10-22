@@ -1,0 +1,31 @@
+local {
+	var localVar = "localVar";
+	
+	function localF() {
+		return "localF";
+	}
+
+	function load(var s) {
+		print(s);
+	}
+
+	load("scripts/mylib.js");
+}
+
+global {
+	var globVar = "GLOBAL";
+}
+
+td.count == 2 : {
+	print("1. " + localVar);
+	print("2. " + localF());
+	print("3. " + globVar1);
+	print("4. " + mul(3,5));
+
+	var odds = _.filter([1, 2, 3, 4, 5, 6], function (num) {
+    	return num % 2 == 1;
+	});
+	for (var i = 0; i < odds.length; i++) {
+		print(odds[i]);
+	}
+}

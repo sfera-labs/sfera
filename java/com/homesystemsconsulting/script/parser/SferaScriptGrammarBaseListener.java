@@ -199,6 +199,32 @@ public class SferaScriptGrammarBaseListener implements SferaScriptGrammarListene
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterGlobalScopeInit(@NotNull SferaScriptGrammarParser.GlobalScopeInitContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitGlobalScopeInit(@NotNull SferaScriptGrammarParser.GlobalScopeInitContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterLocalScopeInit(@NotNull SferaScriptGrammarParser.LocalScopeInitContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitLocalScopeInit(@NotNull SferaScriptGrammarParser.LocalScopeInitContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterAction(@NotNull SferaScriptGrammarParser.ActionContext ctx) { }
 	/**
 	 * {@inheritDoc}

@@ -2,6 +2,7 @@ package com.homesystemsconsulting.script;
 
 import javax.script.Bindings;
 import javax.script.ScriptContext;
+import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
 import com.homesystemsconsulting.core.Task;
@@ -11,24 +12,34 @@ public class ActionTask extends Task {
 
 	private final Event triggerEvent;
 	private final Rule rule;
+	private final Bindings localScope; 
 
 	/**
 	 * 
 	 * @param triggerEvent
 	 * @param rule
+	 * @param localScope 
 	 */
-	public ActionTask(Event triggerEvent, Rule rule) {
+	public ActionTask(Event triggerEvent, Rule rule, Bindings localScope) {
 		super("script:" + rule.scriptFile + ":" + rule.startLine);
 		this.triggerEvent = triggerEvent;
 		this.rule = rule;
+		this.localScope = localScope;
 	}
 
 	@Override
 	public void execute() {
 		try {
-			Bindings b = rule.action.getEngine().createBindings();
-			b.putAll(rule.action.getEngine().getBindings(ScriptContext.ENGINE_SCOPE));
-			b.put("ev", triggerEvent); // add "ev" variable
+			ScriptEngine engine = rule.action.getEngine();
+			Bindings b = engine.createBindings();
+			// add global (directory) scope
+			b.putAll(engine.getBindings(ScriptContext.ENGINE_SCOPE));
+			// add local (file) scope
+			if (localScope != null) {
+				b.putAll(localScope);
+			}
+			// add "_e" variable
+			b.put("_e", triggerEvent);
 			rule.action.eval(b);
 			SferaScriptEngine.LOG.info("action executed - file '" + rule.scriptFile + "' line " + rule.startLine);
 		} catch (Throwable e) {

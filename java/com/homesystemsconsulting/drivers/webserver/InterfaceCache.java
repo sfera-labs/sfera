@@ -637,13 +637,13 @@ public class InterfaceCache {
 			eventWriter.add(eventFactory.createStartElement("", "", elementLocalName));
 		    eventWriter.add(NL);
 		    
-		    StringBuilder content = new StringBuilder("\n");
+		    StringBuilder content = new StringBuilder();
 		    String line = null;
 		    while ((line = reader.readLine()) != null) {
 		    	content.append(line).append('\n');
 		    }
 		    
-		    eventWriter.add(eventFactory.createCData(content.toString()));
+		    eventWriter.add(eventFactory.createCData(content.substring(0, content.length() - 1)));
 		    eventWriter.add(NL);
 		    
 		    eventWriter.add(eventFactory.createEndElement("", "", elementLocalName));

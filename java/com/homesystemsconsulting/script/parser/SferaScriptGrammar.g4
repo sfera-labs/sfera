@@ -5,11 +5,20 @@
 grammar SferaScriptGrammar;
 
 parse
-    : init? rules? EOF
+    : init rules? EOF
     ;
     
 init
-	: Script
+	: localScopeInit? globalScopeInit?
+	| globalScopeInit? localScopeInit?
+	;
+	
+localScopeInit
+	: 'local'? Script
+	;
+	
+globalScopeInit
+	: 'global' Script
 	;
 
 rules

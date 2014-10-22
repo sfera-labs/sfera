@@ -189,11 +189,12 @@ public class SferaScriptEngine implements EventListener {
     			@Override
     			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
     				try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
+    					Compilable engine = (Compilable) SCRIPT_ENGINE_MANAGER.getEngineByName("nashorn");
     					for (Path file : stream) {
     						if (Files.isRegularFile(file) && file.getFileName().toString().endsWith(".ev")) {
     							LOG.debug("loading script file " + file);
     							try {
-    								parseScriptFile(file);
+    								parseScriptFile(file, engine);
     							} catch (IOException e) {
     								addError(file, "IOException: " + e.getLocalizedMessage());
     							}
@@ -223,9 +224,11 @@ public class SferaScriptEngine implements EventListener {
 	/**
 	 * 
 	 * @param scriptFile
+	 * @param engine
+	 * @param localScope 
 	 * @throws IOException
 	 */
-    private static void parseScriptFile(Path scriptFile) throws IOException {
+    private static void parseScriptFile(Path scriptFile, Compilable engine) throws IOException {
     	try (BufferedReader r = Files.newBufferedReader(scriptFile, Sfera.CHARSET)) {
     		SferaScriptGrammarLexer lexer = new SferaScriptGrammarLexer(new ANTLRInputStream(r));
         	CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -247,20 +250,18 @@ public class SferaScriptEngine implements EventListener {
             	return;
         	}
             
-            Compilable engine = (Compilable) SCRIPT_ENGINE_MANAGER.getEngineByName("nashorn");
-            
-        	TriggerActionMapListener triggerActionMapListener = new TriggerActionMapListener(scriptFile, engine);
-        	ParseTreeWalker.DEFAULT.walk(triggerActionMapListener, tree);
+        	SferaScriptGrammarListenerImplementation scriptListener = new SferaScriptGrammarListenerImplementation(scriptFile, engine);
+        	ParseTreeWalker.DEFAULT.walk(scriptListener, tree);
         	
-        	if (triggerActionMapListener.errors.size() != 0) {
-    	    	for (String e : triggerActionMapListener.errors) {
+        	if (scriptListener.errors.size() != 0) {
+    	    	for (String e : scriptListener.errors) {
     	    		addError(scriptFile, e);
     	    	}
     	    	
     	    	return;
         	}
         	
-        	for (Entry<String, HashSet<Rule>> entry : triggerActionMapListener.triggerActionsMap.entrySet()) {
+        	for (Entry<String, HashSet<Rule>> entry : scriptListener.triggerActionsMap.entrySet()) {
         		String trigger = entry.getKey();
         		HashSet<Rule> actions = triggersActionsMap.get(trigger);
         		if (actions == null) {

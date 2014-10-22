@@ -163,6 +163,28 @@ public interface SferaScriptGrammarListener extends ParseTreeListener {
 	void exitAtomExpression(@NotNull SferaScriptGrammarParser.AtomExpressionContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link SferaScriptGrammarParser#globalScopeInit}.
+	 * @param ctx the parse tree
+	 */
+	void enterGlobalScopeInit(@NotNull SferaScriptGrammarParser.GlobalScopeInitContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SferaScriptGrammarParser#globalScopeInit}.
+	 * @param ctx the parse tree
+	 */
+	void exitGlobalScopeInit(@NotNull SferaScriptGrammarParser.GlobalScopeInitContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link SferaScriptGrammarParser#localScopeInit}.
+	 * @param ctx the parse tree
+	 */
+	void enterLocalScopeInit(@NotNull SferaScriptGrammarParser.LocalScopeInitContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SferaScriptGrammarParser#localScopeInit}.
+	 * @param ctx the parse tree
+	 */
+	void exitLocalScopeInit(@NotNull SferaScriptGrammarParser.LocalScopeInitContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link SferaScriptGrammarParser#action}.
 	 * @param ctx the parse tree
 	 */
