@@ -635,7 +635,6 @@ public class InterfaceCache {
 		
 		try (BufferedReader reader = Files.newBufferedReader(filePath, Sfera.CHARSET)) {
 			eventWriter.add(eventFactory.createStartElement("", "", elementLocalName));
-		    eventWriter.add(NL);
 		    
 		    StringBuilder content = new StringBuilder();
 		    String line = null;
@@ -644,7 +643,6 @@ public class InterfaceCache {
 		    }
 		    
 		    eventWriter.add(eventFactory.createCData(content.substring(0, content.length() - 1)));
-		    eventWriter.add(NL);
 		    
 		    eventWriter.add(eventFactory.createEndElement("", "", elementLocalName));
 		    eventWriter.add(NL);
