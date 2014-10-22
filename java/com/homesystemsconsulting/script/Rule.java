@@ -53,7 +53,7 @@ public class Rule {
 		try {
 			return condition.eval(event);
 		} catch (Exception e) {
-			SferaScriptEngine.LOG.error("Error evaluating trigger condition - file " + scriptFile + ": " + e.getLocalizedMessage());
+			ScriptsEngine.LOG.error("Error evaluating trigger condition - file " + scriptFile + ": " + e.getLocalizedMessage());
 			return false;
 		}
 	}

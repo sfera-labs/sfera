@@ -35,13 +35,11 @@ public class ActionTask extends Task {
 			// add global (directory) scope
 			b.putAll(engine.getBindings(ScriptContext.ENGINE_SCOPE));
 			// add local (file) scope
-			if (localScope != null) {
-				b.putAll(localScope);
-			}
+			b.putAll(localScope);
 			// add "_e" variable
 			b.put("_e", triggerEvent);
 			rule.action.eval(b);
-			SferaScriptEngine.LOG.info("action executed - file '" + rule.scriptFile + "' line " + rule.startLine);
+			ScriptsEngine.LOG.info("action executed - file '" + rule.scriptFile + "' line " + rule.startLine);
 		} catch (Throwable e) {
 			int line = rule.startLine;
 			if (e instanceof ScriptException) {
@@ -49,7 +47,7 @@ public class ActionTask extends Task {
 					line += ((ScriptException) e).getLineNumber() - 1;
 				}
 			}
-			SferaScriptEngine.LOG.error("Error executing action - file '" + rule.scriptFile + "' line " + line + ": " + e.getLocalizedMessage());
+			ScriptsEngine.LOG.error("Error executing action - file '" + rule.scriptFile + "' line " + line + ": " + e.getLocalizedMessage());
 		}
 	}
 }

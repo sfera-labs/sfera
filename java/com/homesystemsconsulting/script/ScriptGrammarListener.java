@@ -1,5 +1,6 @@
 package com.homesystemsconsulting.script;
 
+import java.nio.file.FileSystem;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,6 +8,7 @@ import java.util.HashSet;
 
 import javax.script.Bindings;
 import javax.script.Compilable;
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
@@ -20,7 +22,7 @@ import com.homesystemsconsulting.script.parser.SferaScriptGrammarParser.StableEv
 import com.homesystemsconsulting.script.parser.SferaScriptGrammarParser.TransientEventContext;
 import com.homesystemsconsulting.script.parser.SferaScriptGrammarParser.TriggerContext;
 
-public class SferaScriptGrammarListenerImplementation extends SferaScriptGrammarBaseListener {
+public class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 	
 	private final Compilable engine;
 	private final Path scriptFile;
@@ -34,12 +36,17 @@ public class SferaScriptGrammarListenerImplementation extends SferaScriptGrammar
 	/**
 	 * 
 	 * @param scriptFile
+	 * @param fileSystem 
 	 * @param engine
 	 */
-	public SferaScriptGrammarListenerImplementation(Path scriptFile, Compilable engine) {
+	public ScriptGrammarListener(Path scriptFile, FileSystem fileSystem, Compilable engine) {
+		ScriptEngine se = (ScriptEngine) engine;
 		this.scriptFile = scriptFile;
 		this.engine = engine;
-		this.localScope = ((ScriptEngine) engine).createBindings();
+		this.localScope = se.createBindings();
+		
+		se.put(ScriptLoader.VAR_NAME, new ScriptLoader(se, fileSystem, se.getBindings(ScriptContext.ENGINE_SCOPE)));
+		this.localScope.put(ScriptLoader.VAR_NAME, new ScriptLoader(se, fileSystem, localScope));
 	}
 	
 	@Override

@@ -21,6 +21,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.script.Compilable;
+import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
@@ -40,14 +41,22 @@ import com.homesystemsconsulting.script.parser.SferaScriptGrammarParser.ParseCon
 import com.homesystemsconsulting.util.logging.SystemLogger;
 
 
-public class SferaScriptEngine implements EventListener {
+public class ScriptsEngine implements EventListener {
 
-	public static final SferaScriptEngine INSTANCE = new SferaScriptEngine();
+	public static final ScriptsEngine INSTANCE = new ScriptsEngine();
 	private static final ScriptEngineManager SCRIPT_ENGINE_MANAGER = new ScriptEngineManager();
 	static final SystemLogger LOG = SystemLogger.getLogger("scripts");
 	
     private static HashMap<String, HashSet<Rule>> triggersActionsMap;
     private static HashMap<Path, List<String>> errors;
+    
+    /**
+     * 
+     * @return
+     */
+    private static ScriptEngine getNewEngine() {
+    	return SCRIPT_ENGINE_MANAGER.getEngineByName("nashorn");
+	}
     
     /**
      * 
@@ -131,15 +140,14 @@ public class SferaScriptEngine implements EventListener {
      * @throws IOException
      */
     public synchronized static void loadScriptFiles() throws IOException {
-    	Path localScriptsDir = Paths.get("scripts");
     	try {
 	    	triggersActionsMap = new HashMap<String, HashSet<Rule>>();
 	    	errors = new HashMap<Path, List<String>>();
 	    	
-	    	loadScriptFilesIn(localScriptsDir);
+	    	loadScriptFilesIn(FileSystems.getDefault());
 	    	for (Plugin plugin : Sfera.getPlugins()) {
 				try (FileSystem pluginFs = FileSystems.newFileSystem(plugin.getPath(), null)) {
-					loadScriptFilesIn(pluginFs.getPath("scripts"));
+					loadScriptFilesIn(pluginFs);
 				}
 		    }
 	    	
@@ -168,7 +176,7 @@ public class SferaScriptEngine implements EventListener {
 					}
 				};
 	    		
-				FilesWatcher.register(localScriptsDir, reloadScriptFiles);
+				FilesWatcher.register(Paths.get("scripts"), reloadScriptFiles);
 				FilesWatcher.register(Paths.get("plugins"), reloadScriptFiles);
 				
 			} catch (Exception e) {
@@ -179,22 +187,22 @@ public class SferaScriptEngine implements EventListener {
     
     /**
      * 
-     * @param scriptsDirectory
+     * @param fileSystem
      * @throws IOException
      */
-    private static void loadScriptFilesIn(Path scriptsDirectory) throws IOException {
+    private static void loadScriptFilesIn(final FileSystem fileSystem) throws IOException {
     	try {
-    		Files.walkFileTree(scriptsDirectory, new SimpleFileVisitor<Path>() {
+    		Files.walkFileTree(fileSystem.getPath("scripts"), new SimpleFileVisitor<Path>() {
     			
     			@Override
     			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
     				try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
-    					Compilable engine = (Compilable) SCRIPT_ENGINE_MANAGER.getEngineByName("nashorn");
+    					Compilable engine = (Compilable) getNewEngine();
     					for (Path file : stream) {
     						if (Files.isRegularFile(file) && file.getFileName().toString().endsWith(".ev")) {
     							LOG.debug("loading script file " + file);
     							try {
-    								parseScriptFile(file, engine);
+    								parseScriptFile(file, fileSystem, engine);
     							} catch (IOException e) {
     								addError(file, "IOException: " + e.getLocalizedMessage());
     							}
@@ -224,11 +232,12 @@ public class SferaScriptEngine implements EventListener {
 	/**
 	 * 
 	 * @param scriptFile
+	 * @param fileSystem 
 	 * @param engine
 	 * @param localScope 
 	 * @throws IOException
 	 */
-    private static void parseScriptFile(Path scriptFile, Compilable engine) throws IOException {
+    private static void parseScriptFile(Path scriptFile, FileSystem fileSystem, Compilable engine) throws IOException {
     	try (BufferedReader r = Files.newBufferedReader(scriptFile, Sfera.CHARSET)) {
     		SferaScriptGrammarLexer lexer = new SferaScriptGrammarLexer(new ANTLRInputStream(r));
         	CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -250,7 +259,7 @@ public class SferaScriptEngine implements EventListener {
             	return;
         	}
             
-        	SferaScriptGrammarListenerImplementation scriptListener = new SferaScriptGrammarListenerImplementation(scriptFile, engine);
+        	ScriptGrammarListener scriptListener = new ScriptGrammarListener(scriptFile, fileSystem, engine);
         	ParseTreeWalker.DEFAULT.walk(scriptListener, tree);
         	
         	if (scriptListener.errors.size() != 0) {
