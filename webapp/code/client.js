@@ -242,7 +242,7 @@ var urls = {
 		case "dictionary":  return "/"+config.interf+"/dictionary.xml";
 		case "index" :      return "/"+config.interf+"/index.xml";
 		case "subscribe" :  return "/x/subscribe?"+(config.clientId?config.clientId+"&":"")+"nodes=*";
-		case "state" :      return "/x/status/"+config.clientId+"?";
+		case "state" :      return "/x/state/"+config.clientId+"?";
 		}
 	}
 };
@@ -264,14 +264,14 @@ function Client() {
 		"dictionary":-1,
 		"index":-1,
 		"subscribe":-1,
-		"status":-1
+		"state":-1
 	};
 	
 	this.remoteTs = {
 		"dictionary":-1,
 		"index":-1,
 		"subscribe":-1,
-		"status":-1
+		"state":-1
 	};
 	
 	// get current timestamp
@@ -288,8 +288,8 @@ function Client() {
 	
 	// sync, if necessary
 	this.sync = function () {
-		// force status?
-		this.localTs.status = -1;
+		// force state?
+		this.localTs.state = -1;
 		
 		for (var s in this.localTs) {
 			if (this.localTs[s] == -1 || this.localTs[s] < this.remoteTs[s]) {
@@ -309,7 +309,7 @@ function Client() {
 			cSync = "index";
 			req.open(urls.get("index"));
 		}
-		// status
+		// state
 		else {
 			cSync = "state";
 			req.open(urls.get("state"));
@@ -323,7 +323,7 @@ function Client() {
 		e.innerHTML += cSync+" loaded:<br><textarea style='width:500px; height:200px'>"+req.getResponseText()+"</textarea><br><br>";
 		self.localTs[cSync] = getTimestamp();
 		
-		var status;
+		var state;
 		
 		switch (cSync) {
 		case "dictionary":
@@ -336,10 +336,10 @@ function Client() {
 			self.showPage();
 			break;
 		case "subscribe":
-			status = JSON.parse(req.getResponseText());
+			state = JSON.parse(req.getResponseText());
 			break;
-		case "status":
-			status = JSON.parse(req.getResponseText());
+		case "state":
+			state = JSON.parse(req.getResponseText());
 			break;
 		}
 		
