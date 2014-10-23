@@ -153,22 +153,21 @@ public class ConnectionHandler extends Task {
 		WebServer.getLogger().debug("processing request from: " + connection.getInetAddress() + " URI: " + uri + (token == null ? "" : " User: " + token.getUser().getUsername()));
 		
 		if (uri.startsWith(WebServer.API_BASE_URI)) {
+			HashMap<String, String> query = new HashMap<String, String>();;
 			int qmIdx = uri.indexOf('?');
-			HashMap<String, String> query;
 			if (qmIdx >= 0) {
-				query = new HashMap<String, String>();
 				String queryString = uri.substring(qmIdx + 1);
 				for (String pair : queryString.split("&")) {
 					String[] key_val = pair.split("=");
-					query.put(key_val[0], key_val[1]);
+					if (key_val.length == 2) {
+						query.put(key_val[0], key_val[1]);
+					}
 				}
 				uri = uri.substring(0, qmIdx);
-			} else {
-				query = null;
 			}
 			
 			return processApiRequest(uri.substring(WebServer.API_BASE_URI.length()), token, query, httpRequestHeader);
-		
+			
 		} else {
 			return InterfaceCache.processFileRequest(uri, token, httpRequestHeader, this);
 		}
@@ -189,15 +188,16 @@ public class ConnectionHandler extends Task {
 
 	/**
 	 * 
-	 * @param command
+	 * @param request
 	 * @param token
 	 * @param query
 	 * @param httpRequestHeader
 	 * @return
 	 * @throws Exception
 	 */
-	private boolean processApiRequest(String command, Token token, HashMap<String, String> query, HttpRequestHeader httpRequestHeader) throws Exception {
-		if (command.equals("login")) {
+	private boolean processApiRequest(String request, Token token, HashMap<String, String> query, HttpRequestHeader httpRequestHeader) throws Exception {
+		
+		if (request.equals("login")) {
 			login(token, query, httpRequestHeader);
 			return true;
 		}
@@ -207,22 +207,22 @@ public class ConnectionHandler extends Task {
 			return true;
 		}
 		
-		if (command.equals("logout")) {
+		if (request.equals("logout")) {
 			logout(token);
 			return true;
 		}
 		
-		if (command.equals("subscribe")) {
+		if (request.equals("subscribe")) {
 			subscribe(token, query);
 			return true;
 		}
 		
-		if (command.startsWith("status/")) {
-			status(command.substring(7), token, query);
+		if (request.startsWith("state/")) {
+			state(request.substring(6), token, query);
 			return true;
 		}
 		
-		WebServer.getLogger().warning("unknown API request: " + command);
+		WebServer.getLogger().warning("unknown API request: " + request);
 		return false;
 	}
 
@@ -232,7 +232,7 @@ public class ConnectionHandler extends Task {
 	 * @param token
 	 * @param query
 	 */
-	private void status(String id, Token token, HashMap<String, String> query) {
+	private void state(String id, Token token, HashMap<String, String> query) {
 
 		// TODO
 		try {
@@ -264,8 +264,10 @@ public class ConnectionHandler extends Task {
 	 * @throws Exception
 	 */
 	private void login(Token token, HashMap<String, String> query, HttpRequestHeader httpRequestHeader) throws Exception {
-		User user = null;
-		if (query == null) {
+		String username = query.get("user");
+		String password = query.get("password");
+		
+		if (username == null || password == null) {
 			if (token != null) {
 				ok(null, null);
 			} else {
@@ -273,13 +275,10 @@ public class ConnectionHandler extends Task {
 			}
 			
 		} else {
-			String username = query.get("user");
-			String password = query.get("password");
-			
 			if (token != null) {
 				Access.removeToken(token.getUUID());
 			}
-			user = Access.authenticate(username, password);
+			User user = Access.authenticate(username, password);
 			if (user != null) {
 				String tokenUUID = Access.assignToken(user, httpRequestHeader);
 				setTokenCookie(tokenUUID);
