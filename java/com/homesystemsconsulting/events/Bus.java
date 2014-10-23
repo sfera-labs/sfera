@@ -2,6 +2,7 @@ package com.homesystemsconsulting.events;
 
 import java.util.EventListener;
 import java.util.HashMap;
+import java.util.Map;
 
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
@@ -13,7 +14,7 @@ public abstract class Bus {
 	
 	private static final SubscriberExceptionHandler SUBSCRIBER_EXCEPTION_HANDLER = new EventsSubscriberExceptionHandler();
 	private static final EventBus EVENT_BUS = new AsyncEventBus(TasksManager.DEFAULT.getExecutorService(), SUBSCRIBER_EXCEPTION_HANDLER);
-	private static final HashMap<String, Event> EVENTS_MAP = new HashMap<String, Event>();
+	private static final Map<String, Event> EVENTS_MAP = new HashMap<String, Event>();
 	
 	/**
 	 * 
@@ -43,7 +44,7 @@ public abstract class Bus {
 	 * @param event
 	 */
 	public static void postIfChanged(Event event) {
-		Object currVal = getEventValue(event.getId());
+		Object currVal = getValueOf(event.getId());
 		Object newVal = event.getValue();
 		
 		if (currVal == null) {
@@ -57,14 +58,22 @@ public abstract class Bus {
 	
 	/**
 	 * 
-	 * @param eventId
+	 * @param id
 	 * @return
 	 */
-	public static Object getEventValue(String eventId) {
-		Event ev = EVENTS_MAP.get(eventId);
+	public static Object getValueOf(String id) {
+		Event ev = EVENTS_MAP.get(id);
 		if (ev == null) {
 			return null;
 		}
 		return ev.getValue();
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public static Map<String, Event> getCurrentState() {
+		return new HashMap<>(EVENTS_MAP);
 	}
 }

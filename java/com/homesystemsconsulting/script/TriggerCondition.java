@@ -173,7 +173,7 @@ public class TriggerCondition {
 	 * @throws Exception 
 	 */
 	private boolean eval(StringComparisonContext ctx) throws Exception {
-		Object value = Bus.getEventValue(ctx.FinalNodeId().getText());
+		Object value = Bus.getValueOf(ctx.FinalNodeId().getText());
 		
 		if (value == null) {
 			return false;
@@ -209,7 +209,7 @@ public class TriggerCondition {
 	 * @throws Exception 
 	 */
 	private boolean eval(NumberComparisonContext ctx) throws Exception {
-		Object value = Bus.getEventValue(ctx.FinalNodeId().getText());
+		Object value = Bus.getValueOf(ctx.FinalNodeId().getText());
 		
 		if (value == null) {
 			return false;
@@ -242,7 +242,7 @@ public class TriggerCondition {
 	 * @throws Exception 
 	 */
 	private boolean eval(BooleanComparisonContext ctx) throws Exception {
-		Object value = Bus.getEventValue(ctx.FinalNodeId().getText());
+		Object value = Bus.getValueOf(ctx.FinalNodeId().getText());
 		
 		if (value == null) {
 			return false;
@@ -266,7 +266,7 @@ public class TriggerCondition {
 	 * @return
 	 */
 	private boolean eval(UnknownComparisonContext ctx) {
-		Object value = Bus.getEventValue(ctx.FinalNodeId().getText());
+		Object value = Bus.getValueOf(ctx.FinalNodeId().getText());
 		
 		if (ctx.ET() != null) {
 			return value == null;

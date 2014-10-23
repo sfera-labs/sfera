@@ -5,20 +5,27 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.Socket;
 import java.net.SocketException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
-import java.util.UUID;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import org.json.simple.JSONObject;
 
 import com.homesystemsconsulting.core.Configuration;
 import com.homesystemsconsulting.core.Task;
 import com.homesystemsconsulting.core.TasksManager;
 import com.homesystemsconsulting.drivers.webserver.access.Access;
+import com.homesystemsconsulting.drivers.webserver.access.Subscription;
 import com.homesystemsconsulting.drivers.webserver.access.Token;
 import com.homesystemsconsulting.drivers.webserver.access.User;
 import com.homesystemsconsulting.drivers.webserver.util.DateUtil;
+import com.homesystemsconsulting.events.Event;
 
 public class ConnectionHandler extends Task {
 	private static final int SOCKET_TIMEOUT = 60000;
@@ -179,11 +186,11 @@ public class ConnectionHandler extends Task {
 	 * @return
 	 */
 	private Token getToken(HttpRequestHeader httpRequestHeader) {
-		String token = getCookieValue("token", httpRequestHeader.getCookies());
-		if (token == null) {
+		String tokenUUID = getCookieValue("token", httpRequestHeader.getCookies());
+		if (tokenUUID == null) {
 			return null;
 		}
-		return Access.getToken(token, httpRequestHeader);
+		return Access.getToken(tokenUUID, httpRequestHeader);
 	}
 
 	/**
@@ -196,7 +203,6 @@ public class ConnectionHandler extends Task {
 	 * @throws Exception
 	 */
 	private boolean processApiRequest(String request, Token token, HashMap<String, String> query, HttpRequestHeader httpRequestHeader) throws Exception {
-		
 		if (request.equals("login")) {
 			login(token, query, httpRequestHeader);
 			return true;
@@ -228,32 +234,53 @@ public class ConnectionHandler extends Task {
 
 	/**
 	 * 
-	 * @param id
-	 * @param token
-	 * @param query
-	 */
-	private void state(String id, Token token, HashMap<String, String> query) {
-
-		// TODO
-		try {
-			Thread.sleep(5000);
-		} catch (InterruptedException e) {}
-		
-		ok(null, null);
-	}
-
-	/**
-	 * 
 	 * @param token
 	 * @param query
 	 */
 	private void subscribe(Token token, HashMap<String, String> query) {
-		//TODO
 		String id = query.get("id");
-		if (id == null) {
-			id = UUID.randomUUID().toString();
-		}
+		String nodes = query.get("nodes");
+		id = token.subscribe(id, nodes);
+		
 		ok("{\"id\":\"" + id + "\"}", "application/json");
+	}
+	
+	/**
+	 * 
+	 * @param id
+	 * @param token
+	 * @param query
+	 * @throws InterruptedException 
+	 * @throws IOException 
+	 */
+	@SuppressWarnings("unchecked")
+	private void state(String id, Token token, HashMap<String, String> query) throws InterruptedException, IOException {
+		long ts;
+		try {
+			ts = Long.parseLong(query.get("ts"));
+		} catch (NumberFormatException nfe) {
+			ts = 0;
+		}
+		
+		Subscription s = token.getSubscription(id);
+		if (s != null) {
+			Map<String, Event> changes = s.pollChanges(ts, 5, TimeUnit.SECONDS);
+			JSONObject obj = new JSONObject();
+			obj.put("timestamp", System.currentTimeMillis());
+			JSONObject nodes = new JSONObject();
+			for (Entry<String, Event> change : changes.entrySet()) {
+				nodes.put(change.getKey(), change.getValue().getValue());
+			}
+			obj.put("nodes", nodes);
+			
+			StringWriter out = new StringWriter();
+			obj.writeJSONString(out);
+			
+			ok(out.toString(), "application/json");
+			
+		} else {
+			notFoundError();
+		}
 	}
 
 	/**
