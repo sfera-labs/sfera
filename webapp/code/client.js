@@ -289,7 +289,7 @@ function Client() {
 	// sync, if necessary
 	this.sync = function () {
 		// force status?
-		//this.localTs.status = -1;
+		this.localTs.status = -1;
 		
 		for (var s in this.localTs) {
 			if (this.localTs[s] == -1 || this.localTs[s] < this.remoteTs[s]) {
