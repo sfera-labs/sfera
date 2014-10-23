@@ -337,6 +337,8 @@ function Client() {
 			break;
 		case "subscribe":
 			state = JSON.parse(req.getResponseText());
+			if (state.id)
+				config.clientId = state.id;
 			break;
 		case "state":
 			state = JSON.parse(req.getResponseText());
