@@ -242,7 +242,7 @@ var urls = {
 		case "dictionary":  return "/"+config.interf+"/dictionary.xml";
 		case "index" :      return "/"+config.interf+"/index.xml";
 		case "subscribe" :  return "/x/subscribe?"+(config.clientId?config.clientId+"&":"")+"nodes=*";
-		case "state" :      return "/x/state/"+config.clientId+"?";
+		case "state" :      return "/x/state/"+config.clientId+"?ts="+client.stateTs;
 		}
 	}
 };
@@ -259,19 +259,18 @@ function Client() {
 	
 	var self = this;
 	
+	this.stateTs = -1;
+	this.subscribed = false; // change this
+	
 	// local timestamps, to check required updates
 	this.localTs = {
 		"dictionary":-1,
-		"index":-1,
-		"subscribe":-1,
-		"state":-1
+		"index":-1
 	};
 	
 	this.remoteTs = {
 		"dictionary":-1,
-		"index":-1,
-		"subscribe":-1,
-		"state":-1
+		"index":-1
 	};
 	
 	// get current timestamp
@@ -288,40 +287,31 @@ function Client() {
 	
 	// sync, if necessary
 	this.sync = function () {
-		// force state?
-		this.localTs.state = -1;
-		
 		for (var s in this.localTs) {
-			if (this.localTs[s] == -1 || this.localTs[s] < this.remoteTs[s]) {
+			if (this.localTs[s] == -1) { // || this.localTs[s] < this.remoteTs[s]) {
 				cSync = s;
 				req.open(urls.get(s),20);
-				break;
+				return; // one resource per time
 			}
 		}
-		/*
-		// dictionary?
-		if (this.localTs.dictionary == -1 || this.localTs.dictionary < this.remoteTs.dictionary) {
-			cSync = "dictionary";
-			req.open(urls.get("dictionary"));
-		}
-		// index
-		else if (this.localTs.index == -1 || this.localTs.index < this.remoteTs.index) {
-			cSync = "index";
-			req.open(urls.get("index"));
-		}
-		// state
-		else {
-			cSync = "state";
-			req.open(urls.get("state"));
-		}
-		*/
+		
+		if (!this.subscribed) {
+			cSync = "subscribe";
+			req.open(urls.get("subscribe"));
+			return;
+		} 
+		
+		cSync = "state";
+		req.open(urls.get("state"));
 	};
 	
 	function onReqLoaded() {
 		console.log(cSync+" loaded");
 		var e = document.getElementById("output");
 		e.innerHTML += cSync+" loaded:<br><textarea style='width:500px; height:200px'>"+req.getResponseText()+"</textarea><br><br>";
-		self.localTs[cSync] = getTimestamp();
+		
+		if (self.localTs[cSync] != null)
+			self.localTs[cSync] = getTimestamp();
 		
 		var state;
 		
@@ -335,13 +325,16 @@ function Client() {
 			parser.parseInterface(req.getResponseXML(), {cInterface:cInterface});
 			self.showPage();
 			break;
+			
 		case "subscribe":
+			self.subscribed = true;
+			
+		case "state":
 			state = JSON.parse(req.getResponseText());
 			if (state.id)
 				config.clientId = state.id;
-			break;
-		case "state":
-			state = JSON.parse(req.getResponseText());
+			if (state.timestamp)
+				self.stateTs = state.timestamp;
 			break;
 		}
 		
