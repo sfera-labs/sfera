@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.net.Socket;
-import java.net.SocketException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,29 +26,27 @@ import com.homesystemsconsulting.drivers.webserver.util.DateUtil;
 import com.homesystemsconsulting.events.Event;
 
 public class ConnectionHandler extends Task {
-	private static final int SOCKET_TIMEOUT = 60000;
-
+	
 	private static TasksManager tasksManager;
+
+	private static int maxRequestThreads;
 	private static final Object tasksManagerLock = new Object();
 
-	private final Socket connection;
-	private final String protocol;
+	private WebServer webServer;
+	private final Connection connection;
 	private PrintWriter out;
 	private BufferedOutputStream dataOut;
 	private BufferedReader in;
 	
 	/**
 	 * 
-	 * @param driverId
+	 * @param webServer
 	 * @param connection
-	 * @param protocol
-	 * @throws SocketException
 	 */
-	public ConnectionHandler(String driverId, Socket connection, String protocol) throws SocketException {
-		super(driverId + "#" + connection.getInetAddress());
+	public ConnectionHandler(WebServer webServer, Connection connection) {
+		super(webServer.getId() + ":ConnectionHandler:" + connection.getSocket().getRemoteSocketAddress());
+		this.webServer = webServer;
 		this.connection = connection;
-		this.connection.setSoTimeout(SOCKET_TIMEOUT);
-		this.protocol = protocol;
 		tasksManager.execute(this);
 	}
 	
@@ -61,14 +57,19 @@ public class ConnectionHandler extends Task {
 	public static void init(Configuration configuration) {
 		synchronized (tasksManagerLock) {
 			if (tasksManager == null) {
-				Integer maxRequestThreads = configuration.getIntProperty("max_threads", null);
-				if (maxRequestThreads == null) {
-					int availableProcessors = Runtime.getRuntime().availableProcessors();
-					maxRequestThreads = availableProcessors * 128;
-				}
+				maxRequestThreads = configuration.getIntProperty(
+						"max_threads",  Runtime.getRuntime().availableProcessors() * 128);
 				tasksManager = new TasksManager(Executors.newFixedThreadPool(maxRequestThreads));
 			}
 		}
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public static int getMaxRequestThreads() {
+		return maxRequestThreads;
 	}
 	
 	/**
@@ -86,9 +87,9 @@ public class ConnectionHandler extends Task {
 	@Override
 	public void execute() {
 		try {
-			out = new PrintWriter(connection.getOutputStream());
-			dataOut = new BufferedOutputStream(connection.getOutputStream());
-			in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			out = new PrintWriter(connection.getSocket().getOutputStream());
+			dataOut = new BufferedOutputStream(connection.getSocket().getOutputStream());
+			in = new BufferedReader(new InputStreamReader(connection.getSocket().getInputStream()));
 			
 			boolean keepAlive = true;
 			while (keepAlive) {
@@ -109,8 +110,7 @@ public class ConnectionHandler extends Task {
 									keepAlive = false;
 								}
 							} catch (Exception e) {
-								WebServer.getLogger().warning("error processing request: " + e);
-								e.printStackTrace();
+								webServer.getLogger().debug("error processing request: " + e);
 								keepAlive = false;
 							}
 						}
@@ -137,7 +137,7 @@ public class ConnectionHandler extends Task {
 			}
 			
 		} catch (Exception e) {
-			WebServer.getLogger().debug("connection exception: " + e);
+			webServer.getLogger().debug("connection exception: " + e);
 			
 		} finally {
 			try { in.close(); } catch (Exception e) {}
@@ -145,7 +145,7 @@ public class ConnectionHandler extends Task {
 			try { dataOut.close(); } catch (Exception e) {}
 		}
 		
-		WebServer.getLogger().debug("connection " + connection.getInetAddress() + " terminated");
+		webServer.getLogger().debug("connection " + connection.getSocket().getRemoteSocketAddress() + " terminated");
 	}
 
 	/**
@@ -157,7 +157,7 @@ public class ConnectionHandler extends Task {
 	private boolean processRequest(HttpRequestHeader httpRequestHeader) throws Exception {
 		String uri = httpRequestHeader.getURI();
 		Token token = getToken(httpRequestHeader);
-		WebServer.getLogger().debug("processing request from: " + connection.getInetAddress() + " URI: " + uri + (token == null ? "" : " User: " + token.getUser().getUsername()));
+		webServer.getLogger().debug("processing request from: " + connection.getSocket().getRemoteSocketAddress() + " URI: " + uri + (token == null ? "" : " User: " + token.getUser().getUsername()));
 		
 		if (uri.startsWith(WebServer.API_BASE_URI)) {
 			HashMap<String, String> query = new HashMap<String, String>();;
@@ -176,7 +176,7 @@ public class ConnectionHandler extends Task {
 			return processApiRequest(uri.substring(WebServer.API_BASE_URI.length()), token, query, httpRequestHeader);
 			
 		} else {
-			return InterfaceCache.processFileRequest(uri, token, httpRequestHeader, this);
+			return InterfaceCache.processFileRequest(webServer, uri, token, httpRequestHeader, this);
 		}
 	}
 
@@ -228,7 +228,7 @@ public class ConnectionHandler extends Task {
 			return true;
 		}
 		
-		WebServer.getLogger().warning("unknown API request: " + request);
+		webServer.getLogger().warning("unknown API request: " + request);
 		return false;
 	}
 
@@ -309,10 +309,10 @@ public class ConnectionHandler extends Task {
 			if (user != null) {
 				String tokenUUID = Access.assignToken(user, httpRequestHeader);
 				setTokenCookie(tokenUUID);
-				WebServer.getLogger().info("login: " + username);
+				webServer.getLogger().info("login: " + username);
 				
 			} else {
-				WebServer.getLogger().warning("failed login attempt - username: " + username);
+				webServer.getLogger().warning("failed login attempt - username: " + username);
 				notAuthorizedError();
 			}
 		}
@@ -324,7 +324,7 @@ public class ConnectionHandler extends Task {
 	 */
 	private void logout(Token token) {
 		Access.removeToken(token.getUUID());
-		WebServer.getLogger().info("logout: " + token.getUser().getUsername());
+		webServer.getLogger().info("logout: " + token.getUser().getUsername());
 		setTokenCookie(null);
 	}
 
@@ -401,7 +401,7 @@ public class ConnectionHandler extends Task {
 		out.print("HTTP/1.1 307 Temporary Redirect\r\n");
 		out.print("Location: ");
 		if (httpRequestHeader.getHost() != null) {				
-			out.print(protocol);
+			out.print(connection.getProtocol());
 			out.print("://");
 			out.print(httpRequestHeader.getHost());
 		}

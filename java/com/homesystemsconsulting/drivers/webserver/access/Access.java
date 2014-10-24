@@ -31,7 +31,7 @@ public abstract class Access {
 	 * 
 	 * @throws Exception
 	 */
-	public static void init() throws Exception {
+	public static void init(WebServer webServer) throws Exception {
 		List<String> lines = Files.readAllLines(USERS_FILE_PATH, Sfera.CHARSET);
 		int lineNum = 0;
 		for (String line : lines) {
@@ -42,7 +42,7 @@ public abstract class Access {
 			    	User u = new User(splitted[0], splitted[1], splitted[2]);
 			    	users.put(u.getUsername(), u);
 		    	} catch (Exception e) {
-		    		WebServer.getLogger().error("error reading file " + USERS_FILE_PATH + " on line " + lineNum);
+		    		webServer.getLogger().error("error reading file " + USERS_FILE_PATH + " on line " + lineNum);
 		    	}
 	    	}
 	    	lineNum++;

@@ -5,8 +5,6 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -62,19 +60,14 @@ public class Plugin {
 	 * @param driverName
 	 * @return
 	 */
-	public Set<String> getDriverClasses(String driverName) {
+	public String getDriverClass(String driverName) {
 		try {
 			if (driverNodes != null) {
 				for (int i = 0; i < driverNodes.getLength(); i++) {
 					Element driverNode = (Element) driverNodes.item(i);
 					
 					if (driverNode.getElementsByTagName("name").item(0).getTextContent().equalsIgnoreCase(driverName)) {
-						NodeList classList = driverNode.getElementsByTagName("class");
-						Set<String> classNames = new HashSet<String>(classList.getLength());
-						for (int j = 0; j < classList.getLength(); j++) {
-							classNames.add(classList.item(j).getTextContent());
-						}
-						return classNames;
+						return driverNode.getElementsByTagName("class").item(0).getTextContent();
 					}
 				}
 			}

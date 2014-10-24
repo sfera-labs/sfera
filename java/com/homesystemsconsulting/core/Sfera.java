@@ -12,10 +12,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.EventListener;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import com.homesystemsconsulting.apps.Application;
@@ -193,37 +191,35 @@ public class Sfera {
 				String driverType = props.getProperty(propName);
 				if (driverType != null) {
 					try {
-						Set<String> driverClasses = null;
+						String driverClassName = null;
 						for (Plugin plugin : plugins) {
-							if ((driverClasses = plugin.getDriverClasses(driverType)) != null) {
+							if ((driverClassName = plugin.getDriverClass(driverType)) != null) {
 								break;
 							}
 						}
 						
-						if (driverClasses == null) {
+						if (driverClassName == null) {
 							/*
 							 * If the class is not found in the plugins
 							 * we try using the declared type
 							 * as the driver class
 							 */
-							driverClasses = new HashSet<String>();
-							driverClasses.add(driverType);
+							driverClassName = driverType;
 						}
 						
-						for (String driverClassName : driverClasses) {
-							Class<?> driverClass = Class.forName(driverClassName);
-							Constructor<?> constructor = driverClass.getConstructor(new Class[]{String.class});
-							Object driverInstance = constructor.newInstance(propName);
-							if (driverInstance instanceof Driver) {
-								Driver d = (Driver) driverInstance;
-								drivers.add(d);
-								ScriptsEngine.putInGlobalScope(d.getId(), d);
-								if (d instanceof EventListener) {
-									Bus.register((EventListener) d);
-								}
-								SystemLogger.SYSTEM.info("drivers", "driver '" + propName + "' of type '" + driverType + "' instantiated");
+						Class<?> driverClass = Class.forName(driverClassName);
+						Constructor<?> constructor = driverClass.getConstructor(new Class[]{String.class});
+						Object driverInstance = constructor.newInstance(propName);
+						if (driverInstance instanceof Driver) {
+							Driver d = (Driver) driverInstance;
+							drivers.add(d);
+							ScriptsEngine.putInGlobalScope(d.getId(), d);
+							if (d instanceof EventListener) {
+								Bus.register((EventListener) d);
 							}
+							SystemLogger.SYSTEM.info("drivers", "driver '" + propName + "' of type '" + driverType + "' instantiated");
 						}
+						
 					} catch (Throwable e) {
 						SystemLogger.SYSTEM.error("drivers", "error instantiating driver '" + propName + "' of type '" + driverType + "': " + e);
 						e.printStackTrace();

@@ -33,7 +33,6 @@ import com.homesystemsconsulting.core.FilesWatcher;
 import com.homesystemsconsulting.core.Plugin;
 import com.homesystemsconsulting.core.Sfera;
 import com.homesystemsconsulting.core.Task;
-import com.homesystemsconsulting.drivers.webserver.WebServer;
 import com.homesystemsconsulting.events.Event;
 import com.homesystemsconsulting.script.parser.SferaScriptGrammarLexer;
 import com.homesystemsconsulting.script.parser.SferaScriptGrammarParser;
@@ -180,7 +179,7 @@ public class ScriptsEngine implements EventListener {
 				FilesWatcher.register(Paths.get("plugins"), reloadScriptFiles);
 				
 			} catch (Exception e) {
-				WebServer.getLogger().error("error registering script files watcher: " + e);
+				LOG.error("error registering script files watcher: " + e);
 			}
     	}
 	}

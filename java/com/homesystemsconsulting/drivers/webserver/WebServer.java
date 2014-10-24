@@ -1,20 +1,22 @@
 package com.homesystemsconsulting.drivers.webserver;
 
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import com.homesystemsconsulting.core.Configuration;
 import com.homesystemsconsulting.core.Sfera;
+import com.homesystemsconsulting.core.TasksManager;
 import com.homesystemsconsulting.drivers.Driver;
 import com.homesystemsconsulting.drivers.webserver.access.Access;
 import com.homesystemsconsulting.drivers.webserver.access.Token;
 import com.homesystemsconsulting.drivers.webserver.util.ResourcesUtil;
 import com.homesystemsconsulting.util.logging.SystemLogger;
 
-public abstract class WebServer extends Driver {
+public class WebServer extends Driver {
 	
 	static final Path ROOT = Paths.get("webapp/");
 	static final String HTTP_HEADER_FIELD_SERVER = "Sfera " + Sfera.VERSION;
@@ -23,14 +25,14 @@ public abstract class WebServer extends Driver {
 	private static boolean initialized = false;
 	private static final Object initLock = new Object();
 	
-	private static SystemLogger log;
+	private ArrayBlockingQueue<Connection> connectionsQ;
 	
-	private ServerSocket socket;
+	private List<SocketListner> socketListners;
 	
 	/**
 	 * 
 	 */
-	protected WebServer(String id) {
+	public WebServer(String id) {
 		super(id);
 	}
 
@@ -38,8 +40,6 @@ public abstract class WebServer extends Driver {
 	protected boolean onInit(Configuration configuration) throws InterruptedException {
 		synchronized (initLock) {
 			if (!initialized) {
-				log = super.log;
-				
 				ConnectionHandler.init(configuration);
 				try {
 					ResourcesUtil.lookForPluginsOverwritingWebapp();
@@ -47,12 +47,12 @@ public abstract class WebServer extends Driver {
 					log.error("error scanning plugins directory: " + e);
 				}
 				try {
-					InterfaceCache.init(configuration);
+					InterfaceCache.init(this, configuration);
 				} catch (Exception e) {
 					log.error("error creating cache: " + e);
 				}
 				try {
-					Access.init();
+					Access.init(this);
 				} catch (Exception e) {
 					log.error("error initializing access: " + e);
 					return false;
@@ -64,75 +64,54 @@ public abstract class WebServer extends Driver {
 			}			
 		}
 		
-		Integer port = configuration.getIntProperty(getProtocolName() + "_port", getDefaultPort());
+		connectionsQ = new ArrayBlockingQueue<>(ConnectionHandler.getMaxRequestThreads() + 50);
+		
+		Integer http_port = configuration.getIntProperty("http_port", null);
+		Integer https_port = configuration.getIntProperty("https_port", null);
+		
 		try {
-			socket = getServerSocket(port, configuration);
+			socketListners = new ArrayList<SocketListner>();
+			if (http_port != null) {
+				socketListners.add(new HttpSocketListner(this, http_port, connectionsQ));
+			}
+			if (https_port != null) {
+				String sslPassword = configuration.getProperty("ssl_password", "sferapass");
+				socketListners.add(new HttpsSocketListner(this, https_port, connectionsQ, sslPassword));
+			}
 		} catch (Exception e) {
 			log.error("error instantiating socket: " + e);
 			return false;
 		}
 		
-		log.info("accepting connections on port " + socket.getLocalPort());
+		for (SocketListner sl : socketListners) {
+			TasksManager.DEFAULT.execute(sl);
+		}
 		
 		return true;
 	}
-	
-	/**
-	 * 
-	 * @return
-	 */
-	public static SystemLogger getLogger() {
-		return log;
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	protected abstract int getDefaultPort();
-	
-	/**
-	 * 
-	 * @return
-	 */
-	protected abstract String getProtocolName();
-
-	/**
-	 * 
-	 * @param port
-	 * @param configuration
-	 * @return
-	 * @throws Exception
-	 */
-	protected abstract ServerSocket getServerSocket(int port, Configuration configuration) throws Exception;
 
 	@Override
 	protected boolean loop() throws InterruptedException {
-		Socket connection = null;
-		try {
-			connection = socket.accept();
-			log.debug("accepted connection from: " + connection.getInetAddress());
-			new ConnectionHandler(getId(), connection, getProtocolName());
-			
-		} catch (IOException e) {
-			log.error("error accepting connection: " + e);
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (IOException ioe) {}
-			}
-			
-			return false;
-		}
+		Connection c = connectionsQ.take();
+		log.debug("accepted connection from: " + c.getSocket().getRemoteSocketAddress());
+		new ConnectionHandler(this, c);
 		
 		return true;
 	}
 
 	@Override
 	protected void onQuit() throws InterruptedException {
-		try {
-			socket.close();
-		} catch (Exception e) {}
+		for (SocketListner sl : socketListners) {
+			sl.close();
+		}
 		ConnectionHandler.quit();
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public SystemLogger getLogger() {
+		return log;
 	}
 }
