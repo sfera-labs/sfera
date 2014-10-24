@@ -64,7 +64,7 @@ public abstract class WebServer extends Driver {
 			}			
 		}
 		
-		Integer port = configuration.getIntProperty(getProtocolName() + ".port", getDefaultPort());
+		Integer port = configuration.getIntProperty(getProtocolName() + "_port", getDefaultPort());
 		try {
 			socket = getServerSocket(port, configuration);
 		} catch (Exception e) {
