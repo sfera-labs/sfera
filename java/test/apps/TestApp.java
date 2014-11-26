@@ -2,10 +2,11 @@ package test.apps;
 
 import java.util.EventListener;
 
+import cc.sferalabs.sfera.apps.Application;
+import cc.sferalabs.sfera.events.NumberEvent;
+
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
-import com.homesystemsconsulting.apps.Application;
-import com.homesystemsconsulting.events.NumberEvent;
 
 
 public class TestApp extends Application implements EventListener {

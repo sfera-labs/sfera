@@ -1,6 +1,6 @@
 package test.drivers;
 
-import com.homesystemsconsulting.events.BooleanEvent;
+import cc.sferalabs.sfera.events.BooleanEvent;
 
 
 public class ZoneEvent extends BooleanEvent {

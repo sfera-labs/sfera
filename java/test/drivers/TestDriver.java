@@ -3,11 +3,11 @@ package test.drivers;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.homesystemsconsulting.core.Configuration;
-import com.homesystemsconsulting.drivers.Driver;
-import com.homesystemsconsulting.events.Bus;
-import com.homesystemsconsulting.events.NumberEvent;
-import com.homesystemsconsulting.events.StringEvent;
+import cc.sferalabs.sfera.core.Configuration;
+import cc.sferalabs.sfera.drivers.Driver;
+import cc.sferalabs.sfera.events.Bus;
+import cc.sferalabs.sfera.events.NumberEvent;
+import cc.sferalabs.sfera.events.StringEvent;
 
 public class TestDriver extends Driver {
 	
