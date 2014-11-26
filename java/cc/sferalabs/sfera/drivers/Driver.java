@@ -21,7 +21,7 @@ public abstract class Driver extends Task implements Node {
 	 * 
 	 * @param id
 	 */
-	protected Driver(String id) {
+	public Driver(String id) {
 		super("driver." + id);
 		this.id = id;
 		this.log = SystemLogger.getLogger("driver." + id);
