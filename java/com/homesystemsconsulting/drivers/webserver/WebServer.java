@@ -17,18 +17,18 @@ import com.homesystemsconsulting.drivers.webserver.util.ResourcesUtil;
 import com.homesystemsconsulting.util.logging.SystemLogger;
 
 public class WebServer extends Driver {
-	
+
 	static final Path ROOT = Paths.get("webapp/");
 	static final String HTTP_HEADER_FIELD_SERVER = "Sfera " + Sfera.VERSION;
 	static final String API_BASE_URI = "/x/";
-	
+
 	private static boolean initialized = false;
 	private static final Object initLock = new Object();
-	
+
 	private ArrayBlockingQueue<Connection> connectionsQ;
-	
+
 	private List<SocketListner> socketListners;
-	
+
 	/**
 	 * 
 	 */
@@ -37,7 +37,8 @@ public class WebServer extends Driver {
 	}
 
 	@Override
-	protected boolean onInit(Configuration configuration) throws InterruptedException {
+	protected boolean onInit(Configuration configuration)
+			throws InterruptedException {
 		synchronized (initLock) {
 			if (!initialized) {
 				ConnectionHandler.init(configuration);
@@ -57,45 +58,51 @@ public class WebServer extends Driver {
 					log.error("error initializing access: " + e);
 					return false;
 				}
-				
-				Token.maxAgeSeconds = configuration.getIntProperty("password_validity_minutes", 60) * 60;
-				
+
+				Token.maxAgeSeconds = configuration.getIntProperty(
+						"password_validity_minutes", 60) * 60;
+
 				initialized = true;
-			}			
+			}
 		}
-		
-		connectionsQ = new ArrayBlockingQueue<>(ConnectionHandler.getMaxRequestThreads() + 50);
-		
+
+		connectionsQ = new ArrayBlockingQueue<>(
+				ConnectionHandler.getMaxRequestThreads() + 50);
+
 		Integer http_port = configuration.getIntProperty("http_port", null);
 		Integer https_port = configuration.getIntProperty("https_port", null);
-		
+
 		try {
 			socketListners = new ArrayList<SocketListner>();
 			if (http_port != null) {
-				socketListners.add(new HttpSocketListner(this, http_port, connectionsQ));
+				socketListners.add(new HttpSocketListner(this, http_port,
+						connectionsQ));
 			}
 			if (https_port != null) {
-				String sslPassword = configuration.getProperty("ssl_password", "sferapass");
-				socketListners.add(new HttpsSocketListner(this, https_port, connectionsQ, sslPassword));
+				String sslPassword = configuration.getProperty("ssl_password",
+						"sferapass");
+				socketListners.add(new HttpsSocketListner(this, https_port,
+						connectionsQ, sslPassword));
 			}
 		} catch (Exception e) {
 			log.error("error instantiating socket: " + e);
 			return false;
 		}
-		
+
 		for (SocketListner sl : socketListners) {
 			TasksManager.DEFAULT.execute(sl);
 		}
-		
+
 		return true;
 	}
 
 	@Override
 	protected boolean loop() throws InterruptedException {
 		Connection c = connectionsQ.take();
-		log.debug("accepted connection from: " + c.getSocket().getRemoteSocketAddress());
+		log.debug("accepted connection from: "
+				+ c.getSocket().getRemoteSocketAddress());
 		new ConnectionHandler(this, c);
-		
+
 		return true;
 	}
 

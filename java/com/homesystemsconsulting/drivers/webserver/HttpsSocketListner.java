@@ -11,7 +11,9 @@ import javax.net.ssl.SSLServerSocketFactory;
 
 public class HttpsSocketListner extends SocketListner {
 
-	public HttpsSocketListner(WebServer webServer, int port, ArrayBlockingQueue<Connection> connectionsQ, String sslPassword) throws Exception {
+	public HttpsSocketListner(WebServer webServer, int port,
+			ArrayBlockingQueue<Connection> connectionsQ, String sslPassword)
+			throws Exception {
 		super(webServer, "https", connectionsQ);
 		SSLContext context = SSLContext.getInstance("SSLv3");
 		KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
