@@ -1,8 +1,0 @@
-<interface id="new" skin="charcoal" language="it_IT" title="My New Project" width="700" height="500">
-
-	<page id="page:homepage" title="" orientation="landscape" gestures="">
-		<text id="text1" x="500" y="320" width="160" height="18" text="this is some text" color="green" size="20"/>
-		<link id="link1" x="200" y="220" width="120" height="120" label="this is some text"/>
-	</page>
-
-</interface>

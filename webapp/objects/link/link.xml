@@ -1,6 +1,0 @@
-<obj name="link">
-	<attributes>
-		<attr name="label" type="string" default="" />
-		<attr name="link" type="string" default="" />
-	</attributes>
-</obj>

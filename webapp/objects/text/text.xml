@@ -1,7 +1,0 @@
-<obj name="text" iname="optional" grname="1">
-	<attributes>
-		<attr name="Position" type="pos" />
-		<attr name="Text" type="string" empty="true" />
-		<attr name="CSS Style" type="css" optional="true" />
-	</attributes>
-</obj>
