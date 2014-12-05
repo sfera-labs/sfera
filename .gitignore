@@ -6,6 +6,7 @@
 
 .settings/
 .classpath
+.project
 
 target/
 pom.xml.tag
@@ -22,5 +23,3 @@ release.properties
 ehthumbs.db
 Thumbs.db
 *.lck
-
-java/cc/sferalabs/sfera/drivers/iono/Iono.java
