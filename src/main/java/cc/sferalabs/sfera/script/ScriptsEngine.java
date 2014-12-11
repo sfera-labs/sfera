@@ -2,6 +2,7 @@ package cc.sferalabs.sfera.script;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -145,7 +146,7 @@ public class ScriptsEngine implements EventListener {
 	    	errors = new HashMap<Path, List<String>>();
 	    	
 	    	loadScriptFilesIn(FileSystems.getDefault());
-	    	for (Plugin plugin : Sfera.getPlugins()) {
+	    	for (Plugin plugin : Sfera.getPlugins().values()) {
 				try (FileSystem pluginFs = FileSystems.newFileSystem(plugin.getPath(), null)) {
 					loadScriptFilesIn(pluginFs);
 				}
@@ -238,7 +239,7 @@ public class ScriptsEngine implements EventListener {
 	 * @throws IOException
 	 */
     private static void parseScriptFile(Path scriptFile, FileSystem fileSystem, Compilable engine) throws IOException {
-    	try (BufferedReader r = Files.newBufferedReader(scriptFile, Sfera.CHARSET)) {
+    	try (BufferedReader r = Files.newBufferedReader(scriptFile, StandardCharsets.UTF_8)) {
     		SferaScriptGrammarLexer lexer = new SferaScriptGrammarLexer(new ANTLRInputStream(r));
         	CommonTokenStream tokens = new CommonTokenStream(lexer);
         	SferaScriptGrammarParser parser = new SferaScriptGrammarParser(tokens);

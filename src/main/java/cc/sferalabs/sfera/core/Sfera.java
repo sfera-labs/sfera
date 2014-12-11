@@ -2,9 +2,9 @@ package cc.sferalabs.sfera.core;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
-import java.nio.charset.Charset;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -12,7 +12,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.EventListener;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -25,15 +27,11 @@ import cc.sferalabs.sfera.util.logging.SystemLogger;
 
 public class Sfera {
 
-	public static final String VERSION = "0.0.1";
-
-	public static final Charset CHARSET = Charset.forName("UTF-8");
-
 	private static final BufferedReader STD_INPUT = new BufferedReader(
 			new InputStreamReader(System.in));
 	private static boolean run = true;
 
-	private static List<Plugin> plugins;
+	private static HashMap<String, Plugin> plugins;
 
 	private static List<Driver> drivers;
 	private static List<Application> applications;
@@ -60,7 +58,7 @@ public class Sfera {
 				throw new RuntimeException(e);
 			}
 
-			SystemLogger.SYSTEM.info("STARTED - version " + VERSION);
+			SystemLogger.SYSTEM.info("STARTED");
 
 			SystemNode.init();
 
@@ -149,36 +147,19 @@ public class Sfera {
 	 */
 	private static void loadApplications() {
 		applications = new ArrayList<Application>();
-
 		String appList = Configuration.SYSTEM.getProperty("apps", null);
 		if (appList != null) {
 			for (String appName : appList.split(",")) {
 				appName = appName.trim();
 				try {
-					String appClassName = null;
-					for (Plugin plugin : plugins) {
-						if ((appClassName = plugin.getApplicationClass(appName)) != null) {
-							Class<?> appClass = Class.forName(appClassName);
-							Constructor<?> constructor = appClass
-									.getConstructor(new Class[] { String.class });
-							Object appInstance = constructor
-									.newInstance(appName);
-							if (appInstance instanceof Application) {
-								applications.add((Application) appInstance);
-								if (appInstance instanceof EventListener) {
-									Bus.register((EventListener) appInstance);
-								}
-								SystemLogger.SYSTEM.info("apps", "app '"
-										+ appName + "' loaded");
-							}
-
-							break;
+					Object appInstance = getModuleInstance(appName, "appClass");
+					if (appInstance instanceof Application) {
+						applications.add((Application) appInstance);
+						if (appInstance instanceof EventListener) {
+							Bus.register((EventListener) appInstance);
 						}
-					}
-
-					if (appClassName == null) {
-						SystemLogger.SYSTEM.error("apps", "app '" + appName
-								+ "' not found");
+						SystemLogger.SYSTEM.info("apps", "app '" + appName
+								+ "' loaded");
 					}
 				} catch (Throwable e) {
 					SystemLogger.SYSTEM.error("apps",
@@ -194,7 +175,6 @@ public class Sfera {
 	 */
 	private static void loadDrivers() {
 		drivers = new ArrayList<Driver>();
-
 		Properties props = Configuration.getProperties();
 		for (String propName : props.stringPropertyNames()) {
 			if (propName.indexOf('.') < 0) {
@@ -202,27 +182,8 @@ public class Sfera {
 				String driverType = props.getProperty(propName);
 				if (driverType != null) {
 					try {
-						String driverClassName = null;
-						for (Plugin plugin : plugins) {
-							if ((driverClassName = plugin
-									.getDriverClass(driverType)) != null) {
-								break;
-							}
-						}
-
-						if (driverClassName == null) {
-							/*
-							 * If the class is not found in the plugins we try
-							 * using the declared type as the driver class
-							 */
-							driverClassName = driverType;
-						}
-
-						Class<?> driverClass = Class.forName(driverClassName);
-						Constructor<?> constructor = driverClass
-								.getConstructor(new Class[] { String.class });
-						Object driverInstance = constructor
-								.newInstance(propName);
+						Object driverInstance = getModuleInstance(driverType,
+								"driverClass");
 						if (driverInstance instanceof Driver) {
 							Driver d = (Driver) driverInstance;
 							drivers.add(d);
@@ -234,7 +195,6 @@ public class Sfera {
 									+ propName + "' of type '" + driverType
 									+ "' instantiated");
 						}
-
 					} catch (Throwable e) {
 						SystemLogger.SYSTEM.error("drivers",
 								"error instantiating driver '" + propName
@@ -245,6 +205,41 @@ public class Sfera {
 				}
 			}
 		}
+	}
+
+	/**
+	 * 
+	 * @param moduleName
+	 * @param propertyName
+	 * @return
+	 * @throws Exception
+	 */
+	private static Object getModuleInstance(String moduleName,
+			String propertyName) throws Exception {
+		Plugin plugin = plugins.get(moduleName);
+		String className;
+		if (plugin != null) {
+			className = plugin.getProperty(propertyName);
+		} else {
+			// when in development
+			Properties p = new Properties();
+			InputStream is = Sfera.class.getClassLoader().getResourceAsStream(
+					Plugin.PLUGIN_PROPERTIES_PATH);
+			if (is == null) {
+				throw new NoSuchFileException(Plugin.PLUGIN_PROPERTIES_PATH);
+			}
+			p.load(is);
+			className = p.getProperty(propertyName);
+		}
+
+		if (className == null) {
+			throw new Exception(propertyName + " property not found");
+		}
+
+		Class<?> clazz = Class.forName(className);
+		Constructor<?> constructor = clazz
+				.getConstructor(new Class[] { String.class });
+		return constructor.newInstance(moduleName);
 	}
 
 	/**
@@ -276,15 +271,14 @@ public class Sfera {
 	 * @throws IOException
 	 */
 	private static void loadPlugins() {
-		plugins = new ArrayList<Plugin>();
-
+		plugins = new HashMap<>();
 		try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths
 				.get("plugins"))) {
 			for (Path file : stream) {
 				try {
 					if (!Files.isHidden(file)) {
-						Plugin ps = new Plugin(file);
-						plugins.add(ps);
+						Plugin p = new Plugin(file);
+						plugins.put(p.getId(), p);
 					}
 				} catch (Exception e) {
 					SystemLogger.SYSTEM.warning("Error loading file " + file
@@ -292,7 +286,7 @@ public class Sfera {
 				}
 			}
 		} catch (NoSuchFileException e) {
-
+			// no plugins directory
 		} catch (IOException e) {
 			SystemLogger.SYSTEM.error("Error loading plugins - " + e);
 		}
@@ -302,7 +296,7 @@ public class Sfera {
 	 * 
 	 * @return
 	 */
-	public static List<Plugin> getPlugins() {
+	public static Map<String, Plugin> getPlugins() {
 		return plugins;
 	}
 }
