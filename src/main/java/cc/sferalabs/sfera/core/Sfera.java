@@ -12,10 +12,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.EventListener;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import cc.sferalabs.sfera.apps.Application;
@@ -31,7 +31,7 @@ public class Sfera {
 			new InputStreamReader(System.in));
 	private static boolean run = true;
 
-	private static HashMap<String, Plugin> plugins;
+	private static ConcurrentHashMap<String, Plugin> plugins;
 
 	private static List<Driver> drivers;
 	private static List<Application> applications;
@@ -182,7 +182,7 @@ public class Sfera {
 				String driverType = props.getProperty(propName);
 				if (driverType != null) {
 					try {
-						Object driverInstance = getModuleInstance(driverType,
+						Object driverInstance = getModuleInstance(propName,
 								"driverClass");
 						if (driverInstance instanceof Driver) {
 							Driver d = (Driver) driverInstance;
@@ -271,7 +271,7 @@ public class Sfera {
 	 * @throws IOException
 	 */
 	private static void loadPlugins() {
-		plugins = new HashMap<>();
+		plugins = new ConcurrentHashMap<>();
 		try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths
 				.get("plugins"))) {
 			for (Path file : stream) {
