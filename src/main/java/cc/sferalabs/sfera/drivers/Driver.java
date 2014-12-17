@@ -61,6 +61,7 @@ public abstract class Driver extends Task implements Node {
 	 */
 	public void enable() {
 		enabled = true;
+		start();
 	}
 
 	/**
@@ -74,7 +75,7 @@ public abstract class Driver extends Task implements Node {
 	/**
 	 * 
 	 */
-	public void quit() {
+	public synchronized void quit() {
 		this.quit = true;
 		if (future != null) {
 			future.cancel(true);
@@ -84,14 +85,12 @@ public abstract class Driver extends Task implements Node {
 	/**
 	 * 
 	 */
-	public void startIfNotActive() {
+	public synchronized void start() {
 		if (enabled) {
-			if (future != null && !future.isDone()) {
-				return;
+			if (future == null) {
+				quit = false;
+				future = TasksManager.DEFAULT.submit(this);
 			}
-
-			quit = false;
-			future = TasksManager.DEFAULT.submit(this);
 		}
 	}
 
@@ -140,5 +139,13 @@ public abstract class Driver extends Task implements Node {
 		} catch (Throwable t) {
 			log.error("uncought exception in onQuit(): " + t);
 		}
+		
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+		}
+		
+		future = null;
+		start();
 	}
 }

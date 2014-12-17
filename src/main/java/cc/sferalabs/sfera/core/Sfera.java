@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
+import java.net.URL;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -45,7 +46,7 @@ public class Sfera {
 			System.setProperty("java.awt.headless", "true");
 
 			Thread.setDefaultUncaughtExceptionHandler(new SystemExceptionHandler());
-
+			
 			try {
 				Configuration.load();
 			} catch (IOException e) {
@@ -77,21 +78,14 @@ public class Sfera {
 				SystemLogger.SYSTEM.error("error loading script files: " + e);
 				e.printStackTrace();
 			}
+			
+			for (final Driver d : drivers) {
+				d.start();
+			}
+			
+			TasksManager.DEFAULT.submit(FilesWatcher.INSTANCE);
 
 			while (run) {
-				for (final Driver d : drivers) {
-					d.startIfNotActive();
-				}
-
-				try {
-					FilesWatcher.watch(5, TimeUnit.SECONDS);
-				} catch (InterruptedException e) {
-					if (!run) {
-						Thread.currentThread().interrupt();
-						break;
-					}
-				}
-
 				checkStandardInput();
 			}
 
@@ -178,7 +172,7 @@ public class Sfera {
 		Properties props = Configuration.getProperties();
 		for (String propName : props.stringPropertyNames()) {
 			if (propName.indexOf('.') < 0) {
-				// it's a driver definition
+				// it's a driver instance definition
 				String driverType = props.getProperty(propName);
 				if (driverType != null) {
 					try {
@@ -247,23 +241,42 @@ public class Sfera {
 	 */
 	private static void checkStandardInput() {
 		try {
-			if (STD_INPUT.ready()) {
-				String cmd;
-				while (STD_INPUT.ready()
-						&& ((cmd = STD_INPUT.readLine()) != null)) {
-					cmd = cmd.trim().toLowerCase();
-					switch (cmd) {
-					case "quit":
-						run = false;
-						break;
+			String cmd;
+			if ((cmd = STD_INPUT.readLine()) != null) {
+				switch (cmd.trim().toLowerCase()) {
+				case "quit":
+					run = false;
+					break;
 
-					default:
-						break;
-					}
+				default:
+					break;
 				}
 			}
 		} catch (Exception e) {
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e1) {
+			}
 		}
+		
+//		try {
+//			if (STD_INPUT.ready()) {
+//				String cmd;
+//				while (STD_INPUT.ready()
+//						&& ((cmd = STD_INPUT.readLine()) != null)) {
+//					cmd = cmd.trim().toLowerCase();
+//					switch (cmd) {
+//					case "quit":
+//						run = false;
+//						break;
+//
+//					default:
+//						break;
+//					}
+//				}
+//			}
+//		} catch (Exception e) {
+//		}
 	}
 
 	/**

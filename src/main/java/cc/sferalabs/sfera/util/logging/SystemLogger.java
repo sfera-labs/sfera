@@ -3,6 +3,7 @@ package cc.sferalabs.sfera.util.logging;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -78,6 +79,12 @@ public class SystemLogger {
 		fh = new FileHandler(JSON_LOG_FILE, true);
 		fh.setFormatter(new JSONFormatter());
 		BASE_LOGGER.addHandler(fh);
+		
+		// TODO remove
+		ConsoleHandler ch = new ConsoleHandler();
+		ch.setLevel(VERBOSE);
+		ch.setFormatter(new TextFormatter());
+		BASE_LOGGER.addHandler(ch);
 		
 		Level level = getLevel(Configuration.SYSTEM.getProperty("log_level", "INFO"));
 		

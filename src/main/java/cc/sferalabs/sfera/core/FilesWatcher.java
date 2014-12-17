@@ -5,6 +5,7 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 
 import java.io.IOException;
+import java.nio.file.ClosedWatchServiceException;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -24,18 +25,20 @@ import java.util.concurrent.TimeUnit;
 
 import cc.sferalabs.sfera.util.logging.SystemLogger;
 
-public class FilesWatcher {
+public class FilesWatcher extends Task {
 
-	private static final FilesWatcher INSTANCE = new FilesWatcher();
+	static final FilesWatcher INSTANCE = new FilesWatcher();
 	private static final Map<Path, Set<Task>> PATHS_TASKS_MAP = new HashMap<Path, Set<Task>>();
 	private static final Set<Path> INVALIDATED_PATHS = new HashSet<Path>();
-	
+	private static boolean run = true;
+
 	private final WatchService watcher;
 	
 	/**
 	 * 
 	 */
 	private FilesWatcher() {
+		super("Files Watcher");
 		WatchService watcher = null;
 		try {
 			watcher = FileSystems.getDefault().newWatchService();
@@ -43,41 +46,58 @@ public class FilesWatcher {
 		} catch (IOException e) {
 			SystemLogger.SYSTEM.error("Error instantiating File Watcher: " + e);
 		}
-		
+
 		this.watcher = watcher;
 	}
-	
+
+	@Override
+	public void execute() {
+		if (INSTANCE.watcher != null) {		
+			try {
+				while (run) {
+					try {
+						watch();
+					} catch (InterruptedException e) {
+						if (!run) {
+							Thread.currentThread().interrupt();
+							break;
+						}
+					}
+				}
+			} catch (ClosedWatchServiceException e) {
+			}
+		}
+		
+		SystemLogger.SYSTEM.debug("File Watcher quitted");
+	}
+
 	/**
 	 * 
-	 * @param timeout
-	 * @param unit
 	 * @throws InterruptedException
+	 * @throws ClosedWatchServiceException
 	 */
-	static void watch(long timeout, TimeUnit unit) throws InterruptedException {
-		if (INSTANCE.watcher == null) {
-			return;
-		}
-		
-		WatchKey wkey = INSTANCE.watcher.poll(timeout, unit);
+	private static void watch() throws InterruptedException, ClosedWatchServiceException {
+		WatchKey wkey = INSTANCE.watcher.take();
 		Set<WatchKey> keys = new HashSet<WatchKey>();
-		if (wkey != null) {
-			do {
-				keys.add(wkey);
-			} while ((wkey = INSTANCE.watcher.poll(1, TimeUnit.SECONDS)) != null && keys.size() < 10);
-		}
-		
+		do { // in case there are other events combined
+			keys.add(wkey);
+		} while ((wkey = INSTANCE.watcher.poll(1, TimeUnit.SECONDS)) != null
+				&& keys.size() < 10);
+
 		Set<Task> toExecute = new HashSet<Task>();
 		for (WatchKey key : keys) {
 			key.pollEvents();
 			Watchable path = key.watchable();
 			if (path instanceof Path) {
-				SystemLogger.SYSTEM.debug("File Watcher: " + path + " modified");
+				SystemLogger.SYSTEM
+						.debug("File Watcher: " + path + " modified");
 				synchronized (PATHS_TASKS_MAP) {
 					Set<Task> ts = PATHS_TASKS_MAP.remove(path);
 					if (ts != null) {
 						toExecute.addAll(ts);
 					} else {
-						for (Iterator<Path> it = PATHS_TASKS_MAP.keySet().iterator(); it.hasNext(); ) {
+						for (Iterator<Path> it = PATHS_TASKS_MAP.keySet()
+								.iterator(); it.hasNext();) {
 							Path parent = it.next();
 							if (((Path) path).startsWith(parent)) {
 								ts = PATHS_TASKS_MAP.get(parent);
@@ -87,25 +107,26 @@ public class FilesWatcher {
 						}
 					}
 				}
-				
+
 				key.reset();
 			}
 		}
-		
+
 		executeTasks(toExecute);
-		
+
 		synchronized (INVALIDATED_PATHS) {
-			for (Iterator<Path> it = INVALIDATED_PATHS.iterator(); it.hasNext(); ) {
+			for (Iterator<Path> it = INVALIDATED_PATHS.iterator(); it.hasNext();) {
 				try {
 					Path path = it.next();
 					registerRecursive(path);
 					it.remove();
 					executeTasks(PATHS_TASKS_MAP.remove(path));
-				} catch (IOException e) {}
+				} catch (IOException e) {
+				}
 			}
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @param path
@@ -128,7 +149,7 @@ public class FilesWatcher {
 		if (INSTANCE.watcher == null) {
 			return;
 		}
-		
+
 		synchronized (PATHS_TASKS_MAP) {
 			Set<Task> ts = PATHS_TASKS_MAP.get(path);
 			if (ts == null) {
@@ -146,7 +167,7 @@ public class FilesWatcher {
 		}
 		SystemLogger.SYSTEM.debug("File Watcher: watching " + path);
 	}
-	
+
 	/**
 	 * 
 	 * @param path
@@ -154,12 +175,14 @@ public class FilesWatcher {
 	 */
 	private static void registerRecursive(Path path) throws IOException {
 		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
-	        @Override
-	        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-	            dir.register(INSTANCE.watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
-	            return FileVisitResult.CONTINUE;
-	        }
-	    });
+			@Override
+			public FileVisitResult preVisitDirectory(Path dir,
+					BasicFileAttributes attrs) throws IOException {
+				dir.register(INSTANCE.watcher, ENTRY_CREATE, ENTRY_DELETE,
+						ENTRY_MODIFY);
+				return FileVisitResult.CONTINUE;
+			}
+		});
 	}
 
 	/**
@@ -167,7 +190,9 @@ public class FilesWatcher {
 	 */
 	public static void quit() {
 		try {
+			run = false;
 			INSTANCE.watcher.close();
-		} catch (Exception e) {}
+		} catch (Exception e) {
+		}
 	}
 }
