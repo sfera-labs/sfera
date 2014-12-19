@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
-import java.net.URL;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -44,88 +43,13 @@ public class Sfera {
 	public static void main(String[] args) {
 		try {
 			System.setProperty("java.awt.headless", "true");
-
 			Thread.setDefaultUncaughtExceptionHandler(new SystemExceptionHandler());
-			
-			try {
-				Configuration.load();
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
 
-			try {
-				SystemLogger.setup();
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-
-			SystemLogger.SYSTEM.info("STARTED");
-
-			SystemNode.init();
-
-			Bus.register(ScriptsEngine.INSTANCE);
-
-			// TODO Maybe we don't need a general database... maybe just a
-			// "Variables" module
-			// Database.init();
-
-			loadPlugins();
-			loadDrivers();
-			loadApplications();
-			try {
-				ScriptsEngine.loadScriptFiles();
-			} catch (IOException e) {
-				SystemLogger.SYSTEM.error("error loading script files: " + e);
-				e.printStackTrace();
-			}
-			
-			for (final Driver d : drivers) {
-				d.start();
-			}
-			
-			TasksManager.DEFAULT.submit(FilesWatcher.INSTANCE);
-
+			init();
 			while (run) {
 				checkStandardInput();
 			}
-
-			SystemLogger.SYSTEM.warning("System stopped");
-			SystemLogger.SYSTEM.info("Quitting modules...");
-
-			try {
-				STD_INPUT.close();
-			} catch (Exception e) {
-			}
-
-			Bus.post(new SystemEvent("quit", null));
-
-			for (final Driver d : drivers) {
-				d.quit();
-			}
-
-			SystemLogger.SYSTEM
-					.debug("Waiting 5 seconds for modules to quit...");
-
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-			}
-
-			SystemLogger.SYSTEM.debug("Shutting down remaining threads...");
-
-			FilesWatcher.quit();
-
-			try {
-				TasksManager.DEFAULT.getExecutorService().shutdownNow();
-				TasksManager.DEFAULT.getExecutorService().awaitTermination(5,
-						TimeUnit.SECONDS);
-			} catch (InterruptedException e) {
-			}
-
-			// TODO Database.close();
-
-			SystemLogger.SYSTEM.info("Bye!");
-			System.exit(0);
+			quit();
 
 		} catch (RuntimeException t) {
 			SystemLogger.SYSTEM.error("exception in main thread: " + t);
@@ -134,6 +58,91 @@ public class Sfera {
 		} finally {
 			SystemLogger.close();
 		}
+	}
+
+	/**
+	 * 
+	 */
+	private static void init() {
+		try {
+			Configuration.load();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+		try {
+			SystemLogger.setup();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+		SystemLogger.SYSTEM.info("STARTED");
+
+		SystemNode.init();
+
+		Bus.register(ScriptsEngine.INSTANCE);
+
+		// TODO Maybe we don't need a general database... maybe just a
+		// "Variables" module
+		// Database.init();
+
+		loadPlugins();
+		loadDrivers();
+		loadApplications();
+		try {
+			ScriptsEngine.loadScriptFiles();
+		} catch (IOException e) {
+			SystemLogger.SYSTEM.error("error loading script files: " + e);
+			e.printStackTrace();
+		}
+
+		for (final Driver d : drivers) {
+			d.start();
+		}
+
+		TasksManager.DEFAULT.submit(FilesWatcher.INSTANCE);
+	}
+
+	/**
+	 * 
+	 */
+	private static void quit() {
+		SystemLogger.SYSTEM.warning("System stopped");
+		SystemLogger.SYSTEM.info("Quitting modules...");
+
+		Bus.post(new SystemEvent("quit", null));
+
+		try {
+			STD_INPUT.close();
+		} catch (Exception e) {
+		}
+
+		for (final Driver d : drivers) {
+			d.quit();
+		}
+
+		SystemLogger.SYSTEM.debug("Waiting 5 seconds for modules to quit...");
+
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+		}
+
+		SystemLogger.SYSTEM.debug("Shutting down remaining threads...");
+
+		FilesWatcher.quit();
+
+		try {
+			TasksManager.DEFAULT.getExecutorService().shutdownNow();
+			TasksManager.DEFAULT.getExecutorService().awaitTermination(5,
+					TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+		}
+
+		// TODO Database.close();
+
+		SystemLogger.SYSTEM.info("Bye!");
+		System.exit(0);
 	}
 
 	/**
@@ -255,28 +264,9 @@ public class Sfera {
 		} catch (Exception e) {
 			try {
 				Thread.sleep(5000);
-			} catch (InterruptedException e1) {
+			} catch (InterruptedException ie) {
 			}
 		}
-		
-//		try {
-//			if (STD_INPUT.ready()) {
-//				String cmd;
-//				while (STD_INPUT.ready()
-//						&& ((cmd = STD_INPUT.readLine()) != null)) {
-//					cmd = cmd.trim().toLowerCase();
-//					switch (cmd) {
-//					case "quit":
-//						run = false;
-//						break;
-//
-//					default:
-//						break;
-//					}
-//				}
-//			}
-//		} catch (Exception e) {
-//		}
 	}
 
 	/**
