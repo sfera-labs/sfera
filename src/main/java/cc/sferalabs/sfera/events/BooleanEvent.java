@@ -3,7 +3,7 @@ package cc.sferalabs.sfera.events;
 
 public class BooleanEvent extends Event {
 	
-	private final boolean value;
+	private final Boolean value;
 
 	public BooleanEvent(Node source, String id, Boolean value) {
 		super(source, id);

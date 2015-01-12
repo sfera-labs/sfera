@@ -3,9 +3,9 @@ package cc.sferalabs.sfera.events;
 
 public class NumberEvent extends Event {
 	
-	private final double value;
+	private final Double value;
 
-	public NumberEvent(Node source, String id, double value) {
+	public NumberEvent(Node source, String id, Double value) {
 		super(source, id);
 		this.value = value;
 	}

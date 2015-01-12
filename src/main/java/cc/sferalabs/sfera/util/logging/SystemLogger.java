@@ -80,15 +80,15 @@ public class SystemLogger {
 		fh.setFormatter(new JSONFormatter());
 		BASE_LOGGER.addHandler(fh);
 		
-		// TODO remove
-		ConsoleHandler ch = new ConsoleHandler();
-		ch.setLevel(VERBOSE);
-		ch.setFormatter(new TextFormatter());
-		BASE_LOGGER.addHandler(ch);
-		
 		Level level = getLevel(Configuration.SYSTEM.getProperty("log_level", "INFO"));
 		
 		BASE_LOGGER.setLevel(level);
+		
+		// TODO remove
+				ConsoleHandler ch = new ConsoleHandler();
+				ch.setLevel(VERBOSE);
+				ch.setFormatter(new TextFormatter());
+				BASE_LOGGER.addHandler(ch);
 	}
 	
 	/**

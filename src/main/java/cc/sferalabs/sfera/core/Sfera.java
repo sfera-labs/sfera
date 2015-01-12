@@ -118,7 +118,7 @@ public class Sfera {
 		}
 
 		for (final Driver d : drivers) {
-			d.quit();
+			d.disable();
 		}
 
 		SystemLogger.SYSTEM.debug("Waiting 5 seconds for modules to quit...");
