@@ -2,10 +2,19 @@ package cc.sferalabs.sfera.io.comm;
 
 import java.nio.charset.Charset;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
+
+import cc.sferalabs.sfera.core.Sfera;
 import jssc.SerialPort;
-import cc.sferalabs.sfera.util.logging.SystemLogger;
 
 public abstract class CommPort {
+
+	private static final Logger logger = LogManager.getLogger();
+	static final Marker COMM_MARKER = MarkerManager.getMarker("SFERA_COMM")
+			.setParents(Sfera.SFERA_MARKER);
 
 	public static final int PARITY_NONE = SerialPort.PARITY_NONE;
 	public static final int PARITY_ODD = SerialPort.PARITY_ODD;
@@ -26,27 +35,26 @@ public abstract class CommPort {
 	 * @throws CommPortException
 	 */
 	public static CommPort open(String portName) throws CommPortException {
-		SystemLogger.SYSTEM.debug("comm", "trying getting local port "
-				+ portName);
+		logger.debug(COMM_MARKER, "trying getting local port '{}'", portName);
 		CommPort commPort = null;
 		try {
 			commPort = new LocalCommPort(portName);
 		} catch (CommPortException e) {
-			SystemLogger.SYSTEM.debug("comm", "error getting local port "
-					+ portName + ": " + e.getLocalizedMessage());
+			logger.debug(COMM_MARKER, "error getting local port '{}': {}",
+					portName, e.getLocalizedMessage());
 			try {
-				SystemLogger.SYSTEM.debug("comm", "trying getting IP port "
-						+ portName);
+				logger.debug(COMM_MARKER, "trying getting IP port '{}'",
+						portName);
 				commPort = new IPCommPort(portName);
 			} catch (CommPortException e1) {
-				SystemLogger.SYSTEM.debug("comm", "error getting IP port "
-						+ portName + ": " + e1.getLocalizedMessage());
+				logger.debug(COMM_MARKER, "error getting IP port '{}': {}",
+						portName, e.getLocalizedMessage());
 			}
 		}
 		if (commPort == null) {
 			throw new CommPortException("could not open port " + portName);
 		}
-		SystemLogger.SYSTEM.debug("comm", "comm port " + portName + " open");
+		logger.debug(COMM_MARKER, "comm port '{}' open", portName);
 		return commPort;
 	}
 

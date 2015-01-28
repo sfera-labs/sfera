@@ -23,17 +23,20 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import cc.sferalabs.sfera.util.logging.SystemLogger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class FilesWatcher extends Task {
 
+	private static final Logger logger = LogManager.getLogger();
+	
 	static final FilesWatcher INSTANCE = new FilesWatcher();
 	private static final Map<Path, Set<Task>> PATHS_TASKS_MAP = new HashMap<Path, Set<Task>>();
 	private static final Set<Path> INVALIDATED_PATHS = new HashSet<Path>();
 	private static boolean run = true;
 
 	private final WatchService watcher;
-	
+
 	/**
 	 * 
 	 */
@@ -42,9 +45,10 @@ public class FilesWatcher extends Task {
 		WatchService watcher = null;
 		try {
 			watcher = FileSystems.getDefault().newWatchService();
-			SystemLogger.SYSTEM.debug("File Watcher ready");
+			logger.debug("File Watcher ready");
 		} catch (IOException e) {
-			SystemLogger.SYSTEM.error("Error instantiating File Watcher: " + e);
+			logger.debug("Error instantiating File Watcher");
+			logger.catching(e);
 		}
 
 		this.watcher = watcher;
@@ -52,7 +56,7 @@ public class FilesWatcher extends Task {
 
 	@Override
 	public void execute() {
-		if (INSTANCE.watcher != null) {		
+		if (INSTANCE.watcher != null) {
 			try {
 				while (run) {
 					try {
@@ -67,8 +71,8 @@ public class FilesWatcher extends Task {
 			} catch (ClosedWatchServiceException e) {
 			}
 		}
-		
-		SystemLogger.SYSTEM.debug("File Watcher quitted");
+
+		logger.debug("File Watcher quitted");
 	}
 
 	/**
@@ -76,7 +80,8 @@ public class FilesWatcher extends Task {
 	 * @throws InterruptedException
 	 * @throws ClosedWatchServiceException
 	 */
-	private static void watch() throws InterruptedException, ClosedWatchServiceException {
+	private static void watch() throws InterruptedException,
+			ClosedWatchServiceException {
 		WatchKey wkey = INSTANCE.watcher.take();
 		Set<WatchKey> keys = new HashSet<WatchKey>();
 		do { // in case there are other events combined
@@ -89,8 +94,7 @@ public class FilesWatcher extends Task {
 			key.pollEvents();
 			Watchable path = key.watchable();
 			if (path instanceof Path) {
-				SystemLogger.SYSTEM
-						.debug("File Watcher: " + path + " modified");
+				logger.debug("File '{}' modified", path);
 				synchronized (PATHS_TASKS_MAP) {
 					Set<Task> ts = PATHS_TASKS_MAP.remove(path);
 					if (ts != null) {
@@ -165,7 +169,7 @@ public class FilesWatcher extends Task {
 				INVALIDATED_PATHS.add(path);
 			}
 		}
-		SystemLogger.SYSTEM.debug("File Watcher: watching " + path);
+		logger.debug("Watching '{}'", path);
 	}
 
 	/**

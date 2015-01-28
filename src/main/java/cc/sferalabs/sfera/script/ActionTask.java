@@ -5,20 +5,25 @@ import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import cc.sferalabs.sfera.core.Task;
 import cc.sferalabs.sfera.events.Event;
 
 public class ActionTask extends Task {
 
+	private static final Logger logger = LogManager.getLogger();
+
 	private final Event triggerEvent;
 	private final Rule rule;
-	private final Bindings localScope; 
+	private final Bindings localScope;
 
 	/**
 	 * 
 	 * @param triggerEvent
 	 * @param rule
-	 * @param localScope 
+	 * @param localScope
 	 */
 	public ActionTask(Event triggerEvent, Rule rule, Bindings localScope) {
 		super("script:" + rule.scriptFile + ":" + rule.startLine);
@@ -39,7 +44,8 @@ public class ActionTask extends Task {
 			// add "_e" variable
 			b.put("_e", triggerEvent);
 			rule.action.eval(b);
-			ScriptsEngine.LOG.info("action executed - file '" + rule.scriptFile + "' line " + rule.startLine);
+			logger.info("Action executed - file '{}' line {}", rule.scriptFile,
+					rule.startLine);
 		} catch (Throwable e) {
 			int line = rule.startLine;
 			if (e instanceof ScriptException) {
@@ -47,7 +53,9 @@ public class ActionTask extends Task {
 					line += ((ScriptException) e).getLineNumber() - 1;
 				}
 			}
-			ScriptsEngine.LOG.error("Error executing action - file '" + rule.scriptFile + "' line " + line + ": " + e.getLocalizedMessage());
+			logger.error("Error executing action - file '{}' line {}: {}",
+					rule.scriptFile, line, e.getLocalizedMessage());
+			logger.catching(e);
 		}
 	}
 }

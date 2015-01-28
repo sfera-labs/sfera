@@ -28,6 +28,8 @@ import javax.script.ScriptEngineManager;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import cc.sferalabs.sfera.core.FilesWatcher;
 import cc.sferalabs.sfera.core.Plugin;
@@ -37,7 +39,6 @@ import cc.sferalabs.sfera.events.Event;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarLexer;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.ParseContext;
-import cc.sferalabs.sfera.util.logging.SystemLogger;
 
 import com.google.common.eventbus.Subscribe;
 
@@ -46,7 +47,7 @@ public class ScriptsEngine implements EventListener {
 
 	public static final ScriptsEngine INSTANCE = new ScriptsEngine();
 	private static final ScriptEngineManager SCRIPT_ENGINE_MANAGER = new ScriptEngineManager();
-	static final SystemLogger LOG = SystemLogger.getLogger("scripts");
+	private static final Logger logger = LogManager.getLogger();
 	
     private static HashMap<String, HashSet<Rule>> triggersActionsMap;
     private static HashMap<Path, List<String>> errors;
@@ -153,12 +154,12 @@ public class ScriptsEngine implements EventListener {
 		    }
 	    	
 	    	if (!errors.isEmpty()) {
-	    		LOG.error("Errors in script files");
+	    		logger.error("Errors in script files");
 		    	
 		    	for (Entry<Path, List<String>> error : errors.entrySet()) {
 	    			Path file = error.getKey();
 	    			for (String message : error.getValue()) {
-	    				LOG.error("File: " + file + " - " + message);
+	    				logger.error("File '{}': {}", file, message);
 	    			}
 	    		}
 	    	}
@@ -172,7 +173,8 @@ public class ScriptsEngine implements EventListener {
 						try {
 							loadScriptFiles();
 						} catch (IOException e) {
-							SystemLogger.SYSTEM.error("error loading script files: " + e);
+							logger.error("Error loading script files");
+							logger.catching(e);
 						}					
 					}
 				};
@@ -181,7 +183,8 @@ public class ScriptsEngine implements EventListener {
 				FilesWatcher.register(Paths.get("plugins"), reloadScriptFiles);
 				
 			} catch (Exception e) {
-				LOG.error("error registering script files watcher: " + e);
+				logger.error("Error registering script files watcher");
+				logger.catching(e);
 			}
     	}
 	}
@@ -201,7 +204,7 @@ public class ScriptsEngine implements EventListener {
     					Compilable engine = (Compilable) getNewEngine();
     					for (Path file : stream) {
     						if (Files.isRegularFile(file) && file.getFileName().toString().endsWith(".ev")) {
-    							LOG.debug("loading script file " + file);
+    							logger.debug("Loading script file '{}'", file);
     							try {
     								parseScriptFile(file, fileSystem, engine);
     							} catch (IOException e) {

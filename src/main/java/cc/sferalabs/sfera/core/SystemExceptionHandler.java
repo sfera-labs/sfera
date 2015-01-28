@@ -1,28 +1,17 @@
 package cc.sferalabs.sfera.core;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.lang.Thread.UncaughtExceptionHandler;
 
-import cc.sferalabs.sfera.util.logging.SystemLogger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class SystemExceptionHandler implements UncaughtExceptionHandler {
+	
+	private static final Logger logger = LogManager.getLogger();
 
 	@Override
 	public void uncaughtException(Thread t, Throwable e) {
-		SystemLogger.SYSTEM.error("exceptionHandler", "Uncaught exception in thread '" + t.getName() + "': " + getStackTraceString(e));
-		e.printStackTrace();
+		logger.error("Uncaught exception in thread '{}': {}", t.getName(), e.getLocalizedMessage());
+		logger.catching(e);
 	}
-	
-	/**
-	 * 
-	 * @param e
-	 * @return
-	 */
-	public static String getStackTraceString(Throwable e) {
-		StringWriter sw = new StringWriter();
-		e.printStackTrace(new PrintWriter(sw));
-		return sw.toString().replaceAll("\\s+", " ");
-	}
-
 }

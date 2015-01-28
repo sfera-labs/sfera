@@ -8,7 +8,6 @@ import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 import jssc.SerialPortTimeoutException;
-import cc.sferalabs.sfera.util.logging.SystemLogger;
 
 public class LocalCommPort extends CommPort {
 
@@ -62,8 +61,6 @@ public class LocalCommPort extends CommPort {
 
 			@Override
 			public void serialEvent(SerialPortEvent event) {
-				SystemLogger.SYSTEM.verbose("comm", "event on port "
-						+ serialPort.getPortName());
 				try {
 					int len = event.getEventValue();
 					byte[] bytes = new byte[len];

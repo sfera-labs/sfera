@@ -1,6 +1,8 @@
 package cc.sferalabs.sfera.events;
 
-import cc.sferalabs.sfera.util.logging.SystemLogger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.google.common.eventbus.SubscriberExceptionContext;
 import com.google.common.eventbus.SubscriberExceptionHandler;
@@ -9,11 +11,16 @@ public class EventsSubscriberExceptionHandler implements
 		SubscriberExceptionHandler {
 
 	@Override
-	public void handleException(Throwable exception, SubscriberExceptionContext context) {
-		String listener = context.getSubscriber().getClass().getSimpleName();
+	public void handleException(Throwable exception,
+			SubscriberExceptionContext context) {
+		Class<?> listenerClass = context.getSubscriber().getClass();
 		String method = context.getSubscriberMethod().getName();
 		String event = context.getEvent().getClass().getSimpleName();
-		SystemLogger.SYSTEM.error("events", "Uncought exception dispatching event '" + event + "' to '" + listener + "." + method + "': " + exception);
+
+		Logger logger = LogManager.getLogger(listenerClass);
+		logger.error("Error dispatching event '{}' to '{}.{}'", event,
+				listenerClass.getSimpleName(), method);
+		logger.catching(Level.ERROR, exception);
 	}
 
 }

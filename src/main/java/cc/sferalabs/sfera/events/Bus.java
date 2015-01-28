@@ -4,8 +4,13 @@ import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
+
+import cc.sferalabs.sfera.core.Sfera;
 import cc.sferalabs.sfera.core.TasksManager;
-import cc.sferalabs.sfera.util.logging.SystemLogger;
 
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
@@ -16,6 +21,9 @@ public abstract class Bus {
 	private static final SubscriberExceptionHandler SUBSCRIBER_EXCEPTION_HANDLER = new EventsSubscriberExceptionHandler();
 	private static final EventBus EVENT_BUS = new AsyncEventBus(TasksManager.DEFAULT.getExecutorService(), SUBSCRIBER_EXCEPTION_HANDLER);
 	private static final Map<String, Event> EVENTS_MAP = new HashMap<String, Event>();
+	
+	private static final Logger logger = LogManager.getLogger();
+	private static final Marker EVENT_MARKER = MarkerManager.getMarker("SFERA_EVENT").setParents(Sfera.SFERA_MARKER);
 	
 	/**
 	 * 
@@ -32,12 +40,7 @@ public abstract class Bus {
 	public static void post(Event event) {
 		EVENTS_MAP.put(event.getId(), event);
 		EVENT_BUS.post(event);
-		String msg = event.getId();
-		Object val = event.getValue();
-		if (val != null) {
-			msg += " = " + event.getValue();
-		}
-		SystemLogger.SYSTEM.event("events", msg);
+		logger.info(EVENT_MARKER, "{} = {}", event.getId(), event.getValue());
 	}
 	
 	/**

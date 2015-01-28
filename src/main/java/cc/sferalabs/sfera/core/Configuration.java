@@ -10,8 +10,8 @@ import java.util.Properties;
 
 public class Configuration {
 	
-	private static final Path CONFIG_DIR = Paths.get("config");
-	private static final Path SYSTEM_CONFIG_FILE = CONFIG_DIR.resolve("sfera.ini");
+	static final Path CONFIG_DIR = Paths.get("config");
+	static final Path SYSTEM_CONFIG_FILE = CONFIG_DIR.resolve("sfera.ini");
 	
 	public static final Configuration SYSTEM = new Configuration("system");
 	

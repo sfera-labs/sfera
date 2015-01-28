@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+	<Appenders>
+		<RollingRandomAccessFile name="SferaLog"
+			fileName="logs/sfera.csv" filePattern="logs/%d{yyyy}/sfera-%d{yyyy-MM-dd}-%i.csv.gz">
+			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS},%level,%thread,%logger,%msg%n" />
+			<TimeBasedTriggeringPolicy />
+		</RollingRandomAccessFile>
+	</Appenders>
+	<Loggers>
+		<Root level="info">
+			<AppenderRef ref="SferaLog" />
+		</Root>
+	</Loggers>
+</Configuration>

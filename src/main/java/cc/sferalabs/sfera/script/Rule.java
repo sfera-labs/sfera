@@ -7,28 +7,34 @@ import javax.script.Compilable;
 import javax.script.CompiledScript;
 import javax.script.ScriptException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import cc.sferalabs.sfera.core.TasksManager;
 import cc.sferalabs.sfera.events.Event;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.TriggerContext;
 
 public class Rule {
-	
+
+	private static final Logger logger = LogManager.getLogger();
+
 	final TriggerCondition condition;
 	final CompiledScript action;
 	final Path scriptFile;
 	final int startLine;
 	final Bindings localScope;
-	
+
 	/**
 	 * 
 	 * @param condition
 	 * @param action
 	 * @param scriptFile
 	 * @param engine
-	 * @param localScope 
+	 * @param localScope
 	 * @throws ScriptException
 	 */
-	public Rule(TriggerContext condition, String action, Path scriptFile, Compilable engine, Bindings localScope) throws ScriptException {
+	public Rule(TriggerContext condition, String action, Path scriptFile,
+			Compilable engine, Bindings localScope) throws ScriptException {
 		this.condition = new TriggerCondition(condition);
 		this.action = engine.compile(action);
 		this.scriptFile = scriptFile;
@@ -53,7 +59,9 @@ public class Rule {
 		try {
 			return condition.eval(event);
 		} catch (Exception e) {
-			ScriptsEngine.LOG.error("Error evaluating trigger condition - file " + scriptFile + ": " + e.getLocalizedMessage());
+			logger.error("Error evaluating trigger condition - file '{}': {}",
+					scriptFile, e.getLocalizedMessage());
+			logger.catching(e);
 			return false;
 		}
 	}

@@ -18,14 +18,31 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
+
 import cc.sferalabs.sfera.apps.Application;
 import cc.sferalabs.sfera.drivers.Driver;
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.SystemEvent;
 import cc.sferalabs.sfera.script.ScriptsEngine;
-import cc.sferalabs.sfera.util.logging.SystemLogger;
 
 public class Sfera {
+
+	static {
+		try {
+			System.setProperty("java.awt.headless", "true");
+			Path log4j2Config = Configuration.CONFIG_DIR.resolve("log4j2.xml");
+			if (Files.exists(log4j2Config)) {
+				System.setProperty("log4j.configurationFile", log4j2Config.toString());
+			}
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
+	}
 
 	private static final BufferedReader STD_INPUT = new BufferedReader(
 			new InputStreamReader(System.in));
@@ -36,13 +53,15 @@ public class Sfera {
 	private static List<Driver> drivers;
 	private static List<Application> applications;
 
+	private static final Logger logger = LogManager.getLogger();
+	public static final Marker SFERA_MARKER = MarkerManager.getMarker("SFERA");
+
 	/**
+	 * 
 	 * @param args
-	 * @throws IOException
 	 */
 	public static void main(String[] args) {
 		try {
-			System.setProperty("java.awt.headless", "true");
 			Thread.setDefaultUncaughtExceptionHandler(new SystemExceptionHandler());
 
 			init();
@@ -52,12 +71,11 @@ public class Sfera {
 			quit();
 
 		} catch (RuntimeException t) {
-			SystemLogger.SYSTEM.error("exception in main thread: " + t);
-			t.printStackTrace();
-
-		} finally {
-			SystemLogger.close();
+			logger.catching(Level.FATAL, t);
 		}
+
+		logger.warn("Quitted");
+		System.exit(0);
 	}
 
 	/**
@@ -70,13 +88,7 @@ public class Sfera {
 			throw new RuntimeException(e);
 		}
 
-		try {
-			SystemLogger.setup();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-
-		SystemLogger.SYSTEM.info("STARTED");
+		logger.info("STARTED");
 
 		SystemNode.init();
 
@@ -92,8 +104,8 @@ public class Sfera {
 		try {
 			ScriptsEngine.loadScriptFiles();
 		} catch (IOException e) {
-			SystemLogger.SYSTEM.error("error loading script files: " + e);
-			e.printStackTrace();
+			logger.error("Error loading script files");
+			logger.catching(e);
 		}
 
 		for (final Driver d : drivers) {
@@ -107,8 +119,8 @@ public class Sfera {
 	 * 
 	 */
 	private static void quit() {
-		SystemLogger.SYSTEM.warning("System stopped");
-		SystemLogger.SYSTEM.info("Quitting modules...");
+		logger.warn("System stopped");
+		logger.info("Quitting modules...");
 
 		Bus.post(new SystemEvent("quit", null));
 
@@ -121,14 +133,14 @@ public class Sfera {
 			d.disable();
 		}
 
-		SystemLogger.SYSTEM.debug("Waiting 5 seconds for modules to quit...");
+		logger.debug("Waiting 5 seconds for modules to quit...");
 
 		try {
 			Thread.sleep(5000);
 		} catch (InterruptedException e) {
 		}
 
-		SystemLogger.SYSTEM.debug("Shutting down remaining threads...");
+		logger.debug("Shutting down remaining threads...");
 
 		FilesWatcher.quit();
 
@@ -140,9 +152,6 @@ public class Sfera {
 		}
 
 		// TODO Database.close();
-
-		SystemLogger.SYSTEM.info("Bye!");
-		System.exit(0);
 	}
 
 	/**
@@ -155,19 +164,18 @@ public class Sfera {
 			for (String appName : appList.split(",")) {
 				appName = appName.trim();
 				try {
-					Object appInstance = getModuleInstance(appName, "appClass");
+					Object appInstance = getModuleInstance(appName, null,
+							"appClass");
 					if (appInstance instanceof Application) {
 						applications.add((Application) appInstance);
 						if (appInstance instanceof EventListener) {
 							Bus.register((EventListener) appInstance);
 						}
-						SystemLogger.SYSTEM.info("apps", "app '" + appName
-								+ "' loaded");
+						logger.info("App '{}' loaded", appName);
 					}
 				} catch (Throwable e) {
-					SystemLogger.SYSTEM.error("apps",
-							"error instantiating app '" + appName + "': " + e);
-					e.printStackTrace();
+					logger.error("Error instantiating app '{}'", appName);
+					logger.catching(e);
 				}
 			}
 		}
@@ -185,8 +193,8 @@ public class Sfera {
 				String driverType = props.getProperty(propName);
 				if (driverType != null) {
 					try {
-						Object driverInstance = getModuleInstance(propName,
-								"driverClass");
+						Object driverInstance = getModuleInstance(driverType,
+								propName, "driverClass");
 						if (driverInstance instanceof Driver) {
 							Driver d = (Driver) driverInstance;
 							drivers.add(d);
@@ -194,16 +202,15 @@ public class Sfera {
 							if (d instanceof EventListener) {
 								Bus.register((EventListener) d);
 							}
-							SystemLogger.SYSTEM.info("drivers", "driver '"
-									+ propName + "' of type '" + driverType
-									+ "' instantiated");
+							logger.info(
+									"Driver '{}' of type '{}' instantiated",
+									propName, driverType);
 						}
 					} catch (Throwable e) {
-						SystemLogger.SYSTEM.error("drivers",
-								"error instantiating driver '" + propName
-										+ "' of type '" + driverType + "': "
-										+ e);
-						e.printStackTrace();
+						logger.error(
+								"Error instantiating driver '{}' of type '{}'",
+								propName, driverType);
+						logger.catching(e);
 					}
 				}
 			}
@@ -212,14 +219,15 @@ public class Sfera {
 
 	/**
 	 * 
-	 * @param moduleName
+	 * @param type
+	 * @param id
 	 * @param propertyName
 	 * @return
 	 * @throws Exception
 	 */
-	private static Object getModuleInstance(String moduleName,
+	private static Object getModuleInstance(String type, String id,
 			String propertyName) throws Exception {
-		Plugin plugin = plugins.get(moduleName);
+		Plugin plugin = plugins.get(type);
 		String className;
 		if (plugin != null) {
 			className = plugin.getProperty(propertyName);
@@ -242,7 +250,11 @@ public class Sfera {
 		Class<?> clazz = Class.forName(className);
 		Constructor<?> constructor = clazz
 				.getConstructor(new Class[] { String.class });
-		return constructor.newInstance(moduleName);
+		if (id == null) {
+			return constructor.newInstance();
+		} else {
+			return constructor.newInstance(id);
+		}
 	}
 
 	/**
@@ -284,14 +296,16 @@ public class Sfera {
 						plugins.put(p.getId(), p);
 					}
 				} catch (Exception e) {
-					SystemLogger.SYSTEM.warning("Error loading file " + file
-							+ " in plugins folder - " + e);
+					logger.error("Error loading file {} in plugins folder",
+							file);
+					logger.catching(e);
 				}
 			}
 		} catch (NoSuchFileException e) {
-			// no plugins directory
+			logger.debug("No plugins directory found");
 		} catch (IOException e) {
-			SystemLogger.SYSTEM.error("Error loading plugins - " + e);
+			logger.error("Error loading plugins");
+			logger.catching(e);
 		}
 	}
 

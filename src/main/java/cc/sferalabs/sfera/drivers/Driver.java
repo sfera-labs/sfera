@@ -2,11 +2,13 @@ package cc.sferalabs.sfera.drivers;
 
 import java.util.concurrent.Future;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import cc.sferalabs.sfera.core.Configuration;
 import cc.sferalabs.sfera.core.Task;
 import cc.sferalabs.sfera.core.TasksManager;
 import cc.sferalabs.sfera.events.Node;
-import cc.sferalabs.sfera.util.logging.SystemLogger;
 
 public abstract class Driver extends Task implements Node {
 
@@ -15,7 +17,7 @@ public abstract class Driver extends Task implements Node {
 	private Future<?> future;
 	private boolean enabled = true;
 
-	protected final SystemLogger log;
+	protected final Logger logger;
 
 	/**
 	 * 
@@ -24,7 +26,7 @@ public abstract class Driver extends Task implements Node {
 	public Driver(String id) {
 		super("driver." + id);
 		this.id = id;
-		this.log = SystemLogger.getLogger("driver." + id);
+		this.logger = LogManager.getLogger(getClass().getName() + "." + id);
 	}
 
 	/**
@@ -97,11 +99,11 @@ public abstract class Driver extends Task implements Node {
 	@Override
 	public void execute() {
 		try {
-			log.info("starting...");
+			logger.info("Starting...");
 			if (onInit(new Configuration(getId()))) {
-				log.info("started");
+				logger.info("Started");
 			} else {
-				log.warning("initialization failed");
+				logger.warn("Initialization failed");
 				quit = true;
 			}
 
@@ -113,31 +115,34 @@ public abstract class Driver extends Task implements Node {
 						}
 					} catch (InterruptedException ie) {
 						if (quit) {
-							log.warning("driver interrupted");
+							logger.warn("Driver interrupted");
 							Thread.currentThread().interrupt();
 						} else {
-							log.debug("driver interrupted but not quitted");
+							logger.debug("Driver interrupted but not quitted");
 						}
 					}
 				}
 			} catch (Throwable t) {
-				log.error("uncought exception in loop(): " + t + " - " + t.getStackTrace()[0]);
+				logger.error("Uncought exception in loop(): {}", t);
+				logger.catching(t);
 			}
 
 		} catch (InterruptedException t) {
-			log.debug("initialization interrupted");
+			logger.debug("Initialization interrupted");
 		} catch (Throwable t) {
-			log.error("uncought exception in onInit(): " + t + " - " + t.getStackTrace()[0]);
+			logger.error("Uncought exception in onInit(): {}", t);
+			logger.catching(t);
 		}
 
 		try {
-			log.info("quitting...");
+			logger.info("Quitting...");
 			onQuit();
-			log.info("quitted");
+			logger.info("Quitted");
 		} catch (InterruptedException t) {
-			log.debug("onQuit() interrupted");
+			logger.debug("onQuit() interrupted");
 		} catch (Throwable t) {
-			log.error("uncought exception in onQuit(): " + t + " - " + t.getStackTrace()[0]);
+			logger.error("Uncought exception in onQuit(): {}", t);
+			logger.catching(t);
 		}
 		
 		try {
