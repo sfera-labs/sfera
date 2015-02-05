@@ -44,7 +44,7 @@ public class ActionTask extends Task {
 			// add "_e" variable
 			b.put("_e", triggerEvent);
 			rule.action.eval(b);
-			logger.info("Action executed - file '{}' line {}", rule.scriptFile,
+			logger.info("Action executed. File '{}' line {}", rule.scriptFile,
 					rule.startLine);
 		} catch (Throwable e) {
 			int line = rule.startLine;
@@ -53,9 +53,8 @@ public class ActionTask extends Task {
 					line += ((ScriptException) e).getLineNumber() - 1;
 				}
 			}
-			logger.error("Error executing action - file '{}' line {}: {}",
-					rule.scriptFile, line, e.getLocalizedMessage());
-			logger.catching(e);
+			logger.error("Error executing action. File '" + rule.scriptFile
+					+ "' line " + line, e);
 		}
 	}
 }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="WARN" monitorInterval="30">
+<Configuration status="WARN" monitorInterval="300">
 	<Appenders>
 		<RollingRandomAccessFile name="SferaLog"
 			fileName="logs/sfera.csv" filePattern="logs/%d{yyyy}/sfera-%d{yyyy-MM-dd}-%i.csv.gz">

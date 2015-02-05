@@ -9,6 +9,10 @@ public class NumberEvent extends Event {
 		super(source, id);
 		this.value = value;
 	}
+	
+	public NumberEvent(Node source, String id, Integer value) {
+		this(source, id, value == null ? null : value.doubleValue());
+	}
 
 	@Override
 	public Double getValue() {

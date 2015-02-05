@@ -40,7 +40,7 @@ public abstract class Bus {
 	public static void post(Event event) {
 		EVENTS_MAP.put(event.getId(), event);
 		EVENT_BUS.post(event);
-		logger.info(EVENT_MARKER, "{} = {}", event.getId(), event.getValue());
+		logger.info(EVENT_MARKER, "Event: {} = {}", event.getId(), event.getValue());
 	}
 	
 	/**

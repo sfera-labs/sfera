@@ -29,7 +29,7 @@ import org.apache.logging.log4j.Logger;
 public class FilesWatcher extends Task {
 
 	private static final Logger logger = LogManager.getLogger();
-	
+
 	static final FilesWatcher INSTANCE = new FilesWatcher();
 	private static final Map<Path, Set<Task>> PATHS_TASKS_MAP = new HashMap<Path, Set<Task>>();
 	private static final Set<Path> INVALIDATED_PATHS = new HashSet<Path>();
@@ -47,8 +47,7 @@ public class FilesWatcher extends Task {
 			watcher = FileSystems.getDefault().newWatchService();
 			logger.debug("File Watcher ready");
 		} catch (IOException e) {
-			logger.debug("Error instantiating File Watcher");
-			logger.catching(e);
+			logger.warn("Error instantiating File Watcher", e);
 		}
 
 		this.watcher = watcher;

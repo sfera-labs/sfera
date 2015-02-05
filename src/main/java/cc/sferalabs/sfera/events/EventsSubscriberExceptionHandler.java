@@ -1,6 +1,5 @@
 package cc.sferalabs.sfera.events;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -18,9 +17,8 @@ public class EventsSubscriberExceptionHandler implements
 		String event = context.getEvent().getClass().getSimpleName();
 
 		Logger logger = LogManager.getLogger(listenerClass);
-		logger.error("Error dispatching event '{}' to '{}.{}'", event,
-				listenerClass.getSimpleName(), method);
-		logger.catching(Level.ERROR, exception);
+		logger.error("Error dispatching event '" + event + "' to '"
+				+ listenerClass.getSimpleName() + "." + method + "'", exception);
 	}
 
 }

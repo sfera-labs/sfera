@@ -59,9 +59,7 @@ public class Rule {
 		try {
 			return condition.eval(event);
 		} catch (Exception e) {
-			logger.error("Error evaluating trigger condition - file '{}': {}",
-					scriptFile, e.getLocalizedMessage());
-			logger.catching(e);
+			logger.error("Error evaluating trigger condition. File: " + scriptFile, e);
 			return false;
 		}
 	}

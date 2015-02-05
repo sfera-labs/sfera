@@ -37,7 +37,8 @@ public class Sfera {
 			System.setProperty("java.awt.headless", "true");
 			Path log4j2Config = Configuration.CONFIG_DIR.resolve("log4j2.xml");
 			if (Files.exists(log4j2Config)) {
-				System.setProperty("log4j.configurationFile", log4j2Config.toString());
+				System.setProperty("log4j.configurationFile",
+						log4j2Config.toString());
 			}
 		} catch (Throwable t) {
 			t.printStackTrace();
@@ -70,7 +71,7 @@ public class Sfera {
 			}
 			quit();
 
-		} catch (RuntimeException t) {
+		} catch (Throwable t) {
 			logger.catching(Level.FATAL, t);
 		}
 
@@ -104,8 +105,7 @@ public class Sfera {
 		try {
 			ScriptsEngine.loadScriptFiles();
 		} catch (IOException e) {
-			logger.error("Error loading script files");
-			logger.catching(e);
+			logger.error("Error loading script files", e);
 		}
 
 		for (final Driver d : drivers) {
@@ -174,8 +174,7 @@ public class Sfera {
 						logger.info("App '{}' loaded", appName);
 					}
 				} catch (Throwable e) {
-					logger.error("Error instantiating app '{}'", appName);
-					logger.catching(e);
+					logger.error("Error instantiating app: " + appName, e);
 				}
 			}
 		}
@@ -207,10 +206,8 @@ public class Sfera {
 									propName, driverType);
 						}
 					} catch (Throwable e) {
-						logger.error(
-								"Error instantiating driver '{}' of type '{}'",
-								propName, driverType);
-						logger.catching(e);
+						logger.error("Error instantiating driver '" + propName
+								+ "' of type '" + driverType + "'", e);
 					}
 				}
 			}
@@ -296,16 +293,14 @@ public class Sfera {
 						plugins.put(p.getId(), p);
 					}
 				} catch (Exception e) {
-					logger.error("Error loading file {} in plugins folder",
-							file);
-					logger.catching(e);
+					logger.error("Error loading file '" + file
+							+ "' in plugins folder", e);
 				}
 			}
 		} catch (NoSuchFileException e) {
 			logger.debug("No plugins directory found");
 		} catch (IOException e) {
-			logger.error("Error loading plugins");
-			logger.catching(e);
+			logger.error("Error loading plugins", e);
 		}
 	}
 

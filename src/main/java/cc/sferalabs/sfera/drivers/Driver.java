@@ -123,15 +123,13 @@ public abstract class Driver extends Task implements Node {
 					}
 				}
 			} catch (Throwable t) {
-				logger.error("Uncought exception in loop(): {}", t);
-				logger.catching(t);
+				logger.error("Uncought exception in loop()", t);
 			}
 
 		} catch (InterruptedException t) {
 			logger.debug("Initialization interrupted");
 		} catch (Throwable t) {
-			logger.error("Uncought exception in onInit(): {}", t);
-			logger.catching(t);
+			logger.error("Uncought exception in onInit()", t);
 		}
 
 		try {
@@ -141,8 +139,7 @@ public abstract class Driver extends Task implements Node {
 		} catch (InterruptedException t) {
 			logger.debug("onQuit() interrupted");
 		} catch (Throwable t) {
-			logger.error("Uncought exception in onQuit(): {}", t);
-			logger.catching(t);
+			logger.error("Uncought exception in onQuit()", t);
 		}
 		
 		try {
