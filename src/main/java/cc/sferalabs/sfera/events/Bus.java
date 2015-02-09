@@ -17,14 +17,17 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.SubscriberExceptionHandler;
 
 public abstract class Bus {
-	
+
 	private static final SubscriberExceptionHandler SUBSCRIBER_EXCEPTION_HANDLER = new EventsSubscriberExceptionHandler();
-	private static final EventBus EVENT_BUS = new AsyncEventBus(TasksManager.DEFAULT.getExecutorService(), SUBSCRIBER_EXCEPTION_HANDLER);
+	private static final EventBus EVENT_BUS = new AsyncEventBus(
+			TasksManager.DEFAULT.getExecutorService(),
+			SUBSCRIBER_EXCEPTION_HANDLER);
 	private static final Map<String, Event> EVENTS_MAP = new HashMap<String, Event>();
-	
+
 	private static final Logger logger = LogManager.getLogger();
-	private static final Marker EVENT_MARKER = MarkerManager.getMarker("SFERA_EVENT").setParents(Sfera.SFERA_MARKER);
-	
+	private static final Marker EVENT_MARKER = MarkerManager.getMarker(
+			"SFERA_EVENT").setParents(Sfera.SFERA_MARKER);
+
 	/**
 	 * 
 	 * @param listener
@@ -32,7 +35,7 @@ public abstract class Bus {
 	public static void register(EventListener listener) {
 		EVENT_BUS.register(listener);
 	}
-	
+
 	/**
 	 * 
 	 * @param event
@@ -40,9 +43,10 @@ public abstract class Bus {
 	public static void post(Event event) {
 		EVENTS_MAP.put(event.getId(), event);
 		EVENT_BUS.post(event);
-		logger.info(EVENT_MARKER, "Event: {} = {}", event.getId(), event.getValue());
+		logger.info(EVENT_MARKER, "Event: {} = {}", event.getId(),
+				event.getValue());
 	}
-	
+
 	/**
 	 * 
 	 * @param event
@@ -50,7 +54,7 @@ public abstract class Bus {
 	public static void postIfChanged(Event event) {
 		Object currVal = getValueOf(event.getId());
 		Object newVal = event.getValue();
-		
+
 		if (currVal == null) {
 			if (newVal != null) {
 				post(event);
@@ -59,7 +63,7 @@ public abstract class Bus {
 			post(event);
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @param id
@@ -72,7 +76,7 @@ public abstract class Bus {
 		}
 		return ev.getValue();
 	}
-	
+
 	/**
 	 * 
 	 * @return
