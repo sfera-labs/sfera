@@ -153,17 +153,13 @@ public class ScriptsEngine implements EventListener {
 				}
 			}
 
-			if (!errors.isEmpty()) {
-				logger.error("Errors in script files");
-
-				for (Entry<Path, List<String>> error : errors.entrySet()) {
-					Path file = error.getKey();
-					for (String message : error.getValue()) {
-						logger.error("File '{}': {}", file, message);
-					}
+			for (Entry<Path, List<String>> error : errors.entrySet()) {
+				Path file = error.getKey();
+				for (String message : error.getValue()) {
+					logger.error("Errors in script file '{}': {}", file,
+							message);
 				}
 			}
-
 		} finally {
 			try {
 				Task reloadScriptFiles = new Task("Script files watcher") {
@@ -208,7 +204,7 @@ public class ScriptsEngine implements EventListener {
 									if (Files.isRegularFile(file)
 											&& file.getFileName().toString()
 													.endsWith(".ev")) {
-										logger.debug(
+										logger.info(
 												"Loading script file '{}'",
 												file);
 										try {
@@ -270,7 +266,7 @@ public class ScriptsEngine implements EventListener {
 
 			ParseContext tree = parser.parse();
 
-			if (grammarErrorListener.errors.size() != 0) {
+			if (!grammarErrorListener.errors.isEmpty()) {
 				for (String e : grammarErrorListener.errors) {
 					addError(scriptFile, e);
 				}
@@ -282,7 +278,7 @@ public class ScriptsEngine implements EventListener {
 					scriptFile, fileSystem, engine);
 			ParseTreeWalker.DEFAULT.walk(scriptListener, tree);
 
-			if (scriptListener.errors.size() != 0) {
+			if (!scriptListener.errors.isEmpty()) {
 				for (String e : scriptListener.errors) {
 					addError(scriptFile, e);
 				}

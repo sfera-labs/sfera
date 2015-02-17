@@ -93,7 +93,7 @@ public class FilesWatcher extends Task {
 			key.pollEvents();
 			Watchable path = key.watchable();
 			if (path instanceof Path) {
-				logger.debug("File '{}' modified", path);
+				logger.info("File '{}' modified", path);
 				synchronized (PATHS_TASKS_MAP) {
 					Set<Task> ts = PATHS_TASKS_MAP.remove(path);
 					if (ts != null) {

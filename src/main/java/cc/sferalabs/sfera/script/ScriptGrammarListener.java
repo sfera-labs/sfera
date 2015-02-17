@@ -8,6 +8,7 @@ import java.util.HashSet;
 
 import javax.script.Bindings;
 import javax.script.Compilable;
+import javax.script.CompiledScript;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
@@ -54,7 +55,20 @@ public class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 		String action = ctx.Script().getText();
 		action = action.substring(1, action.length() - 1);
 		try {
-			engine.compile(action).eval(localScope);
+			CompiledScript cs = engine.compile(action);
+			
+			try {
+				cs.eval(localScope);
+			} catch (Throwable e) {
+				int line = ctx.getStart().getLine();
+				if (e instanceof ScriptException) {
+					if (((ScriptException) e).getLineNumber() >= 0) {
+						line += ((ScriptException) e).getLineNumber() - 1;
+					}
+				}
+				errors.add("line " + line + " - evaluation error: " + e);
+			}
+			
 		} catch (Throwable e) {
 			int line = ctx.getStart().getLine();
 			if (e instanceof ScriptException) {
@@ -62,7 +76,7 @@ public class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 					line += ((ScriptException) e).getLineNumber() - 1;
 				}
 			}
-			errors.add("line " + line + ": " + e.getLocalizedMessage());
+			errors.add("line " + line + " - compilation error: " + e);
 		}
 	}
 	
@@ -71,7 +85,20 @@ public class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 		String action = ctx.Script().getText();
 		action = action.substring(1, action.length() - 1);
 		try {
-			engine.compile(action).eval();
+			CompiledScript cs = engine.compile(action);
+			
+			try {
+				cs.eval();
+			} catch (Throwable e) {
+				int line = ctx.getStart().getLine();
+				if (e instanceof ScriptException) {
+					if (((ScriptException) e).getLineNumber() >= 0) {
+						line += ((ScriptException) e).getLineNumber() - 1;
+					}
+				}
+				errors.add("line " + line + " - evaluation error: " + e);
+			}
+			
 		} catch (Throwable e) {
 			int line = ctx.getStart().getLine();
 			if (e instanceof ScriptException) {
@@ -79,7 +106,7 @@ public class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 					line += ((ScriptException) e).getLineNumber() - 1;
 				}
 			}
-			errors.add("line " + line + ": " + e.getLocalizedMessage());
+			errors.add("line " + line + " - compilation error: " + e);
 		}
 	}
 
@@ -96,7 +123,7 @@ public class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 			if (e.getLineNumber() >= 0) {
 				line += e.getLineNumber() - 1;
 			}
-			errors.add("line " + line + ": " + e.getLocalizedMessage());
+			errors.add("line " + line + " - " + e);
 		}
 	}
 	
