@@ -9,8 +9,6 @@ import java.util.HashSet;
 import javax.script.Bindings;
 import javax.script.Compilable;
 import javax.script.CompiledScript;
-import javax.script.ScriptContext;
-import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
 import org.antlr.v4.runtime.misc.NotNull;
@@ -24,39 +22,37 @@ import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.TransientEventC
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.TriggerContext;
 
 public class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
-	
+
 	private final Compilable engine;
 	private final Path scriptFile;
 
 	final HashMap<String, HashSet<Rule>> triggerActionsMap = new HashMap<String, HashSet<Rule>>();
 	final ArrayList<String> errors = new ArrayList<String>();
 	final Bindings localScope;
-	
+
 	private Rule currentRule;
-	
+
 	/**
 	 * 
 	 * @param scriptFile
-	 * @param fileSystem 
+	 * @param fileSystem
 	 * @param engine
+	 * @param localScope 
 	 */
-	public ScriptGrammarListener(Path scriptFile, FileSystem fileSystem, Compilable engine) {
-		ScriptEngine se = (ScriptEngine) engine;
+	public ScriptGrammarListener(Path scriptFile, FileSystem fileSystem,
+			Compilable engine, Bindings localScope) {
 		this.scriptFile = scriptFile;
 		this.engine = engine;
-		this.localScope = se.createBindings();
-		
-		se.put(ScriptLoader.VAR_NAME, new ScriptLoader(se, fileSystem, se.getBindings(ScriptContext.ENGINE_SCOPE)));
-		this.localScope.put(ScriptLoader.VAR_NAME, new ScriptLoader(se, fileSystem, localScope));
+		this.localScope = localScope;
 	}
-	
+
 	@Override
 	public void enterLocalScopeInit(@NotNull LocalScopeInitContext ctx) {
 		String action = ctx.Script().getText();
 		action = action.substring(1, action.length() - 1);
 		try {
 			CompiledScript cs = engine.compile(action);
-			
+
 			try {
 				cs.eval(localScope);
 			} catch (Throwable e) {
@@ -68,7 +64,7 @@ public class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 				}
 				errors.add("line " + line + " - evaluation error: " + e);
 			}
-			
+
 		} catch (Throwable e) {
 			int line = ctx.getStart().getLine();
 			if (e instanceof ScriptException) {
@@ -79,14 +75,14 @@ public class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 			errors.add("line " + line + " - compilation error: " + e);
 		}
 	}
-	
+
 	@Override
 	public void enterGlobalScopeInit(@NotNull GlobalScopeInitContext ctx) {
 		String action = ctx.Script().getText();
 		action = action.substring(1, action.length() - 1);
 		try {
 			CompiledScript cs = engine.compile(action);
-			
+
 			try {
 				cs.eval();
 			} catch (Throwable e) {
@@ -98,7 +94,7 @@ public class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 				}
 				errors.add("line " + line + " - evaluation error: " + e);
 			}
-			
+
 		} catch (Throwable e) {
 			int line = ctx.getStart().getLine();
 			if (e instanceof ScriptException) {
@@ -117,7 +113,8 @@ public class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 		String action = ctx.action().Script().getText();
 		action = action.substring(1, action.length() - 1);
 		try {
-			currentRule = new Rule(condition, action, scriptFile, engine, localScope);
+			currentRule = new Rule(condition, action, scriptFile, engine,
+					localScope);
 		} catch (ScriptException e) {
 			int line = ctx.getStart().getLine();
 			if (e.getLineNumber() >= 0) {
@@ -126,7 +123,7 @@ public class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 			errors.add("line " + line + " - " + e);
 		}
 	}
-	
+
 	@Override
 	public void enterStableEvent(@NotNull StableEventContext ctx) {
 		addTrigger(ctx.getChild(0).getChild(0).getText());
@@ -136,7 +133,7 @@ public class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 	public void enterTransientEvent(@NotNull TransientEventContext ctx) {
 		addTrigger(ctx.getChild(0).getText());
 	}
-	
+
 	/**
 	 * 
 	 * @param id

@@ -21,7 +21,9 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.script.Bindings;
 import javax.script.Compilable;
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
@@ -46,6 +48,7 @@ public class ScriptsEngine implements EventListener {
 
 	public static final ScriptsEngine INSTANCE = new ScriptsEngine();
 	private static final ScriptEngineManager SCRIPT_ENGINE_MANAGER = new ScriptEngineManager();
+	private static final String SCRIPT_FILES_EXTENSION = ".ev";
 	private static final Logger logger = LogManager.getLogger();
 
 	private static HashMap<String, HashSet<Rule>> triggersActionsMap;
@@ -199,25 +202,7 @@ public class ScriptsEngine implements EventListener {
 								BasicFileAttributes attrs) throws IOException {
 							try (DirectoryStream<Path> stream = Files
 									.newDirectoryStream(dir)) {
-								Compilable engine = (Compilable) getNewEngine();
-								for (Path file : stream) {
-									if (Files.isRegularFile(file)
-											&& file.getFileName().toString()
-													.endsWith(".ev")) {
-										logger.info(
-												"Loading script file '{}'",
-												file);
-										try {
-											parseScriptFile(file, fileSystem,
-													engine);
-										} catch (IOException e) {
-											addError(
-													file,
-													"IOException: "
-															+ e.getLocalizedMessage());
-										}
-									}
-								}
+								createNewEnvironment(fileSystem, stream);
 							}
 							return FileVisitResult.CONTINUE;
 						}
@@ -228,16 +213,24 @@ public class ScriptsEngine implements EventListener {
 
 	/**
 	 * 
-	 * @param file
-	 * @param message
+	 * @param fileSystem
+	 * @param stream
 	 */
-	private static void addError(Path file, String message) {
-		List<String> messages = errors.get(file);
-		if (messages == null) {
-			messages = new ArrayList<String>();
-			errors.put(file, messages);
+	private static void createNewEnvironment(FileSystem fileSystem,
+			DirectoryStream<Path> stream) {
+		Compilable engine = (Compilable) getNewEngine();
+		for (Path file : stream) {
+			if (Files.isRegularFile(file)
+					&& file.getFileName().toString()
+							.endsWith(SCRIPT_FILES_EXTENSION)) {
+				logger.info("Loading script file '{}'", file);
+				try {
+					parseScriptFile(file, fileSystem, engine);
+				} catch (IOException e) {
+					addError(file, "IOException: " + e.getLocalizedMessage());
+				}
+			}
 		}
-		messages.add(message);
 	}
 
 	/**
@@ -274,8 +267,25 @@ public class ScriptsEngine implements EventListener {
 				return;
 			}
 
+			ScriptEngine scriptEngine = (ScriptEngine) engine;
+
+			ScriptLoader globalScriptLoader = new ScriptLoader(scriptEngine,
+					fileSystem,
+					scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE));
+			scriptEngine.put(ScriptLoader.VAR_NAME, globalScriptLoader);
+
+			Bindings localScope = scriptEngine.createBindings();
+			ScriptLoader localScriptLoader = new ScriptLoader(scriptEngine,
+					fileSystem, localScope);
+			localScope.put(ScriptLoader.VAR_NAME, localScriptLoader);
+			String loggerName = scriptFile.toString();
+			loggerName = loggerName.substring(0,
+					loggerName.length() - SCRIPT_FILES_EXTENSION.length())
+					.replace('/', '.');
+			localScope.put("logger", LogManager.getLogger(loggerName));
+
 			ScriptGrammarListener scriptListener = new ScriptGrammarListener(
-					scriptFile, fileSystem, engine);
+					scriptFile, fileSystem, engine, localScope);
 			ParseTreeWalker.DEFAULT.walk(scriptListener, tree);
 
 			if (!scriptListener.errors.isEmpty()) {
@@ -297,5 +307,19 @@ public class ScriptsEngine implements EventListener {
 				actions.addAll(entry.getValue());
 			}
 		}
+	}
+
+	/**
+	 * 
+	 * @param file
+	 * @param message
+	 */
+	private static void addError(Path file, String message) {
+		List<String> messages = errors.get(file);
+		if (messages == null) {
+			messages = new ArrayList<String>();
+			errors.put(file, messages);
+		}
+		messages.add(message);
 	}
 }
