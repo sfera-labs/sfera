@@ -1,7 +1,7 @@
 package cc.sferalabs.sfera.events;
 
 
-public class BooleanEvent extends Event {
+public class BooleanEvent extends BaseEvent {
 	
 	private final Boolean value;
 

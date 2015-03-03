@@ -1,7 +1,7 @@
 package cc.sferalabs.sfera.events;
 
 
-public class StringEvent extends Event {
+public class StringEvent extends BaseEvent {
 	
 	private final String value;
 

@@ -2,7 +2,7 @@ package cc.sferalabs.sfera.events;
 
 import cc.sferalabs.sfera.core.SystemNode;
 
-public class SystemEvent extends Event {
+public class SystemEvent extends BaseEvent {
 	
 	private final Object value;
 

@@ -1,50 +1,29 @@
 package cc.sferalabs.sfera.events;
 
-
-public abstract class Event {
-	
-	private final Node source;
-	private final String id;
-	private final long timestamp;
-
-	/**
-	 * 
-	 * @param source
-	 * @param id
-	 */
-	public Event(Node source, String id) {
-		this.timestamp = System.currentTimeMillis();
-		this.source = source;
-		this.id = source.getId() + "." + id;
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	public String getId() {
-		return id;
-	}
+public interface Event {
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public Node getSource() {
-		return source;
-	}
+	public String getId();
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public long getTimestamp() {
-		return timestamp;
-	}
-
+	public Node getSource();
+	
 	/**
 	 * 
 	 * @return
 	 */
-	public abstract Object getValue();
+	public long getTimestamp();
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public Object getValue();
+
 }

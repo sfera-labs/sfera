@@ -3,7 +3,7 @@ package cc.sferalabs.sfera.script;
 import java.util.List;
 
 import cc.sferalabs.sfera.events.Bus;
-import cc.sferalabs.sfera.events.Event;
+import cc.sferalabs.sfera.events.BaseEvent;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.AndExpressionContext;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.AtomExpressionContext;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.BooleanComparisonContext;
@@ -35,7 +35,7 @@ public class TriggerCondition {
 	 * @return
 	 * @throws Exception
 	 */
-	public boolean eval(Event event) throws Exception {
+	public boolean eval(BaseEvent event) throws Exception {
 		return eval(condition.orExpression(), event);
 	}
 
@@ -46,7 +46,7 @@ public class TriggerCondition {
 	 * @return
 	 * @throws Exception
 	 */
-	private boolean eval(OrExpressionContext ctx, Event event) throws Exception {
+	private boolean eval(OrExpressionContext ctx, BaseEvent event) throws Exception {
 		List<AndExpressionContext> ands = ctx.andExpression();
 
 		boolean res = eval(ands.get(0), event);
@@ -64,7 +64,7 @@ public class TriggerCondition {
 	 * @return
 	 * @throws Exception
 	 */
-	private boolean eval(AndExpressionContext ctx, Event event)
+	private boolean eval(AndExpressionContext ctx, BaseEvent event)
 			throws Exception {
 		List<NotExpressionContext> nots = ctx.notExpression();
 
@@ -83,7 +83,7 @@ public class TriggerCondition {
 	 * @return
 	 * @throws Exception
 	 */
-	private boolean eval(NotExpressionContext ctx, Event event)
+	private boolean eval(NotExpressionContext ctx, BaseEvent event)
 			throws Exception {
 		if (ctx.NOT() != null) {
 			return !eval(ctx.atomExpression(), event);
@@ -99,7 +99,7 @@ public class TriggerCondition {
 	 * @return
 	 * @throws Exception
 	 */
-	private boolean eval(AtomExpressionContext ctx, Event event)
+	private boolean eval(AtomExpressionContext ctx, BaseEvent event)
 			throws Exception {
 		if (ctx.event() != null) {
 			return eval(ctx.event(), event);
@@ -115,7 +115,7 @@ public class TriggerCondition {
 	 * @return
 	 * @throws Exception
 	 */
-	private boolean eval(EventContext ctx, Event event) throws Exception {
+	private boolean eval(EventContext ctx, BaseEvent event) throws Exception {
 		if (ctx.stableEvent() != null) {
 			return eval(ctx.stableEvent());
 		} else {
@@ -129,7 +129,7 @@ public class TriggerCondition {
 	 * @param event
 	 * @return
 	 */
-	private boolean eval(TransientEventContext ctx, Event event) {
+	private boolean eval(TransientEventContext ctx, BaseEvent event) {
 		String eventId = event.getId();
 		String condition = ctx.getText();
 		if (event.getId().startsWith(ctx.getText())) {

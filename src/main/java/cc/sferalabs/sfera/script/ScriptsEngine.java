@@ -37,7 +37,7 @@ import cc.sferalabs.sfera.core.FilesWatcher;
 import cc.sferalabs.sfera.core.Plugin;
 import cc.sferalabs.sfera.core.Sfera;
 import cc.sferalabs.sfera.core.Task;
-import cc.sferalabs.sfera.events.Event;
+import cc.sferalabs.sfera.events.BaseEvent;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarLexer;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.ParseContext;
@@ -67,7 +67,7 @@ public class ScriptsEngine implements EventListener {
 	 * @param event
 	 */
 	@Subscribe
-	public synchronized static void executeActionsTriggeredBy(Event event) {
+	public synchronized static void executeActionsTriggeredBy(BaseEvent event) {
 		try {
 			Set<Rule> toExecute = new HashSet<Rule>();
 			String id = event.getId();

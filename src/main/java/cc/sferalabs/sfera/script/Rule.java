@@ -11,7 +11,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import cc.sferalabs.sfera.core.TasksManager;
-import cc.sferalabs.sfera.events.Event;
+import cc.sferalabs.sfera.events.BaseEvent;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.TriggerContext;
 
 public class Rule {
@@ -46,7 +46,7 @@ public class Rule {
 	 * 
 	 * @param event
 	 */
-	public void execute(Event event) {
+	public void execute(BaseEvent event) {
 		TasksManager.DEFAULT.execute(new ActionTask(event, this, localScope));
 	}
 
@@ -55,7 +55,7 @@ public class Rule {
 	 * @param event
 	 * @return
 	 */
-	public boolean eval(Event event) {
+	public boolean eval(BaseEvent event) {
 		try {
 			return condition.eval(event);
 		} catch (Exception e) {

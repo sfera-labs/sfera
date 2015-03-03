@@ -9,13 +9,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import cc.sferalabs.sfera.core.Task;
-import cc.sferalabs.sfera.events.Event;
+import cc.sferalabs.sfera.events.BaseEvent;
 
 public class ActionTask extends Task {
 
 	private static final Logger logger = LogManager.getLogger();
 
-	private final Event triggerEvent;
+	private final BaseEvent triggerEvent;
 	private final Rule rule;
 	private final Bindings localScope;
 
@@ -25,7 +25,7 @@ public class ActionTask extends Task {
 	 * @param rule
 	 * @param localScope
 	 */
-	public ActionTask(Event triggerEvent, Rule rule, Bindings localScope) {
+	public ActionTask(BaseEvent triggerEvent, Rule rule, Bindings localScope) {
 		super("script:" + rule.scriptFile + ":" + rule.startLine);
 		this.triggerEvent = triggerEvent;
 		this.rule = rule;

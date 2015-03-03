@@ -164,15 +164,12 @@ public class Sfera {
 			for (String appName : appList.split(",")) {
 				appName = appName.trim();
 				try {
-					Object appInstance = getModuleInstance(appName, null,
-							"appClass");
-					if (appInstance instanceof Application) {
-						applications.add((Application) appInstance);
-						if (appInstance instanceof EventListener) {
-							Bus.register((EventListener) appInstance);
-						}
-						logger.info("App '{}' loaded", appName);
+					Application appInstance = getModuleInstance(appName, null);
+					applications.add(appInstance);
+					if (appInstance instanceof EventListener) {
+						Bus.register((EventListener) appInstance);
 					}
+					logger.info("App '{}' loaded", appName);
 				} catch (Throwable e) {
 					logger.error("Error instantiating app: " + appName, e);
 				}
@@ -192,19 +189,16 @@ public class Sfera {
 				String driverType = props.getProperty(propName);
 				if (driverType != null) {
 					try {
-						Object driverInstance = getModuleInstance(driverType,
-								propName, "driverClass");
-						if (driverInstance instanceof Driver) {
-							Driver d = (Driver) driverInstance;
-							drivers.add(d);
-							ScriptsEngine.putInGlobalScope(d.getId(), d);
-							if (d instanceof EventListener) {
-								Bus.register((EventListener) d);
-							}
-							logger.info(
-									"Driver '{}' of type '{}' instantiated",
-									propName, driverType);
+						Driver driverInstance = getModuleInstance(driverType,
+								propName);
+						drivers.add(driverInstance);
+						ScriptsEngine.putInGlobalScope(driverInstance.getId(),
+								driverInstance);
+						if (driverInstance instanceof EventListener) {
+							Bus.register((EventListener) driverInstance);
 						}
+						logger.info("Driver '{}' of type '{}' instantiated",
+								propName, driverType);
 					} catch (Throwable e) {
 						logger.error("Error instantiating driver '" + propName
 								+ "' of type '" + driverType + "'", e);
@@ -218,18 +212,20 @@ public class Sfera {
 	 * 
 	 * @param type
 	 * @param id
-	 * @param propertyName
 	 * @return
 	 * @throws Exception
 	 */
-	private static Object getModuleInstance(String type, String id,
-			String propertyName) throws Exception {
+	private static <T> T getModuleInstance(String type, String id)
+			throws Exception {
 		Plugin plugin = plugins.get(type);
 		String className;
 		if (plugin != null) {
-			className = plugin.getProperty(propertyName);
+			className = plugin.getProperty("class");
 		} else {
 			// when in development
+			logger.debug(
+					"Plugin '{}' not found. Looking in local resources...",
+					type);
 			Properties p = new Properties();
 			InputStream is = Sfera.class.getClassLoader().getResourceAsStream(
 					Plugin.PLUGIN_PROPERTIES_PATH);
@@ -237,21 +233,29 @@ public class Sfera {
 				throw new NoSuchFileException(Plugin.PLUGIN_PROPERTIES_PATH);
 			}
 			p.load(is);
-			className = p.getProperty(propertyName);
+			className = p.getProperty("class");
 		}
 
 		if (className == null) {
-			throw new Exception(propertyName + " property not found");
+			throw new Exception("class property not found");
 		}
 
 		Class<?> clazz = Class.forName(className);
-		Constructor<?> constructor = clazz
-				.getConstructor(new Class[] { String.class });
+
+		Object instance;
 		if (id == null) {
-			return constructor.newInstance();
+			Constructor<?> constructor = clazz.getConstructor();
+			instance = constructor.newInstance();
 		} else {
-			return constructor.newInstance(id);
+			Constructor<?> constructor = clazz
+					.getConstructor(new Class[] { String.class });
+			instance = constructor.newInstance(id);
 		}
+
+		@SuppressWarnings("unchecked")
+		T i = (T) instance;
+
+		return i;
 	}
 
 	/**
@@ -291,6 +295,7 @@ public class Sfera {
 					if (!Files.isHidden(file)) {
 						Plugin p = new Plugin(file);
 						plugins.put(p.getId(), p);
+						logger.info("Plugin '{}' loaded", p.getId());
 					}
 				} catch (Exception e) {
 					logger.error("Error loading file '" + file

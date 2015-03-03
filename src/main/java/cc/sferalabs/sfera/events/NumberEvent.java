@@ -1,7 +1,7 @@
 package cc.sferalabs.sfera.events;
 
 
-public class NumberEvent extends Event {
+public class NumberEvent extends BaseEvent {
 	
 	private final Double value;
 
