@@ -22,7 +22,7 @@ public abstract class Bus {
 	private static final EventBus EVENT_BUS = new AsyncEventBus(
 			TasksManager.DEFAULT.getExecutorService(),
 			SUBSCRIBER_EXCEPTION_HANDLER);
-	private static final Map<String, BaseEvent> EVENTS_MAP = new HashMap<String, BaseEvent>();
+	private static final Map<String, Event> EVENTS_MAP = new HashMap<String, Event>();
 
 	private static final Logger logger = LogManager.getLogger();
 	private static final Marker EVENT_MARKER = MarkerManager.getMarker(
@@ -40,7 +40,7 @@ public abstract class Bus {
 	 * 
 	 * @param event
 	 */
-	public static void post(BaseEvent event) {
+	public static void post(Event event) {
 		EVENTS_MAP.put(event.getId(), event);
 		EVENT_BUS.post(event);
 		logger.info(EVENT_MARKER, "Event: {} = {}", event.getId(),
@@ -51,7 +51,7 @@ public abstract class Bus {
 	 * 
 	 * @param event
 	 */
-	public static void postIfChanged(BaseEvent event) {
+	public static void postIfChanged(Event event) {
 		Object currVal = getValueOf(event.getId());
 		Object newVal = event.getValue();
 
@@ -70,7 +70,7 @@ public abstract class Bus {
 	 * @return
 	 */
 	public static Object getValueOf(String id) {
-		BaseEvent ev = EVENTS_MAP.get(id);
+		Event ev = EVENTS_MAP.get(id);
 		if (ev == null) {
 			return null;
 		}
@@ -81,7 +81,7 @@ public abstract class Bus {
 	 * 
 	 * @return
 	 */
-	public static Map<String, BaseEvent> getCurrentState() {
+	public static Map<String, Event> getCurrentState() {
 		return new HashMap<>(EVENTS_MAP);
 	}
 }
