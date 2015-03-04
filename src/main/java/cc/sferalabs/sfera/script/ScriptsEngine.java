@@ -36,7 +36,9 @@ import org.apache.logging.log4j.Logger;
 import cc.sferalabs.sfera.core.FilesWatcher;
 import cc.sferalabs.sfera.core.Plugin;
 import cc.sferalabs.sfera.core.Sfera;
+import cc.sferalabs.sfera.core.SferaService;
 import cc.sferalabs.sfera.core.Task;
+import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Event;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarLexer;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser;
@@ -44,15 +46,30 @@ import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.ParseContext;
 
 import com.google.common.eventbus.Subscribe;
 
-public class ScriptsEngine implements EventListener {
+public class ScriptsEngine implements SferaService, EventListener {
 
-	public static final ScriptsEngine INSTANCE = new ScriptsEngine();
 	private static final ScriptEngineManager SCRIPT_ENGINE_MANAGER = new ScriptEngineManager();
 	private static final String SCRIPT_FILES_EXTENSION = ".ev";
 	private static final Logger logger = LogManager.getLogger();
 
 	private static HashMap<String, HashSet<Rule>> triggersActionsMap;
 	private static HashMap<Path, List<String>> errors;
+
+	@Override
+	public void init() throws Exception {
+		Bus.register(this);
+		try {
+			loadScriptFiles();
+		} catch (IOException e) {
+			logger.error("Error loading script files", e);
+		}
+		logger.debug("Scripts Engine initiated");
+	}
+
+	@Override
+	public void quit() throws Exception {
+		logger.debug("Scripts Engine quitted");
+	}
 
 	/**
 	 * 
@@ -135,8 +152,26 @@ public class ScriptsEngine implements EventListener {
 	 * @param key
 	 * @param value
 	 */
-	public synchronized static void putInGlobalScope(String key, Object value) {
+	public synchronized static void putObjectInGlobalScope(String key,
+			Object value) {
 		SCRIPT_ENGINE_MANAGER.put(key, value);
+	}
+
+	/**
+	 * 
+	 * @param type
+	 * @throws Exception
+	 */
+	public synchronized static void putTypeInGlobalScope(Class<?> clazz)
+			throws Exception {
+		String typeName = clazz.getSimpleName();
+		ScriptEngine engine = getNewEngine();
+		String script = "var " + typeName + " = Java.type('" + clazz.getName()
+				+ "');";
+		Bindings bindings = engine.createBindings();
+		engine.eval(script, bindings);
+		Object type = bindings.get(typeName);
+		putObjectInGlobalScope(typeName, type);
 	}
 
 	/**
@@ -218,7 +253,7 @@ public class ScriptsEngine implements EventListener {
 	 */
 	private static void createNewEnvironment(FileSystem fileSystem,
 			DirectoryStream<Path> stream) {
-		Compilable engine = (Compilable) getNewEngine();
+		ScriptEngine engine = getNewEngine();
 		for (Path file : stream) {
 			if (Files.isRegularFile(file)
 					&& file.getFileName().toString()
@@ -237,12 +272,11 @@ public class ScriptsEngine implements EventListener {
 	 * 
 	 * @param scriptFile
 	 * @param fileSystem
-	 * @param engine
-	 * @param localScope
+	 * @param scriptEngine
 	 * @throws IOException
 	 */
 	private static void parseScriptFile(Path scriptFile, FileSystem fileSystem,
-			Compilable engine) throws IOException {
+			ScriptEngine scriptEngine) throws IOException {
 		try (BufferedReader r = Files.newBufferedReader(scriptFile,
 				StandardCharsets.UTF_8)) {
 			SferaScriptGrammarLexer lexer = new SferaScriptGrammarLexer(
@@ -267,8 +301,6 @@ public class ScriptsEngine implements EventListener {
 				return;
 			}
 
-			ScriptEngine scriptEngine = (ScriptEngine) engine;
-
 			ScriptLoader globalScriptLoader = new ScriptLoader(scriptEngine,
 					fileSystem,
 					scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE));
@@ -278,6 +310,7 @@ public class ScriptsEngine implements EventListener {
 			ScriptLoader localScriptLoader = new ScriptLoader(scriptEngine,
 					fileSystem, localScope);
 			localScope.put(ScriptLoader.VAR_NAME, localScriptLoader);
+
 			String loggerName = scriptFile.toString();
 			loggerName = loggerName.substring(0,
 					loggerName.length() - SCRIPT_FILES_EXTENSION.length())
@@ -285,7 +318,8 @@ public class ScriptsEngine implements EventListener {
 			localScope.put("logger", LogManager.getLogger(loggerName));
 
 			ScriptGrammarListener scriptListener = new ScriptGrammarListener(
-					scriptFile, fileSystem, engine, localScope);
+					scriptFile, fileSystem, (Compilable) scriptEngine,
+					localScope);
 			ParseTreeWalker.DEFAULT.walk(scriptListener, tree);
 
 			if (!scriptListener.errors.isEmpty()) {
@@ -322,4 +356,5 @@ public class ScriptsEngine implements EventListener {
 		}
 		messages.add(message);
 	}
+
 }

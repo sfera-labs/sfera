@@ -4,7 +4,12 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class Database {
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import cc.sferalabs.sfera.core.SferaService;
+
+public class Database implements SferaService {
 
 	private static final String DB_FILE = "data/sfera";
 	private static final String DB_PROPERTIES = ";hsqldb.write_delay_millis=100";
@@ -13,7 +18,10 @@ public class Database {
 	
 	private static Connection dbConnection = null;
 	
-	public static void init() throws ClassNotFoundException, SQLException {
+	private static final Logger logger = LogManager.getLogger();
+	
+	@Override
+	public void init() throws Exception {
 		if (dbConnection == null) {
 			System.setProperty("hsqldb.reconfig_logging", "false");
 			
@@ -21,13 +29,16 @@ public class Database {
 			dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:" + DB_FILE + DB_PROPERTIES, DB_USER, DB_PASSWORD);
 			dbConnection.setAutoCommit(true);
 		}
+		logger.debug("Database initiated");
 	}
 	
-	public static void close() {
+	@Override
+	public void quit() {
 		if (dbConnection != null) {
 			try {
 				dbConnection.close();
 			} catch (SQLException e) {}
 		}
+		logger.debug("Database quitted");
 	}
 }

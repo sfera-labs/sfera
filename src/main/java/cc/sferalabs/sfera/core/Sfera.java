@@ -15,6 +15,7 @@ import java.util.EventListener;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -57,6 +58,9 @@ public class Sfera {
 	private static final Logger logger = LogManager.getLogger();
 	public static final Marker SFERA_MARKER = MarkerManager.getMarker("SFERA");
 
+	private static final ServiceLoader<SferaService> SERVICE_LOADER = ServiceLoader
+			.load(SferaService.class);
+
 	/**
 	 * 
 	 * @param args
@@ -64,6 +68,8 @@ public class Sfera {
 	public static void main(String[] args) {
 		try {
 			Thread.setDefaultUncaughtExceptionHandler(new SystemExceptionHandler());
+
+			logger.info("======== Started ========");
 
 			init();
 			while (run) {
@@ -89,30 +95,20 @@ public class Sfera {
 			throw new RuntimeException(e);
 		}
 
-		logger.info("STARTED");
-
-		SystemNode.init();
-
-		Bus.register(ScriptsEngine.INSTANCE);
-
-		// TODO Maybe we don't need a general database... maybe just a
-		// "Variables" module
-		// Database.init();
-
 		loadPlugins();
-		loadDrivers();
-		loadApplications();
-		try {
-			ScriptsEngine.loadScriptFiles();
-		} catch (IOException e) {
-			logger.error("Error loading script files", e);
+
+		for (SferaService service : SERVICE_LOADER) {
+			try {
+				service.init();
+			} catch (Exception e) {
+				logger.error("Error initiating service '" + service.getClass()
+						+ "'", e);
+			}
 		}
 
 		for (final Driver d : drivers) {
 			d.start();
 		}
-
-		TasksManager.DEFAULT.submit(FilesWatcher.INSTANCE);
 	}
 
 	/**
@@ -142,8 +138,6 @@ public class Sfera {
 
 		logger.debug("Shutting down remaining threads...");
 
-		FilesWatcher.quit();
-
 		try {
 			TasksManager.DEFAULT.getExecutorService().shutdownNow();
 			TasksManager.DEFAULT.getExecutorService().awaitTermination(5,
@@ -151,7 +145,75 @@ public class Sfera {
 		} catch (InterruptedException e) {
 		}
 
-		// TODO Database.close();
+		for (SferaService service : SERVICE_LOADER) {
+			try {
+				service.quit();
+			} catch (Exception e) {
+				logger.error("Error quitting service '" + service.getClass()
+						+ "'", e);
+			}
+		}
+	}
+
+	/**
+	 * 
+	 * @throws IOException
+	 */
+	private static void loadPlugins() {
+		plugins = new ConcurrentHashMap<>();
+		try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths
+				.get("plugins"))) {
+			for (Path file : stream) {
+				try {
+					if (!Files.isHidden(file)) {
+						Plugin p = new Plugin(file);
+						plugins.put(p.getId(), p);
+						logger.info("Plugin '{}' loaded", p.getId());
+					}
+				} catch (Exception e) {
+					logger.error("Error loading file '" + file
+							+ "' in plugins folder", e);
+				}
+			}
+		} catch (NoSuchFileException e) {
+			logger.debug("No plugins directory found");
+		} catch (IOException e) {
+			logger.error("Error loading plugins", e);
+		}
+
+		loadDrivers();
+		loadApplications();
+	}
+
+	/**
+	 * 
+	 */
+	private static void loadDrivers() {
+		drivers = new ArrayList<Driver>();
+		Properties props = Configuration.getProperties();
+		for (String propName : props.stringPropertyNames()) {
+			if (propName.indexOf('.') < 0) {
+				// it's a driver instance definition
+				String driverType = props.getProperty(propName);
+				if (driverType != null) {
+					try {
+						Driver driverInstance = getModuleInstance(driverType,
+								propName);
+						drivers.add(driverInstance);
+						ScriptsEngine.putObjectInGlobalScope(driverInstance.getId(),
+								driverInstance);
+						if (driverInstance instanceof EventListener) {
+							Bus.register((EventListener) driverInstance);
+						}
+						logger.info("Driver '{}' of type '{}' instantiated",
+								propName, driverType);
+					} catch (Throwable e) {
+						logger.error("Error instantiating driver '" + propName
+								+ "' of type '" + driverType + "'", e);
+					}
+				}
+			}
+		}
 	}
 
 	/**
@@ -172,37 +234,6 @@ public class Sfera {
 					logger.info("App '{}' loaded", appName);
 				} catch (Throwable e) {
 					logger.error("Error instantiating app: " + appName, e);
-				}
-			}
-		}
-	}
-
-	/**
-	 * 
-	 */
-	private static void loadDrivers() {
-		drivers = new ArrayList<Driver>();
-		Properties props = Configuration.getProperties();
-		for (String propName : props.stringPropertyNames()) {
-			if (propName.indexOf('.') < 0) {
-				// it's a driver instance definition
-				String driverType = props.getProperty(propName);
-				if (driverType != null) {
-					try {
-						Driver driverInstance = getModuleInstance(driverType,
-								propName);
-						drivers.add(driverInstance);
-						ScriptsEngine.putInGlobalScope(driverInstance.getId(),
-								driverInstance);
-						if (driverInstance instanceof EventListener) {
-							Bus.register((EventListener) driverInstance);
-						}
-						logger.info("Driver '{}' of type '{}' instantiated",
-								propName, driverType);
-					} catch (Throwable e) {
-						logger.error("Error instantiating driver '" + propName
-								+ "' of type '" + driverType + "'", e);
-					}
 				}
 			}
 		}
@@ -279,33 +310,6 @@ public class Sfera {
 				Thread.sleep(5000);
 			} catch (InterruptedException ie) {
 			}
-		}
-	}
-
-	/**
-	 * 
-	 * @throws IOException
-	 */
-	private static void loadPlugins() {
-		plugins = new ConcurrentHashMap<>();
-		try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths
-				.get("plugins"))) {
-			for (Path file : stream) {
-				try {
-					if (!Files.isHidden(file)) {
-						Plugin p = new Plugin(file);
-						plugins.put(p.getId(), p);
-						logger.info("Plugin '{}' loaded", p.getId());
-					}
-				} catch (Exception e) {
-					logger.error("Error loading file '" + file
-							+ "' in plugins folder", e);
-				}
-			}
-		} catch (NoSuchFileException e) {
-			logger.debug("No plugins directory found");
-		} catch (IOException e) {
-			logger.error("Error loading plugins", e);
 		}
 	}
 

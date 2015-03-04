@@ -26,36 +26,48 @@ import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class FilesWatcher extends Task {
+public class FilesWatcher extends Task implements SferaService {
 
 	private static final Logger logger = LogManager.getLogger();
 
-	static final FilesWatcher INSTANCE = new FilesWatcher();
 	private static final Map<Path, Set<Task>> PATHS_TASKS_MAP = new HashMap<Path, Set<Task>>();
 	private static final Set<Path> INVALIDATED_PATHS = new HashSet<Path>();
 	private static boolean run = true;
 
-	private final WatchService watcher;
-
+	private static final  WatchService WATCHER;
+	static {
+		WatchService ws = null;
+		try {
+			ws = FileSystems.getDefault().newWatchService();
+		} catch (IOException e) {
+			logger.error("Error getting Watch Service", e);
+		}
+		WATCHER = ws;
+	}
+	
 	/**
 	 * 
 	 */
-	private FilesWatcher() {
+	public FilesWatcher() {
 		super("Files Watcher");
-		WatchService watcher = null;
-		try {
-			watcher = FileSystems.getDefault().newWatchService();
-			logger.debug("File Watcher ready");
-		} catch (IOException e) {
-			logger.warn("Error instantiating File Watcher", e);
-		}
+	}
 
-		this.watcher = watcher;
+	@Override
+	public void init() throws Exception {
+		TasksManager.DEFAULT.submit(this);
+		logger.debug("File Watcher initiated");
+	}
+
+	@Override
+	public void quit() throws Exception {
+		run = false;
+		WATCHER.close();
+		logger.debug("File Watcher quitted");
 	}
 
 	@Override
 	public void execute() {
-		if (INSTANCE.watcher != null) {
+		if (WATCHER != null) {
 			try {
 				while (run) {
 					try {
@@ -81,11 +93,11 @@ public class FilesWatcher extends Task {
 	 */
 	private static void watch() throws InterruptedException,
 			ClosedWatchServiceException {
-		WatchKey wkey = INSTANCE.watcher.take();
+		WatchKey wkey = WATCHER.take();
 		Set<WatchKey> keys = new HashSet<WatchKey>();
 		do { // in case there are other events combined
 			keys.add(wkey);
-		} while ((wkey = INSTANCE.watcher.poll(1, TimeUnit.SECONDS)) != null
+		} while ((wkey = WATCHER.poll(1, TimeUnit.SECONDS)) != null
 				&& keys.size() < 10);
 
 		Set<Task> toExecute = new HashSet<Task>();
@@ -149,7 +161,7 @@ public class FilesWatcher extends Task {
 	 * @throws IOException
 	 */
 	public static void register(Path path, Task task) throws IOException {
-		if (INSTANCE.watcher == null) {
+		if (WATCHER == null) {
 			return;
 		}
 
@@ -181,21 +193,11 @@ public class FilesWatcher extends Task {
 			@Override
 			public FileVisitResult preVisitDirectory(Path dir,
 					BasicFileAttributes attrs) throws IOException {
-				dir.register(INSTANCE.watcher, ENTRY_CREATE, ENTRY_DELETE,
+				dir.register(WATCHER, ENTRY_CREATE, ENTRY_DELETE,
 						ENTRY_MODIFY);
 				return FileVisitResult.CONTINUE;
 			}
 		});
 	}
 
-	/**
-	 * 
-	 */
-	public static void quit() {
-		try {
-			run = false;
-			INSTANCE.watcher.close();
-		} catch (Exception e) {
-		}
-	}
 }
