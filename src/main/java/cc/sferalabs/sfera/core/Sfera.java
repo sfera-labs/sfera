@@ -71,17 +71,20 @@ public class Sfera {
 
 			logger.info("======== Started ========");
 
+			Bus.post(new SystemEvent("state", "start"));
 			init();
+			Bus.post(new SystemEvent("state", "ready"));
 			while (run) {
 				checkStandardInput();
 			}
+			Bus.post(new SystemEvent("state", "quit"));
 			quit();
 
 		} catch (Throwable t) {
 			logger.catching(Level.FATAL, t);
 		}
 
-		logger.warn("Quitted");
+		logger.info("Quitted");
 		System.exit(0);
 	}
 
@@ -117,8 +120,6 @@ public class Sfera {
 	private static void quit() {
 		logger.warn("System stopped");
 		logger.info("Quitting modules...");
-
-		Bus.post(new SystemEvent("quit", null));
 
 		try {
 			STD_INPUT.close();

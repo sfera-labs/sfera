@@ -12,12 +12,10 @@ import cc.sferalabs.sfera.core.SferaService;
 import cc.sferalabs.sfera.script.ScriptsEngine;
 
 public class EventsScheduler implements SferaService {
-	
-	//TODO handle scheduling an event with same ID more than once, maybe it makes sense to keep both schedulers... maybe not...
 
 	private static final ScheduledExecutorService SCHEDULER = Executors
 			.newScheduledThreadPool(5);
-	
+
 	private static final Logger logger = LogManager.getLogger();
 
 	@Override

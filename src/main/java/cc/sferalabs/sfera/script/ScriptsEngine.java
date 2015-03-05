@@ -106,7 +106,9 @@ public class ScriptsEngine implements SferaService, EventListener {
 				rule.execute(event);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(
+					"Error executing actions triggered by event: "
+							+ event.getId(), e);
 		}
 	}
 
