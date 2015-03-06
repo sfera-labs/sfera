@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import javax.script.Bindings;
 import javax.script.Compilable;
 import javax.script.CompiledScript;
 import javax.script.ScriptException;
@@ -28,7 +27,8 @@ public class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 
 	final HashMap<String, HashSet<Rule>> triggerActionsMap = new HashMap<String, HashSet<Rule>>();
 	final ArrayList<String> errors = new ArrayList<String>();
-	final Bindings localScope;
+	final Scope localScope;
+	final Scope globalScope;
 
 	private Rule currentRule;
 
@@ -37,12 +37,14 @@ public class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 	 * @param scriptFile
 	 * @param fileSystem
 	 * @param engine
-	 * @param localScope 
+	 * @param globalScope
+	 * @param localScope
 	 */
 	public ScriptGrammarListener(Path scriptFile, FileSystem fileSystem,
-			Compilable engine, Bindings localScope) {
+			Compilable engine, Scope globalScope, Scope localScope) {
 		this.scriptFile = scriptFile;
 		this.engine = engine;
+		this.globalScope = globalScope;
 		this.localScope = localScope;
 	}
 
@@ -54,7 +56,7 @@ public class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 			CompiledScript cs = engine.compile(action);
 
 			try {
-				cs.eval(localScope);
+				cs.eval(localScope.getBindings());
 			} catch (Throwable e) {
 				int line = ctx.getStart().getLine();
 				if (e instanceof ScriptException) {
@@ -114,7 +116,7 @@ public class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 		action = action.substring(1, action.length() - 1);
 		try {
 			currentRule = new Rule(condition, action, scriptFile, engine,
-					localScope);
+					globalScope, localScope);
 		} catch (ScriptException e) {
 			int line = ctx.getStart().getLine();
 			if (e.getLineNumber() >= 0) {

@@ -255,14 +255,19 @@ public class ScriptsEngine implements SferaService, EventListener {
 	 */
 	private static void createNewEnvironment(FileSystem fileSystem,
 			DirectoryStream<Path> stream) {
-		ScriptEngine engine = getNewEngine();
+		ScriptEngine scriptEngine = getNewEngine();
+		Bindings dirScopeBindings = scriptEngine
+				.getBindings(ScriptContext.ENGINE_SCOPE);
+		Scope directoryScope = new Scope(fileSystem, scriptEngine,
+				dirScopeBindings);
 		for (Path file : stream) {
 			if (Files.isRegularFile(file)
 					&& file.getFileName().toString()
 							.endsWith(SCRIPT_FILES_EXTENSION)) {
 				logger.info("Loading script file '{}'", file);
 				try {
-					parseScriptFile(file, fileSystem, engine);
+					parseScriptFile(file, fileSystem, scriptEngine,
+							directoryScope);
 				} catch (IOException e) {
 					addError(file, "IOException: " + e.getLocalizedMessage());
 				}
@@ -275,10 +280,11 @@ public class ScriptsEngine implements SferaService, EventListener {
 	 * @param scriptFile
 	 * @param fileSystem
 	 * @param scriptEngine
+	 * @param directoryScope
 	 * @throws IOException
 	 */
 	private static void parseScriptFile(Path scriptFile, FileSystem fileSystem,
-			ScriptEngine scriptEngine) throws IOException {
+			ScriptEngine scriptEngine, Scope directoryScope) throws IOException {
 		try (BufferedReader r = Files.newBufferedReader(scriptFile,
 				StandardCharsets.UTF_8)) {
 			SferaScriptGrammarLexer lexer = new SferaScriptGrammarLexer(
@@ -303,25 +309,18 @@ public class ScriptsEngine implements SferaService, EventListener {
 				return;
 			}
 
-			ScriptLoader globalScriptLoader = new ScriptLoader(scriptEngine,
-					fileSystem,
-					scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE));
-			scriptEngine.put(ScriptLoader.VAR_NAME, globalScriptLoader);
-
-			Bindings localScope = scriptEngine.createBindings();
-			ScriptLoader localScriptLoader = new ScriptLoader(scriptEngine,
-					fileSystem, localScope);
-			localScope.put(ScriptLoader.VAR_NAME, localScriptLoader);
+			Scope fileScope = new Scope(fileSystem, scriptEngine,
+					scriptEngine.createBindings());
 
 			String loggerName = scriptFile.toString();
 			loggerName = loggerName.substring(0,
 					loggerName.length() - SCRIPT_FILES_EXTENSION.length())
 					.replace('/', '.');
-			localScope.put("logger", LogManager.getLogger(loggerName));
+			fileScope.put("logger", LogManager.getLogger(loggerName));
 
 			ScriptGrammarListener scriptListener = new ScriptGrammarListener(
 					scriptFile, fileSystem, (Compilable) scriptEngine,
-					localScope);
+					directoryScope, fileScope);
 			ParseTreeWalker.DEFAULT.walk(scriptListener, tree);
 
 			if (!scriptListener.errors.isEmpty()) {

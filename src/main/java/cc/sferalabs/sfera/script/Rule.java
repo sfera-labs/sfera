@@ -2,7 +2,6 @@ package cc.sferalabs.sfera.script;
 
 import java.nio.file.Path;
 
-import javax.script.Bindings;
 import javax.script.Compilable;
 import javax.script.CompiledScript;
 import javax.script.ScriptException;
@@ -22,7 +21,8 @@ public class Rule {
 	final CompiledScript action;
 	final Path scriptFile;
 	final int startLine;
-	final Bindings localScope;
+	final Scope globalScope;
+	final Scope localScope;
 
 	/**
 	 * 
@@ -30,15 +30,17 @@ public class Rule {
 	 * @param action
 	 * @param scriptFile
 	 * @param engine
+	 * @param globalScope
 	 * @param localScope
 	 * @throws ScriptException
 	 */
 	public Rule(TriggerContext condition, String action, Path scriptFile,
-			Compilable engine, Bindings localScope) throws ScriptException {
+			Compilable engine, Scope globalScope, Scope localScope) throws ScriptException {
 		this.condition = new TriggerCondition(condition);
 		this.action = engine.compile(action);
 		this.scriptFile = scriptFile;
 		this.startLine = condition.getStart().getLine();
+		this.globalScope = globalScope;
 		this.localScope = localScope;
 	}
 
@@ -47,7 +49,7 @@ public class Rule {
 	 * @param event
 	 */
 	public void execute(Event event) {
-		TasksManager.DEFAULT.execute(new ActionTask(event, this, localScope));
+		TasksManager.DEFAULT.execute(new ActionTask(event, this));
 	}
 
 	/**
