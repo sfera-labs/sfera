@@ -161,7 +161,7 @@ public class ScriptsEngine implements SferaService, EventListener {
 
 	/**
 	 * 
-	 * @param type
+	 * @param clazz
 	 * @throws Exception
 	 */
 	public synchronized static void putTypeInGlobalScope(Class<?> clazz)
@@ -180,7 +180,7 @@ public class ScriptsEngine implements SferaService, EventListener {
 	 * 
 	 * @throws IOException
 	 */
-	public synchronized static void loadScriptFiles() throws IOException {
+	private synchronized static void loadScriptFiles() throws IOException {
 		try {
 			triggersActionsMap = new HashMap<String, HashSet<Rule>>();
 			errors = new HashMap<Path, List<String>>();

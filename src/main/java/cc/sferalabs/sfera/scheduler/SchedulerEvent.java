@@ -16,20 +16,20 @@ public class SchedulerEvent extends BaseEvent {
 		}
 	};
 	
-	private final String schedulerId;
+	private final String value;
 
 	/**
 	 * 
 	 * @param id
 	 */
-	public SchedulerEvent(String id) {
-		super(SCHEDULER_NODE, "event");
-		this.schedulerId = id;
+	public SchedulerEvent(String id, String value) {
+		super(SCHEDULER_NODE, id);
+		this.value = value;
 	}
 
 	@Override
 	public String getValue() {
-		return schedulerId;
+		return value;
 	}
 
 }

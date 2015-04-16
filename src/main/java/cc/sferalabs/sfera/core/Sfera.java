@@ -201,8 +201,8 @@ public class Sfera {
 						Driver driverInstance = getModuleInstance(driverType,
 								propName);
 						drivers.add(driverInstance);
-						ScriptsEngine.putObjectInGlobalScope(driverInstance.getId(),
-								driverInstance);
+						ScriptsEngine.putObjectInGlobalScope(
+								driverInstance.getId(), driverInstance);
 						if (driverInstance instanceof EventListener) {
 							Bus.register((EventListener) driverInstance);
 						}
@@ -250,26 +250,27 @@ public class Sfera {
 	private static <T> T getModuleInstance(String type, String id)
 			throws Exception {
 		Plugin plugin = plugins.get(type);
-		String className;
+		String className = null;
 		if (plugin != null) {
 			className = plugin.getProperty("class");
 		} else {
 			// when in development
-			logger.debug(
-					"Plugin '{}' not found. Looking in local resources...",
+			logger.warn("Plugin '{}' not found. Looking in local resources...",
 					type);
 			Properties p = new Properties();
 			InputStream is = Sfera.class.getClassLoader().getResourceAsStream(
 					Plugin.PLUGIN_PROPERTIES_PATH);
-			if (is == null) {
-				throw new NoSuchFileException(Plugin.PLUGIN_PROPERTIES_PATH);
+			if (is != null) {
+				p.load(is);
+				String plugId = p.getProperty("id");
+				if (type.equals(plugId)) {
+					className = p.getProperty("class");
+				}
 			}
-			p.load(is);
-			className = p.getProperty("class");
 		}
 
 		if (className == null) {
-			throw new Exception("class property not found");
+			throw new Exception("Plugin '" + type + "' not found");
 		}
 
 		Class<?> clazz = Class.forName(className);

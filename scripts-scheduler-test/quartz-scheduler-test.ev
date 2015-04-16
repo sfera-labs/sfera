@@ -1,0 +1,11 @@
+local {
+	//EventsScheduler.delay("ciao", "mamma", 5);
+	//EventsScheduler.repeat("ciao", "mamma", 2, 2);
+	//EventsScheduler.repeat("ciao", "mamma", 2, 2, 3);
+	//EventsScheduler.repeat("ciao", "zio", 3, 3, 3);
+}
+
+scheduler.ciao : {
+	logger.info("scheduler event: " + _e.getValue());
+	//EventsScheduler.cancel("ciao", "mamma");
+}
