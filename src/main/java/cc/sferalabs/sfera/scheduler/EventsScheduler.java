@@ -45,6 +45,11 @@ public class EventsScheduler implements SferaService {
 	private static final Logger logger = LogManager.getLogger();
 
 	private static Scheduler scheduler;
+	
+	@Override
+	public String getName() {
+		return "Events Scheduler";
+	}
 
 	@Override
 	public void init() throws Exception {
@@ -53,13 +58,13 @@ public class EventsScheduler implements SferaService {
 		SchedulerFactory schedFact = new StdSchedulerFactory();
 		scheduler = schedFact.getScheduler();
 		scheduler.start();
-		logger.debug("Events Scheduler initiated");
 	}
 
 	@Override
 	public void quit() throws Exception {
-		scheduler.shutdown();
-		logger.debug("Events Scheduler quitted");
+		if (scheduler != null) {
+			scheduler.shutdown();
+		}
 	}
 
 	/**

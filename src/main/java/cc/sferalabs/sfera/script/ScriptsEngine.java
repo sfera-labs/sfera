@@ -35,8 +35,8 @@ import org.apache.logging.log4j.Logger;
 
 import cc.sferalabs.sfera.core.FilesWatcher;
 import cc.sferalabs.sfera.core.Plugin;
-import cc.sferalabs.sfera.core.Sfera;
 import cc.sferalabs.sfera.core.SferaService;
+import cc.sferalabs.sfera.core.SystemNode;
 import cc.sferalabs.sfera.core.Task;
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Event;
@@ -54,6 +54,11 @@ public class ScriptsEngine implements SferaService, EventListener {
 
 	private static HashMap<String, HashSet<Rule>> triggersActionsMap;
 	private static HashMap<Path, List<String>> errors;
+	
+	@Override
+	public String getName() {
+		return "Scripts Engine";
+	}
 
 	@Override
 	public void init() throws Exception {
@@ -63,12 +68,10 @@ public class ScriptsEngine implements SferaService, EventListener {
 		} catch (IOException e) {
 			logger.error("Error loading script files", e);
 		}
-		logger.debug("Scripts Engine initiated");
 	}
 
 	@Override
 	public void quit() throws Exception {
-		logger.debug("Scripts Engine quitted");
 	}
 
 	/**
@@ -186,7 +189,7 @@ public class ScriptsEngine implements SferaService, EventListener {
 			errors = new HashMap<Path, List<String>>();
 
 			loadScriptFilesIn(FileSystems.getDefault());
-			for (Plugin plugin : Sfera.getPlugins().values()) {
+			for (Plugin plugin : SystemNode.getPlugins().values()) {
 				try (FileSystem pluginFs = FileSystems.newFileSystem(
 						plugin.getPath(), null)) {
 					loadScriptFilesIn(pluginFs);

@@ -21,6 +21,11 @@ public class Database implements SferaService {
 	private static final Logger logger = LogManager.getLogger();
 	
 	@Override
+	public String getName() {
+		return "Database";
+	}
+	
+	@Override
 	public void init() throws Exception {
 		if (dbConnection == null) {
 			System.setProperty("hsqldb.reconfig_logging", "false");
@@ -29,7 +34,6 @@ public class Database implements SferaService {
 			dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:" + DB_FILE + DB_PROPERTIES, DB_USER, DB_PASSWORD);
 			dbConnection.setAutoCommit(true);
 		}
-		logger.debug("Database initiated");
 	}
 	
 	@Override
@@ -39,6 +43,5 @@ public class Database implements SferaService {
 				dbConnection.close();
 			} catch (SQLException e) {}
 		}
-		logger.debug("Database quitted");
 	}
 }

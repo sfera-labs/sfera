@@ -34,7 +34,7 @@ public class FilesWatcher extends Task implements SferaService {
 	private static final Set<Path> INVALIDATED_PATHS = new HashSet<Path>();
 	private static boolean run = true;
 
-	private static final  WatchService WATCHER;
+	private static final WatchService WATCHER;
 	static {
 		WatchService ws = null;
 		try {
@@ -44,7 +44,7 @@ public class FilesWatcher extends Task implements SferaService {
 		}
 		WATCHER = ws;
 	}
-	
+
 	/**
 	 * 
 	 */
@@ -53,16 +53,19 @@ public class FilesWatcher extends Task implements SferaService {
 	}
 
 	@Override
+	public String getName() {
+		return "Files Watcher";
+	}
+
+	@Override
 	public void init() throws Exception {
 		TasksManager.DEFAULT.submit(this);
-		logger.debug("File Watcher initiated");
 	}
 
 	@Override
 	public void quit() throws Exception {
 		run = false;
 		WATCHER.close();
-		logger.debug("File Watcher quitted");
 	}
 
 	@Override
@@ -80,19 +83,18 @@ public class FilesWatcher extends Task implements SferaService {
 					}
 				}
 			} catch (ClosedWatchServiceException e) {
+				if (run) {
+					logger.error("WatchService Error. File Watcher stopped", e);
+				}
 			}
 		}
-
-		logger.debug("File Watcher quitted");
 	}
 
 	/**
 	 * 
 	 * @throws InterruptedException
-	 * @throws ClosedWatchServiceException
 	 */
-	private static void watch() throws InterruptedException,
-			ClosedWatchServiceException {
+	private static void watch() throws InterruptedException {
 		WatchKey wkey = WATCHER.take();
 		Set<WatchKey> keys = new HashSet<WatchKey>();
 		do { // in case there are other events combined
@@ -193,8 +195,7 @@ public class FilesWatcher extends Task implements SferaService {
 			@Override
 			public FileVisitResult preVisitDirectory(Path dir,
 					BasicFileAttributes attrs) throws IOException {
-				dir.register(WATCHER, ENTRY_CREATE, ENTRY_DELETE,
-						ENTRY_MODIFY);
+				dir.register(WATCHER, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
 				return FileVisitResult.CONTINUE;
 			}
 		});

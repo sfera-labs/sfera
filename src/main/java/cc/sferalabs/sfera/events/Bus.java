@@ -9,8 +9,8 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 
-import cc.sferalabs.sfera.core.Sfera;
 import cc.sferalabs.sfera.core.TasksManager;
+import cc.sferalabs.sfera.util.logging.LoggerUtils;
 
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
@@ -26,7 +26,7 @@ public abstract class Bus {
 
 	private static final Logger logger = LogManager.getLogger();
 	private static final Marker EVENT_MARKER = MarkerManager.getMarker(
-			"SFERA_EVENT").setParents(Sfera.SFERA_MARKER);
+			"SFERA_EVENT").setParents(LoggerUtils.SFERA_MARKER);
 
 	/**
 	 * 
