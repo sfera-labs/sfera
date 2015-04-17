@@ -1,7 +1,6 @@
 package cc.sferalabs.sfera.core;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -20,8 +19,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.google.common.eventbus.Subscribe;
-
 import cc.sferalabs.sfera.apps.Application;
 import cc.sferalabs.sfera.core.events.SystemStateEvent;
 import cc.sferalabs.sfera.drivers.Driver;
@@ -29,26 +26,33 @@ import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Node;
 import cc.sferalabs.sfera.script.ScriptsEngine;
 
+import com.google.common.eventbus.Subscribe;
+
 public class SystemNode implements Node, EventListener {
-	
+
 	private static ConcurrentHashMap<String, Plugin> plugins;
 
 	private static List<Driver> drivers;
 	private static List<Application> applications;
-	
+
 	private static final ServiceLoader<SferaService> SERVICE_LOADER = ServiceLoader
 			.load(SferaService.class);
 
 	private static final Logger logger = LogManager.getLogger();
-	
+
 	public static final SystemNode INSTANCE = new SystemNode();
-	
+
+	private static final String BASE_PACKAGE = "cc.sferalabs.sfera";
+	private static final String DEFAULT_DRIVERS_PACKAGE = BASE_PACKAGE
+			+ ".drivers";
+	private static final String DEFAULT_APPS_PACKAGE = BASE_PACKAGE + ".apps";
+
 	/**
 	 * 
 	 */
 	private SystemNode() {
 	}
-	
+
 	/**
 	 * 
 	 */
@@ -65,7 +69,7 @@ public class SystemNode implements Node, EventListener {
 	public String getId() {
 		return "system";
 	}
-	
+
 	@Subscribe
 	public void handleSystemStateEvent(SystemStateEvent event) {
 		String state = event.getValue();
@@ -75,7 +79,7 @@ public class SystemNode implements Node, EventListener {
 			System.exit(0);
 		}
 	}
-	
+
 	/**
 	 * 
 	 */
@@ -87,6 +91,8 @@ public class SystemNode implements Node, EventListener {
 		}
 
 		loadPlugins();
+		loadDrivers();
+		loadApplications();
 
 		for (SferaService service : SERVICE_LOADER) {
 			try {
@@ -104,13 +110,13 @@ public class SystemNode implements Node, EventListener {
 			d.start();
 		}
 	}
-	
+
 	/**
 	 * 
 	 */
-	private static void quit() {
+	private void quit() {
 		logger.warn("System stopped");
-		
+
 		logger.debug("Quitting drivers...");
 		for (final Driver d : drivers) {
 			d.disable();
@@ -143,12 +149,12 @@ public class SystemNode implements Node, EventListener {
 			}
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @throws IOException
 	 */
-	private static void loadPlugins() {
+	private void loadPlugins() {
 		plugins = new ConcurrentHashMap<>();
 		try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths
 				.get("plugins"))) {
@@ -169,37 +175,38 @@ public class SystemNode implements Node, EventListener {
 		} catch (IOException e) {
 			logger.error("Error loading plugins", e);
 		}
-
-		loadDrivers();
-		loadApplications();
 	}
 
 	/**
 	 * 
 	 */
-	private static void loadDrivers() {
+	private void loadDrivers() {
 		drivers = new ArrayList<Driver>();
 		Properties props = Configuration.getProperties();
 		for (String propName : props.stringPropertyNames()) {
-			if (propName.indexOf('.') < 0) {
-				// it's a driver instance definition
-				String driverType = props.getProperty(propName);
-				if (driverType != null) {
-					try {
-						Driver driverInstance = getModuleInstance(driverType,
-								propName);
-						drivers.add(driverInstance);
-						ScriptsEngine.putObjectInGlobalScope(
-								driverInstance.getId(), driverInstance);
-						if (driverInstance instanceof EventListener) {
-							Bus.register((EventListener) driverInstance);
-						}
-						logger.info("Driver '{}' of type '{}' instantiated",
-								propName, driverType);
-					} catch (Throwable e) {
-						logger.error("Error instantiating driver '" + propName
-								+ "' of type '" + driverType + "'", e);
+			if (!propName.contains(".")) {
+				String driverClass = props.getProperty(propName);
+				try {
+					if (!driverClass.contains(".")) {
+						driverClass = DEFAULT_DRIVERS_PACKAGE
+								+ driverClass.toLowerCase() + driverClass;
 					}
+					Class<?> clazz = Class.forName(driverClass);
+					Constructor<?> constructor = clazz
+							.getConstructor(new Class[] { String.class });
+					Driver driverInstance = (Driver) constructor
+							.newInstance(propName);
+					drivers.add(driverInstance);
+					ScriptsEngine.putObjectInGlobalScope(
+							driverInstance.getId(), driverInstance);
+					if (driverInstance instanceof EventListener) {
+						Bus.register((EventListener) driverInstance);
+					}
+					logger.info("Driver '{}' of type '{}' instantiated",
+							propName, driverClass);
+				} catch (Throwable e) {
+					logger.error("Error instantiating driver '" + propName
+							+ "' of type '" + driverClass + "'", e);
 				}
 			}
 		}
@@ -208,75 +215,31 @@ public class SystemNode implements Node, EventListener {
 	/**
 	 * 
 	 */
-	private static void loadApplications() {
+	private void loadApplications() {
 		applications = new ArrayList<Application>();
 		String appList = Configuration.SYSTEM.getProperty("apps", null);
 		if (appList != null) {
-			for (String appName : appList.split(",")) {
-				appName = appName.trim();
+			for (String appClass : appList.split(",")) {
+				appClass = appClass.trim();
 				try {
-					Application appInstance = getModuleInstance(appName, null);
+					if (!appClass.contains(".")) {
+						appClass = DEFAULT_APPS_PACKAGE
+								+ appClass.toLowerCase() + appClass;
+					}
+					Class<?> clazz = Class.forName(appClass);
+					Constructor<?> constructor = clazz.getConstructor();
+					Application appInstance = (Application) constructor
+							.newInstance();
 					applications.add(appInstance);
 					if (appInstance instanceof EventListener) {
 						Bus.register((EventListener) appInstance);
 					}
-					logger.info("App '{}' loaded", appName);
+					logger.info("App '{}' loaded", appClass);
 				} catch (Throwable e) {
-					logger.error("Error instantiating app: " + appName, e);
+					logger.error("Error instantiating app: " + appClass, e);
 				}
 			}
 		}
-	}
-
-	/**
-	 * 
-	 * @param type
-	 * @param id
-	 * @return
-	 * @throws Exception
-	 */
-	private static <T> T getModuleInstance(String type, String id)
-			throws Exception {
-		Plugin plugin = plugins.get(type);
-		String className = null;
-		if (plugin != null) {
-			className = plugin.getProperty("class");
-		} else {
-			// when in development
-			logger.warn("Plugin '{}' not found. Looking in local resources...",
-					type);
-			Properties p = new Properties();
-			InputStream is = Sfera.class.getClassLoader().getResourceAsStream(
-					Plugin.PLUGIN_PROPERTIES_PATH);
-			if (is != null) {
-				p.load(is);
-				String plugId = p.getProperty("id");
-				if (type.equals(plugId)) {
-					className = p.getProperty("class");
-				}
-			}
-		}
-
-		if (className == null) {
-			throw new Exception("Plugin '" + type + "' not found");
-		}
-
-		Class<?> clazz = Class.forName(className);
-
-		Object instance;
-		if (id == null) {
-			Constructor<?> constructor = clazz.getConstructor();
-			instance = constructor.newInstance();
-		} else {
-			Constructor<?> constructor = clazz
-					.getConstructor(new Class[] { String.class });
-			instance = constructor.newInstance(id);
-		}
-
-		@SuppressWarnings("unchecked")
-		T i = (T) instance;
-
-		return i;
 	}
 
 	/**
@@ -286,5 +249,5 @@ public class SystemNode implements Node, EventListener {
 	public static Map<String, Plugin> getPlugins() {
 		return plugins;
 	}
-	
+
 }
