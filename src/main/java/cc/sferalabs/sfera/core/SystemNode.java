@@ -90,10 +90,6 @@ public class SystemNode implements Node, EventListener {
 			throw new RuntimeException(e);
 		}
 
-		loadPlugins();
-		loadDrivers();
-		loadApplications();
-
 		for (SferaService service : SERVICE_LOADER) {
 			try {
 				String name = service.getName();
@@ -105,6 +101,10 @@ public class SystemNode implements Node, EventListener {
 						+ "'", e);
 			}
 		}
+		
+		loadPlugins();
+		loadDrivers();
+		loadApplications();
 
 		for (final Driver d : drivers) {
 			d.start();
@@ -188,8 +188,8 @@ public class SystemNode implements Node, EventListener {
 				String driverClass = props.getProperty(propName);
 				try {
 					if (!driverClass.contains(".")) {
-						driverClass = DEFAULT_DRIVERS_PACKAGE
-								+ driverClass.toLowerCase() + driverClass;
+						driverClass = DEFAULT_DRIVERS_PACKAGE + "."
+								+ driverClass.toLowerCase() + "." + driverClass;
 					}
 					Class<?> clazz = Class.forName(driverClass);
 					Constructor<?> constructor = clazz
@@ -223,8 +223,8 @@ public class SystemNode implements Node, EventListener {
 				appClass = appClass.trim();
 				try {
 					if (!appClass.contains(".")) {
-						appClass = DEFAULT_APPS_PACKAGE
-								+ appClass.toLowerCase() + appClass;
+						appClass = DEFAULT_APPS_PACKAGE + "."
+								+ appClass.toLowerCase() + "." + appClass;
 					}
 					Class<?> clazz = Class.forName(appClass);
 					Constructor<?> constructor = clazz.getConstructor();
