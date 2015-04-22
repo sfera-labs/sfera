@@ -21,5 +21,5 @@ public abstract class Task implements Runnable {
 	/**
 	 * 
 	 */
-	public abstract void execute();
+	protected abstract void execute();
 }

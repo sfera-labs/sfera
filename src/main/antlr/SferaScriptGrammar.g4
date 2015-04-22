@@ -26,7 +26,7 @@ rules
     ;
 
 ruleLine
-    : trigger COLON action
+    : trigger ':' action
     ;
     
 action
@@ -56,7 +56,7 @@ notExpression
 
 atomExpression
     : event
-    | LPAREN orExpression RPAREN
+    | '(' orExpression ')'
     ;
 
 event
@@ -72,41 +72,64 @@ stableEvent
     ;
     
 stringComparison
-    : FinalNodeId (ET|NE|GT|LT|GE|LE) StringLiteral
+    : terminalNode (ET|NE|GT|LT|GE|LE) StringLiteral
     ;
     
 numberComparison
-    : FinalNodeId (ET|NE|GT|LT|GE|LE) NumberLiteral
+    : terminalNode (ET|NE|GT|LT|GE|LE) NumberLiteral
     ;
     
 booleanComparison
-    : FinalNodeId (ET|NE) BooleanLiteral
+    : terminalNode (ET|NE) BooleanLiteral
     ;
     
 unknownComparison
-    : FinalNodeId (ET|NE) Unknown
+    : terminalNode (ET|NE) Unknown
     ;
 
 transientEvent
     : NodeId
-    | FinalNodeId
+    | terminalNode
     ;
 
-FinalNodeId
-    : NodeId (DOT NodeId)+
+terminalNode
+    : NodeId ('.' subNode)+
     ;
     
 BooleanLiteral
-    :   'true'
-    |   'false'
+    : 'true'
+    | 'false'
     ;
     
 Unknown
-    :   'unknown'
+    : 'unknown'
     ;
+
+subNode
+	: NodeId parameters?
+	;
+	
+parameters
+	: '(' paramsList? ')'
+	;
+	
+paramsList
+	: parameter (',' parameter)*
+	;
+	
+parameter
+	: NumberLiteral
+	| StringLiteral
+	| BooleanLiteral
+	| array
+	;
+	
+array
+	: '[' paramsList ']'
+	;
     
 NodeId
-    : NodeFirstLetter LetterOrDigit* (LPAREN [0-9]+ RPAREN)?
+    : NodeFirstLetter LetterOrDigit*
     ;
 
 fragment
@@ -183,11 +206,6 @@ fragment
 ZeroToThree
     :   [0-3]
     ;
-      
-LPAREN  : '(';
-RPAREN  : ')';
-
-DOT : '.';
 
 ET      : '==';
 NE      : '!=';
@@ -199,8 +217,6 @@ LE      : '<=';
 OR      : '||';
 AND      : '&&';
 NOT      : '!';
-
-COLON   : ':';
 
 //
 // Whitespace and comments

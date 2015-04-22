@@ -38,7 +38,7 @@ public class IPCommPort extends CommPort {
 		}
 
 		@Override
-		public void execute() {
+		protected void execute() {
 			while (run) {
 				try {
 					InputStream in = socket.getInputStream();

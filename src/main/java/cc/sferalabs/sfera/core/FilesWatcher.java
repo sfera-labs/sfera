@@ -69,7 +69,7 @@ public class FilesWatcher extends Task implements SferaService {
 	}
 
 	@Override
-	public void execute() {
+	protected void execute() {
 		if (WATCHER != null) {
 			try {
 				while (run) {

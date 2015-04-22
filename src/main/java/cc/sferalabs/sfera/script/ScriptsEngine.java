@@ -35,8 +35,8 @@ import org.apache.logging.log4j.Logger;
 
 import cc.sferalabs.sfera.core.FilesWatcher;
 import cc.sferalabs.sfera.core.Plugin;
+import cc.sferalabs.sfera.core.Plugins;
 import cc.sferalabs.sfera.core.SferaService;
-import cc.sferalabs.sfera.core.SystemNode;
 import cc.sferalabs.sfera.core.Task;
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Event;
@@ -189,7 +189,7 @@ public class ScriptsEngine implements SferaService, EventListener {
 			errors = new HashMap<Path, List<String>>();
 
 			loadScriptFilesIn(FileSystems.getDefault());
-			for (Plugin plugin : SystemNode.getPlugins().values()) {
+			for (Plugin plugin : Plugins.getAll().values()) {
 				try (FileSystem pluginFs = FileSystems.newFileSystem(
 						plugin.getPath(), null)) {
 					loadScriptFilesIn(pluginFs);
@@ -208,7 +208,7 @@ public class ScriptsEngine implements SferaService, EventListener {
 				Task reloadScriptFiles = new Task("Script files watcher") {
 
 					@Override
-					public void execute() {
+					protected void execute() {
 						try {
 							loadScriptFiles();
 						} catch (IOException e) {

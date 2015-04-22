@@ -32,7 +32,7 @@ public class ActionTask extends Task {
 	}
 
 	@Override
-	public void execute() {
+	protected void execute() {
 		try {
 			Bindings b = new SimpleBindings();
 			b.putAll(rule.globalScope.getBindings());

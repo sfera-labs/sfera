@@ -47,7 +47,7 @@ public class Console extends Task implements SferaService {
 	}
 
 	@Override
-	public void execute() {
+	protected void execute() {
 		try {
 			while (run) {
 				checkStandardInput();

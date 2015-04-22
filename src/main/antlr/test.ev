@@ -1,0 +1,11 @@
+ciao : {}
+ciao.mamma : {}
+ciao.mamma(1, 2) : {}
+ciao.mamma() > 1 : {}
+ciao.mamma("dss") != 23.4 : {}
+ciao.mamma(21.8) == true : {}
+ciao.mamma(true).cacca < 'sdjkdfjh' : {}
+ciao.mamma("aaa").lll == true : {}
+ciao.mamma(1, "aaa", true).mmmm > 32.8 : {}
+ciao.sss.mamma(1, "aaa", true).aaa != 'sdsdsds' : {}
+ciao.sss([1, "as", false, [2, 3]]).aaa != 'sdsdsds' : {}

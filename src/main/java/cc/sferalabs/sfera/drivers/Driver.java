@@ -15,7 +15,6 @@ public abstract class Driver extends Task implements Node {
 	private final String id;
 	private boolean quit = false;
 	private Future<?> future;
-	private boolean enabled = true;
 
 	protected final Logger logger;
 
@@ -61,22 +60,6 @@ public abstract class Driver extends Task implements Node {
 	/**
 	 * 
 	 */
-	public void enable() {
-		enabled = true;
-		start();
-	}
-
-	/**
-	 * 
-	 */
-	public void disable() {
-		enabled = false;
-		quit();
-	}
-
-	/**
-	 * 
-	 */
 	public synchronized void quit() {
 		this.quit = true;
 		if (future != null) {
@@ -88,66 +71,65 @@ public abstract class Driver extends Task implements Node {
 	 * 
 	 */
 	public synchronized void start() {
-		if (enabled) {
-			if (future == null) {
-				quit = false;
-				future = TasksManager.DEFAULT.submit(this);
-			}
+		if (future == null) {
+			quit = false;
+			future = TasksManager.DEFAULT.submit(this);
 		}
 	}
 
 	@Override
-	public void execute() {
-		try {
-			logger.info("Starting...");
-			if (onInit(new Configuration(getId()))) {
-				logger.info("Started");
-			} else {
-				logger.warn("Initialization failed");
-				quit = true;
+	protected void execute() {
+		while (!quit) {
+			try {
+				logger.info("Starting...");
+				if (onInit(new Configuration(getId()))) {
+					logger.info("Started");
+				} else {
+					logger.warn("Initialization failed");
+					quit = true;
+				}
+
+				try {
+					while (!quit) {
+						try {
+							if (!loop()) {
+								break;
+							}
+						} catch (InterruptedException ie) {
+							if (quit) {
+								logger.warn("Driver interrupted");
+								Thread.currentThread().interrupt();
+							} else {
+								logger.debug("Driver interrupted but not quitted");
+							}
+						}
+					}
+				} catch (Throwable t) {
+					logger.error("Uncought exception in loop()", t);
+				}
+
+			} catch (InterruptedException t) {
+				logger.debug("Initialization interrupted");
+			} catch (Throwable t) {
+				logger.error("Uncought exception in onInit()", t);
 			}
 
 			try {
-				while (!quit) {
-					try {
-						if (!loop()) {
-							break;
-						}
-					} catch (InterruptedException ie) {
-						if (quit) {
-							logger.warn("Driver interrupted");
-							Thread.currentThread().interrupt();
-						} else {
-							logger.debug("Driver interrupted but not quitted");
-						}
-					}
-				}
+				logger.info("Quitting...");
+				onQuit();
+				logger.info("Quitted");
+			} catch (InterruptedException t) {
+				logger.debug("onQuit() interrupted");
 			} catch (Throwable t) {
-				logger.error("Uncought exception in loop()", t);
+				logger.error("Uncought exception in onQuit()", t);
 			}
 
-		} catch (InterruptedException t) {
-			logger.debug("Initialization interrupted");
-		} catch (Throwable t) {
-			logger.error("Uncought exception in onInit()", t);
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+			}
 		}
 
-		try {
-			logger.info("Quitting...");
-			onQuit();
-			logger.info("Quitted");
-		} catch (InterruptedException t) {
-			logger.debug("onQuit() interrupted");
-		} catch (Throwable t) {
-			logger.error("Uncought exception in onQuit()", t);
-		}
-		
-		try {
-			Thread.sleep(5000);
-		} catch (InterruptedException e) {
-		}
-		
 		future = null;
-		start();
 	}
 }

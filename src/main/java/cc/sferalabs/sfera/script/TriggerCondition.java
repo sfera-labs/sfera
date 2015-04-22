@@ -175,7 +175,7 @@ public class TriggerCondition {
 	 * @throws Exception
 	 */
 	private boolean eval(StringComparisonContext ctx) throws Exception {
-		Object value = Bus.getValueOf(ctx.FinalNodeId().getText());
+		Object value = Bus.getValueOf(ctx.terminalNode().getText());
 
 		if (value == null) {
 			return false;
@@ -208,7 +208,7 @@ public class TriggerCondition {
 	 * @throws Exception
 	 */
 	private boolean eval(NumberComparisonContext ctx) throws Exception {
-		Object value = Bus.getValueOf(ctx.FinalNodeId().getText());
+		Object value = Bus.getValueOf(ctx.terminalNode().getText());
 
 		if (value == null) {
 			return false;
@@ -217,7 +217,7 @@ public class TriggerCondition {
 		if (!(value instanceof Double)) {
 			int line = ctx.getStart().getLine();
 			throw new Exception("line " + line + ": Type error: "
-					+ ctx.FinalNodeId().getText() + " not a number");
+					+ ctx.terminalNode().getText() + " not a number");
 		}
 
 		if (ctx.ET() != null) {
@@ -248,7 +248,7 @@ public class TriggerCondition {
 	 * @throws Exception
 	 */
 	private boolean eval(BooleanComparisonContext ctx) throws Exception {
-		Object value = Bus.getValueOf(ctx.FinalNodeId().getText());
+		Object value = Bus.getValueOf(ctx.terminalNode().getText());
 
 		if (value == null) {
 			return false;
@@ -257,7 +257,7 @@ public class TriggerCondition {
 		if (!(value instanceof Boolean)) {
 			int line = ctx.getStart().getLine();
 			throw new Exception("line " + line + ": Type error: "
-					+ ctx.FinalNodeId().getText() + " not a boolean");
+					+ ctx.terminalNode().getText() + " not a boolean");
 		}
 
 		if (ctx.ET() != null) {
@@ -273,7 +273,7 @@ public class TriggerCondition {
 	 * @return
 	 */
 	private boolean eval(UnknownComparisonContext ctx) {
-		Object value = Bus.getValueOf(ctx.FinalNodeId().getText());
+		Object value = Bus.getValueOf(ctx.terminalNode().getText());
 
 		if (ctx.ET() != null) {
 			return value == null;
