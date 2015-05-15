@@ -9,12 +9,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import cc.sferalabs.sfera.core.Configuration;
-import cc.sferalabs.sfera.core.SystemNode;
+import cc.sferalabs.sfera.core.Sfera;
 import cc.sferalabs.sfera.events.Bus;
 
 public abstract class Applications {
 
-	private static final String DEFAULT_APPS_PACKAGE = SystemNode.BASE_PACKAGE
+	private static final String DEFAULT_APPS_PACKAGE = Sfera.BASE_PACKAGE
 			+ ".apps";
 	private static final Logger logger = LogManager.getLogger();
 

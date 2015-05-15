@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -47,7 +48,16 @@ public abstract class Plugins {
 	 * @return
 	 */
 	public static Map<String, Plugin> getAll() {
-		return plugins;
+		return new HashMap<String, Plugin>(plugins);
+	}
+
+	/**
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public static Plugin get(String id) {
+		return plugins.get(id);
 	}
 
 }

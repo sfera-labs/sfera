@@ -4,7 +4,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class Sfera {
-	
+
+	public static final String BASE_PACKAGE = "cc.sferalabs.sfera";
+
 	static {
 		Path log4j2Config = Configuration.CONFIG_DIR.resolve("log4j2.xml");
 		if (Files.exists(log4j2Config)) {

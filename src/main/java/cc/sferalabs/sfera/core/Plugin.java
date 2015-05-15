@@ -5,15 +5,21 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Properties;
+
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.events.EndElement;
+import javax.xml.stream.events.StartElement;
+import javax.xml.stream.events.XMLEvent;
 
 public class Plugin {
 
-	final static String PLUGIN_PROPERTIES_PATH = "META-INF/sfera/plugin.properties";
+	final static String PLUGIN_POM_FILE = "pom.xml";
 
 	private final Path path;
 	private final String id;
-	private final Properties properties;
+	private final String name;
+	private final String description;
 
 	/**
 	 * 
@@ -29,19 +35,74 @@ public class Plugin {
 		}
 
 		this.path = jarFile;
-		properties = new Properties();
+
+		String id = null;
+		String name = null;
+		String description = null;
 		try (FileSystem pluginFileSystem = FileSystems.newFileSystem(jarFile,
 				null)) {
+			XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+			XMLEventReader eventReader = null;
 			try (BufferedReader br = Files.newBufferedReader(pluginFileSystem
-					.getPath(PLUGIN_PROPERTIES_PATH))) {
-				properties.load(br);
-				this.id = properties.getProperty("id");
-				if (this.id == null) {
+					.getPath(PLUGIN_POM_FILE))) {
+
+				eventReader = inputFactory.createXMLEventReader(br);
+				boolean inProject = false;
+				while (eventReader.hasNext()) {
+					XMLEvent event = eventReader.nextEvent();
+					if (event.isStartElement()) {
+						StartElement startElement = event.asStartElement();
+						if (!inProject) {
+							if (startElement.getName().getLocalPart()
+									.equals("project")) {
+								inProject = true;
+							}
+						} else {
+							String elName = startElement.getName()
+									.getLocalPart();
+							if (elName.equals("groupId")) {
+								event = eventReader.nextEvent();
+								if (event.isCharacters()) {
+									id = event.asCharacters().getData();
+								}
+							} else if (elName.equals("name")) {
+								event = eventReader.nextEvent();
+								if (event.isCharacters()) {
+									name = event.asCharacters().getData();
+								}
+							} else if (elName.equals("description")) {
+								event = eventReader.nextEvent();
+								if (event.isCharacters()) {
+									description = event.asCharacters().getData();
+								}
+							}
+						}
+
+					} else if (event.isEndElement()) {
+						EndElement endElement = event.asEndElement();
+						if (endElement.getName().getLocalPart()
+								.equals("project")) {
+							inProject = false;
+						}
+					}
+				}
+
+				if (id == null) {
 					throw new Exception("id not found");
+				}
+
+				this.id = id;
+				this.name = name;
+				this.description = description;
+
+			} finally {
+				try {
+					eventReader.close();
+				} catch (Exception e) {
 				}
 			}
 		} catch (Exception e) {
-			throw new Exception("error reading plugin properties", e);
+			throw new Exception("Error reading plugin properties", e);
 		}
 	}
 
@@ -60,13 +121,20 @@ public class Plugin {
 	public Path getPath() {
 		return path;
 	}
-
+	
 	/**
 	 * 
-	 * @param key
 	 * @return
 	 */
-	public String getProperty(String key) {
-		return properties.getProperty(key);
+	public String getName() {
+		return name;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public String getDescription() {
+		return description;
 	}
 }

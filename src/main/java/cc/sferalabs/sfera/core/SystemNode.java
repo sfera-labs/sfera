@@ -25,8 +25,6 @@ public class SystemNode implements Node, EventListener {
 
 	public static final SystemNode INSTANCE = new SystemNode();
 
-	public static final String BASE_PACKAGE = "cc.sferalabs.sfera";
-
 	/**
 	 * 
 	 */
