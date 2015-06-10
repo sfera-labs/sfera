@@ -6,7 +6,7 @@ import cc.sferalabs.sfera.events.BaseEvent;
 public abstract class SystemEvent extends BaseEvent {
 
 	public SystemEvent(String id) {
-		super(SystemNode.INSTANCE, id);
+		super(SystemNode.getInstance(), id);
 	}
 
 }

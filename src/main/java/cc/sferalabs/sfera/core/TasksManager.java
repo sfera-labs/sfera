@@ -6,7 +6,7 @@ import java.util.concurrent.Future;
 
 public class TasksManager {
 	
-	public static final TasksManager DEFAULT = new TasksManager(Executors.newCachedThreadPool());
+	private static final TasksManager DEFAULT = new TasksManager(Executors.newCachedThreadPool());
 	
 	private final ExecutorService executorService;
 	
@@ -14,8 +14,16 @@ public class TasksManager {
 	 * 
 	 * @param executorService
 	 */
-	public TasksManager(ExecutorService executorService) {
+	private TasksManager(ExecutorService executorService) {
 		this.executorService = executorService;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public static TasksManager getDefault() {
+		return DEFAULT;
 	}
 
 	/**

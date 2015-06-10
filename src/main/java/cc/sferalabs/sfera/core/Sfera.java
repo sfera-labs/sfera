@@ -22,7 +22,7 @@ public class Sfera {
 	public static void main(String[] args) {
 		System.setProperty("java.awt.headless", "true");
 		Thread.setDefaultUncaughtExceptionHandler(new SystemExceptionHandler());
-		SystemNode.INSTANCE.start();
+		SystemNode.getInstance().start();
 	}
 
 }

@@ -73,7 +73,7 @@ public abstract class Driver extends Task implements Node {
 	public synchronized void start() {
 		if (future == null) {
 			quit = false;
-			future = TasksManager.DEFAULT.submit(this);
+			future = TasksManager.getDefault().submit(this);
 		}
 	}
 

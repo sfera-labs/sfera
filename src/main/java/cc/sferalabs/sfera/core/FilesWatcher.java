@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class FilesWatcher extends Task implements SferaService {
+public class FilesWatcher extends Task implements AutoStartService {
 
 	private static final Logger logger = LogManager.getLogger();
 
@@ -59,7 +59,7 @@ public class FilesWatcher extends Task implements SferaService {
 
 	@Override
 	public void init() throws Exception {
-		TasksManager.DEFAULT.submit(this);
+		TasksManager.getDefault().submit(this);
 	}
 
 	@Override
@@ -151,7 +151,7 @@ public class FilesWatcher extends Task implements SferaService {
 	private static void executeTasks(Set<Task> tasks) {
 		if (tasks != null) {
 			for (Task t : tasks) {
-				TasksManager.DEFAULT.execute(t);
+				TasksManager.getDefault().execute(t);
 			}
 		}
 	}

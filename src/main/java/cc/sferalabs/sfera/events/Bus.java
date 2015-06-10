@@ -20,7 +20,7 @@ public abstract class Bus {
 
 	private static final SubscriberExceptionHandler SUBSCRIBER_EXCEPTION_HANDLER = new EventsSubscriberExceptionHandler();
 	private static final EventBus EVENT_BUS = new AsyncEventBus(
-			TasksManager.DEFAULT.getExecutorService(),
+			TasksManager.getDefault().getExecutorService(),
 			SUBSCRIBER_EXCEPTION_HANDLER);
 	private static final Map<String, Event> EVENTS_MAP = new HashMap<String, Event>();
 

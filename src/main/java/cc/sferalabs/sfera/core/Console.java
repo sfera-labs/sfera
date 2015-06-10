@@ -10,7 +10,7 @@ import org.apache.logging.log4j.Logger;
 import cc.sferalabs.sfera.core.events.SystemStateEvent;
 import cc.sferalabs.sfera.events.Bus;
 
-public class Console extends Task implements SferaService {
+public class Console extends Task implements AutoStartService {
 
 	private static BufferedReader stdIn;
 	private boolean run;
@@ -32,7 +32,7 @@ public class Console extends Task implements SferaService {
 	public void init() throws Exception {
 		run = true;
 		stdIn = new BufferedReader(new InputStreamReader(System.in));
-		TasksManager.DEFAULT.execute(this);
+		TasksManager.getDefault().execute(this);
 	}
 
 	@Override

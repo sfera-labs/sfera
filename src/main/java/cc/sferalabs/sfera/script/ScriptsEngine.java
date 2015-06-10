@@ -36,7 +36,7 @@ import org.apache.logging.log4j.Logger;
 import cc.sferalabs.sfera.core.FilesWatcher;
 import cc.sferalabs.sfera.core.Plugin;
 import cc.sferalabs.sfera.core.Plugins;
-import cc.sferalabs.sfera.core.SferaService;
+import cc.sferalabs.sfera.core.AutoStartService;
 import cc.sferalabs.sfera.core.Task;
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Event;
@@ -46,7 +46,7 @@ import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.ParseContext;
 
 import com.google.common.eventbus.Subscribe;
 
-public class ScriptsEngine implements SferaService, EventListener {
+public class ScriptsEngine implements AutoStartService, EventListener {
 
 	private static final ScriptEngineManager SCRIPT_ENGINE_MANAGER = new ScriptEngineManager();
 	private static final String SCRIPT_FILES_EXTENSION = ".ev";

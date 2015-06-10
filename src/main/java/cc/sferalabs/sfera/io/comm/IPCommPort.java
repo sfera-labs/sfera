@@ -115,7 +115,7 @@ public class IPCommPort extends CommPort {
 			throw new CommPortException("Comm port reader already set");
 		}
 		readerTask = new ReaderTask(reader);
-		TasksManager.DEFAULT.execute(readerTask);
+		TasksManager.getDefault().execute(readerTask);
 	}
 
 	@Override

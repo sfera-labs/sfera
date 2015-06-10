@@ -21,9 +21,10 @@ public class Configuration {
 	
 	/**
 	 * 
+	 * @param id
 	 */
-	public Configuration(String prefix) {
-		this.prefix = prefix + ".";
+	public Configuration(String id) {
+		this.prefix = id + ".";
 	}
 	
 	/**
@@ -51,6 +52,7 @@ public class Configuration {
 	/**
 	 * 
 	 * @param key
+	 * @param defaultValue
 	 * @return
 	 */
 	public String getProperty(String key, String defaultValue) {
@@ -66,6 +68,7 @@ public class Configuration {
 	/**
 	 * 
 	 * @param key
+	 * @param defaultValue
 	 * @return
 	 */
 	public Integer getIntProperty(String key, Integer defaultValue) {

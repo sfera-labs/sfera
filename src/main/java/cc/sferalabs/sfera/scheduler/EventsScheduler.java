@@ -21,7 +21,7 @@ import org.quartz.TriggerKey;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.matchers.GroupMatcher;
 
-import cc.sferalabs.sfera.core.SferaService;
+import cc.sferalabs.sfera.core.AutoStartService;
 import cc.sferalabs.sfera.script.ScriptsEngine;
 
 /* TODO remove
@@ -40,7 +40,7 @@ import cc.sferalabs.sfera.script.ScriptsEngine;
  import static org.quartz.impl.matchers.EverythingMatcher.*;
  */
 
-public class EventsScheduler implements SferaService {
+public class EventsScheduler implements AutoStartService {
 
 	private static final Logger logger = LogManager.getLogger();
 

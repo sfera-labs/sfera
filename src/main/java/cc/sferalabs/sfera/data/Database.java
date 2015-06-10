@@ -7,9 +7,9 @@ import java.sql.SQLException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import cc.sferalabs.sfera.core.SferaService;
+import cc.sferalabs.sfera.core.AutoStartService;
 
-public class Database implements SferaService {
+public class Database implements AutoStartService {
 
 	private static final String DB_FILE = "data/sfera";
 	private static final String DB_PROPERTIES = ";hsqldb.write_delay_millis=100";

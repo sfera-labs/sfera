@@ -1,6 +1,6 @@
 package cc.sferalabs.sfera.core;
 
-public interface SferaService {
+public interface AutoStartService {
 	
 	/**
 	 * 

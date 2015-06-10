@@ -49,7 +49,7 @@ public class Rule {
 	 * @param event
 	 */
 	public void execute(Event event) {
-		TasksManager.DEFAULT.execute(new ActionTask(event, this));
+		TasksManager.getDefault().execute(new ActionTask(event, this));
 	}
 
 	/**

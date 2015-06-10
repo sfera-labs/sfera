@@ -18,17 +18,25 @@ import com.google.common.eventbus.Subscribe;
 
 public class SystemNode implements Node, EventListener {
 
-	private static final ServiceLoader<SferaService> SERVICE_LOADER = ServiceLoader
-			.load(SferaService.class);
+	private static final ServiceLoader<AutoStartService> SERVICE_LOADER = ServiceLoader
+			.load(AutoStartService.class);
 
 	private static final Logger logger = LogManager.getLogger();
 
-	public static final SystemNode INSTANCE = new SystemNode();
+	private static final SystemNode INSTANCE = new SystemNode();
 
 	/**
 	 * 
 	 */
 	private SystemNode() {
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public static SystemNode getInstance() {
+		return INSTANCE;
 	}
 
 	/**
@@ -76,7 +84,7 @@ public class SystemNode implements Node, EventListener {
 		Drivers.load();
 		Applications.load();
 
-		for (SferaService service : SERVICE_LOADER) {
+		for (AutoStartService service : SERVICE_LOADER) {
 			String name = service.getName();
 			try {
 				logger.debug("Initializing service {}...", name);
@@ -107,14 +115,14 @@ public class SystemNode implements Node, EventListener {
 
 		logger.debug("terminating tasks...");
 		try {
-			TasksManager.DEFAULT.getExecutorService().shutdownNow();
-			TasksManager.DEFAULT.getExecutorService().awaitTermination(5,
+			TasksManager.getDefault().getExecutorService().shutdownNow();
+			TasksManager.getDefault().getExecutorService().awaitTermination(5,
 					TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 		}
 		logger.debug("Tasks terminated");
 
-		for (SferaService service : SERVICE_LOADER) {
+		for (AutoStartService service : SERVICE_LOADER) {
 			try {
 				String name = service.getName();
 				logger.debug("Quitting service {}...", name);
