@@ -5,11 +5,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class TasksManager {
-	
-	private static final TasksManager DEFAULT = new TasksManager(Executors.newCachedThreadPool());
-	
+
+	private static final TasksManager DEFAULT = new TasksManager(
+			Executors.newCachedThreadPool());
+
 	private final ExecutorService executorService;
-	
+
 	/**
 	 * 
 	 * @param executorService
@@ -17,7 +18,7 @@ public class TasksManager {
 	private TasksManager(ExecutorService executorService) {
 		this.executorService = executorService;
 	}
-	
+
 	/**
 	 * 
 	 * @return
@@ -28,13 +29,21 @@ public class TasksManager {
 
 	/**
 	 * 
+	 * @return
+	 */
+	public static TasksManager newTasksManager(ExecutorService executorService) {
+		return new TasksManager(executorService);
+	}
+
+	/**
+	 * 
 	 * @param t
 	 * @return
 	 */
 	public Future<?> submit(Task t) {
 		return executorService.submit(t);
 	}
-	
+
 	/**
 	 * 
 	 * @param t
@@ -42,7 +51,7 @@ public class TasksManager {
 	public void execute(Task t) {
 		executorService.execute(t);
 	}
-	
+
 	/**
 	 * 
 	 * @return
