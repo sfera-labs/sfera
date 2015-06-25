@@ -53,11 +53,6 @@ public class FilesWatcher extends Task implements AutoStartService {
 	}
 
 	@Override
-	public String getName() {
-		return "Files Watcher";
-	}
-
-	@Override
 	public void init() throws Exception {
 		TasksManager.getDefault().submit(this);
 	}

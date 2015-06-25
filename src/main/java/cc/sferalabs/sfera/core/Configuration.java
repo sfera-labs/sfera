@@ -13,7 +13,7 @@ public class Configuration {
 	static final Path CONFIG_DIR = Paths.get("config");
 	static final Path SYSTEM_CONFIG_FILE = CONFIG_DIR.resolve("sfera.ini");
 	
-	public static final Configuration SYSTEM = new Configuration("system");
+	private static final Configuration SYSTEM = new Configuration("system");
 	
 	private static Properties props;
 	
@@ -25,6 +25,14 @@ public class Configuration {
 	 */
 	public Configuration(String id) {
 		this.prefix = id + ".";
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public static Configuration getSystemConfig() {
+		return SYSTEM;
 	}
 	
 	/**

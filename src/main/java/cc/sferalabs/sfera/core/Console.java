@@ -22,11 +22,6 @@ public class Console extends Task implements AutoStartService {
 	public Console() {
 		super("Console");
 	}
-	
-	@Override
-	public String getName() {
-		return "Console";
-	}
 
 	@Override
 	public void init() throws Exception {

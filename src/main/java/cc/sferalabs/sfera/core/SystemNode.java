@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import cc.sferalabs.sfera.access.Access;
 import cc.sferalabs.sfera.apps.Applications;
 import cc.sferalabs.sfera.core.events.SystemStateEvent;
 import cc.sferalabs.sfera.drivers.Drivers;
@@ -30,7 +31,7 @@ public class SystemNode implements Node, EventListener {
 	 */
 	private SystemNode() {
 	}
-	
+
 	/**
 	 * 
 	 * @return
@@ -46,8 +47,8 @@ public class SystemNode implements Node, EventListener {
 		logger.info("======== Started ========");
 
 		Bus.post(new SystemStateEvent("start"));
-		init();
 		Bus.register(this);
+		init();
 		Bus.post(new SystemStateEvent("ready"));
 	}
 
@@ -75,6 +76,12 @@ public class SystemNode implements Node, EventListener {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+		
+		try {
+			Access.init();
+		} catch (Exception e) {
+			logger.error("Error initializing access config", e);
+		}
 
 		try {
 			Plugins.load();
@@ -84,18 +91,28 @@ public class SystemNode implements Node, EventListener {
 		Drivers.load();
 		Applications.load();
 
-		for (AutoStartService service : SERVICE_LOADER) {
-			String name = service.getName();
-			try {
-				logger.debug("Initializing service {}...", name);
-				service.init();
-				logger.debug("Service {} initiated", name);
-			} catch (Exception e) {
-				logger.error("Error initiating service '" + name + "'", e);
+		try {
+			for (AutoStartService service : SERVICE_LOADER) {
+				String name = service.getClass().getSimpleName();
+				try {
+					logger.debug("Initializing service {}...", name);
+					service.init();
+					logger.debug("Service {} initiated", name);
+				} catch (Exception e) {
+					logger.error("Error initiating service '" + name + "'", e);
+				}
 			}
+		} catch (Throwable e) {
+			logger.error(
+					"Error loading services "
+							+ AutoStartService.class.getSimpleName(), e);
 		}
 
-		Drivers.startAll();
+		logger.debug("Enabling apps...");
+		Applications.enable();
+		
+		logger.debug("Starting drivers...");
+		Drivers.start();
 	}
 
 	/**
@@ -106,6 +123,9 @@ public class SystemNode implements Node, EventListener {
 
 		logger.debug("Quitting drivers...");
 		Drivers.quit();
+		
+		logger.debug("Disabling apps...");
+		Applications.disable();
 
 		logger.debug("Waiting 5 seconds for drivers to quit...");
 		try {
@@ -116,15 +136,15 @@ public class SystemNode implements Node, EventListener {
 		logger.debug("terminating tasks...");
 		try {
 			TasksManager.getDefault().getExecutorService().shutdownNow();
-			TasksManager.getDefault().getExecutorService().awaitTermination(5,
-					TimeUnit.SECONDS);
+			TasksManager.getDefault().getExecutorService()
+					.awaitTermination(5, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 		}
 		logger.debug("Tasks terminated");
 
 		for (AutoStartService service : SERVICE_LOADER) {
 			try {
-				String name = service.getName();
+				String name = service.getClass().getSimpleName();
 				logger.debug("Quitting service {}...", name);
 				service.quit();
 				logger.debug("Service {} quitted", name);

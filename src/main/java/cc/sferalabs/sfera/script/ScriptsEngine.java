@@ -56,11 +56,6 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	private static HashMap<Path, List<String>> errors;
 	
 	@Override
-	public String getName() {
-		return "Scripts Engine";
-	}
-
-	@Override
 	public void init() throws Exception {
 		Bus.register(this);
 		try {

@@ -25,7 +25,8 @@ public abstract class Applications {
 	 */
 	public static void load() {
 		applications = new ArrayList<Application>();
-		String appList = Configuration.SYSTEM.getProperty("apps", null);
+		String appList = Configuration.getSystemConfig().getProperty("apps",
+				null);
 		if (appList != null) {
 			for (String appClass : appList.split(",")) {
 				appClass = appClass.trim();
@@ -47,6 +48,25 @@ public abstract class Applications {
 					logger.error("Error instantiating app: " + appClass, e);
 				}
 			}
+		}
+	}
+
+	/**
+	 * 
+	 */
+	public synchronized static void enable() {
+		for (final Application a : applications) {
+			//TODO get app configuration
+			a.onEnable(new Configuration(a.getClass().getName()));
+		}
+	}
+
+	/**
+	 * 
+	 */
+	public synchronized static void disable() {
+		for (final Application a : applications) {
+			a.onDisable();
 		}
 	}
 

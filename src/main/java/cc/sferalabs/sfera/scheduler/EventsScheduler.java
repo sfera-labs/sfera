@@ -45,11 +45,6 @@ public class EventsScheduler implements AutoStartService {
 	private static final Logger logger = LogManager.getLogger();
 
 	private static Scheduler scheduler;
-	
-	@Override
-	public String getName() {
-		return "Events Scheduler";
-	}
 
 	@Override
 	public void init() throws Exception {

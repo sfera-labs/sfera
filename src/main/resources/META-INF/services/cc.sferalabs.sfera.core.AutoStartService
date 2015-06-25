@@ -1,5 +1,6 @@
 cc.sferalabs.sfera.core.Console
 cc.sferalabs.sfera.core.FilesWatcher
 cc.sferalabs.sfera.script.ScriptsEngine
+cc.sferalabs.sfera.http.HttpServer
 cc.sferalabs.sfera.scheduler.EventsScheduler
 #cc.sferalabs.sfera.data.Database

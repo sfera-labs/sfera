@@ -4,12 +4,6 @@ public interface AutoStartService {
 	
 	/**
 	 * 
-	 * @return
-	 */
-	public String getName();
-	
-	/**
-	 * 
 	 * @throws Exception
 	 */
 	public void init() throws Exception;

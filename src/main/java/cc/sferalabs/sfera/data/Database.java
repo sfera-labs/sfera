@@ -21,11 +21,6 @@ public class Database implements AutoStartService {
 	private static final Logger logger = LogManager.getLogger();
 	
 	@Override
-	public String getName() {
-		return "Database";
-	}
-	
-	@Override
 	public void init() throws Exception {
 		if (dbConnection == null) {
 			System.setProperty("hsqldb.reconfig_logging", "false");

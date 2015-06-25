@@ -60,7 +60,7 @@ public abstract class Drivers {
 	/**
 	 * 
 	 */
-	public synchronized static void startAll() {
+	public synchronized static void start() {
 		for (final Driver d : drivers.values()) {
 			d.start();
 		}
