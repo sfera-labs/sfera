@@ -10,6 +10,8 @@ import java.util.List;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpSessionEvent;
+import javax.servlet.http.HttpSessionListener;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -53,8 +55,6 @@ public class HttpServer implements AutoStartService {
 	private static Server server;
 
 	private static ServletContextHandler contexts;
-
-	// TODO check sessions expiration
 
 	@Override
 	public void init() throws Exception {
@@ -128,9 +128,24 @@ public class HttpServer implements AutoStartService {
 
 		HashSessionManager hsm = new HashSessionManager();
 		hsm.setStoreDirectory(new File(SESSIONS_STORE_DIR));
-		// TODO try to periodically save sessions
+		// TODO try to make session restorable when server not stopped properly
 		hsm.setSessionCookie("session");
+		int maxInactiveInterval = config.getIntProperty(
+				"http_session_max_inactive", 3600);
+		hsm.setMaxInactiveInterval(maxInactiveInterval);
 		SessionHandler sessionHandler = new SessionHandler(hsm);
+		sessionHandler.addEventListener(new HttpSessionListener() {
+
+			@Override
+			public void sessionCreated(HttpSessionEvent se) {
+				logger.debug("Creted new session: {}", se.getSession().getId());
+			}
+
+			@Override
+			public void sessionDestroyed(HttpSessionEvent se) {
+				logger.debug("Session '{}' destroyed", se.getSession().getId());
+			}
+		});
 
 		contexts = new ServletContextHandler(server, "/",
 				ServletContextHandler.SESSIONS | ServletContextHandler.SECURITY);
@@ -152,10 +167,11 @@ public class HttpServer implements AutoStartService {
 	 * 
 	 * @param loginService
 	 */
-	@SuppressWarnings("serial")
 	private void addUsers(HashLoginService loginService) {
 		for (User user : Access.getUsers()) {
 			loginService.putUser(user.getUsername(), new Credential() {
+
+				private static final long serialVersionUID = 3107948362308619263L;
 
 				@Override
 				public boolean check(Object credentials) {

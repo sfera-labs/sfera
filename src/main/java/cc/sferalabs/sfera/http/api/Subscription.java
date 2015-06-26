@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -17,6 +18,7 @@ import com.google.common.eventbus.Subscribe;
 
 public class Subscription implements EventListener {
 
+	private final String id;
 	private final BlockingQueue<Event> changes = new LinkedBlockingQueue<Event>();
 	private Set<String> nodes;
 	private long lastAckTs;
@@ -26,6 +28,7 @@ public class Subscription implements EventListener {
 	 * 
 	 */
 	public Subscription() {
+		this.id = UUID.randomUUID().toString();
 		Bus.register(this);
 	}
 
@@ -86,5 +89,13 @@ public class Subscription implements EventListener {
 		if (nodes == null || nodes.contains(event.getId())) {
 			changes.add(event);
 		}
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public String getId() {
+		return id;
 	}
 }

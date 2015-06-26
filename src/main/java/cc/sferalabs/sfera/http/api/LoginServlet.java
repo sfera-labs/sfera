@@ -21,16 +21,19 @@ public class LoginServlet extends ApiServlet {
 			HttpServletResponse resp) throws Exception {
 		String user = req.getParameter("user");
 		String password = req.getParameter("password");
-		HttpSession session = req.getSession(true);
 
 		try {
 			req.login(user, password);
+			HttpSession session = req.getSession(true);
 			session.setAttribute(SESSION_ATTR_USERNAME, user);
 			resp.setStatus(HttpServletResponse.SC_OK);
 			logger.info("Login: {}", user);
 		} catch (ServletException e) {
 			logger.warn(e.getMessage());
-			session.invalidate();
+			HttpSession session = req.getSession(false);
+			if (session != null) {
+				session.invalidate();
+			}
 			resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 		}
 	}

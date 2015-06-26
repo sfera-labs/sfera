@@ -19,19 +19,21 @@ public class StateServlet extends AuthorizedApiServlet {
 
 	public static final String PATH = ApiServlet.PATH + "state/*";
 
-	@Override
 	@SuppressWarnings("unchecked")
+	@Override
 	protected void processAuthorizedRequest(HttpServletRequest req,
 			HttpServletResponse resp) throws Exception {
 		long ts;
 		try {
 			ts = Long.parseLong(req.getParameter("ts"));
 		} catch (NumberFormatException nfe) {
-			ts = 0;
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+					"Timestamp not provided");
+			return;
 		}
 
-		HttpSession session = req.getSession();
-		Map<String, Subscription> subscriptions = (Map<String, Subscription>) session
+		HttpSession session = req.getSession(false);
+		SubscriptionsSet subscriptions = (SubscriptionsSet) session
 				.getAttribute(SubscribeServlet.SESSION_ATTR_SUBSCRIPTIONS);
 		if (subscriptions == null) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND);

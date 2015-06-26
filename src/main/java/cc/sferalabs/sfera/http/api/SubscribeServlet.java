@@ -1,9 +1,6 @@
 package cc.sferalabs.sfera.http.api;
 
 import java.io.PrintWriter;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -26,27 +23,26 @@ public class SubscribeServlet extends AuthorizedApiServlet {
 		String id = req.getParameter("id");
 		String nodes = req.getParameter("nodes");
 
-		HttpSession session = req.getSession();
-		@SuppressWarnings("unchecked")
-		Map<String, Subscription> subscriptions = (Map<String, Subscription>) session
+		HttpSession session = req.getSession(false);
+		SubscriptionsSet subscriptions = (SubscriptionsSet) session
 				.getAttribute(SESSION_ATTR_SUBSCRIPTIONS);
 		if (subscriptions == null) {
-			subscriptions = new ConcurrentHashMap<>();
+			subscriptions = new SubscriptionsSet();
 			session.setAttribute(SESSION_ATTR_SUBSCRIPTIONS, subscriptions);
 			logger.debug("Creted new subscriptions set for session '{}'",
 					session.getId());
 		}
 		Subscription subscription = (id == null) ? null : subscriptions.get(id);
 		if (subscription == null) {
-			id = UUID.randomUUID().toString();
 			subscription = new Subscription();
+			id = subscription.getId();
 			subscriptions.put(id, subscription);
 			logger.debug(
 					"Creted new subscription for session '{}' with ID: {}",
 					session.getId(), id);
 		}
 		subscription.setNodes(nodes);
-		logger.debug("Subscribed: session '{}' ID '{}' nodes: {}",
+		logger.debug("Subscribed: session '{}' subscription '{}' nodes: {}",
 				session.getId(), id, nodes);
 
 		resp.setContentType("application/json");
