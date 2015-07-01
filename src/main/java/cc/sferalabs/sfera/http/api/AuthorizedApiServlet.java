@@ -18,7 +18,8 @@ public abstract class AuthorizedApiServlet extends ApiServlet {
 			processAuthorizedRequest(req, resp);
 		} else {
 			String uri = req.getRequestURI();
-			logger.warn("Unauthorized API request from {}: {}", req.getRemoteHost(), uri);
+			logger.warn("Unauthorized API request from {}: {}",
+					req.getRemoteHost(), uri);
 			resp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 		}
 	}

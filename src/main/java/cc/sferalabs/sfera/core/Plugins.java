@@ -14,10 +14,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public abstract class Plugins {
-	
+
 	private static ConcurrentHashMap<String, Plugin> plugins;
 	private static final Logger logger = LogManager.getLogger();
-	
+
 	/**
 	 * 
 	 * @throws IOException
@@ -39,10 +39,10 @@ public abstract class Plugins {
 				}
 			}
 		} catch (NoSuchFileException e) {
-			logger.debug("No plugins directory found");
+			logger.debug("Plugins directory not found");
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @return

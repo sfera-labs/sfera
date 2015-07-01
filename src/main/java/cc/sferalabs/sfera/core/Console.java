@@ -8,6 +8,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import cc.sferalabs.sfera.core.events.SystemStateEvent;
+import cc.sferalabs.sfera.drivers.Driver;
+import cc.sferalabs.sfera.drivers.Drivers;
 import cc.sferalabs.sfera.events.Bus;
 
 public class Console extends Task implements AutoStartService {
@@ -53,20 +55,69 @@ public class Console extends Task implements AutoStartService {
 	}
 
 	/**
-	 * @throws IOException
 	 * 
+	 * @throws IOException
 	 */
 	private static void checkStandardInput() throws IOException {
 		String cmd;
 		if ((cmd = stdIn.readLine()) != null) {
-			switch (cmd.trim().toLowerCase()) {
-			case "quit":
-				Bus.post(new SystemStateEvent("quit"));
-				break;
+			cmd = cmd.trim();
+			if (cmd.isEmpty()) {
+				return;
+			}
 
-			case "kill":
-				System.exit(0);
-				break;
+			String[] args = cmd.split("\\s+");
+			try {
+				switch (args[0]) {
+				case "quit":
+					if (args.length == 3) {
+						if (args[1].equals("driver")) {
+							Driver d = Drivers.getDriver(args[2]);
+							if (d != null) {
+								d.quit();
+							}
+						}
+					} else {
+						Bus.post(new SystemStateEvent("quit"));
+					}
+					break;
+
+				case "start":
+					if (args.length == 3) {
+						if (args[1].equals("driver")) {
+							Driver d = Drivers.getDriver(args[2]);
+							if (d != null) {
+								d.start();
+							}
+						}
+					} else {
+						System.err.println("Add target");
+					}
+					break;
+
+				case "restart":
+					if (args.length == 3) {
+						if (args[1].equals("driver")) {
+							Driver d = Drivers.getDriver(args[2]);
+							if (d != null) {
+								d.restart();
+							}
+						}
+					} else {
+						System.err.println("Add target");
+					}
+					break;
+
+				case "kill":
+					System.exit(0);
+					break;
+
+				default:
+					System.err.println("Unknown command '" + cmd + "'");
+					break;
+				}
+			} catch (Throwable t) {
+				logger.error("Error executing command '" + cmd + "'", t);
 			}
 		}
 	}

@@ -73,7 +73,8 @@ public class Plugin {
 							} else if (elName.equals("description")) {
 								event = eventReader.nextEvent();
 								if (event.isCharacters()) {
-									description = event.asCharacters().getData();
+									description = event.asCharacters()
+											.getData();
 								}
 							}
 						}
@@ -121,7 +122,7 @@ public class Plugin {
 	public Path getPath() {
 		return path;
 	}
-	
+
 	/**
 	 * 
 	 * @return
@@ -129,7 +130,7 @@ public class Plugin {
 	public String getName() {
 		return name;
 	}
-	
+
 	/**
 	 * 
 	 * @return

@@ -14,7 +14,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class AuthenticationFilter implements Filter {
-	
+
 	private final static Logger logger = LogManager.getLogger();
 
 	@Override
@@ -25,7 +25,8 @@ public class AuthenticationFilter implements Filter {
 	public void doFilter(ServletRequest request, ServletResponse response,
 			FilterChain chain) throws IOException, ServletException {
 		HttpServletRequest req = (HttpServletRequest) request;
-		logger.debug("Request from {}: {}", req.getRemoteHost(), req.getRequestURI());
+		logger.debug("Request from {}: {}", req.getRemoteHost(),
+				req.getRequestURI());
 		chain.doFilter(new AuthenticationRequestWrapper(req), response);
 	}
 

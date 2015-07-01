@@ -38,7 +38,8 @@ public abstract class ApiServlet extends HttpServlet {
 	private void doRequest(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
 		try {
-			resp.setHeader("Cache-Control", "max-age=0, no-cache, no-store");
+			resp.setHeader("Cache-Control",
+					"private, max-age=0, no-cache, no-store, must-revalidate");
 			processRequest(req, resp);
 		} catch (Throwable t) {
 			logger.error("Exception processing HTTP API request", t);

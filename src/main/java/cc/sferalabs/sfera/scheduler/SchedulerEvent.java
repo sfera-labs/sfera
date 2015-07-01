@@ -4,18 +4,18 @@ import cc.sferalabs.sfera.events.BaseEvent;
 import cc.sferalabs.sfera.events.Node;
 
 public class SchedulerEvent extends BaseEvent {
-	
+
 	/**
 	 * Node used by SchedulerEvents
 	 */
 	private static final Node SCHEDULER_NODE = new Node() {
-		
+
 		@Override
 		public String getId() {
 			return "scheduler";
 		}
 	};
-	
+
 	private final String value;
 
 	/**

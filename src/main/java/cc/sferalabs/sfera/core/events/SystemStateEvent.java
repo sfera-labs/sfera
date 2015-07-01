@@ -1,6 +1,5 @@
 package cc.sferalabs.sfera.core.events;
 
-
 public class SystemStateEvent extends SystemEvent {
 
 	private String state;

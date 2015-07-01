@@ -1,8 +1,7 @@
 package cc.sferalabs.sfera.events;
 
-
 public abstract class BaseEvent implements Event {
-	
+
 	private final Node source;
 	private final String id;
 	private final long timestamp;
@@ -22,12 +21,12 @@ public abstract class BaseEvent implements Event {
 	public String getId() {
 		return id;
 	}
-	
+
 	@Override
 	public Node getSource() {
 		return source;
 	}
-	
+
 	@Override
 	public long getTimestamp() {
 		return timestamp;

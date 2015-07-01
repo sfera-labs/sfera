@@ -1,6 +1,7 @@
 package cc.sferalabs.sfera.core;
 
 import java.io.IOException;
+import java.nio.file.NoSuchFileException;
 import java.util.EventListener;
 import java.util.ServiceLoader;
 import java.util.concurrent.TimeUnit;
@@ -26,6 +27,8 @@ public class SystemNode implements Node, EventListener {
 
 	private static final SystemNode INSTANCE = new SystemNode();
 
+	private Configuration config;
+
 	/**
 	 * 
 	 */
@@ -38,6 +41,14 @@ public class SystemNode implements Node, EventListener {
 	 */
 	public static SystemNode getInstance() {
 		return INSTANCE;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public static Configuration getConfiguration() {
+		return INSTANCE.config;
 	}
 
 	/**
@@ -72,11 +83,13 @@ public class SystemNode implements Node, EventListener {
 	 */
 	private void init() {
 		try {
-			Configuration.load();
-		} catch (IOException e) {
+			config = new Configuration("sfera.ini");
+		} catch (NoSuchFileException e) {
+			// no config file, that's fine...
+		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		
+
 		try {
 			Access.init();
 		} catch (Exception e) {
@@ -88,8 +101,6 @@ public class SystemNode implements Node, EventListener {
 		} catch (IOException e) {
 			logger.error("Error loading plugins", e);
 		}
-		Drivers.load();
-		Applications.load();
 
 		try {
 			for (AutoStartService service : SERVICE_LOADER) {
@@ -108,11 +119,9 @@ public class SystemNode implements Node, EventListener {
 							+ AutoStartService.class.getSimpleName(), e);
 		}
 
-		logger.debug("Enabling apps...");
-		Applications.enable();
-		
-		logger.debug("Starting drivers...");
-		Drivers.start();
+		Drivers.load();
+
+		Applications.load();
 	}
 
 	/**
@@ -123,7 +132,7 @@ public class SystemNode implements Node, EventListener {
 
 		logger.debug("Quitting drivers...");
 		Drivers.quit();
-		
+
 		logger.debug("Disabling apps...");
 		Applications.disable();
 

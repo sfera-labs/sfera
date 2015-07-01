@@ -37,6 +37,7 @@ import cc.sferalabs.sfera.access.Access;
 import cc.sferalabs.sfera.access.User;
 import cc.sferalabs.sfera.core.AutoStartService;
 import cc.sferalabs.sfera.core.Configuration;
+import cc.sferalabs.sfera.core.SystemNode;
 import cc.sferalabs.sfera.http.api.CommandServlet;
 import cc.sferalabs.sfera.http.api.LoginServlet;
 import cc.sferalabs.sfera.http.api.LogoutServlet;
@@ -58,12 +59,13 @@ public class HttpServer implements AutoStartService {
 
 	@Override
 	public void init() throws Exception {
-		Configuration config = Configuration.getSystemConfig();
+		Configuration config = SystemNode.getConfiguration();
 		Integer http_port = config.getIntProperty("http_port", null);
 		Integer https_port = config.getIntProperty("https_port", null);
 
 		if (http_port == null && https_port == null) {
 			logger.debug("No HTTP port defined in configuration. Server disabled");
+			return;
 		}
 
 		int maxThreads = config.getIntProperty("http_max_threads", Runtime
@@ -267,6 +269,13 @@ public class HttpServer implements AutoStartService {
 				for (ServletMapping mapping : handler.getServletMappings()) {
 					if (!mapping.getServletName().equals(servlet.getName())) {
 						mappings.add(mapping);
+					} else {
+						if (logger.isDebugEnabled()) {
+							for (String path : mapping.getPathSpecs()) {
+								logger.debug("Removed servlet for path {}",
+										path);
+							}
+						}
 					}
 				}
 

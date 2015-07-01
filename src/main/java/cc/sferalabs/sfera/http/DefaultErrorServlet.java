@@ -12,9 +12,9 @@ import org.eclipse.jetty.servlet.ServletHandler.Default404Servlet;
 
 @SuppressWarnings("serial")
 public class DefaultErrorServlet extends Default404Servlet {
-	
+
 	private static final Logger logger = LogManager.getLogger();
-	
+
 	/**
 	 * 
 	 * @param req
@@ -24,7 +24,8 @@ public class DefaultErrorServlet extends Default404Servlet {
 	 */
 	private void processRequest(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		logger.warn("Unhandled request from {}: {}", req.getRemoteHost(), req.getRequestURI());
+		logger.warn("Unhandled request from {}: {}", req.getRemoteHost(),
+				req.getRequestURI());
 		super.doGet(req, resp);
 	}
 
@@ -39,31 +40,31 @@ public class DefaultErrorServlet extends Default404Servlet {
 			throws ServletException, IOException {
 		processRequest(req, resp);
 	}
-	
+
 	@Override
 	protected void doPut(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		processRequest(req, resp);
 	}
-	
+
 	@Override
 	protected void doHead(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		processRequest(req, resp);
 	}
-	
+
 	@Override
 	protected void doTrace(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		processRequest(req, resp);
 	}
-	
+
 	@Override
 	protected void doOptions(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		processRequest(req, resp);
 	}
-	
+
 	@Override
 	protected void doDelete(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {

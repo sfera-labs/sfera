@@ -33,13 +33,12 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import cc.sferalabs.sfera.core.FilesWatcher;
+import cc.sferalabs.sfera.core.AutoStartService;
 import cc.sferalabs.sfera.core.Plugin;
 import cc.sferalabs.sfera.core.Plugins;
-import cc.sferalabs.sfera.core.AutoStartService;
-import cc.sferalabs.sfera.core.Task;
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Event;
+import cc.sferalabs.sfera.files.FilesWatcher;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarLexer;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.ParseContext;
@@ -54,14 +53,19 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 
 	private static HashMap<String, HashSet<Rule>> triggersActionsMap;
 	private static HashMap<Path, List<String>> errors;
-	
+
 	@Override
 	public void init() throws Exception {
 		Bus.register(this);
+		loadScriptFiles();
 		try {
-			loadScriptFiles();
-		} catch (IOException e) {
-			logger.error("Error loading script files", e);
+			Runnable loadScriptFilesTask = ScriptsEngine::loadScriptFiles;
+			FilesWatcher.register(Paths.get("scripts"), loadScriptFilesTask,
+					false);
+			FilesWatcher.register(Paths.get("plugins"), loadScriptFilesTask,
+					false);
+		} catch (Exception e) {
+			logger.error("Error registering script files watcher", e);
 		}
 	}
 
@@ -178,7 +182,7 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	 * 
 	 * @throws IOException
 	 */
-	private synchronized static void loadScriptFiles() throws IOException {
+	private synchronized static void loadScriptFiles() {
 		try {
 			triggersActionsMap = new HashMap<String, HashSet<Rule>>();
 			errors = new HashMap<Path, List<String>>();
@@ -198,26 +202,8 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 							message);
 				}
 			}
-		} finally {
-			try {
-				Task reloadScriptFiles = new Task("Script files watcher") {
-
-					@Override
-					protected void execute() {
-						try {
-							loadScriptFiles();
-						} catch (IOException e) {
-							logger.error("Error loading script files", e);
-						}
-					}
-				};
-
-				FilesWatcher.register(Paths.get("scripts"), reloadScriptFiles);
-				FilesWatcher.register(Paths.get("plugins"), reloadScriptFiles);
-
-			} catch (Exception e) {
-				logger.error("Error registering script files watcher", e);
-			}
+		} catch (IOException e) {
+			logger.error("Error loading script files", e);
 		}
 	}
 

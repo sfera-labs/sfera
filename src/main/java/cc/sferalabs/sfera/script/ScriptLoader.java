@@ -9,9 +9,9 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
 public class ScriptLoader {
-	
+
 	static final String VAR_NAME = ScriptLoader.class.getSimpleName();
-	
+
 	private final ScriptEngine engine;
 	private final FileSystem fileSystem;
 	private final Bindings bindings;
@@ -22,7 +22,8 @@ public class ScriptLoader {
 	 * @param fileSystem
 	 * @param bindings
 	 */
-	public ScriptLoader(ScriptEngine engine, FileSystem fileSystem, Bindings bindings) {
+	public ScriptLoader(ScriptEngine engine, FileSystem fileSystem,
+			Bindings bindings) {
 		this.engine = engine;
 		this.fileSystem = fileSystem;
 		this.bindings = bindings;

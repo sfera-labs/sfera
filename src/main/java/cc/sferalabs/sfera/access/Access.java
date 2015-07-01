@@ -3,6 +3,7 @@ package cc.sferalabs.sfera.access;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.security.SecureRandom;
@@ -32,11 +33,17 @@ public class Access {
 
 	/**
 	 * 
-	 * @throws Exception
+	 * @throws IOException
 	 */
-	public synchronized static void init() throws Exception {
-		List<String> lines = Files.readAllLines(Paths.get(USERS_FILE_PATH),
-				StandardCharsets.UTF_8);
+	public synchronized static void init() throws IOException {
+		List<String> lines;
+		try {
+			lines = Files.readAllLines(Paths.get(USERS_FILE_PATH),
+					StandardCharsets.UTF_8);
+		} catch (NoSuchFileException e) {
+			logger.debug("File '{}' not found", USERS_FILE_PATH);
+			return;
+		}
 		int lineNum = 0;
 		for (String line : lines) {
 			line = line.trim();

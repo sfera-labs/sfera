@@ -3,60 +3,64 @@ package cc.sferalabs.sfera.core;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
 
 public class Configuration {
-	
-	static final Path CONFIG_DIR = Paths.get("config");
-	static final Path SYSTEM_CONFIG_FILE = CONFIG_DIR.resolve("sfera.ini");
-	
-	private static final Configuration SYSTEM = new Configuration("system");
-	
-	private static Properties props;
-	
-	private final String prefix;
-	
+
+	private static final String CONFIG_DIR = "config";
+
+	private final Path path;
+	private final Properties props;
+
 	/**
 	 * 
-	 * @param id
-	 */
-	public Configuration(String id) {
-		this.prefix = id + ".";
-	}
-	
-	/**
-	 * 
-	 * @return
-	 */
-	public static Configuration getSystemConfig() {
-		return SYSTEM;
-	}
-	
-	/**
-	 * 
+	 * @param configFile
 	 * @throws IOException
 	 */
-	public static void load() throws IOException {
+	public Configuration(String configFile) throws IOException {
+		this(getPath(configFile));
+	}
+
+	/**
+	 * 
+	 * @param configFilile
+	 * @throws IOException
+	 */
+	public Configuration(Path configFilile) throws IOException {
+		path = configFilile;
 		props = new Properties();
-		
-		try (BufferedReader r = Files.newBufferedReader(SYSTEM_CONFIG_FILE)) {
+		try (BufferedReader r = Files.newBufferedReader(path)) {
 			props.load(r);
-		} catch (NoSuchFileException e) {
-			// no config file, that's fine...
 		}
 	}
-	
+
+	/**
+	 * 
+	 * @param configFile
+	 * @return
+	 */
+	public static Path getPath(String configFile) {
+		return Paths.get(CONFIG_DIR).resolve(configFile);
+	}
+
 	/**
 	 * 
 	 * @return
 	 */
-	public static Properties getProperties() {
-		return props;
+	public static Path getConfigDir() {
+		return Paths.get(CONFIG_DIR);
 	}
-	
+
+	/**
+	 * 
+	 * @return
+	 */
+	public Path getRealPath() {
+		return path;
+	}
+
 	/**
 	 * 
 	 * @param key
@@ -64,15 +68,14 @@ public class Configuration {
 	 * @return
 	 */
 	public String getProperty(String key, String defaultValue) {
-		key = prefix + key;
 		String val = props.getProperty(key, defaultValue);
 		if (val == null) {
 			return null;
 		}
-		
+
 		return val.trim();
 	}
-	
+
 	/**
 	 * 
 	 * @param key
@@ -84,14 +87,14 @@ public class Configuration {
 		if (val == null) {
 			return defaultValue;
 		}
-		
+
 		try {
 			return Integer.parseInt(val);
 		} catch (NumberFormatException e) {
 			return defaultValue;
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @param key
@@ -103,7 +106,7 @@ public class Configuration {
 		if (val == null) {
 			return defaultValue;
 		}
-		
+
 		if (val.equalsIgnoreCase("true")) {
 			return true;
 		}
@@ -112,4 +115,5 @@ public class Configuration {
 		}
 		return defaultValue;
 	}
+
 }

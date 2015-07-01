@@ -1,8 +1,7 @@
 package cc.sferalabs.sfera.events;
 
-
 public class StringEvent extends BaseEvent {
-	
+
 	private final String value;
 
 	public StringEvent(Node source, String id, String value) {

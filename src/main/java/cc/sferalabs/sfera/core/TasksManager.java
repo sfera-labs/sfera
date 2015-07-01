@@ -37,11 +37,30 @@ public class TasksManager {
 
 	/**
 	 * 
+	 * @param name
+	 * @param task
+	 * @return
+	 */
+	public Future<?> submit(String name, Runnable task) {
+		return submit(Task.create(name, task));
+	}
+
+	/**
+	 * 
 	 * @param t
 	 * @return
 	 */
 	public Future<?> submit(Task t) {
 		return executorService.submit(t);
+	}
+
+	/**
+	 * 
+	 * @param name
+	 * @param task
+	 */
+	public void execute(String name, Runnable task) {
+		execute(Task.create(name, task));
 	}
 
 	/**

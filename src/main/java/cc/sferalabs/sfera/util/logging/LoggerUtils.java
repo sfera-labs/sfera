@@ -8,7 +8,7 @@ import org.apache.logging.log4j.MarkerManager;
  * 
  */
 public abstract class LoggerUtils {
-	
+
 	public static final Marker SFERA_MARKER = MarkerManager.getMarker("SFERA");
 
 	/**
