@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 
 public abstract class Plugins {
 
+	private static final String DIR_PATH = "plugins";
 	private static ConcurrentHashMap<String, Plugin> plugins;
 	private static final Logger logger = LogManager.getLogger();
 
@@ -25,7 +26,7 @@ public abstract class Plugins {
 	public static void load() throws IOException {
 		plugins = new ConcurrentHashMap<>();
 		try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths
-				.get("plugins"))) {
+				.get(DIR_PATH))) {
 			for (Path file : stream) {
 				try {
 					if (!Files.isHidden(file)) {

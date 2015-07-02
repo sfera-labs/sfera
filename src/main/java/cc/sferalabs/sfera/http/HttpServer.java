@@ -64,7 +64,7 @@ public class HttpServer implements AutoStartService {
 		Integer https_port = config.getIntProperty("https_port", null);
 
 		if (http_port == null && https_port == null) {
-			logger.debug("No HTTP port defined in configuration. Server disabled");
+			logger.warn("No HTTP port defined in configuration. Server disabled");
 			return;
 		}
 

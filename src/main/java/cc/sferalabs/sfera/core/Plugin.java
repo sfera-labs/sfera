@@ -36,7 +36,8 @@ public class Plugin {
 
 		this.path = jarFile;
 
-		String id = null;
+		String groupId = null;
+		String artifactId = null;
 		String name = null;
 		String description = null;
 		try (FileSystem pluginFileSystem = FileSystems.newFileSystem(jarFile,
@@ -60,17 +61,23 @@ public class Plugin {
 						} else {
 							String elName = startElement.getName()
 									.getLocalPart();
-							if (elName.equals("groupId")) {
+							if (groupId == null && elName.equals("groupId")) {
 								event = eventReader.nextEvent();
 								if (event.isCharacters()) {
-									id = event.asCharacters().getData();
+									groupId = event.asCharacters().getData();
 								}
-							} else if (elName.equals("name")) {
+							} else if (artifactId == null && elName.equals("artifactId")) {
+								event = eventReader.nextEvent();
+								if (event.isCharacters()) {
+									artifactId = event.asCharacters().getData();
+								}
+							} else if (name == null && elName.equals("name")) {
 								event = eventReader.nextEvent();
 								if (event.isCharacters()) {
 									name = event.asCharacters().getData();
 								}
-							} else if (elName.equals("description")) {
+							} else if (description == null
+									&& elName.equals("description")) {
 								event = eventReader.nextEvent();
 								if (event.isCharacters()) {
 									description = event.asCharacters()
@@ -88,11 +95,11 @@ public class Plugin {
 					}
 				}
 
-				if (id == null) {
+				if (groupId == null || artifactId == null) {
 					throw new Exception("id not found");
 				}
 
-				this.id = id;
+				this.id = groupId + "." + artifactId;
 				this.name = name;
 				this.description = description;
 

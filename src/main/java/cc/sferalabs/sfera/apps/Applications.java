@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 
 import cc.sferalabs.sfera.core.Configuration;
 import cc.sferalabs.sfera.core.Sfera;
+import cc.sferalabs.sfera.core.SystemClassLoader;
 import cc.sferalabs.sfera.core.services.FilesWatcher;
 import cc.sferalabs.sfera.events.Bus;
 
@@ -67,7 +68,7 @@ public abstract class Applications {
 							if (appAlreadyInstantiated(appClass)) {
 								continue;
 							}
-							Class<?> clazz = Class.forName(appClass);
+							Class<?> clazz = SystemClassLoader.getClass(appClass);
 							Constructor<?> constructor = clazz.getConstructor();
 							Application appInstance = (Application) constructor
 									.newInstance();

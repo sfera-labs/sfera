@@ -17,6 +17,7 @@ import org.apache.logging.log4j.Logger;
 
 import cc.sferalabs.sfera.core.Configuration;
 import cc.sferalabs.sfera.core.Sfera;
+import cc.sferalabs.sfera.core.SystemClassLoader;
 import cc.sferalabs.sfera.core.services.FilesWatcher;
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.script.ScriptsEngine;
@@ -74,7 +75,8 @@ public abstract class Drivers {
 										+ driverClass.toLowerCase() + "."
 										+ driverClass;
 							}
-							Class<?> clazz = Class.forName(driverClass);
+							Class<?> clazz = SystemClassLoader
+									.getClass(driverClass);
 							Constructor<?> constructor = clazz
 									.getConstructor(new Class[] { String.class });
 							Driver driverInstance = (Driver) constructor
