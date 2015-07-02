@@ -9,8 +9,8 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.nio.charset.Charset;
 
-import cc.sferalabs.sfera.core.Task;
-import cc.sferalabs.sfera.core.TasksManager;
+import cc.sferalabs.sfera.core.services.Task;
+import cc.sferalabs.sfera.core.services.TasksManager;
 
 public class IPCommPort extends CommPort {
 

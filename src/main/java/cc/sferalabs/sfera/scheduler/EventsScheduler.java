@@ -21,7 +21,7 @@ import org.quartz.TriggerKey;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.matchers.GroupMatcher;
 
-import cc.sferalabs.sfera.core.AutoStartService;
+import cc.sferalabs.sfera.core.services.AutoStartService;
 import cc.sferalabs.sfera.script.ScriptsEngine;
 
 /* TODO remove

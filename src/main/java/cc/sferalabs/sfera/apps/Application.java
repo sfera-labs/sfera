@@ -7,9 +7,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import cc.sferalabs.sfera.core.Configuration;
-import cc.sferalabs.sfera.core.Task;
-import cc.sferalabs.sfera.core.TasksManager;
-import cc.sferalabs.sfera.files.FilesWatcher;
+import cc.sferalabs.sfera.core.services.FilesWatcher;
+import cc.sferalabs.sfera.core.services.Task;
+import cc.sferalabs.sfera.core.services.TasksManager;
 
 public abstract class Application {
 
@@ -49,7 +49,7 @@ public abstract class Application {
 							configWatcherId = FilesWatcher.register(
 									config.getRealPath(),
 									thisApp::onConfigFileModified, false);
-						} catch (IOException e) {
+						} catch (Exception e) {
 							logger.error("Error watching config file", e);
 						}
 						try {

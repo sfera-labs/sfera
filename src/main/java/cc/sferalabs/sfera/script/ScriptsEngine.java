@@ -33,12 +33,12 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import cc.sferalabs.sfera.core.AutoStartService;
 import cc.sferalabs.sfera.core.Plugin;
 import cc.sferalabs.sfera.core.Plugins;
+import cc.sferalabs.sfera.core.services.AutoStartService;
+import cc.sferalabs.sfera.core.services.FilesWatcher;
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Event;
-import cc.sferalabs.sfera.files.FilesWatcher;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarLexer;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.ParseContext;

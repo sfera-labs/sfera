@@ -17,8 +17,8 @@ import org.apache.logging.log4j.Logger;
 
 import cc.sferalabs.sfera.core.Configuration;
 import cc.sferalabs.sfera.core.Sfera;
+import cc.sferalabs.sfera.core.services.FilesWatcher;
 import cc.sferalabs.sfera.events.Bus;
-import cc.sferalabs.sfera.files.FilesWatcher;
 import cc.sferalabs.sfera.script.ScriptsEngine;
 
 public abstract class Drivers {
@@ -39,7 +39,7 @@ public abstract class Drivers {
 			FilesWatcher.register(
 					Configuration.getConfigDir().resolve(CONFIG_DIR),
 					Drivers::instantiateDrivers, false);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			logger.error("Error watching drivers config directory", e);
 		}
 	}

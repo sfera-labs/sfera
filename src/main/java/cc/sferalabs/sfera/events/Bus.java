@@ -9,7 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 
-import cc.sferalabs.sfera.core.TasksManager;
+import cc.sferalabs.sfera.core.services.TasksManager;
 import cc.sferalabs.sfera.util.logging.LoggerUtils;
 
 import com.google.common.eventbus.AsyncEventBus;

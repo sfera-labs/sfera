@@ -1,4 +1,4 @@
-package cc.sferalabs.sfera.files;
+package cc.sferalabs.sfera.core.services;
 
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
@@ -26,66 +26,51 @@ import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import cc.sferalabs.sfera.core.AutoStartService;
-import cc.sferalabs.sfera.core.Task;
-import cc.sferalabs.sfera.core.TasksManager;
-
-public class FilesWatcher extends Task implements AutoStartService {
+public final class FilesWatcher extends LazyService {
 
 	private static final Logger logger = LogManager.getLogger();
-
 	private static final Map<Path, Set<WatcherTask>> PATHS_TASKS_MAP = new HashMap<>();
 	private static final Set<Path> NON_EXISTING_PATHS = new HashSet<Path>();
 	private static final Object LOCK = new Object();
 	private static boolean run = true;
+	private static WatchService WATCHER;
 
-	private static final WatchService WATCHER;
+	private static FilesWatcher INSTANCE = new FilesWatcher();
 	static {
-		WatchService ws = null;
 		try {
-			ws = FileSystems.getDefault().newWatchService();
+			WATCHER = FileSystems.getDefault().newWatchService();
+			TasksManager.getDefault().submit("Files Watcher", INSTANCE::watch);
 		} catch (IOException e) {
-			logger.error("Error getting Watch Service", e);
+			logger.error("Error instantiating FilesWatcher", e);
 		}
-		WATCHER = ws;
-	}
-
-	/**
-	 * 
-	 */
-	public FilesWatcher() {
-		super("Files Watcher");
-	}
-
-	@Override
-	public void init() throws Exception {
-		TasksManager.getDefault().submit(this);
 	}
 
 	@Override
 	public void quit() throws Exception {
 		run = false;
-		WATCHER.close();
+		if (WATCHER != null) {
+			WATCHER.close();
+		}
 	}
 
-	@Override
-	protected void execute() {
-		if (WATCHER != null) {
-			try {
-				while (run) {
-					try {
-						watch();
-					} catch (InterruptedException e) {
-						if (!run) {
-							Thread.currentThread().interrupt();
-							break;
-						}
+	/**
+	 * 
+	 */
+	private void watch() {
+		try {
+			while (run) {
+				try {
+					pollWatcher();
+				} catch (InterruptedException e) {
+					if (!run) {
+						Thread.currentThread().interrupt();
+						break;
 					}
 				}
-			} catch (ClosedWatchServiceException e) {
-				if (run) {
-					logger.error("WatchService Error. File Watcher stopped", e);
-				}
+			}
+		} catch (ClosedWatchServiceException e) {
+			if (run) {
+				logger.error("WatchService Error. File Watcher stopped", e);
 			}
 		}
 	}
@@ -94,7 +79,7 @@ public class FilesWatcher extends Task implements AutoStartService {
 	 * 
 	 * @throws InterruptedException
 	 */
-	private static void watch() throws InterruptedException {
+	private void pollWatcher() throws InterruptedException {
 		WatchKey wkey = WATCHER.poll(20, TimeUnit.SECONDS);
 		if (wkey != null) {
 			Set<WatchKey> keys = new HashSet<WatchKey>();
@@ -160,7 +145,7 @@ public class FilesWatcher extends Task implements AutoStartService {
 			if (!t.remove) {
 				try {
 					register(t);
-				} catch (IOException e) {
+				} catch (Exception e) {
 					logger.error("Error registering path " + t.path, e);
 				}
 			}
@@ -172,9 +157,9 @@ public class FilesWatcher extends Task implements AutoStartService {
 	 * 
 	 * @param path
 	 * @param task
-	 * @throws IOException
+	 * @throws Exception
 	 */
-	public static String register(Path path, Runnable task) throws IOException {
+	public static String register(Path path, Runnable task) throws Exception {
 		return register(path, task, true);
 	}
 
@@ -183,21 +168,21 @@ public class FilesWatcher extends Task implements AutoStartService {
 	 * @param path
 	 * @param task
 	 * @param removeWhenDone
-	 * @throws IOException
+	 * @throws Exception
 	 */
 	public static String register(Path path, Runnable task,
-			boolean removeWhenDone) throws IOException {
+			boolean removeWhenDone) throws Exception {
 		return register(new WatcherTask(path, task, removeWhenDone));
 	}
 
 	/**
 	 * 
 	 * @param watcherTask
-	 * @throws IOException
+	 * @throws Exception
 	 */
-	private static String register(WatcherTask watcherTask) throws IOException {
+	private static String register(WatcherTask watcherTask) throws Exception {
 		if (WATCHER == null) {
-			return null;
+			throw new IllegalStateException("Not initialized");
 		}
 
 		Path path = watcherTask.path;

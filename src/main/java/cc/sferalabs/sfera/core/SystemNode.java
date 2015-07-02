@@ -2,7 +2,9 @@ package cc.sferalabs.sfera.core;
 
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
+import java.util.ArrayList;
 import java.util.EventListener;
+import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.TimeUnit;
 
@@ -12,6 +14,9 @@ import org.apache.logging.log4j.Logger;
 import cc.sferalabs.sfera.access.Access;
 import cc.sferalabs.sfera.apps.Applications;
 import cc.sferalabs.sfera.core.events.SystemStateEvent;
+import cc.sferalabs.sfera.core.services.AutoStartService;
+import cc.sferalabs.sfera.core.services.Service;
+import cc.sferalabs.sfera.core.services.TasksManager;
 import cc.sferalabs.sfera.drivers.Drivers;
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Node;
@@ -20,13 +25,9 @@ import com.google.common.eventbus.Subscribe;
 
 public class SystemNode implements Node, EventListener {
 
-	private static final ServiceLoader<AutoStartService> SERVICE_LOADER = ServiceLoader
-			.load(AutoStartService.class);
-
 	private static final Logger logger = LogManager.getLogger();
-
 	private static final SystemNode INSTANCE = new SystemNode();
-
+	private static final List<Service> services = new ArrayList<>();
 	private Configuration config;
 
 	/**
@@ -103,11 +104,14 @@ public class SystemNode implements Node, EventListener {
 		}
 
 		try {
-			for (AutoStartService service : SERVICE_LOADER) {
+			ServiceLoader<AutoStartService> autoStartServices = ServiceLoader
+					.load(AutoStartService.class);
+			for (AutoStartService service : autoStartServices) {
 				String name = service.getClass().getSimpleName();
 				try {
 					logger.debug("Initializing service {}...", name);
 					service.init();
+					addToLifeCycle(service);
 					logger.debug("Service {} initiated", name);
 				} catch (Exception e) {
 					logger.error("Error initiating service '" + name + "'", e);
@@ -120,7 +124,6 @@ public class SystemNode implements Node, EventListener {
 		}
 
 		Drivers.load();
-
 		Applications.load();
 	}
 
@@ -151,7 +154,7 @@ public class SystemNode implements Node, EventListener {
 		}
 		logger.debug("Tasks terminated");
 
-		for (AutoStartService service : SERVICE_LOADER) {
+		for (Service service : services) {
 			try {
 				String name = service.getClass().getSimpleName();
 				logger.debug("Quitting service {}...", name);
@@ -162,6 +165,14 @@ public class SystemNode implements Node, EventListener {
 						+ "'", e);
 			}
 		}
+	}
+
+	/**
+	 * 
+	 * @param service
+	 */
+	public static void addToLifeCycle(Service service) {
+		services.add(service);
 	}
 
 }

@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import cc.sferalabs.sfera.core.AutoStartService;
+import cc.sferalabs.sfera.core.services.AutoStartService;
 
 public class Database implements AutoStartService {
 

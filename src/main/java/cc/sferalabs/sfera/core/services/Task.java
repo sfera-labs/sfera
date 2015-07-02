@@ -1,4 +1,4 @@
-package cc.sferalabs.sfera.core;
+package cc.sferalabs.sfera.core.services;
 
 public abstract class Task implements Runnable {
 

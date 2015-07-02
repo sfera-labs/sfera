@@ -9,7 +9,7 @@ import javax.script.ScriptException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import cc.sferalabs.sfera.core.TasksManager;
+import cc.sferalabs.sfera.core.services.TasksManager;
 import cc.sferalabs.sfera.events.Event;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.TriggerContext;
 

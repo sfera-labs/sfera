@@ -9,7 +9,7 @@ import javax.script.SimpleBindings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import cc.sferalabs.sfera.core.Task;
+import cc.sferalabs.sfera.core.services.Task;
 import cc.sferalabs.sfera.events.Event;
 
 public class ActionTask extends Task {

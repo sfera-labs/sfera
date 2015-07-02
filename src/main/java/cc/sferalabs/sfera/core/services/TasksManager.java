@@ -1,4 +1,4 @@
-package cc.sferalabs.sfera.core;
+package cc.sferalabs.sfera.core.services;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

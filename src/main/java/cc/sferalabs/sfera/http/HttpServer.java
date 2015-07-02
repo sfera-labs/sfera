@@ -35,9 +35,9 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
 import cc.sferalabs.sfera.access.Access;
 import cc.sferalabs.sfera.access.User;
-import cc.sferalabs.sfera.core.AutoStartService;
 import cc.sferalabs.sfera.core.Configuration;
 import cc.sferalabs.sfera.core.SystemNode;
+import cc.sferalabs.sfera.core.services.AutoStartService;
 import cc.sferalabs.sfera.http.api.CommandServlet;
 import cc.sferalabs.sfera.http.api.LoginServlet;
 import cc.sferalabs.sfera.http.api.LogoutServlet;
