@@ -1,6 +1,5 @@
 package cc.sferalabs.sfera.core;
 
-import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.EventListener;
@@ -58,10 +57,10 @@ public class SystemNode implements Node, EventListener {
 	void start() {
 		logger.info("======== Started ========");
 
-		Bus.post(new SystemStateEvent("start"));
+		Bus.post(SystemStateEvent.START);
 		Bus.register(this);
 		init();
-		Bus.post(new SystemStateEvent("ready"));
+		Bus.post(SystemStateEvent.READY);
 	}
 
 	@Override
@@ -71,11 +70,8 @@ public class SystemNode implements Node, EventListener {
 
 	@Subscribe
 	public void handleSystemStateEvent(SystemStateEvent event) {
-		String state = event.getValue();
-		if ("quit".equals(state)) {
+		if (event == SystemStateEvent.QUIT) {
 			quit();
-			logger.info("Quitted");
-			System.exit(0);
 		}
 	}
 
@@ -97,11 +93,7 @@ public class SystemNode implements Node, EventListener {
 			logger.error("Error initializing access config", e);
 		}
 
-		try {
-			Plugins.load();
-		} catch (IOException e) {
-			logger.error("Error loading plugins", e);
-		}
+		Plugins.load();
 
 		try {
 			ServiceLoader<AutoStartService> autoStartServices = ServiceLoader
@@ -139,13 +131,13 @@ public class SystemNode implements Node, EventListener {
 		logger.debug("Disabling apps...");
 		Applications.disable();
 
-		logger.debug("Waiting 5 seconds for drivers to quit...");
+		logger.debug("Waiting 5 seconds for drivers/apps to quit...");
 		try {
 			Thread.sleep(5000);
 		} catch (InterruptedException e) {
 		}
 
-		logger.debug("terminating tasks...");
+		logger.debug("Terminating tasks...");
 		try {
 			TasksManager.getDefault().getExecutorService().shutdownNow();
 			TasksManager.getDefault().getExecutorService()
@@ -165,6 +157,10 @@ public class SystemNode implements Node, EventListener {
 						+ "'", e);
 			}
 		}
+
+		logger.info("Quitted");
+		System.exit(0);
+		logger.error("If you are reding this in the logs run as fast as you can!");
 	}
 
 	/**

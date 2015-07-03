@@ -35,6 +35,7 @@ import org.apache.logging.log4j.Logger;
 
 import cc.sferalabs.sfera.core.Plugin;
 import cc.sferalabs.sfera.core.Plugins;
+import cc.sferalabs.sfera.core.events.PluginsEvent;
 import cc.sferalabs.sfera.core.services.AutoStartService;
 import cc.sferalabs.sfera.core.services.FilesWatcher;
 import cc.sferalabs.sfera.events.Bus;
@@ -47,6 +48,7 @@ import com.google.common.eventbus.Subscribe;
 
 public class ScriptsEngine implements AutoStartService, EventListener {
 
+	private static final String SCRIPTS_DIR = "scripts";
 	private static final ScriptEngineManager SCRIPT_ENGINE_MANAGER = new ScriptEngineManager();
 	private static final String SCRIPT_FILES_EXTENSION = ".ev";
 	private static final Logger logger = LogManager.getLogger();
@@ -59,13 +61,17 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 		Bus.register(this);
 		loadScriptFiles();
 		try {
-			Runnable loadScriptFilesTask = ScriptsEngine::loadScriptFiles;
-			FilesWatcher.register(Paths.get("scripts"), loadScriptFilesTask,
-					false);
-			FilesWatcher.register(Paths.get("plugins"), loadScriptFilesTask,
-					false);
+			FilesWatcher.register(Paths.get(SCRIPTS_DIR),
+					ScriptsEngine::loadScriptFiles, false);
 		} catch (Exception e) {
 			logger.error("Error registering script files watcher", e);
+		}
+	}
+
+	@Subscribe
+	public static void handlePluginsReload(PluginsEvent event) {
+		if (event == PluginsEvent.RELOAD) {
+			loadScriptFiles();
 		}
 	}
 
@@ -183,6 +189,7 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	 * @throws IOException
 	 */
 	private synchronized static void loadScriptFiles() {
+		logger.info("Loading scripts...");
 		try {
 			triggersActionsMap = new HashMap<String, HashSet<Rule>>();
 			errors = new HashMap<Path, List<String>>();
@@ -215,7 +222,7 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	private static void loadScriptFilesIn(final FileSystem fileSystem)
 			throws IOException {
 		try {
-			Files.walkFileTree(fileSystem.getPath("scripts"),
+			Files.walkFileTree(fileSystem.getPath(SCRIPTS_DIR),
 					new SimpleFileVisitor<Path>() {
 
 						@Override

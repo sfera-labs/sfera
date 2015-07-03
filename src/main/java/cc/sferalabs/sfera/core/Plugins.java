@@ -13,6 +13,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import cc.sferalabs.sfera.core.events.PluginsEvent;
+import cc.sferalabs.sfera.core.services.FilesWatcher;
+import cc.sferalabs.sfera.events.Bus;
+
 public abstract class Plugins {
 
 	private static final String DIR_PATH = "plugins";
@@ -21,9 +25,20 @@ public abstract class Plugins {
 
 	/**
 	 * 
-	 * @throws IOException
 	 */
-	public static void load() throws IOException {
+	public static void load() {
+		doLoad();
+		try {
+			FilesWatcher.register(Paths.get(DIR_PATH), Plugins::doLoad, false);
+		} catch (Exception e) {
+			logger.error("Error watching plugins directory", e);
+		}
+	}
+
+	/**
+	 * 
+	 */
+	private static void doLoad() {
 		plugins = new ConcurrentHashMap<>();
 		try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths
 				.get(DIR_PATH))) {
@@ -41,7 +56,11 @@ public abstract class Plugins {
 			}
 		} catch (NoSuchFileException e) {
 			logger.debug("Plugins directory not found");
+		} catch (IOException e) {
+			logger.error("Error loading plugins", e);
+			return;
 		}
+		Bus.post(PluginsEvent.RELOAD);
 	}
 
 	/**

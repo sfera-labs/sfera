@@ -78,7 +78,7 @@ public class Console extends Task implements AutoStartService {
 							}
 						}
 					} else {
-						Bus.post(new SystemStateEvent("quit"));
+						Bus.post(SystemStateEvent.QUIT);
 					}
 					break;
 
