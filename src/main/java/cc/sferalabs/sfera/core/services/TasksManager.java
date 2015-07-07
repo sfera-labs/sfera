@@ -31,7 +31,7 @@ public class TasksManager {
 	 * 
 	 * @return
 	 */
-	public static TasksManager newTasksManager(ExecutorService executorService) {
+	static TasksManager newTasksManager(ExecutorService executorService) {
 		return new TasksManager(executorService);
 	}
 

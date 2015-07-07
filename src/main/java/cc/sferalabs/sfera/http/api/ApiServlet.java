@@ -16,7 +16,7 @@ public abstract class ApiServlet extends HttpServlet {
 	/**
 	 * 
 	 */
-	public static final String PATH = "/x/";
+	public static final String PATH = "/api/";
 
 	private static final Logger logger = LogManager.getLogger();
 

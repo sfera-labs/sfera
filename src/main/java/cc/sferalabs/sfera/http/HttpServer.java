@@ -43,6 +43,7 @@ import cc.sferalabs.sfera.http.api.LoginServlet;
 import cc.sferalabs.sfera.http.api.LogoutServlet;
 import cc.sferalabs.sfera.http.api.StateServlet;
 import cc.sferalabs.sfera.http.api.SubscribeServlet;
+import cc.sferalabs.sfera.http.api.websockets.ApiWebSocketServlet;
 import cc.sferalabs.sfera.http.auth.AuthenticationFilter;
 import cc.sferalabs.sfera.http.auth.AuthenticationRequestWrapper;
 
@@ -52,6 +53,10 @@ public class HttpServer implements AutoStartService {
 	private static final String SESSIONS_STORE_DIR = "data/http/sessions";
 
 	private static final Logger logger = LogManager.getLogger();
+	private static final String[] INCLUDED_CIPHER_SUITES = { "TLS_DHE_RSA.*",
+			"TLS_ECDHE.*" };
+	private static final String[] EXCLUDED_CIPHER_SUITES = { ".*NULL.*",
+			".*RC4.*", ".*MD5.*", ".*DES.*", ".*DSS.*" };
 
 	private static Server server;
 
@@ -107,6 +112,10 @@ public class HttpServer implements AutoStartService {
 			if (keyManagerPassword != null) {
 				sslContextFactory.setKeyManagerPassword(keyManagerPassword);
 			}
+			sslContextFactory.setIncludeCipherSuites(INCLUDED_CIPHER_SUITES);
+			sslContextFactory.setExcludeCipherSuites(EXCLUDED_CIPHER_SUITES);
+			sslContextFactory.setExcludeProtocols("SSLv3");
+			sslContextFactory.setRenegotiationAllowed(false);
 
 			HttpConfiguration https_config = new HttpConfiguration();
 			https_config.setSecurePort(https_port);
@@ -194,6 +203,7 @@ public class HttpServer implements AutoStartService {
 		addServlet(SubscribeServlet.class, SubscribeServlet.PATH);
 		addServlet(StateServlet.class, StateServlet.PATH);
 		addServlet(CommandServlet.class, CommandServlet.PATH);
+		addServlet(ApiWebSocketServlet.class, ApiWebSocketServlet.PATH);
 	}
 
 	/**
