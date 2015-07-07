@@ -116,6 +116,7 @@ public class HttpServer implements AutoStartService {
 			sslContextFactory.setExcludeCipherSuites(EXCLUDED_CIPHER_SUITES);
 			sslContextFactory.setExcludeProtocols("SSLv3");
 			sslContextFactory.setRenegotiationAllowed(false);
+			sslContextFactory.setUseCipherSuitesOrder(false);
 
 			HttpConfiguration https_config = new HttpConfiguration();
 			https_config.setSecurePort(https_port);
