@@ -9,10 +9,12 @@ import cc.sferalabs.sfera.http.api.ApiServlet;
 public class ApiWebSocketServlet extends WebSocketServlet {
 
 	public static final String PATH = ApiServlet.PATH + "websocket";
+	private static final long IDLE_TIMEOUT = 10000;
 
 	@Override
 	public void configure(WebSocketServletFactory factory) {
 		factory.setCreator(new ApiSocketCreator());
+		factory.getPolicy().setIdleTimeout(IDLE_TIMEOUT);
 	}
 
 }

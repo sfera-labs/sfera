@@ -19,8 +19,7 @@ public class LogoutServlet extends ApiServlet {
 			HttpServletResponse resp) throws Exception {
 		HttpSession session = req.getSession(false);
 		if (session != null) {
-			String user = (String) session
-					.getAttribute(LoginServlet.SESSION_ATTR_USERNAME);
+			String user = req.getRemoteUser();
 			session.invalidate();
 			resp.setStatus(HttpServletResponse.SC_OK);
 			logger.info("Logout: {}", user);

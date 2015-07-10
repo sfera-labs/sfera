@@ -8,7 +8,7 @@ import org.antlr.v4.runtime.Recognizer;
 
 public class ScriptErrorListener extends BaseErrorListener {
 
-	public final ArrayList<String> errors = new ArrayList<String>();
+	final ArrayList<String> errors = new ArrayList<String>();
 
 	@Override
 	public void syntaxError(Recognizer<?, ?> recognizer,

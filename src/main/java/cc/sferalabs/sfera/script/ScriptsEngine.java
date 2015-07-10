@@ -26,8 +26,11 @@ import javax.script.Compilable;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import javax.script.SimpleBindings;
 
+import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.logging.log4j.LogManager;
@@ -38,23 +41,28 @@ import cc.sferalabs.sfera.core.Plugins;
 import cc.sferalabs.sfera.core.events.PluginsEvent;
 import cc.sferalabs.sfera.core.services.AutoStartService;
 import cc.sferalabs.sfera.core.services.FilesWatcher;
+import cc.sferalabs.sfera.drivers.Driver;
+import cc.sferalabs.sfera.drivers.Drivers;
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Event;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarLexer;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.ParseContext;
+import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.TerminalNodeContext;
 
 import com.google.common.eventbus.Subscribe;
 
 public class ScriptsEngine implements AutoStartService, EventListener {
 
 	private static final String SCRIPTS_DIR = "scripts";
-	private static final ScriptEngineManager SCRIPT_ENGINE_MANAGER = new ScriptEngineManager();
 	private static final String SCRIPT_FILES_EXTENSION = ".ev";
+	private static final ScriptEngineManager scriptEngineManager = new ScriptEngineManager();
+	private static final ScriptEngine driverCommandsEngine = getNewEngine();
 	private static final Logger logger = LogManager.getLogger();
 
 	private static HashMap<String, HashSet<Rule>> triggersActionsMap;
 	private static HashMap<Path, List<String>> errors;
+	
 
 	@Override
 	public void init() throws Exception {
@@ -84,7 +92,7 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	 * @return
 	 */
 	private static ScriptEngine getNewEngine() {
-		return SCRIPT_ENGINE_MANAGER.getEngineByName("nashorn");
+		return scriptEngineManager.getEngineByName("nashorn");
 	}
 
 	/**
@@ -118,6 +126,69 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 					"Error executing actions triggered by event: "
 							+ event.getId(), e);
 		}
+	}
+
+	/**
+	 * 
+	 * @param command
+	 * @param param
+	 * @throws Exception
+	 */
+	public static void executeDriverCommand(String command, String param)
+			throws Exception {
+		ScriptErrorListener errorListener = new ScriptErrorListener();
+
+		SferaScriptGrammarParser parser = getParser(new ANTLRInputStream(command), errorListener);
+		TerminalNodeContext commandContext = parser.terminalNode();
+		if (!errorListener.errors.isEmpty()) {
+			throw new Exception("Invalid node syntax: "
+					+ errorListener.errors.get(0));
+		}
+
+		String driverName = commandContext.NodeId().getText();
+		Driver driver = Drivers.getDriver(driverName);
+
+		if (driver == null) {
+			throw new Exception("Driver '" + driverName + "' not found");
+		}
+
+		String commandScript = command;
+		if (param != null) {
+			parser = getParser(new ANTLRInputStream(param), errorListener);
+			parser.paramsList();
+			if (!errorListener.errors.isEmpty()) {
+				throw new Exception("Invalid param syntax: "
+						+ errorListener.errors.get(0));
+			}
+			commandScript += "=" + param;
+
+		} else if (!commandScript.endsWith(")")) {
+			commandScript += "()";
+		}
+
+		Bindings bindings = new SimpleBindings();
+		bindings.put(driverName, driver);
+		driverCommandsEngine.eval(commandScript, bindings);
+	}
+
+	/**
+	 * 
+	 * @param input
+	 * @param errorListener
+	 * @return
+	 */
+	private static SferaScriptGrammarParser getParser(CharStream input,
+			ANTLRErrorListener errorListener) {
+		SferaScriptGrammarLexer lexer = new SferaScriptGrammarLexer(input);
+		CommonTokenStream tokens = new CommonTokenStream(lexer);
+		SferaScriptGrammarParser parser = new SferaScriptGrammarParser(tokens);
+
+		lexer.removeErrorListeners();
+		lexer.addErrorListener(errorListener);
+		parser.removeErrorListeners();
+		parser.addErrorListener(errorListener);
+
+		return parser;
 	}
 
 	/**
@@ -164,7 +235,7 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	 */
 	public synchronized static void putObjectInGlobalScope(String key,
 			Object value) {
-		SCRIPT_ENGINE_MANAGER.put(key, value);
+		scriptEngineManager.put(key, value);
 	}
 
 	/**
@@ -278,17 +349,8 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 			ScriptEngine scriptEngine, Scope directoryScope) throws IOException {
 		try (BufferedReader r = Files.newBufferedReader(scriptFile,
 				StandardCharsets.UTF_8)) {
-			SferaScriptGrammarLexer lexer = new SferaScriptGrammarLexer(
-					new ANTLRInputStream(r));
-			CommonTokenStream tokens = new CommonTokenStream(lexer);
-			SferaScriptGrammarParser parser = new SferaScriptGrammarParser(
-					tokens);
-
 			ScriptErrorListener grammarErrorListener = new ScriptErrorListener();
-			lexer.removeErrorListeners();
-			lexer.addErrorListener(grammarErrorListener);
-			parser.removeErrorListeners();
-			parser.addErrorListener(grammarErrorListener);
+			SferaScriptGrammarParser parser = getParser(new ANTLRInputStream(r), grammarErrorListener);
 
 			ParseContext tree = parser.parse();
 

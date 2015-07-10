@@ -53,6 +53,8 @@ public class HttpServer implements AutoStartService {
 	private static final String SESSIONS_STORE_DIR = "data/http/sessions";
 
 	private static final Logger logger = LogManager.getLogger();
+	private static final String[] EXCLUDED_PROTOCOLS = { "SSL", "SSLv2",
+			"SSLv2Hello", "SSLv3" };
 	private static final String[] INCLUDED_CIPHER_SUITES = { "TLS_DHE_RSA.*",
 			"TLS_ECDHE.*" };
 	private static final String[] EXCLUDED_CIPHER_SUITES = { ".*NULL.*",
@@ -112,9 +114,9 @@ public class HttpServer implements AutoStartService {
 			if (keyManagerPassword != null) {
 				sslContextFactory.setKeyManagerPassword(keyManagerPassword);
 			}
+			sslContextFactory.addExcludeProtocols(EXCLUDED_PROTOCOLS);
 			sslContextFactory.setIncludeCipherSuites(INCLUDED_CIPHER_SUITES);
 			sslContextFactory.setExcludeCipherSuites(EXCLUDED_CIPHER_SUITES);
-			sslContextFactory.setExcludeProtocols("SSLv3");
 			sslContextFactory.setRenegotiationAllowed(false);
 			sslContextFactory.setUseCipherSuitesOrder(false);
 
