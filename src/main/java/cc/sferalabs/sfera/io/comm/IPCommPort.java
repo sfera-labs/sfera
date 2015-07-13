@@ -82,8 +82,8 @@ public class IPCommPort extends CommPort {
 		try {
 			address = new InetSocketAddress(host, port);
 		} catch (Exception e) {
-			throw new CommPortException("error instantiating socket: "
-					+ e.getLocalizedMessage(), e);
+			throw new CommPortException("error instantiating socket: " + e.getLocalizedMessage(),
+					e);
 		}
 		try {
 			socket = new Socket();
@@ -104,13 +104,12 @@ public class IPCommPort extends CommPort {
 	}
 
 	@Override
-	public void setParams(int baudRate, int dataBits, int stopBits, int parity,
-			int flowControl) throws CommPortException {
+	public void setParams(int baudRate, int dataBits, int stopBits, int parity, int flowControl)
+			throws CommPortException {
 	}
 
 	@Override
-	public synchronized void setReader(CommPortReader reader)
-			throws CommPortException {
+	public synchronized void setReader(CommPortReader reader) throws CommPortException {
 		if (readerTask != null) {
 			throw new CommPortException("Comm port reader already set");
 		}
@@ -147,8 +146,7 @@ public class IPCommPort extends CommPort {
 	}
 
 	@Override
-	public void writeString(String string, Charset charset)
-			throws CommPortException {
+	public void writeString(String string, Charset charset) throws CommPortException {
 		writeBytes(string.getBytes(charset));
 	}
 
@@ -171,8 +169,7 @@ public class IPCommPort extends CommPort {
 	}
 
 	@Override
-	public int readBytes(byte[] b, int offset, int len)
-			throws CommPortException {
+	public int readBytes(byte[] b, int offset, int len) throws CommPortException {
 		try {
 			InputStream in = socket.getInputStream();
 			return in.read(b, offset, len);

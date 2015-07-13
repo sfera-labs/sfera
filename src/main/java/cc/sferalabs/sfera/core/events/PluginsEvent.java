@@ -1,10 +1,9 @@
 package cc.sferalabs.sfera.core.events;
 
-
 public class PluginsEvent extends SystemEvent {
 
 	public static final PluginsEvent RELOAD = new PluginsEvent("reload");
-	
+
 	private final String event;
 
 	/**

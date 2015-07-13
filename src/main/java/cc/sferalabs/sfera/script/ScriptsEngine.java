@@ -62,15 +62,13 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 
 	private static HashMap<String, HashSet<Rule>> triggersActionsMap;
 	private static HashMap<Path, List<String>> errors;
-	
 
 	@Override
 	public void init() throws Exception {
 		Bus.register(this);
 		loadScriptFiles();
 		try {
-			FilesWatcher.register(Paths.get(SCRIPTS_DIR),
-					ScriptsEngine::loadScriptFiles, false);
+			FilesWatcher.register(Paths.get(SCRIPTS_DIR), ScriptsEngine::loadScriptFiles, false);
 		} catch (Exception e) {
 			logger.error("Error registering script files watcher", e);
 		}
@@ -122,9 +120,7 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 				rule.execute(event);
 			}
 		} catch (Exception e) {
-			logger.error(
-					"Error executing actions triggered by event: "
-							+ event.getId(), e);
+			logger.error("Error executing actions triggered by event: " + event.getId(), e);
 		}
 	}
 
@@ -134,15 +130,13 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	 * @param param
 	 * @throws Exception
 	 */
-	public static void executeDriverCommand(String command, String param)
-			throws Exception {
+	public static void executeDriverCommand(String command, String param) throws Exception {
 		ScriptErrorListener errorListener = new ScriptErrorListener();
 
 		SferaScriptGrammarParser parser = getParser(new ANTLRInputStream(command), errorListener);
 		TerminalNodeContext commandContext = parser.terminalNode();
 		if (!errorListener.errors.isEmpty()) {
-			throw new Exception("Invalid node syntax: "
-					+ errorListener.errors.get(0));
+			throw new Exception("Invalid node syntax: " + errorListener.errors.get(0));
 		}
 
 		String driverName = commandContext.NodeId().getText();
@@ -157,8 +151,7 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 			parser = getParser(new ANTLRInputStream(param), errorListener);
 			parser.paramsList();
 			if (!errorListener.errors.isEmpty()) {
-				throw new Exception("Invalid param syntax: "
-						+ errorListener.errors.get(0));
+				throw new Exception("Invalid param syntax: " + errorListener.errors.get(0));
 			}
 			commandScript += "=" + param;
 
@@ -233,8 +226,7 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	 * @param key
 	 * @param value
 	 */
-	public synchronized static void putObjectInGlobalScope(String key,
-			Object value) {
+	public synchronized static void putObjectInGlobalScope(String key, Object value) {
 		scriptEngineManager.put(key, value);
 	}
 
@@ -243,12 +235,10 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	 * @param clazz
 	 * @throws Exception
 	 */
-	public synchronized static void putTypeInGlobalScope(Class<?> clazz)
-			throws Exception {
+	public synchronized static void putTypeInGlobalScope(Class<?> clazz) throws Exception {
 		String typeName = clazz.getSimpleName();
 		ScriptEngine engine = getNewEngine();
-		String script = "var " + typeName + " = Java.type('" + clazz.getName()
-				+ "');";
+		String script = "var " + typeName + " = Java.type('" + clazz.getName() + "');";
 		Bindings bindings = engine.createBindings();
 		engine.eval(script, bindings);
 		Object type = bindings.get(typeName);
@@ -267,8 +257,7 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 
 			loadScriptFilesIn(FileSystems.getDefault());
 			for (Plugin plugin : Plugins.getAll().values()) {
-				try (FileSystem pluginFs = FileSystems.newFileSystem(
-						plugin.getPath(), null)) {
+				try (FileSystem pluginFs = FileSystems.newFileSystem(plugin.getPath(), null)) {
 					loadScriptFilesIn(pluginFs);
 				}
 			}
@@ -276,8 +265,7 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 			for (Entry<Path, List<String>> error : errors.entrySet()) {
 				Path file = error.getKey();
 				for (String message : error.getValue()) {
-					logger.error("Errors in script file '{}': {}", file,
-							message);
+					logger.error("Errors in script file '{}': {}", file, message);
 				}
 			}
 		} catch (IOException e) {
@@ -290,22 +278,19 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	 * @param fileSystem
 	 * @throws IOException
 	 */
-	private static void loadScriptFilesIn(final FileSystem fileSystem)
-			throws IOException {
+	private static void loadScriptFilesIn(final FileSystem fileSystem) throws IOException {
 		try {
-			Files.walkFileTree(fileSystem.getPath(SCRIPTS_DIR),
-					new SimpleFileVisitor<Path>() {
+			Files.walkFileTree(fileSystem.getPath(SCRIPTS_DIR), new SimpleFileVisitor<Path>() {
 
-						@Override
-						public FileVisitResult preVisitDirectory(Path dir,
-								BasicFileAttributes attrs) throws IOException {
-							try (DirectoryStream<Path> stream = Files
-									.newDirectoryStream(dir)) {
-								createNewEnvironment(fileSystem, stream);
-							}
-							return FileVisitResult.CONTINUE;
-						}
-					});
+				@Override
+				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
+						throws IOException {
+					try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
+						createNewEnvironment(fileSystem, stream);
+					}
+					return FileVisitResult.CONTINUE;
+				}
+			});
 		} catch (NoSuchFileException nsfe) {
 		}
 	}
@@ -315,21 +300,16 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	 * @param fileSystem
 	 * @param stream
 	 */
-	private static void createNewEnvironment(FileSystem fileSystem,
-			DirectoryStream<Path> stream) {
+	private static void createNewEnvironment(FileSystem fileSystem, DirectoryStream<Path> stream) {
 		ScriptEngine scriptEngine = getNewEngine();
-		Bindings dirScopeBindings = scriptEngine
-				.getBindings(ScriptContext.ENGINE_SCOPE);
-		Scope directoryScope = new Scope(fileSystem, scriptEngine,
-				dirScopeBindings);
+		Bindings dirScopeBindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE);
+		Scope directoryScope = new Scope(fileSystem, scriptEngine, dirScopeBindings);
 		for (Path file : stream) {
 			if (Files.isRegularFile(file)
-					&& file.getFileName().toString()
-							.endsWith(SCRIPT_FILES_EXTENSION)) {
+					&& file.getFileName().toString().endsWith(SCRIPT_FILES_EXTENSION)) {
 				logger.info("Loading script file '{}'", file);
 				try {
-					parseScriptFile(file, fileSystem, scriptEngine,
-							directoryScope);
+					parseScriptFile(file, fileSystem, scriptEngine, directoryScope);
 				} catch (IOException e) {
 					addError(file, "IOException: " + e.getLocalizedMessage());
 				}
@@ -347,10 +327,10 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	 */
 	private static void parseScriptFile(Path scriptFile, FileSystem fileSystem,
 			ScriptEngine scriptEngine, Scope directoryScope) throws IOException {
-		try (BufferedReader r = Files.newBufferedReader(scriptFile,
-				StandardCharsets.UTF_8)) {
+		try (BufferedReader r = Files.newBufferedReader(scriptFile, StandardCharsets.UTF_8)) {
 			ScriptErrorListener grammarErrorListener = new ScriptErrorListener();
-			SferaScriptGrammarParser parser = getParser(new ANTLRInputStream(r), grammarErrorListener);
+			SferaScriptGrammarParser parser = getParser(new ANTLRInputStream(r),
+					grammarErrorListener);
 
 			ParseContext tree = parser.parse();
 
@@ -362,18 +342,16 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 				return;
 			}
 
-			Scope fileScope = new Scope(fileSystem, scriptEngine,
-					scriptEngine.createBindings());
+			Scope fileScope = new Scope(fileSystem, scriptEngine, scriptEngine.createBindings());
 
 			String loggerName = scriptFile.toString();
-			loggerName = loggerName.substring(0,
-					loggerName.length() - SCRIPT_FILES_EXTENSION.length())
+			loggerName = loggerName
+					.substring(0, loggerName.length() - SCRIPT_FILES_EXTENSION.length())
 					.replace('/', '.');
 			fileScope.put("logger", LogManager.getLogger(loggerName));
 
-			ScriptGrammarListener scriptListener = new ScriptGrammarListener(
-					scriptFile, fileSystem, (Compilable) scriptEngine,
-					directoryScope, fileScope);
+			ScriptGrammarListener scriptListener = new ScriptGrammarListener(scriptFile, fileSystem,
+					(Compilable) scriptEngine, directoryScope, fileScope);
 			ParseTreeWalker.DEFAULT.walk(scriptListener, tree);
 
 			if (!scriptListener.errors.isEmpty()) {
@@ -384,8 +362,7 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 				return;
 			}
 
-			for (Entry<String, HashSet<Rule>> entry : scriptListener.triggerActionsMap
-					.entrySet()) {
+			for (Entry<String, HashSet<Rule>> entry : scriptListener.triggerActionsMap.entrySet()) {
 				String trigger = entry.getKey();
 				HashSet<Rule> actions = triggersActionsMap.get(trigger);
 				if (actions == null) {

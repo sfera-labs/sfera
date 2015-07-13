@@ -21,8 +21,7 @@ import cc.sferalabs.sfera.events.Bus;
 
 public abstract class Applications {
 
-	private static final String DEFAULT_APPS_PACKAGE = Sfera.BASE_PACKAGE
-			+ ".apps";
+	private static final String DEFAULT_APPS_PACKAGE = Sfera.BASE_PACKAGE + ".apps";
 	private static final String CONFIG_DIR = "apps";
 	private static final Logger logger = LogManager.getLogger();
 
@@ -34,8 +33,7 @@ public abstract class Applications {
 	public synchronized static void load() {
 		instantiateApps();
 		try {
-			FilesWatcher.register(
-					Configuration.getConfigDir().resolve(CONFIG_DIR),
+			FilesWatcher.register(Configuration.getConfigDir().resolve(CONFIG_DIR),
 					Applications::instantiateApps, false);
 		} catch (Exception e) {
 			logger.error("Error watching drivers config directory", e);
@@ -49,19 +47,17 @@ public abstract class Applications {
 		Path configDir = Configuration.getConfigDir().resolve(CONFIG_DIR);
 		List<String> inConfig = new ArrayList<String>();
 		if (Files.exists(configDir)) {
-			try (DirectoryStream<Path> stream = Files
-					.newDirectoryStream(configDir)) {
+			try (DirectoryStream<Path> stream = Files.newDirectoryStream(configDir)) {
 				for (Path file : stream) {
 					if (Files.isRegularFile(file) && !Files.isHidden(file)) {
 						String fileName = file.getFileName().toString();
 						String appClass = fileName;
 						if (appClass.endsWith(".ini")) {
-							appClass = appClass.substring(0,
-									appClass.length() - 4);
+							appClass = appClass.substring(0, appClass.length() - 4);
 						}
 						if (!appClass.contains(".")) {
-							appClass = DEFAULT_APPS_PACKAGE + "."
-									+ appClass.toLowerCase() + "." + appClass;
+							appClass = DEFAULT_APPS_PACKAGE + "." + appClass.toLowerCase() + "."
+									+ appClass;
 						}
 						inConfig.add(appClass);
 						try {
@@ -70,10 +66,8 @@ public abstract class Applications {
 							}
 							Class<?> clazz = SystemClassLoader.getClass(appClass);
 							Constructor<?> constructor = clazz.getConstructor();
-							Application appInstance = (Application) constructor
-									.newInstance();
-							appInstance.setConfigFile(CONFIG_DIR + "/"
-									+ fileName);
+							Application appInstance = (Application) constructor.newInstance();
+							appInstance.setConfigFile(CONFIG_DIR + "/" + fileName);
 							applications.add(appInstance);
 							if (appInstance instanceof EventListener) {
 								Bus.register((EventListener) appInstance);
@@ -81,8 +75,7 @@ public abstract class Applications {
 							logger.info("App '{}' loaded", appClass);
 							appInstance.enable();
 						} catch (Throwable e) {
-							logger.error(
-									"Error instantiating app: " + appClass, e);
+							logger.error("Error instantiating app: " + appClass, e);
 						}
 					}
 				}

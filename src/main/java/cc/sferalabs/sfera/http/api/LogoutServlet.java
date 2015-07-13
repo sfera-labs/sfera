@@ -15,8 +15,8 @@ public class LogoutServlet extends ApiServlet {
 	private static final Logger logger = LogManager.getLogger();
 
 	@Override
-	protected void processRequest(HttpServletRequest req,
-			HttpServletResponse resp) throws Exception {
+	protected void processRequest(HttpServletRequest req, HttpServletResponse resp)
+			throws Exception {
 		HttpSession session = req.getSession(false);
 		if (session != null) {
 			String user = req.getRemoteUser();

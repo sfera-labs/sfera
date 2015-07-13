@@ -24,8 +24,7 @@ import cc.sferalabs.sfera.script.ScriptsEngine;
 
 public abstract class Drivers {
 
-	private static final String DEFAULT_DRIVERS_PACKAGE = Sfera.BASE_PACKAGE
-			+ ".drivers";
+	private static final String DEFAULT_DRIVERS_PACKAGE = Sfera.BASE_PACKAGE + ".drivers";
 	private static final String CONFIG_DIR = "drivers";
 	private static final Logger logger = LogManager.getLogger();
 
@@ -37,8 +36,7 @@ public abstract class Drivers {
 	public synchronized static void load() {
 		instantiateDrivers();
 		try {
-			FilesWatcher.register(
-					Configuration.getConfigDir().resolve(CONFIG_DIR),
+			FilesWatcher.register(Configuration.getConfigDir().resolve(CONFIG_DIR),
 					Drivers::instantiateDrivers, false);
 		} catch (Exception e) {
 			logger.error("Error watching drivers config directory", e);
@@ -52,8 +50,7 @@ public abstract class Drivers {
 		Path configDir = Configuration.getConfigDir().resolve(CONFIG_DIR);
 		List<String> inConfig = new ArrayList<String>();
 		if (Files.exists(configDir)) {
-			try (DirectoryStream<Path> stream = Files
-					.newDirectoryStream(configDir)) {
+			try (DirectoryStream<Path> stream = Files.newDirectoryStream(configDir)) {
 				for (Path file : stream) {
 					if (Files.isRegularFile(file) && !Files.isHidden(file)) {
 						String fileName = file.getFileName().toString();
@@ -64,38 +61,30 @@ public abstract class Drivers {
 								continue;
 							}
 							Configuration config = new Configuration(file);
-							String driverClass = config.getProperty("type",
-									null);
+							String driverClass = config.getProperty("type", null);
 							if (driverClass == null) {
-								throw new Exception(
-										"type not specified in configuration");
+								throw new Exception("type not specified in configuration");
 							}
 							if (!driverClass.contains(".")) {
 								driverClass = DEFAULT_DRIVERS_PACKAGE + "."
-										+ driverClass.toLowerCase() + "."
-										+ driverClass;
+										+ driverClass.toLowerCase() + "." + driverClass;
 							}
-							Class<?> clazz = SystemClassLoader
-									.getClass(driverClass);
+							Class<?> clazz = SystemClassLoader.getClass(driverClass);
 							Constructor<?> constructor = clazz
 									.getConstructor(new Class[] { String.class });
-							Driver driverInstance = (Driver) constructor
-									.newInstance(driverId);
-							driverInstance.setConfigFile(CONFIG_DIR + "/"
-									+ fileName);
+							Driver driverInstance = (Driver) constructor.newInstance(driverId);
+							driverInstance.setConfigFile(CONFIG_DIR + "/" + fileName);
 							drivers.put(driverId, driverInstance);
-							ScriptsEngine.putObjectInGlobalScope(
-									driverInstance.getId(), driverInstance);
+							ScriptsEngine.putObjectInGlobalScope(driverInstance.getId(),
+									driverInstance);
 							if (driverInstance instanceof EventListener) {
 								Bus.register((EventListener) driverInstance);
 							}
-							logger.info(
-									"Driver '{}' of type '{}' instantiated",
-									driverId, driverClass);
+							logger.info("Driver '{}' of type '{}' instantiated", driverId,
+									driverClass);
 							driverInstance.start();
 						} catch (Throwable e) {
-							logger.error("Error instantiating driver '"
-									+ driverId + "'", e);
+							logger.error("Error instantiating driver '" + driverId + "'", e);
 						}
 					}
 				}
@@ -110,8 +99,7 @@ public abstract class Drivers {
 		while (it.hasNext()) {
 			Driver d = it.next();
 			if (!inConfig.contains(d.getId())) {
-				logger.info("Configuration file for driver '{}' deleted",
-						d.getId());
+				logger.info("Configuration file for driver '{}' deleted", d.getId());
 				d.quit();
 				it.remove();
 			}

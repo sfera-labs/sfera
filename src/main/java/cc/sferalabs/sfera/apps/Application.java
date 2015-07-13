@@ -39,41 +39,38 @@ public abstract class Application {
 	public synchronized void enable() throws IOException {
 		final Configuration config = new Configuration(configFile);
 		final Application thisApp = this;
-		TasksManager.getDefault().submit(
-				new Task("App " + getClass().getName() + " enable") {
+		TasksManager.getDefault().submit(new Task("App " + getClass().getName() + " enable") {
 
-					@Override
-					protected void execute() {
-						logger.info("Enabling...");
-						try {
-							configWatcherId = FilesWatcher.register(
-									config.getRealPath(),
-									thisApp::onConfigFileModified, false);
-						} catch (Exception e) {
-							logger.error("Error watching config file", e);
-						}
-						try {
-							onEnable(config);
-							logger.info("Enabled");
-						} catch (Throwable t) {
-							logger.error("Initialization error", t);
-						}
-					}
-				});
+			@Override
+			protected void execute() {
+				logger.info("Enabling...");
+				try {
+					configWatcherId = FilesWatcher.register(config.getRealPath(),
+							thisApp::onConfigFileModified, false);
+				} catch (Exception e) {
+					logger.error("Error watching config file", e);
+				}
+				try {
+					onEnable(config);
+					logger.info("Enabled");
+				} catch (Throwable t) {
+					logger.error("Initialization error", t);
+				}
+			}
+		});
 	}
 
 	/**
 	 * 
 	 */
 	public synchronized void disable() {
-		TasksManager.getDefault().submit(
-				new Task("App " + getClass().getName() + " disable") {
+		TasksManager.getDefault().submit(new Task("App " + getClass().getName() + " disable") {
 
-					@Override
-					protected void execute() {
-						doDisable();
-					}
-				});
+			@Override
+			protected void execute() {
+				doDisable();
+			}
+		});
 	}
 
 	/**
@@ -81,8 +78,7 @@ public abstract class Application {
 	 */
 	private void doDisable() {
 		logger.info("Disabling...");
-		FilesWatcher.unregister(Configuration.getPath(configFile),
-				configWatcherId);
+		FilesWatcher.unregister(Configuration.getPath(configFile), configWatcherId);
 		try {
 			onDisable();
 			logger.info("Disabled");
@@ -123,8 +119,7 @@ public abstract class Application {
 	 * 
 	 * @param configuration
 	 */
-	protected void onConfigChange(Configuration configuration)
-			throws InterruptedException {
+	protected void onConfigChange(Configuration configuration) throws InterruptedException {
 		try {
 			restart();
 		} catch (IOException e) {

@@ -15,7 +15,6 @@ public abstract class LoggerUtils {
 	 * Reload the logger configuration.
 	 */
 	public static void reloadConfig() {
-		((org.apache.logging.log4j.core.LoggerContext) LogManager
-				.getContext(false)).reconfigure();
+		((org.apache.logging.log4j.core.LoggerContext) LogManager.getContext(false)).reconfigure();
 	}
 }

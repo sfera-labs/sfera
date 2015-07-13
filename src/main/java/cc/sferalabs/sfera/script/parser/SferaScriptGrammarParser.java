@@ -18,47 +18,39 @@ public class SferaScriptGrammarParser extends Parser {
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache = new PredictionContextCache();
-	public static final int T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5,
-			T__5 = 6, T__6 = 7, T__7 = 8, T__8 = 9, Script = 10,
-			BooleanLiteral = 11, Unknown = 12, NodeId = 13, NumberLiteral = 14,
-			StringLiteral = 15, ET = 16, NE = 17, GT = 18, LT = 19, GE = 20,
-			LE = 21, OR = 22, AND = 23, NOT = 24, WS = 25, COMMENT = 26,
-			LINE_COMMENT = 27;
-	public static final int RULE_parse = 0, RULE_init = 1,
-			RULE_localScopeInit = 2, RULE_globalScopeInit = 3, RULE_rules = 4,
-			RULE_ruleLine = 5, RULE_action = 6, RULE_trigger = 7,
-			RULE_orExpression = 8, RULE_andExpression = 9,
+	public static final int T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5, T__5 = 6, T__6 = 7,
+			T__7 = 8, T__8 = 9, Script = 10, BooleanLiteral = 11, Unknown = 12, NodeId = 13,
+			NumberLiteral = 14, StringLiteral = 15, ET = 16, NE = 17, GT = 18, LT = 19, GE = 20,
+			LE = 21, OR = 22, AND = 23, NOT = 24, WS = 25, COMMENT = 26, LINE_COMMENT = 27;
+	public static final int RULE_parse = 0, RULE_init = 1, RULE_localScopeInit = 2,
+			RULE_globalScopeInit = 3, RULE_rules = 4, RULE_ruleLine = 5, RULE_action = 6,
+			RULE_trigger = 7, RULE_orExpression = 8, RULE_andExpression = 9,
 			RULE_notExpression = 10, RULE_atomExpression = 11, RULE_event = 12,
-			RULE_stableEvent = 13, RULE_stringComparison = 14,
-			RULE_numberComparison = 15, RULE_booleanComparison = 16,
-			RULE_unknownComparison = 17, RULE_transientEvent = 18,
-			RULE_terminalNode = 19, RULE_subNode = 20, RULE_parameters = 21,
-			RULE_paramsList = 22, RULE_parameter = 23, RULE_array = 24;
-	public static final String[] ruleNames = { "parse", "init",
-			"localScopeInit", "globalScopeInit", "rules", "ruleLine", "action",
-			"trigger", "orExpression", "andExpression", "notExpression",
-			"atomExpression", "event", "stableEvent", "stringComparison",
-			"numberComparison", "booleanComparison", "unknownComparison",
-			"transientEvent", "terminalNode", "subNode", "parameters",
-			"paramsList", "parameter", "array" };
+			RULE_stableEvent = 13, RULE_stringComparison = 14, RULE_numberComparison = 15,
+			RULE_booleanComparison = 16, RULE_unknownComparison = 17, RULE_transientEvent = 18,
+			RULE_terminalNode = 19, RULE_subNode = 20, RULE_parameters = 21, RULE_paramsList = 22,
+			RULE_parameter = 23, RULE_array = 24;
+	public static final String[] ruleNames = { "parse", "init", "localScopeInit", "globalScopeInit",
+			"rules", "ruleLine", "action", "trigger", "orExpression", "andExpression",
+			"notExpression", "atomExpression", "event", "stableEvent", "stringComparison",
+			"numberComparison", "booleanComparison", "unknownComparison", "transientEvent",
+			"terminalNode", "subNode", "parameters", "paramsList", "parameter", "array" };
 
-	private static final String[] _LITERAL_NAMES = { null, "'local'",
-			"'global'", "':'", "'('", "')'", "'.'", "','", "'['", "']'", null,
-			null, "'unknown'", null, null, null, "'=='", "'!='", "'>'", "'<'",
-			"'>='", "'<='", "'||'", "'&&'", "'!'" };
-	private static final String[] _SYMBOLIC_NAMES = { null, null, null, null,
-			null, null, null, null, null, null, "Script", "BooleanLiteral",
-			"Unknown", "NodeId", "NumberLiteral", "StringLiteral", "ET", "NE",
-			"GT", "LT", "GE", "LE", "OR", "AND", "NOT", "WS", "COMMENT",
-			"LINE_COMMENT" };
-	public static final Vocabulary VOCABULARY = new VocabularyImpl(
-			_LITERAL_NAMES, _SYMBOLIC_NAMES);
+	private static final String[] _LITERAL_NAMES = { null, "'local'", "'global'", "':'", "'('",
+			"')'", "'.'", "','", "'['", "']'", null, null, "'unknown'", null, null, null, "'=='",
+			"'!='", "'>'", "'<'", "'>='", "'<='", "'||'", "'&&'", "'!'" };
+	private static final String[] _SYMBOLIC_NAMES = { null, null, null, null, null, null, null,
+			null, null, null, "Script", "BooleanLiteral", "Unknown", "NodeId", "NumberLiteral",
+			"StringLiteral", "ET", "NE", "GT", "LT", "GE", "LE", "OR", "AND", "NOT", "WS",
+			"COMMENT", "LINE_COMMENT" };
+	public static final Vocabulary VOCABULARY = new VocabularyImpl(_LITERAL_NAMES, _SYMBOLIC_NAMES);
 
 	/**
 	 * @deprecated Use {@link #VOCABULARY} instead.
 	 */
 	@Deprecated
 	public static final String[] tokenNames;
+
 	static {
 		tokenNames = new String[_SYMBOLIC_NAMES.length];
 		for (int i = 0; i < tokenNames.length; i++) {
@@ -106,8 +98,7 @@ public class SferaScriptGrammarParser extends Parser {
 
 	public SferaScriptGrammarParser(TokenStream input) {
 		super(input);
-		_interp = new ParserATNSimulator(this, _ATN, _decisionToDFA,
-				_sharedContextCache);
+		_interp = new ParserATNSimulator(this, _ATN, _decisionToDFA, _sharedContextCache);
 	}
 
 	public static class ParseContext extends ParserRuleContext {
@@ -156,8 +147,8 @@ public class SferaScriptGrammarParser extends Parser {
 				init();
 				setState(52);
 				_la = _input.LA(1);
-				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__3)
-						| (1L << NodeId) | (1L << NOT))) != 0)) {
+				if ((((_la) & ~0x3f) == 0
+						&& ((1L << _la) & ((1L << T__3) | (1L << NodeId) | (1L << NOT))) != 0)) {
 					{
 						setState(51);
 						rules();
@@ -216,50 +207,48 @@ public class SferaScriptGrammarParser extends Parser {
 			setState(68);
 			switch (getInterpreter().adaptivePredict(_input, 5, _ctx)) {
 			case 1:
-				enterOuterAlt(_localctx, 1);
-				{
-					setState(57);
-					_la = _input.LA(1);
-					if (_la == T__0 || _la == Script) {
-						{
-							setState(56);
-							localScopeInit();
-						}
+				enterOuterAlt(_localctx, 1); {
+				setState(57);
+				_la = _input.LA(1);
+				if (_la == T__0 || _la == Script) {
+					{
+						setState(56);
+						localScopeInit();
 					}
-
-					setState(60);
-					_la = _input.LA(1);
-					if (_la == T__1) {
-						{
-							setState(59);
-							globalScopeInit();
-						}
-					}
-
 				}
+
+				setState(60);
+				_la = _input.LA(1);
+				if (_la == T__1) {
+					{
+						setState(59);
+						globalScopeInit();
+					}
+				}
+
+			}
 				break;
 			case 2:
-				enterOuterAlt(_localctx, 2);
-				{
-					setState(63);
-					_la = _input.LA(1);
-					if (_la == T__1) {
-						{
-							setState(62);
-							globalScopeInit();
-						}
+				enterOuterAlt(_localctx, 2); {
+				setState(63);
+				_la = _input.LA(1);
+				if (_la == T__1) {
+					{
+						setState(62);
+						globalScopeInit();
 					}
-
-					setState(66);
-					_la = _input.LA(1);
-					if (_la == T__0 || _la == Script) {
-						{
-							setState(65);
-							localScopeInit();
-						}
-					}
-
 				}
+
+				setState(66);
+				_la = _input.LA(1);
+				if (_la == T__0 || _la == Script) {
+					{
+						setState(65);
+						localScopeInit();
+					}
+				}
+
+			}
 				break;
 			}
 		} catch (RecognitionException re) {
@@ -289,22 +278,18 @@ public class SferaScriptGrammarParser extends Parser {
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if (listener instanceof SferaScriptGrammarListener)
-				((SferaScriptGrammarListener) listener)
-						.enterLocalScopeInit(this);
+				((SferaScriptGrammarListener) listener).enterLocalScopeInit(this);
 		}
 
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if (listener instanceof SferaScriptGrammarListener)
-				((SferaScriptGrammarListener) listener)
-						.exitLocalScopeInit(this);
+				((SferaScriptGrammarListener) listener).exitLocalScopeInit(this);
 		}
 	}
 
-	public final LocalScopeInitContext localScopeInit()
-			throws RecognitionException {
-		LocalScopeInitContext _localctx = new LocalScopeInitContext(_ctx,
-				getState());
+	public final LocalScopeInitContext localScopeInit() throws RecognitionException {
+		LocalScopeInitContext _localctx = new LocalScopeInitContext(_ctx, getState());
 		enterRule(_localctx, 4, RULE_localScopeInit);
 		int _la;
 		try {
@@ -337,8 +322,7 @@ public class SferaScriptGrammarParser extends Parser {
 			return getToken(SferaScriptGrammarParser.Script, 0);
 		}
 
-		public GlobalScopeInitContext(ParserRuleContext parent,
-				int invokingState) {
+		public GlobalScopeInitContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 
@@ -350,22 +334,18 @@ public class SferaScriptGrammarParser extends Parser {
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if (listener instanceof SferaScriptGrammarListener)
-				((SferaScriptGrammarListener) listener)
-						.enterGlobalScopeInit(this);
+				((SferaScriptGrammarListener) listener).enterGlobalScopeInit(this);
 		}
 
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if (listener instanceof SferaScriptGrammarListener)
-				((SferaScriptGrammarListener) listener)
-						.exitGlobalScopeInit(this);
+				((SferaScriptGrammarListener) listener).exitGlobalScopeInit(this);
 		}
 	}
 
-	public final GlobalScopeInitContext globalScopeInit()
-			throws RecognitionException {
-		GlobalScopeInitContext _localctx = new GlobalScopeInitContext(_ctx,
-				getState());
+	public final GlobalScopeInitContext globalScopeInit() throws RecognitionException {
+		GlobalScopeInitContext _localctx = new GlobalScopeInitContext(_ctx, getState());
 		enterRule(_localctx, 6, RULE_globalScopeInit);
 		try {
 			enterOuterAlt(_localctx, 1);
@@ -436,8 +416,8 @@ public class SferaScriptGrammarParser extends Parser {
 					setState(81);
 					_errHandler.sync(this);
 					_la = _input.LA(1);
-				} while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__3)
-						| (1L << NodeId) | (1L << NOT))) != 0));
+				} while ((((_la) & ~0x3f) == 0
+						&& ((1L << _la) & ((1L << T__3) | (1L << NodeId) | (1L << NOT))) != 0));
 			}
 		} catch (RecognitionException re) {
 			_localctx.exception = re;
@@ -635,8 +615,7 @@ public class SferaScriptGrammarParser extends Parser {
 	}
 
 	public final OrExpressionContext orExpression() throws RecognitionException {
-		OrExpressionContext _localctx = new OrExpressionContext(_ctx,
-				getState());
+		OrExpressionContext _localctx = new OrExpressionContext(_ctx, getState());
 		enterRule(_localctx, 16, RULE_orExpression);
 		int _la;
 		try {
@@ -700,8 +679,7 @@ public class SferaScriptGrammarParser extends Parser {
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if (listener instanceof SferaScriptGrammarListener)
-				((SferaScriptGrammarListener) listener)
-						.enterAndExpression(this);
+				((SferaScriptGrammarListener) listener).enterAndExpression(this);
 		}
 
 		@Override
@@ -711,10 +689,8 @@ public class SferaScriptGrammarParser extends Parser {
 		}
 	}
 
-	public final AndExpressionContext andExpression()
-			throws RecognitionException {
-		AndExpressionContext _localctx = new AndExpressionContext(_ctx,
-				getState());
+	public final AndExpressionContext andExpression() throws RecognitionException {
+		AndExpressionContext _localctx = new AndExpressionContext(_ctx, getState());
 		enterRule(_localctx, 18, RULE_andExpression);
 		int _la;
 		try {
@@ -770,8 +746,7 @@ public class SferaScriptGrammarParser extends Parser {
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if (listener instanceof SferaScriptGrammarListener)
-				((SferaScriptGrammarListener) listener)
-						.enterNotExpression(this);
+				((SferaScriptGrammarListener) listener).enterNotExpression(this);
 		}
 
 		@Override
@@ -781,30 +756,26 @@ public class SferaScriptGrammarParser extends Parser {
 		}
 	}
 
-	public final NotExpressionContext notExpression()
-			throws RecognitionException {
-		NotExpressionContext _localctx = new NotExpressionContext(_ctx,
-				getState());
+	public final NotExpressionContext notExpression() throws RecognitionException {
+		NotExpressionContext _localctx = new NotExpressionContext(_ctx, getState());
 		enterRule(_localctx, 20, RULE_notExpression);
 		try {
 			setState(110);
 			switch (_input.LA(1)) {
 			case NOT:
-				enterOuterAlt(_localctx, 1);
-				{
-					setState(107);
-					match(NOT);
-					setState(108);
-					atomExpression();
-				}
+				enterOuterAlt(_localctx, 1); {
+				setState(107);
+				match(NOT);
+				setState(108);
+				atomExpression();
+			}
 				break;
 			case T__3:
 			case NodeId:
-				enterOuterAlt(_localctx, 2);
-				{
-					setState(109);
-					atomExpression();
-				}
+				enterOuterAlt(_localctx, 2); {
+				setState(109);
+				atomExpression();
+			}
 				break;
 			default:
 				throw new NoViableAltException(this);
@@ -840,43 +811,37 @@ public class SferaScriptGrammarParser extends Parser {
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if (listener instanceof SferaScriptGrammarListener)
-				((SferaScriptGrammarListener) listener)
-						.enterAtomExpression(this);
+				((SferaScriptGrammarListener) listener).enterAtomExpression(this);
 		}
 
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if (listener instanceof SferaScriptGrammarListener)
-				((SferaScriptGrammarListener) listener)
-						.exitAtomExpression(this);
+				((SferaScriptGrammarListener) listener).exitAtomExpression(this);
 		}
 	}
 
-	public final AtomExpressionContext atomExpression()
-			throws RecognitionException {
-		AtomExpressionContext _localctx = new AtomExpressionContext(_ctx,
-				getState());
+	public final AtomExpressionContext atomExpression() throws RecognitionException {
+		AtomExpressionContext _localctx = new AtomExpressionContext(_ctx, getState());
 		enterRule(_localctx, 22, RULE_atomExpression);
 		try {
 			setState(117);
 			switch (_input.LA(1)) {
 			case NodeId:
-				enterOuterAlt(_localctx, 1);
-				{
-					setState(112);
-					event();
-				}
+				enterOuterAlt(_localctx, 1); {
+				setState(112);
+				event();
+			}
 				break;
 			case T__3:
-				enterOuterAlt(_localctx, 2);
-				{
-					setState(113);
-					match(T__3);
-					setState(114);
-					orExpression();
-					setState(115);
-					match(T__4);
-				}
+				enterOuterAlt(_localctx, 2); {
+				setState(113);
+				match(T__3);
+				setState(114);
+				orExpression();
+				setState(115);
+				match(T__4);
+			}
 				break;
 			default:
 				throw new NoViableAltException(this);
@@ -929,18 +894,16 @@ public class SferaScriptGrammarParser extends Parser {
 			setState(121);
 			switch (getInterpreter().adaptivePredict(_input, 12, _ctx)) {
 			case 1:
-				enterOuterAlt(_localctx, 1);
-				{
-					setState(119);
-					stableEvent();
-				}
+				enterOuterAlt(_localctx, 1); {
+				setState(119);
+				stableEvent();
+			}
 				break;
 			case 2:
-				enterOuterAlt(_localctx, 2);
-				{
-					setState(120);
-					transientEvent();
-				}
+				enterOuterAlt(_localctx, 2); {
+				setState(120);
+				transientEvent();
+			}
 				break;
 			}
 		} catch (RecognitionException re) {
@@ -999,32 +962,28 @@ public class SferaScriptGrammarParser extends Parser {
 			setState(127);
 			switch (getInterpreter().adaptivePredict(_input, 13, _ctx)) {
 			case 1:
-				enterOuterAlt(_localctx, 1);
-				{
-					setState(123);
-					stringComparison();
-				}
+				enterOuterAlt(_localctx, 1); {
+				setState(123);
+				stringComparison();
+			}
 				break;
 			case 2:
-				enterOuterAlt(_localctx, 2);
-				{
-					setState(124);
-					numberComparison();
-				}
+				enterOuterAlt(_localctx, 2); {
+				setState(124);
+				numberComparison();
+			}
 				break;
 			case 3:
-				enterOuterAlt(_localctx, 3);
-				{
-					setState(125);
-					booleanComparison();
-				}
+				enterOuterAlt(_localctx, 3); {
+				setState(125);
+				booleanComparison();
+			}
 				break;
 			case 4:
-				enterOuterAlt(_localctx, 4);
-				{
-					setState(126);
-					unknownComparison();
-				}
+				enterOuterAlt(_localctx, 4); {
+				setState(126);
+				unknownComparison();
+			}
 				break;
 			}
 		} catch (RecognitionException re) {
@@ -1070,8 +1029,7 @@ public class SferaScriptGrammarParser extends Parser {
 			return getToken(SferaScriptGrammarParser.LE, 0);
 		}
 
-		public StringComparisonContext(ParserRuleContext parent,
-				int invokingState) {
+		public StringComparisonContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 
@@ -1083,22 +1041,18 @@ public class SferaScriptGrammarParser extends Parser {
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if (listener instanceof SferaScriptGrammarListener)
-				((SferaScriptGrammarListener) listener)
-						.enterStringComparison(this);
+				((SferaScriptGrammarListener) listener).enterStringComparison(this);
 		}
 
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if (listener instanceof SferaScriptGrammarListener)
-				((SferaScriptGrammarListener) listener)
-						.exitStringComparison(this);
+				((SferaScriptGrammarListener) listener).exitStringComparison(this);
 		}
 	}
 
-	public final StringComparisonContext stringComparison()
-			throws RecognitionException {
-		StringComparisonContext _localctx = new StringComparisonContext(_ctx,
-				getState());
+	public final StringComparisonContext stringComparison() throws RecognitionException {
+		StringComparisonContext _localctx = new StringComparisonContext(_ctx, getState());
 		enterRule(_localctx, 28, RULE_stringComparison);
 		int _la;
 		try {
@@ -1108,8 +1062,8 @@ public class SferaScriptGrammarParser extends Parser {
 				terminalNode();
 				setState(130);
 				_la = _input.LA(1);
-				if (!((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << ET)
-						| (1L << NE) | (1L << GT) | (1L << LT) | (1L << GE) | (1L << LE))) != 0))) {
+				if (!((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << ET) | (1L << NE) | (1L << GT)
+						| (1L << LT) | (1L << GE) | (1L << LE))) != 0))) {
 					_errHandler.recoverInline(this);
 				} else {
 					consume();
@@ -1160,8 +1114,7 @@ public class SferaScriptGrammarParser extends Parser {
 			return getToken(SferaScriptGrammarParser.LE, 0);
 		}
 
-		public NumberComparisonContext(ParserRuleContext parent,
-				int invokingState) {
+		public NumberComparisonContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 
@@ -1173,22 +1126,18 @@ public class SferaScriptGrammarParser extends Parser {
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if (listener instanceof SferaScriptGrammarListener)
-				((SferaScriptGrammarListener) listener)
-						.enterNumberComparison(this);
+				((SferaScriptGrammarListener) listener).enterNumberComparison(this);
 		}
 
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if (listener instanceof SferaScriptGrammarListener)
-				((SferaScriptGrammarListener) listener)
-						.exitNumberComparison(this);
+				((SferaScriptGrammarListener) listener).exitNumberComparison(this);
 		}
 	}
 
-	public final NumberComparisonContext numberComparison()
-			throws RecognitionException {
-		NumberComparisonContext _localctx = new NumberComparisonContext(_ctx,
-				getState());
+	public final NumberComparisonContext numberComparison() throws RecognitionException {
+		NumberComparisonContext _localctx = new NumberComparisonContext(_ctx, getState());
 		enterRule(_localctx, 30, RULE_numberComparison);
 		int _la;
 		try {
@@ -1198,8 +1147,8 @@ public class SferaScriptGrammarParser extends Parser {
 				terminalNode();
 				setState(134);
 				_la = _input.LA(1);
-				if (!((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << ET)
-						| (1L << NE) | (1L << GT) | (1L << LT) | (1L << GE) | (1L << LE))) != 0))) {
+				if (!((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << ET) | (1L << NE) | (1L << GT)
+						| (1L << LT) | (1L << GE) | (1L << LE))) != 0))) {
 					_errHandler.recoverInline(this);
 				} else {
 					consume();
@@ -1234,8 +1183,7 @@ public class SferaScriptGrammarParser extends Parser {
 			return getToken(SferaScriptGrammarParser.NE, 0);
 		}
 
-		public BooleanComparisonContext(ParserRuleContext parent,
-				int invokingState) {
+		public BooleanComparisonContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 
@@ -1247,22 +1195,18 @@ public class SferaScriptGrammarParser extends Parser {
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if (listener instanceof SferaScriptGrammarListener)
-				((SferaScriptGrammarListener) listener)
-						.enterBooleanComparison(this);
+				((SferaScriptGrammarListener) listener).enterBooleanComparison(this);
 		}
 
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if (listener instanceof SferaScriptGrammarListener)
-				((SferaScriptGrammarListener) listener)
-						.exitBooleanComparison(this);
+				((SferaScriptGrammarListener) listener).exitBooleanComparison(this);
 		}
 	}
 
-	public final BooleanComparisonContext booleanComparison()
-			throws RecognitionException {
-		BooleanComparisonContext _localctx = new BooleanComparisonContext(_ctx,
-				getState());
+	public final BooleanComparisonContext booleanComparison() throws RecognitionException {
+		BooleanComparisonContext _localctx = new BooleanComparisonContext(_ctx, getState());
 		enterRule(_localctx, 32, RULE_booleanComparison);
 		int _la;
 		try {
@@ -1307,8 +1251,7 @@ public class SferaScriptGrammarParser extends Parser {
 			return getToken(SferaScriptGrammarParser.NE, 0);
 		}
 
-		public UnknownComparisonContext(ParserRuleContext parent,
-				int invokingState) {
+		public UnknownComparisonContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 
@@ -1320,22 +1263,18 @@ public class SferaScriptGrammarParser extends Parser {
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if (listener instanceof SferaScriptGrammarListener)
-				((SferaScriptGrammarListener) listener)
-						.enterUnknownComparison(this);
+				((SferaScriptGrammarListener) listener).enterUnknownComparison(this);
 		}
 
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if (listener instanceof SferaScriptGrammarListener)
-				((SferaScriptGrammarListener) listener)
-						.exitUnknownComparison(this);
+				((SferaScriptGrammarListener) listener).exitUnknownComparison(this);
 		}
 	}
 
-	public final UnknownComparisonContext unknownComparison()
-			throws RecognitionException {
-		UnknownComparisonContext _localctx = new UnknownComparisonContext(_ctx,
-				getState());
+	public final UnknownComparisonContext unknownComparison() throws RecognitionException {
+		UnknownComparisonContext _localctx = new UnknownComparisonContext(_ctx, getState());
 		enterRule(_localctx, 34, RULE_unknownComparison);
 		int _la;
 		try {
@@ -1384,39 +1323,33 @@ public class SferaScriptGrammarParser extends Parser {
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if (listener instanceof SferaScriptGrammarListener)
-				((SferaScriptGrammarListener) listener)
-						.enterTransientEvent(this);
+				((SferaScriptGrammarListener) listener).enterTransientEvent(this);
 		}
 
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if (listener instanceof SferaScriptGrammarListener)
-				((SferaScriptGrammarListener) listener)
-						.exitTransientEvent(this);
+				((SferaScriptGrammarListener) listener).exitTransientEvent(this);
 		}
 	}
 
-	public final TransientEventContext transientEvent()
-			throws RecognitionException {
-		TransientEventContext _localctx = new TransientEventContext(_ctx,
-				getState());
+	public final TransientEventContext transientEvent() throws RecognitionException {
+		TransientEventContext _localctx = new TransientEventContext(_ctx, getState());
 		enterRule(_localctx, 36, RULE_transientEvent);
 		try {
 			setState(147);
 			switch (getInterpreter().adaptivePredict(_input, 14, _ctx)) {
 			case 1:
-				enterOuterAlt(_localctx, 1);
-				{
-					setState(145);
-					match(NodeId);
-				}
+				enterOuterAlt(_localctx, 1); {
+				setState(145);
+				match(NodeId);
+			}
 				break;
 			case 2:
-				enterOuterAlt(_localctx, 2);
-				{
-					setState(146);
-					terminalNode();
-				}
+				enterOuterAlt(_localctx, 2); {
+				setState(146);
+				terminalNode();
+			}
 				break;
 			}
 		} catch (RecognitionException re) {
@@ -1465,8 +1398,7 @@ public class SferaScriptGrammarParser extends Parser {
 	}
 
 	public final TerminalNodeContext terminalNode() throws RecognitionException {
-		TerminalNodeContext _localctx = new TerminalNodeContext(_ctx,
-				getState());
+		TerminalNodeContext _localctx = new TerminalNodeContext(_ctx, getState());
 		enterRule(_localctx, 38, RULE_terminalNode);
 		int _la;
 		try {
@@ -1599,8 +1531,8 @@ public class SferaScriptGrammarParser extends Parser {
 				match(T__3);
 				setState(162);
 				_la = _input.LA(1);
-				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__7)
-						| (1L << BooleanLiteral) | (1L << NumberLiteral) | (1L << StringLiteral))) != 0)) {
+				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__7) | (1L << BooleanLiteral)
+						| (1L << NumberLiteral) | (1L << StringLiteral))) != 0)) {
 					{
 						setState(161);
 						paramsList();
@@ -1733,32 +1665,28 @@ public class SferaScriptGrammarParser extends Parser {
 			setState(178);
 			switch (_input.LA(1)) {
 			case NumberLiteral:
-				enterOuterAlt(_localctx, 1);
-				{
-					setState(174);
-					match(NumberLiteral);
-				}
+				enterOuterAlt(_localctx, 1); {
+				setState(174);
+				match(NumberLiteral);
+			}
 				break;
 			case StringLiteral:
-				enterOuterAlt(_localctx, 2);
-				{
-					setState(175);
-					match(StringLiteral);
-				}
+				enterOuterAlt(_localctx, 2); {
+				setState(175);
+				match(StringLiteral);
+			}
 				break;
 			case BooleanLiteral:
-				enterOuterAlt(_localctx, 3);
-				{
-					setState(176);
-					match(BooleanLiteral);
-				}
+				enterOuterAlt(_localctx, 3); {
+				setState(176);
+				match(BooleanLiteral);
+			}
 				break;
 			case T__7:
-				enterOuterAlt(_localctx, 4);
-				{
-					setState(177);
-					array();
-				}
+				enterOuterAlt(_localctx, 4); {
+				setState(177);
+				array();
+			}
 				break;
 			default:
 				throw new NoViableAltException(this);
@@ -1876,10 +1804,9 @@ public class SferaScriptGrammarParser extends Parser {
 			+ "\7\21\2\2\u00b2\u00b5\7\r\2\2\u00b3\u00b5\5\62\32\2\u00b4\u00b0\3\2\2"
 			+ "\2\u00b4\u00b1\3\2\2\2\u00b4\u00b2\3\2\2\2\u00b4\u00b3\3\2\2\2\u00b5\61"
 			+ "\3\2\2\2\u00b6\u00b7\7\n\2\2\u00b7\u00b8\5.\30\2\u00b8\u00b9\7\13\2\2"
-			+ "\u00b9\63\3\2\2\2\26\66;>ADFISbjpw{\u0081\u0095\u009c\u00a0\u00a4\u00ad"
-			+ "\u00b4";
-	public static final ATN _ATN = new ATNDeserializer()
-			.deserialize(_serializedATN.toCharArray());
+			+ "\u00b9\63\3\2\2\2\26\66;>ADFISbjpw{\u0081\u0095\u009c\u00a0\u00a4\u00ad" + "\u00b4";
+	public static final ATN _ATN = new ATNDeserializer().deserialize(_serializedATN.toCharArray());
+
 	static {
 		_decisionToDFA = new DFA[_ATN.getNumberOfDecisions()];
 		for (int i = 0; i < _ATN.getNumberOfDecisions(); i++) {

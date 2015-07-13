@@ -44,8 +44,7 @@ public class AuthenticationRequestWrapper extends HttpServletRequestWrapper {
 		if (session == null) {
 			return null;
 		}
-		String userName = (String) session
-				.getAttribute(LoginServlet.SESSION_ATTR_USERNAME);
+		String userName = (String) session.getAttribute(LoginServlet.SESSION_ATTR_USERNAME);
 		if (userName == null) {
 			return null;
 		}

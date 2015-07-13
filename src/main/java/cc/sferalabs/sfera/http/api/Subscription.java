@@ -57,8 +57,8 @@ public class Subscription implements EventListener {
 	 * @return
 	 * @throws InterruptedException
 	 */
-	public synchronized Map<String, Event> pollChanges(long ackTs,
-			long timeout, TimeUnit unit) throws InterruptedException {
+	public synchronized Map<String, Event> pollChanges(long ackTs, long timeout, TimeUnit unit)
+			throws InterruptedException {
 		Map<String, Event> map;
 		if (ackTs > lastAckTs) {
 			map = new HashMap<String, Event>();

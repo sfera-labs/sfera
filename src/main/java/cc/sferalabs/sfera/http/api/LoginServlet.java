@@ -17,8 +17,8 @@ public class LoginServlet extends ApiServlet {
 	private static final Logger logger = LogManager.getLogger();
 
 	@Override
-	protected void processRequest(HttpServletRequest req,
-			HttpServletResponse resp) throws Exception {
+	protected void processRequest(HttpServletRequest req, HttpServletResponse resp)
+			throws Exception {
 		String user = req.getParameter("user");
 		String password = req.getParameter("password");
 

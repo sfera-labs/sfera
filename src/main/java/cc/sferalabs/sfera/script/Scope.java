@@ -15,11 +15,9 @@ public class Scope {
 	 * @param scriptEngine
 	 * @param bindings
 	 */
-	public Scope(FileSystem fileSystem, ScriptEngine scriptEngine,
-			Bindings bindings) {
+	public Scope(FileSystem fileSystem, ScriptEngine scriptEngine, Bindings bindings) {
 		this.bindings = bindings;
-		ScriptLoader scriptLoader = new ScriptLoader(scriptEngine, fileSystem,
-				bindings);
+		ScriptLoader scriptLoader = new ScriptLoader(scriptEngine, fileSystem, bindings);
 		bindings.put(ScriptLoader.VAR_NAME, scriptLoader);
 	}
 

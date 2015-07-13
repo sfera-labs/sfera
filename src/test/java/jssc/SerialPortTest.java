@@ -16,16 +16,12 @@ public class SerialPortTest {
 				SerialPort serialPort = new SerialPort(portName);
 				try {
 					assertTrue("openPort() failed", serialPort.openPort());
-					assertTrue("setParams() failed", serialPort.setParams(
-							SerialPort.BAUDRATE_115200, SerialPort.DATABITS_8,
-							SerialPort.STOPBITS_1, SerialPort.PARITY_NONE));
-					assertTrue(
-							"setFlowControlMode() failed",
-							serialPort
-									.setFlowControlMode(SerialPort.FLOWCONTROL_RTSCTS_IN
-											| SerialPort.FLOWCONTROL_RTSCTS_OUT));
-					assertTrue("writeBytes() failed",
-							serialPort.writeString("AT\r"));
+					assertTrue("setParams() failed",
+							serialPort.setParams(SerialPort.BAUDRATE_115200, SerialPort.DATABITS_8,
+									SerialPort.STOPBITS_1, SerialPort.PARITY_NONE));
+					assertTrue("setFlowControlMode() failed", serialPort.setFlowControlMode(
+							SerialPort.FLOWCONTROL_RTSCTS_IN | SerialPort.FLOWCONTROL_RTSCTS_OUT));
+					assertTrue("writeBytes() failed", serialPort.writeString("AT\r"));
 
 					try {
 						Thread.sleep(2000);

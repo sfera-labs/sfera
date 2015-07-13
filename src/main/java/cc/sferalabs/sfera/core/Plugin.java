@@ -40,12 +40,11 @@ public class Plugin {
 		String artifactId = null;
 		String name = null;
 		String description = null;
-		try (FileSystem pluginFileSystem = FileSystems.newFileSystem(jarFile,
-				null)) {
+		try (FileSystem pluginFileSystem = FileSystems.newFileSystem(jarFile, null)) {
 			XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 			XMLEventReader eventReader = null;
-			try (BufferedReader br = Files.newBufferedReader(pluginFileSystem
-					.getPath(PLUGIN_POM_FILE))) {
+			try (BufferedReader br = Files
+					.newBufferedReader(pluginFileSystem.getPath(PLUGIN_POM_FILE))) {
 
 				eventReader = inputFactory.createXMLEventReader(br);
 				boolean inProject = false;
@@ -54,13 +53,11 @@ public class Plugin {
 					if (event.isStartElement()) {
 						StartElement startElement = event.asStartElement();
 						if (!inProject) {
-							if (startElement.getName().getLocalPart()
-									.equals("project")) {
+							if (startElement.getName().getLocalPart().equals("project")) {
 								inProject = true;
 							}
 						} else {
-							String elName = startElement.getName()
-									.getLocalPart();
+							String elName = startElement.getName().getLocalPart();
 							if (groupId == null && elName.equals("groupId")) {
 								event = eventReader.nextEvent();
 								if (event.isCharacters()) {
@@ -76,20 +73,17 @@ public class Plugin {
 								if (event.isCharacters()) {
 									name = event.asCharacters().getData();
 								}
-							} else if (description == null
-									&& elName.equals("description")) {
+							} else if (description == null && elName.equals("description")) {
 								event = eventReader.nextEvent();
 								if (event.isCharacters()) {
-									description = event.asCharacters()
-											.getData();
+									description = event.asCharacters().getData();
 								}
 							}
 						}
 
 					} else if (event.isEndElement()) {
 						EndElement endElement = event.asEndElement();
-						if (endElement.getName().getLocalPart()
-								.equals("project")) {
+						if (endElement.getName().getLocalPart().equals("project")) {
 							inProject = false;
 						}
 					}

@@ -110,9 +110,7 @@ public class SystemNode implements Node, EventListener {
 				}
 			}
 		} catch (Throwable e) {
-			logger.error(
-					"Error loading services "
-							+ AutoStartService.class.getSimpleName(), e);
+			logger.error("Error loading services " + AutoStartService.class.getSimpleName(), e);
 		}
 
 		Drivers.load();
@@ -140,8 +138,7 @@ public class SystemNode implements Node, EventListener {
 		logger.debug("Terminating tasks...");
 		try {
 			TasksManager.getDefault().getExecutorService().shutdownNow();
-			TasksManager.getDefault().getExecutorService()
-					.awaitTermination(5, TimeUnit.SECONDS);
+			TasksManager.getDefault().getExecutorService().awaitTermination(5, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 		}
 		logger.debug("Tasks terminated");
@@ -153,8 +150,7 @@ public class SystemNode implements Node, EventListener {
 				service.quit();
 				logger.debug("Service {} quitted", name);
 			} catch (Exception e) {
-				logger.error("Error quitting service '" + service.getClass()
-						+ "'", e);
+				logger.error("Error quitting service '" + service.getClass() + "'", e);
 			}
 		}
 

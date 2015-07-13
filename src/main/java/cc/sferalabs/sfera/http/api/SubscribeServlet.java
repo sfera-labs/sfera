@@ -18,8 +18,8 @@ public class SubscribeServlet extends AuthorizedApiServlet {
 	private static final Logger logger = LogManager.getLogger();
 
 	@Override
-	protected void processAuthorizedRequest(HttpServletRequest req,
-			HttpServletResponse resp) throws Exception {
+	protected void processAuthorizedRequest(HttpServletRequest req, HttpServletResponse resp)
+			throws Exception {
 		String id = req.getParameter("id");
 		String nodes = req.getParameter("nodes");
 
@@ -29,21 +29,19 @@ public class SubscribeServlet extends AuthorizedApiServlet {
 		if (subscriptions == null) {
 			subscriptions = new SubscriptionsSet();
 			session.setAttribute(SESSION_ATTR_SUBSCRIPTIONS, subscriptions);
-			logger.debug("Creted new subscriptions set for session '{}'",
-					session.getId());
+			logger.debug("Creted new subscriptions set for session '{}'", session.getId());
 		}
 		Subscription subscription = (id == null) ? null : subscriptions.get(id);
 		if (subscription == null) {
 			subscription = new Subscription();
 			id = subscription.getId();
 			subscriptions.put(id, subscription);
-			logger.debug(
-					"Creted new subscription for session '{}' with ID: {}",
-					session.getId(), id);
+			logger.debug("Creted new subscription for session '{}' with ID: {}", session.getId(),
+					id);
 		}
 		subscription.setNodes(nodes);
-		logger.debug("Subscribed: session '{}' subscription '{}' nodes: {}",
-				session.getId(), id, nodes);
+		logger.debug("Subscribed: session '{}' subscription '{}' nodes: {}", session.getId(), id,
+				nodes);
 
 		resp.setContentType("application/json");
 		resp.setStatus(HttpServletResponse.SC_OK);

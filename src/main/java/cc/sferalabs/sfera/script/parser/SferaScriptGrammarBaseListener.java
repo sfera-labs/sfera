@@ -10,8 +10,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
  * {@link SferaScriptGrammarListener}, which can be extended to create a
  * listener which only needs to handle a subset of the available methods.
  */
-public class SferaScriptGrammarBaseListener implements
-		SferaScriptGrammarListener {
+public class SferaScriptGrammarBaseListener implements SferaScriptGrammarListener {
 	/**
 	 * {@inheritDoc}
 	 *
@@ -64,8 +63,7 @@ public class SferaScriptGrammarBaseListener implements
 	 * </p>
 	 */
 	@Override
-	public void enterLocalScopeInit(
-			SferaScriptGrammarParser.LocalScopeInitContext ctx) {
+	public void enterLocalScopeInit(SferaScriptGrammarParser.LocalScopeInitContext ctx) {
 	}
 
 	/**
@@ -76,8 +74,7 @@ public class SferaScriptGrammarBaseListener implements
 	 * </p>
 	 */
 	@Override
-	public void exitLocalScopeInit(
-			SferaScriptGrammarParser.LocalScopeInitContext ctx) {
+	public void exitLocalScopeInit(SferaScriptGrammarParser.LocalScopeInitContext ctx) {
 	}
 
 	/**
@@ -88,8 +85,7 @@ public class SferaScriptGrammarBaseListener implements
 	 * </p>
 	 */
 	@Override
-	public void enterGlobalScopeInit(
-			SferaScriptGrammarParser.GlobalScopeInitContext ctx) {
+	public void enterGlobalScopeInit(SferaScriptGrammarParser.GlobalScopeInitContext ctx) {
 	}
 
 	/**
@@ -100,8 +96,7 @@ public class SferaScriptGrammarBaseListener implements
 	 * </p>
 	 */
 	@Override
-	public void exitGlobalScopeInit(
-			SferaScriptGrammarParser.GlobalScopeInitContext ctx) {
+	public void exitGlobalScopeInit(SferaScriptGrammarParser.GlobalScopeInitContext ctx) {
 	}
 
 	/**
@@ -200,8 +195,7 @@ public class SferaScriptGrammarBaseListener implements
 	 * </p>
 	 */
 	@Override
-	public void enterOrExpression(
-			SferaScriptGrammarParser.OrExpressionContext ctx) {
+	public void enterOrExpression(SferaScriptGrammarParser.OrExpressionContext ctx) {
 	}
 
 	/**
@@ -212,8 +206,7 @@ public class SferaScriptGrammarBaseListener implements
 	 * </p>
 	 */
 	@Override
-	public void exitOrExpression(
-			SferaScriptGrammarParser.OrExpressionContext ctx) {
+	public void exitOrExpression(SferaScriptGrammarParser.OrExpressionContext ctx) {
 	}
 
 	/**
@@ -224,8 +217,7 @@ public class SferaScriptGrammarBaseListener implements
 	 * </p>
 	 */
 	@Override
-	public void enterAndExpression(
-			SferaScriptGrammarParser.AndExpressionContext ctx) {
+	public void enterAndExpression(SferaScriptGrammarParser.AndExpressionContext ctx) {
 	}
 
 	/**
@@ -236,8 +228,7 @@ public class SferaScriptGrammarBaseListener implements
 	 * </p>
 	 */
 	@Override
-	public void exitAndExpression(
-			SferaScriptGrammarParser.AndExpressionContext ctx) {
+	public void exitAndExpression(SferaScriptGrammarParser.AndExpressionContext ctx) {
 	}
 
 	/**
@@ -248,8 +239,7 @@ public class SferaScriptGrammarBaseListener implements
 	 * </p>
 	 */
 	@Override
-	public void enterNotExpression(
-			SferaScriptGrammarParser.NotExpressionContext ctx) {
+	public void enterNotExpression(SferaScriptGrammarParser.NotExpressionContext ctx) {
 	}
 
 	/**
@@ -260,8 +250,7 @@ public class SferaScriptGrammarBaseListener implements
 	 * </p>
 	 */
 	@Override
-	public void exitNotExpression(
-			SferaScriptGrammarParser.NotExpressionContext ctx) {
+	public void exitNotExpression(SferaScriptGrammarParser.NotExpressionContext ctx) {
 	}
 
 	/**
@@ -272,8 +261,7 @@ public class SferaScriptGrammarBaseListener implements
 	 * </p>
 	 */
 	@Override
-	public void enterAtomExpression(
-			SferaScriptGrammarParser.AtomExpressionContext ctx) {
+	public void enterAtomExpression(SferaScriptGrammarParser.AtomExpressionContext ctx) {
 	}
 
 	/**
@@ -284,8 +272,7 @@ public class SferaScriptGrammarBaseListener implements
 	 * </p>
 	 */
 	@Override
-	public void exitAtomExpression(
-			SferaScriptGrammarParser.AtomExpressionContext ctx) {
+	public void exitAtomExpression(SferaScriptGrammarParser.AtomExpressionContext ctx) {
 	}
 
 	/**
@@ -340,8 +327,7 @@ public class SferaScriptGrammarBaseListener implements
 	 * </p>
 	 */
 	@Override
-	public void enterStringComparison(
-			SferaScriptGrammarParser.StringComparisonContext ctx) {
+	public void enterStringComparison(SferaScriptGrammarParser.StringComparisonContext ctx) {
 	}
 
 	/**
@@ -352,8 +338,7 @@ public class SferaScriptGrammarBaseListener implements
 	 * </p>
 	 */
 	@Override
-	public void exitStringComparison(
-			SferaScriptGrammarParser.StringComparisonContext ctx) {
+	public void exitStringComparison(SferaScriptGrammarParser.StringComparisonContext ctx) {
 	}
 
 	/**
@@ -364,8 +349,7 @@ public class SferaScriptGrammarBaseListener implements
 	 * </p>
 	 */
 	@Override
-	public void enterNumberComparison(
-			SferaScriptGrammarParser.NumberComparisonContext ctx) {
+	public void enterNumberComparison(SferaScriptGrammarParser.NumberComparisonContext ctx) {
 	}
 
 	/**
@@ -376,8 +360,7 @@ public class SferaScriptGrammarBaseListener implements
 	 * </p>
 	 */
 	@Override
-	public void exitNumberComparison(
-			SferaScriptGrammarParser.NumberComparisonContext ctx) {
+	public void exitNumberComparison(SferaScriptGrammarParser.NumberComparisonContext ctx) {
 	}
 
 	/**
@@ -388,8 +371,7 @@ public class SferaScriptGrammarBaseListener implements
 	 * </p>
 	 */
 	@Override
-	public void enterBooleanComparison(
-			SferaScriptGrammarParser.BooleanComparisonContext ctx) {
+	public void enterBooleanComparison(SferaScriptGrammarParser.BooleanComparisonContext ctx) {
 	}
 
 	/**
@@ -400,8 +382,7 @@ public class SferaScriptGrammarBaseListener implements
 	 * </p>
 	 */
 	@Override
-	public void exitBooleanComparison(
-			SferaScriptGrammarParser.BooleanComparisonContext ctx) {
+	public void exitBooleanComparison(SferaScriptGrammarParser.BooleanComparisonContext ctx) {
 	}
 
 	/**
@@ -412,8 +393,7 @@ public class SferaScriptGrammarBaseListener implements
 	 * </p>
 	 */
 	@Override
-	public void enterUnknownComparison(
-			SferaScriptGrammarParser.UnknownComparisonContext ctx) {
+	public void enterUnknownComparison(SferaScriptGrammarParser.UnknownComparisonContext ctx) {
 	}
 
 	/**
@@ -424,8 +404,7 @@ public class SferaScriptGrammarBaseListener implements
 	 * </p>
 	 */
 	@Override
-	public void exitUnknownComparison(
-			SferaScriptGrammarParser.UnknownComparisonContext ctx) {
+	public void exitUnknownComparison(SferaScriptGrammarParser.UnknownComparisonContext ctx) {
 	}
 
 	/**
@@ -436,8 +415,7 @@ public class SferaScriptGrammarBaseListener implements
 	 * </p>
 	 */
 	@Override
-	public void enterTransientEvent(
-			SferaScriptGrammarParser.TransientEventContext ctx) {
+	public void enterTransientEvent(SferaScriptGrammarParser.TransientEventContext ctx) {
 	}
 
 	/**
@@ -448,8 +426,7 @@ public class SferaScriptGrammarBaseListener implements
 	 * </p>
 	 */
 	@Override
-	public void exitTransientEvent(
-			SferaScriptGrammarParser.TransientEventContext ctx) {
+	public void exitTransientEvent(SferaScriptGrammarParser.TransientEventContext ctx) {
 	}
 
 	/**
@@ -460,8 +437,7 @@ public class SferaScriptGrammarBaseListener implements
 	 * </p>
 	 */
 	@Override
-	public void enterTerminalNode(
-			SferaScriptGrammarParser.TerminalNodeContext ctx) {
+	public void enterTerminalNode(SferaScriptGrammarParser.TerminalNodeContext ctx) {
 	}
 
 	/**
@@ -472,8 +448,7 @@ public class SferaScriptGrammarBaseListener implements
 	 * </p>
 	 */
 	@Override
-	public void exitTerminalNode(
-			SferaScriptGrammarParser.TerminalNodeContext ctx) {
+	public void exitTerminalNode(SferaScriptGrammarParser.TerminalNodeContext ctx) {
 	}
 
 	/**

@@ -22,7 +22,7 @@ public class ApiSocket extends WebSocketAdapter {
 			logger.debug("Received message: {}", message);
 			// TODO
 			getRemote().sendString("ciao!");
-			
+
 		} catch (Exception e) {
 			logger.warn("Error processing message", e);
 		}

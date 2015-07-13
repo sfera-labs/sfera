@@ -38,8 +38,7 @@ public class Access {
 	public synchronized static void init() throws IOException {
 		List<String> lines;
 		try {
-			lines = Files.readAllLines(Paths.get(USERS_FILE_PATH),
-					StandardCharsets.UTF_8);
+			lines = Files.readAllLines(Paths.get(USERS_FILE_PATH), StandardCharsets.UTF_8);
 		} catch (NoSuchFileException e) {
 			logger.debug("File '{}' not found", USERS_FILE_PATH);
 			return;
@@ -55,8 +54,8 @@ public class Access {
 					users.put(u.getUsername(), u);
 					logger.debug("User '{}' created", u.getUsername());
 				} catch (Exception e) {
-					logger.error("Error reading file '" + USERS_FILE_PATH
-							+ "' on line " + lineNum, e);
+					logger.error("Error reading file '" + USERS_FILE_PATH + "' on line " + lineNum,
+							e);
 				}
 			}
 			lineNum++;
@@ -71,8 +70,7 @@ public class Access {
 	 * @throws UsernameAlreadyUsedException
 	 * @throws IOException
 	 */
-	public synchronized static void addUser(String username,
-			String plainPassword, String[] roles)
+	public synchronized static void addUser(String username, String plainPassword, String[] roles)
 			throws UsernameAlreadyUsedException, IOException {
 		if (users.containsKey(username)) {
 			throw new UsernameAlreadyUsedException();
@@ -94,8 +92,7 @@ public class Access {
 		}
 		userLine += "\n";
 
-		Files.write(Paths.get(USERS_FILE_PATH),
-				userLine.getBytes(StandardCharsets.UTF_8),
+		Files.write(Paths.get(USERS_FILE_PATH), userLine.getBytes(StandardCharsets.UTF_8),
 				StandardOpenOption.APPEND);
 	}
 
@@ -113,15 +110,13 @@ public class Access {
 	 * @param attemptedPassword
 	 * @return
 	 */
-	public synchronized static boolean authenticate(String username,
-			String attemptedPassword) {
+	public synchronized static boolean authenticate(String username, String attemptedPassword) {
 		User u = users.get(username);
 		if (u == null) {
 			return false;
 		}
 
-		byte[] hashedPassword = getEncryptedPassword(attemptedPassword,
-				u.getSalt());
+		byte[] hashedPassword = getEncryptedPassword(attemptedPassword, u.getSalt());
 		if (Arrays.equals(hashedPassword, u.getHashedPassword())) {
 			return true;
 		}
@@ -153,10 +148,8 @@ public class Access {
 	 */
 	private static byte[] getEncryptedPassword(String password, byte[] salt) {
 		try {
-			KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, 20000,
-					20 * 8);
-			SecretKeyFactory f = SecretKeyFactory
-					.getInstance("PBKDF2WithHmacSHA1");
+			KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, 20000, 20 * 8);
+			SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
 
 			return f.generateSecret(spec).getEncoded();
 		} catch (Exception e) {

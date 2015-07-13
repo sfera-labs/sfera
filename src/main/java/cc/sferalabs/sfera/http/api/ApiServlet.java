@@ -26,8 +26,8 @@ public abstract class ApiServlet extends HttpServlet {
 	 * @param resp
 	 * @throws Exception
 	 */
-	abstract protected void processRequest(HttpServletRequest req,
-			HttpServletResponse resp) throws Exception;
+	abstract protected void processRequest(HttpServletRequest req, HttpServletResponse resp)
+			throws Exception;
 
 	/**
 	 * 
@@ -35,16 +35,14 @@ public abstract class ApiServlet extends HttpServlet {
 	 * @param resp
 	 * @throws IOException
 	 */
-	private void doRequest(HttpServletRequest req, HttpServletResponse resp)
-			throws IOException {
+	private void doRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		try {
 			resp.setHeader("Cache-Control",
 					"private, max-age=0, no-cache, no-store, must-revalidate");
 			processRequest(req, resp);
 		} catch (Throwable t) {
 			logger.error("Exception processing HTTP API request", t);
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-					t.getMessage());
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, t.getMessage());
 		}
 	}
 

@@ -88,8 +88,7 @@ public abstract class Driver extends Task implements Node {
 	 * @param configuration
 	 * @throws InterruptedException
 	 */
-	protected void onConfigChange(Configuration configuration)
-			throws InterruptedException {
+	protected void onConfigChange(Configuration configuration) throws InterruptedException {
 		restart();
 	}
 
@@ -102,9 +101,8 @@ public abstract class Driver extends Task implements Node {
 				logger.info("Starting...");
 				config = new Configuration(configFile);
 				try {
-					configWatcherId = FilesWatcher.register(
-							config.getRealPath(), this::onConfigFileModified,
-							false);
+					configWatcherId = FilesWatcher.register(config.getRealPath(),
+							this::onConfigFileModified, false);
 				} catch (IOException e) {
 					logger.error("Error watching config file", e);
 				}
@@ -139,8 +137,7 @@ public abstract class Driver extends Task implements Node {
 			try {
 				logger.info("Quitting...");
 				if (configWatcherId != null) {
-					FilesWatcher.unregister(config.getRealPath(),
-							configWatcherId);
+					FilesWatcher.unregister(config.getRealPath(), configWatcherId);
 				}
 				onQuit();
 				logger.info("Quitted");
@@ -186,8 +183,7 @@ public abstract class Driver extends Task implements Node {
 	 * @return
 	 * @throws InterruptedException
 	 */
-	protected abstract boolean onInit(Configuration configuration)
-			throws InterruptedException;
+	protected abstract boolean onInit(Configuration configuration) throws InterruptedException;
 
 	/**
 	 * 

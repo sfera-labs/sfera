@@ -40,8 +40,7 @@ public abstract class Plugins {
 	 */
 	private static void doLoad() {
 		plugins = new ConcurrentHashMap<>();
-		try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths
-				.get(DIR_PATH))) {
+		try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(DIR_PATH))) {
 			for (Path file : stream) {
 				try {
 					if (!Files.isHidden(file)) {
@@ -50,8 +49,7 @@ public abstract class Plugins {
 						logger.info("Plugin '{}' loaded", p.getId());
 					}
 				} catch (Exception e) {
-					logger.error("Error loading file '" + file
-							+ "' in plugins folder", e);
+					logger.error("Error loading file '" + file + "' in plugins folder", e);
 				}
 			}
 		} catch (NoSuchFileException e) {

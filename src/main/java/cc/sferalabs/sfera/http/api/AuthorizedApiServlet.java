@@ -12,14 +12,13 @@ public abstract class AuthorizedApiServlet extends ApiServlet {
 	private static final Logger logger = LogManager.getLogger();
 
 	@Override
-	protected void processRequest(HttpServletRequest req,
-			HttpServletResponse resp) throws Exception {
+	protected void processRequest(HttpServletRequest req, HttpServletResponse resp)
+			throws Exception {
 		if (isAuthorized(req)) {
 			processAuthorizedRequest(req, resp);
 		} else {
 			String uri = req.getRequestURI();
-			logger.warn("Unauthorized API request from {}: {}",
-					req.getRemoteHost(), uri);
+			logger.warn("Unauthorized API request from {}: {}", req.getRemoteHost(), uri);
 			resp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 		}
 	}

@@ -41,8 +41,8 @@ public class LocalCommPort extends CommPort {
 	}
 
 	@Override
-	public void setParams(int baudRate, int dataBits, int stopBits, int parity,
-			int flowControl) throws CommPortException {
+	public void setParams(int baudRate, int dataBits, int stopBits, int parity, int flowControl)
+			throws CommPortException {
 		try {
 			if (!serialPort.setParams(baudRate, dataBits, stopBits, parity)) {
 				throw new CommPortException("error setting params");
@@ -109,8 +109,7 @@ public class LocalCommPort extends CommPort {
 	}
 
 	@Override
-	public void writeString(String string, Charset charset)
-			throws CommPortException {
+	public void writeString(String string, Charset charset) throws CommPortException {
 		try {
 			if (!serialPort.writeString(string, charset.name())) {
 				throw new CommPortException("write failed");
@@ -136,8 +135,7 @@ public class LocalCommPort extends CommPort {
 	}
 
 	@Override
-	public int readBytes(byte[] b, int offset, int len)
-			throws CommPortException {
+	public int readBytes(byte[] b, int offset, int len) throws CommPortException {
 		try {
 			byte[] read = serialPort.readBytes(len);
 			for (int i = 0; i < read.length; i++) {

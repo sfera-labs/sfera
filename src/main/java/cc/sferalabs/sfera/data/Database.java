@@ -26,8 +26,8 @@ public class Database implements AutoStartService {
 			System.setProperty("hsqldb.reconfig_logging", "false");
 
 			Class.forName("org.hsqldb.jdbc.JDBCDriver");
-			dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:"
-					+ DB_FILE + DB_PROPERTIES, DB_USER, DB_PASSWORD);
+			dbConnection = DriverManager.getConnection(
+					"jdbc:hsqldb:file:" + DB_FILE + DB_PROPERTIES, DB_USER, DB_PASSWORD);
 			dbConnection.setAutoCommit(true);
 		}
 	}

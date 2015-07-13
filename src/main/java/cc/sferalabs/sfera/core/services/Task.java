@@ -42,8 +42,7 @@ public abstract class Task implements Runnable {
 			Thread.currentThread().setName(name);
 			execute();
 		} finally {
-			Thread.currentThread().setName(
-					"TERMINATED-" + Thread.currentThread().getName());
+			Thread.currentThread().setName("TERMINATED-" + Thread.currentThread().getName());
 		}
 	}
 

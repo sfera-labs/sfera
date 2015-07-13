@@ -17,7 +17,7 @@ public class SystemClassLoader {
 
 	private static final Logger logger = LogManager.getLogger();
 	private static ClassLoader CLASS_LOADER;
-	
+
 	/**
 	 * 
 	 */
@@ -30,8 +30,7 @@ public class SystemClassLoader {
 			for (Plugin plugin : plugins) {
 				urls[i++] = plugin.getPath().toUri().toURL();
 			}
-			cl = new URLClassLoader(urls,
-					SystemClassLoader.class.getClassLoader());
+			cl = new URLClassLoader(urls, SystemClassLoader.class.getClassLoader());
 			logger.debug("Class loader created");
 		} catch (Exception e) {
 			logger.error("Error creating plugins class loader", e);
@@ -46,20 +45,19 @@ public class SystemClassLoader {
 	 * @return
 	 * @throws ClassNotFoundException
 	 */
-	public synchronized static Class<?> getClass(String className)
-			throws ClassNotFoundException {
+	public synchronized static Class<?> getClass(String className) throws ClassNotFoundException {
 		if (CLASS_LOADER == null) {
 			load();
 			Bus.register(new PluginsListener());
 		}
 		return Class.forName(className, true, CLASS_LOADER);
 	}
-	
+
 	/**
 	 *
 	 */
 	private static class PluginsListener implements EventListener {
-		
+
 		@Subscribe
 		private void reload(PluginsEvent event) {
 			if (event == PluginsEvent.RELOAD) {

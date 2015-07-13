@@ -10,8 +10,7 @@ public class Sfera {
 	static {
 		Path log4j2Config = Configuration.getConfigDir().resolve("log4j2.xml");
 		if (Files.exists(log4j2Config)) {
-			System.setProperty("log4j.configurationFile",
-					log4j2Config.toString());
+			System.setProperty("log4j.configurationFile", log4j2Config.toString());
 		}
 	}
 

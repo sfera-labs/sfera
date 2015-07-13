@@ -24,8 +24,7 @@ public class DefaultErrorServlet extends Default404Servlet {
 	 */
 	private void processRequest(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		logger.warn("Unhandled request from {}: {}", req.getRemoteHost(),
-				req.getRequestURI());
+		logger.warn("Unhandled request from {}: {}", req.getRemoteHost(), req.getRequestURI());
 		super.doGet(req, resp);
 	}
 

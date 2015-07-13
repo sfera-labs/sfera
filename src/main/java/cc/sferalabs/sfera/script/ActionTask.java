@@ -51,8 +51,7 @@ public class ActionTask extends Task {
 					}
 				}
 			}
-			logger.info("Action executed. File '{}' line {}", rule.scriptFile,
-					rule.startLine);
+			logger.info("Action executed. File '{}' line {}", rule.scriptFile, rule.startLine);
 		} catch (Throwable e) {
 			int line = rule.startLine;
 			if (e instanceof ScriptException) {
@@ -60,8 +59,7 @@ public class ActionTask extends Task {
 					line += ((ScriptException) e).getLineNumber() - 1;
 				}
 			}
-			logger.error("Error executing action. File '" + rule.scriptFile
-					+ "' line " + line, e);
+			logger.error("Error executing action. File '" + rule.scriptFile + "' line " + line, e);
 		}
 	}
 

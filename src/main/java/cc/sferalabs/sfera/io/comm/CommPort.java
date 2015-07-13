@@ -41,15 +41,14 @@ public abstract class CommPort {
 		try {
 			commPort = new LocalCommPort(portName);
 		} catch (CommPortException e) {
-			logger.debug(COMM_MARKER, "error getting local port '{}': {}",
-					portName, e.getLocalizedMessage());
+			logger.debug(COMM_MARKER, "error getting local port '{}': {}", portName,
+					e.getLocalizedMessage());
 			try {
-				logger.debug(COMM_MARKER, "trying getting IP port '{}'",
-						portName);
+				logger.debug(COMM_MARKER, "trying getting IP port '{}'", portName);
 				commPort = new IPCommPort(portName);
 			} catch (CommPortException e1) {
-				logger.debug(COMM_MARKER, "error getting IP port '{}': {}",
-						portName, e.getLocalizedMessage());
+				logger.debug(COMM_MARKER, "error getting IP port '{}': {}", portName,
+						e.getLocalizedMessage());
 			}
 		}
 		if (commPort == null) {
@@ -68,8 +67,8 @@ public abstract class CommPort {
 	 * @param flowControl
 	 * @throws CommPortException
 	 */
-	public abstract void setParams(int baudRate, int dataBits, int stopBits,
-			int parity, int flowControl) throws CommPortException;
+	public abstract void setParams(int baudRate, int dataBits, int stopBits, int parity,
+			int flowControl) throws CommPortException;
 
 	/**
 	 * 
@@ -82,8 +81,7 @@ public abstract class CommPort {
 	 * @param reader
 	 * @throws CommPortException
 	 */
-	public abstract void setReader(CommPortReader reader)
-			throws CommPortException;
+	public abstract void setReader(CommPortReader reader) throws CommPortException;
 
 	/**
 	 * 
@@ -110,8 +108,7 @@ public abstract class CommPort {
 	 * @param charset
 	 * @throws CommPortException
 	 */
-	public abstract void writeString(String string, Charset charset)
-			throws CommPortException;
+	public abstract void writeString(String string, Charset charset) throws CommPortException;
 
 	/**
 	 * 
@@ -127,8 +124,7 @@ public abstract class CommPort {
 	 * @return
 	 * @throws CommPortException
 	 */
-	public abstract int readBytes(byte[] b, int offset, int len)
-			throws CommPortException;
+	public abstract int readBytes(byte[] b, int offset, int len) throws CommPortException;
 
 	/**
 	 * 
@@ -140,8 +136,7 @@ public abstract class CommPort {
 	 * @throws CommPortException
 	 * @throws CommPortTimeoutException
 	 */
-	public abstract int readBytes(byte[] b, int offset, int len,
-			int timeoutMillis) throws CommPortException,
-			CommPortTimeoutException;
+	public abstract int readBytes(byte[] b, int offset, int len, int timeoutMillis)
+			throws CommPortException, CommPortTimeoutException;
 
 }

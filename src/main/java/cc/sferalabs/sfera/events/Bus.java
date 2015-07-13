@@ -19,13 +19,13 @@ import com.google.common.eventbus.SubscriberExceptionHandler;
 public abstract class Bus {
 
 	private static final SubscriberExceptionHandler SUBSCRIBER_EXCEPTION_HANDLER = new EventsSubscriberExceptionHandler();
-	private static final EventBus EVENT_BUS = new AsyncEventBus(TasksManager
-			.getDefault().getExecutorService(), SUBSCRIBER_EXCEPTION_HANDLER);
+	private static final EventBus EVENT_BUS = new AsyncEventBus(
+			TasksManager.getDefault().getExecutorService(), SUBSCRIBER_EXCEPTION_HANDLER);
 	private static final Map<String, Event> EVENTS_MAP = new HashMap<String, Event>();
 
 	private static final Logger logger = LogManager.getLogger();
-	private static final Marker EVENT_MARKER = MarkerManager.getMarker(
-			"SFERA_EVENT").setParents(LoggerUtils.SFERA_MARKER);
+	private static final Marker EVENT_MARKER = MarkerManager.getMarker("SFERA_EVENT")
+			.setParents(LoggerUtils.SFERA_MARKER);
 
 	/**
 	 * 
@@ -42,8 +42,7 @@ public abstract class Bus {
 	public static void post(Event event) {
 		EVENTS_MAP.put(event.getId(), event);
 		EVENT_BUS.post(event);
-		logger.info(EVENT_MARKER, "Event: {} = {}", event.getId(),
-				event.getValue());
+		logger.info(EVENT_MARKER, "Event: {} = {}", event.getId(), event.getValue());
 	}
 
 	/**

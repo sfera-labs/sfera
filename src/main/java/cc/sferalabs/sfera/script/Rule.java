@@ -34,9 +34,8 @@ public class Rule {
 	 * @param localScope
 	 * @throws ScriptException
 	 */
-	public Rule(TriggerContext condition, String action, Path scriptFile,
-			Compilable engine, Scope globalScope, Scope localScope)
-			throws ScriptException {
+	public Rule(TriggerContext condition, String action, Path scriptFile, Compilable engine,
+			Scope globalScope, Scope localScope) throws ScriptException {
 		this.condition = new TriggerCondition(condition);
 		this.action = engine.compile(action);
 		this.scriptFile = scriptFile;
@@ -62,8 +61,7 @@ public class Rule {
 		try {
 			return condition.eval(event);
 		} catch (Exception e) {
-			logger.error("Error evaluating trigger condition. File: "
-					+ scriptFile, e);
+			logger.error("Error evaluating trigger condition. File: " + scriptFile, e);
 			return false;
 		}
 	}

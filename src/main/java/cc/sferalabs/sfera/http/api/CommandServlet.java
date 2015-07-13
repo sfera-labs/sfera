@@ -18,10 +18,9 @@ public class CommandServlet extends AuthorizedApiServlet {
 	private final static Logger logger = LogManager.getLogger();
 
 	@Override
-	protected void processAuthorizedRequest(HttpServletRequest req,
-			HttpServletResponse resp) throws Exception {
-		logger.info("Command: {} User: {}", req.getParameterMap(),
-				req.getRemoteUser());
+	protected void processAuthorizedRequest(HttpServletRequest req, HttpServletResponse resp)
+			throws Exception {
+		logger.info("Command: {} User: {}", req.getParameterMap(), req.getRemoteUser());
 
 		for (Entry<String, String[]> command : req.getParameterMap().entrySet()) {
 			String cmdName = command.getKey();

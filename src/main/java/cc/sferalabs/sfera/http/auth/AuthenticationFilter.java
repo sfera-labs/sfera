@@ -22,11 +22,10 @@ public class AuthenticationFilter implements Filter {
 	}
 
 	@Override
-	public void doFilter(ServletRequest request, ServletResponse response,
-			FilterChain chain) throws IOException, ServletException {
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+			throws IOException, ServletException {
 		HttpServletRequest req = (HttpServletRequest) request;
-		logger.debug("Request from {}: {}", req.getRemoteHost(),
-				req.getRequestURI());
+		logger.debug("Request from {}: {}", req.getRemoteHost(), req.getRequestURI());
 		chain.doFilter(new AuthenticationRequestWrapper(req), response);
 	}
 

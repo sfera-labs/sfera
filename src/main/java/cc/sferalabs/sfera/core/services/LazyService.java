@@ -6,9 +6,9 @@ import org.apache.logging.log4j.Logger;
 import cc.sferalabs.sfera.core.SystemNode;
 
 public abstract class LazyService implements Service {
-	
+
 	private static final Logger logger = LogManager.getLogger();
-	
+
 	/**
 	 * 
 	 */

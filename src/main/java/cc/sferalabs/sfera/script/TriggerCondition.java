@@ -64,8 +64,7 @@ public class TriggerCondition {
 	 * @return
 	 * @throws Exception
 	 */
-	private boolean eval(AndExpressionContext ctx, Event event)
-			throws Exception {
+	private boolean eval(AndExpressionContext ctx, Event event) throws Exception {
 		List<NotExpressionContext> nots = ctx.notExpression();
 
 		boolean res = eval(nots.get(0), event);
@@ -83,8 +82,7 @@ public class TriggerCondition {
 	 * @return
 	 * @throws Exception
 	 */
-	private boolean eval(NotExpressionContext ctx, Event event)
-			throws Exception {
+	private boolean eval(NotExpressionContext ctx, Event event) throws Exception {
 		if (ctx.NOT() != null) {
 			return !eval(ctx.atomExpression(), event);
 		} else {
@@ -99,8 +97,7 @@ public class TriggerCondition {
 	 * @return
 	 * @throws Exception
 	 */
-	private boolean eval(AtomExpressionContext ctx, Event event)
-			throws Exception {
+	private boolean eval(AtomExpressionContext ctx, Event event) throws Exception {
 		if (ctx.event() != null) {
 			return eval(ctx.event(), event);
 		} else {
@@ -216,28 +213,22 @@ public class TriggerCondition {
 
 		if (!(value instanceof Double)) {
 			int line = ctx.getStart().getLine();
-			throw new Exception("line " + line + ": Type error: "
-					+ ctx.terminalNode().getText() + " not a number");
+			throw new Exception("line " + line + ": Type error: " + ctx.terminalNode().getText()
+					+ " not a number");
 		}
 
 		if (ctx.ET() != null) {
-			return (Double) value == Double.parseDouble(ctx.NumberLiteral()
-					.getText());
+			return (Double) value == Double.parseDouble(ctx.NumberLiteral().getText());
 		} else if (ctx.NE() != null) {
-			return (Double) value != Double.parseDouble(ctx.NumberLiteral()
-					.getText());
+			return (Double) value != Double.parseDouble(ctx.NumberLiteral().getText());
 		} else if (ctx.GT() != null) {
-			return (Double) value > Double.parseDouble(ctx.NumberLiteral()
-					.getText());
+			return (Double) value > Double.parseDouble(ctx.NumberLiteral().getText());
 		} else if (ctx.LT() != null) {
-			return (Double) value < Double.parseDouble(ctx.NumberLiteral()
-					.getText());
+			return (Double) value < Double.parseDouble(ctx.NumberLiteral().getText());
 		} else if (ctx.GE() != null) {
-			return (Double) value >= Double.parseDouble(ctx.NumberLiteral()
-					.getText());
+			return (Double) value >= Double.parseDouble(ctx.NumberLiteral().getText());
 		} else { // LE
-			return (Double) value <= Double.parseDouble(ctx.NumberLiteral()
-					.getText());
+			return (Double) value <= Double.parseDouble(ctx.NumberLiteral().getText());
 		}
 	}
 
@@ -256,8 +247,8 @@ public class TriggerCondition {
 
 		if (!(value instanceof Boolean)) {
 			int line = ctx.getStart().getLine();
-			throw new Exception("line " + line + ": Type error: "
-					+ ctx.terminalNode().getText() + " not a boolean");
+			throw new Exception("line " + line + ": Type error: " + ctx.terminalNode().getText()
+					+ " not a boolean");
 		}
 
 		if (ctx.ET() != null) {

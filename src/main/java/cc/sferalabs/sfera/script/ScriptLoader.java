@@ -22,8 +22,7 @@ public class ScriptLoader {
 	 * @param fileSystem
 	 * @param bindings
 	 */
-	public ScriptLoader(ScriptEngine engine, FileSystem fileSystem,
-			Bindings bindings) {
+	public ScriptLoader(ScriptEngine engine, FileSystem fileSystem, Bindings bindings) {
 		this.engine = engine;
 		this.fileSystem = fileSystem;
 		this.bindings = bindings;

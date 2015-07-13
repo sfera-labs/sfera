@@ -40,8 +40,8 @@ public class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 	 * @param globalScope
 	 * @param localScope
 	 */
-	public ScriptGrammarListener(Path scriptFile, FileSystem fileSystem,
-			Compilable engine, Scope globalScope, Scope localScope) {
+	public ScriptGrammarListener(Path scriptFile, FileSystem fileSystem, Compilable engine,
+			Scope globalScope, Scope localScope) {
 		this.scriptFile = scriptFile;
 		this.engine = engine;
 		this.globalScope = globalScope;
@@ -115,8 +115,7 @@ public class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 		String action = ctx.action().Script().getText();
 		action = action.substring(1, action.length() - 1);
 		try {
-			currentRule = new Rule(condition, action, scriptFile, engine,
-					globalScope, localScope);
+			currentRule = new Rule(condition, action, scriptFile, engine, globalScope, localScope);
 		} catch (ScriptException e) {
 			int line = ctx.getStart().getLine();
 			if (e.getLineNumber() >= 0) {

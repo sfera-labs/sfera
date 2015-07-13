@@ -21,14 +21,13 @@ public class StateServlet extends AuthorizedApiServlet {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected void processAuthorizedRequest(HttpServletRequest req,
-			HttpServletResponse resp) throws Exception {
+	protected void processAuthorizedRequest(HttpServletRequest req, HttpServletResponse resp)
+			throws Exception {
 		long ts;
 		try {
 			ts = Long.parseLong(req.getParameter("ts"));
 		} catch (NumberFormatException nfe) {
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-					"Timestamp not provided");
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Timestamp not provided");
 			return;
 		}
 
@@ -42,15 +41,13 @@ public class StateServlet extends AuthorizedApiServlet {
 
 		String uri = req.getRequestURI();
 		String subId = uri.substring(req.getServletPath().length() + 1);
-		Subscription subscription = (subId == null) ? null : subscriptions
-				.get(subId);
+		Subscription subscription = (subId == null) ? null : subscriptions.get(subId);
 		if (subscription == null) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
 
-		Map<String, Event> changes = subscription.pollChanges(ts, 5,
-				TimeUnit.SECONDS);
+		Map<String, Event> changes = subscription.pollChanges(ts, 5, TimeUnit.SECONDS);
 		JSONObject obj = new JSONObject();
 		obj.put("timestamp", System.currentTimeMillis());
 		JSONObject nodes = new JSONObject();

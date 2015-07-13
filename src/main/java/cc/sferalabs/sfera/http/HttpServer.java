@@ -53,12 +53,10 @@ public class HttpServer implements AutoStartService {
 	private static final String SESSIONS_STORE_DIR = "data/http/sessions";
 
 	private static final Logger logger = LogManager.getLogger();
-	private static final String[] EXCLUDED_PROTOCOLS = { "SSL", "SSLv2",
-			"SSLv2Hello", "SSLv3" };
-	private static final String[] INCLUDED_CIPHER_SUITES = { "TLS_DHE_RSA.*",
-			"TLS_ECDHE.*" };
-	private static final String[] EXCLUDED_CIPHER_SUITES = { ".*NULL.*",
-			".*RC4.*", ".*MD5.*", ".*DES.*", ".*DSS.*" };
+	private static final String[] EXCLUDED_PROTOCOLS = { "SSL", "SSLv2", "SSLv2Hello", "SSLv3" };
+	private static final String[] INCLUDED_CIPHER_SUITES = { "TLS_DHE_RSA.*", "TLS_ECDHE.*" };
+	private static final String[] EXCLUDED_CIPHER_SUITES = { ".*NULL.*", ".*RC4.*", ".*MD5.*",
+			".*DES.*", ".*DSS.*" };
 
 	private static Server server;
 
@@ -75,14 +73,12 @@ public class HttpServer implements AutoStartService {
 			return;
 		}
 
-		int maxThreads = config.getIntProperty("http_max_threads", Runtime
-				.getRuntime().availableProcessors() * 128);
+		int maxThreads = config.getIntProperty("http_max_threads",
+				Runtime.getRuntime().availableProcessors() * 128);
 		int minThreads = config.getIntProperty("http_min_threads", 8);
-		int idleTimeout = config.getIntProperty("http_threads_idle_timeout",
-				60000);
+		int idleTimeout = config.getIntProperty("http_threads_idle_timeout", 60000);
 
-		QueuedThreadPool threadPool = new QueuedThreadPool(maxThreads,
-				minThreads, idleTimeout);
+		QueuedThreadPool threadPool = new QueuedThreadPool(maxThreads, minThreads, idleTimeout);
 
 		server = new Server(threadPool);
 
@@ -95,11 +91,9 @@ public class HttpServer implements AutoStartService {
 		}
 
 		if (https_port != null) {
-			String keyStorePassword = config.getProperty("keystore_password",
-					null);
+			String keyStorePassword = config.getProperty("keystore_password", null);
 			if (keyStorePassword == null) {
-				throw new Exception(
-						"'keystore_password' not specified in configuration");
+				throw new Exception("'keystore_password' not specified in configuration");
 			}
 			Path keystorePath = Paths.get(KEYSTORE_PATH);
 			if (!Files.exists(keystorePath)) {
@@ -109,8 +103,7 @@ public class HttpServer implements AutoStartService {
 			SslContextFactory sslContextFactory = new SslContextFactory();
 			sslContextFactory.setKeyStorePath(KEYSTORE_PATH);
 			sslContextFactory.setKeyStorePassword(keyStorePassword);
-			String keyManagerPassword = config.getProperty(
-					"keymanager_password", null);
+			String keyManagerPassword = config.getProperty("keymanager_password", null);
 			if (keyManagerPassword != null) {
 				sslContextFactory.setKeyManagerPassword(keyManagerPassword);
 			}
@@ -125,8 +118,7 @@ public class HttpServer implements AutoStartService {
 			https_config.addCustomizer(new SecureRequestCustomizer());
 
 			ServerConnector https = new ServerConnector(server,
-					new SslConnectionFactory(sslContextFactory,
-							HttpVersion.HTTP_1_1.asString()),
+					new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString()),
 					new HttpConnectionFactory(https_config));
 			https.setName("https");
 			https.setPort(https_port);
@@ -144,8 +136,7 @@ public class HttpServer implements AutoStartService {
 		hsm.setStoreDirectory(new File(SESSIONS_STORE_DIR));
 		// TODO try to make session restorable when server not stopped properly
 		hsm.setSessionCookie("session");
-		int maxInactiveInterval = config.getIntProperty(
-				"http_session_max_inactive", 3600);
+		int maxInactiveInterval = config.getIntProperty("http_session_max_inactive", 3600);
 		hsm.setMaxInactiveInterval(maxInactiveInterval);
 		SessionHandler sessionHandler = new SessionHandler(hsm);
 		sessionHandler.addEventListener(new HttpSessionListener() {
@@ -172,8 +163,7 @@ public class HttpServer implements AutoStartService {
 		try {
 			server.start();
 		} catch (Exception e) {
-			throw new Exception("Error starting server: "
-					+ e.getLocalizedMessage(), e);
+			throw new Exception("Error starting server: " + e.getLocalizedMessage(), e);
 		}
 	}
 
@@ -189,8 +179,7 @@ public class HttpServer implements AutoStartService {
 
 				@Override
 				public boolean check(Object credentials) {
-					return Access.authenticate(user.getUsername(),
-							(String) credentials);
+					return Access.authenticate(user.getUsername(), (String) credentials);
 				}
 			}, user.getRoles());
 		}
@@ -215,8 +204,7 @@ public class HttpServer implements AutoStartService {
 	 * @param pathSpec
 	 * @throws HttpServerException
 	 */
-	public synchronized static void addServlet(
-			Class<? extends Servlet> servlet, String pathSpec)
+	public synchronized static void addServlet(Class<? extends Servlet> servlet, String pathSpec)
 			throws HttpServerException {
 		addServlet((Object) servlet, pathSpec);
 	}
@@ -227,8 +215,8 @@ public class HttpServer implements AutoStartService {
 	 * @param pathSpec
 	 * @throws HttpServerException
 	 */
-	public synchronized static void addServlet(ServletHolder servlet,
-			String pathSpec) throws HttpServerException {
+	public synchronized static void addServlet(ServletHolder servlet, String pathSpec)
+			throws HttpServerException {
 		addServlet((Object) servlet, pathSpec);
 	}
 
@@ -239,15 +227,13 @@ public class HttpServer implements AutoStartService {
 	 * @throws HttpServerException
 	 */
 	@SuppressWarnings("unchecked")
-	private static void addServlet(Object servlet, String pathSpec)
-			throws HttpServerException {
+	private static void addServlet(Object servlet, String pathSpec) throws HttpServerException {
 		if (contexts != null) {
 			try {
 				if (servlet instanceof ServletHolder) {
 					contexts.addServlet((ServletHolder) servlet, pathSpec);
 				} else if (servlet instanceof Class) {
-					contexts.addServlet((Class<? extends Servlet>) servlet,
-							pathSpec);
+					contexts.addServlet((Class<? extends Servlet>) servlet, pathSpec);
 				} else {
 					contexts.addServlet((String) servlet, pathSpec);
 				}
@@ -285,15 +271,13 @@ public class HttpServer implements AutoStartService {
 					} else {
 						if (logger.isDebugEnabled()) {
 							for (String path : mapping.getPathSpecs()) {
-								logger.debug("Removed servlet for path {}",
-										path);
+								logger.debug("Removed servlet for path {}", path);
 							}
 						}
 					}
 				}
 
-				handler.setServletMappings(mappings
-						.toArray(new ServletMapping[] {}));
+				handler.setServletMappings(mappings.toArray(new ServletMapping[] {}));
 				handler.setServlets(servlets.toArray(new ServletHolder[] {}));
 			} catch (Exception e) {
 				throw new HttpServerException(e);
@@ -306,8 +290,8 @@ public class HttpServer implements AutoStartService {
 	 * @param servlet
 	 * @throws HttpServerException
 	 */
-	public synchronized static void removeServlet(
-			Class<? extends Servlet> servlet) throws HttpServerException {
+	public synchronized static void removeServlet(Class<? extends Servlet> servlet)
+			throws HttpServerException {
 		if (contexts != null) {
 			ServletHandler handler = contexts.getServletHandler();
 			if (handler != null) {

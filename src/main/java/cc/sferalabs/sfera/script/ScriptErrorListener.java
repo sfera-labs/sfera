@@ -11,9 +11,8 @@ public class ScriptErrorListener extends BaseErrorListener {
 	final ArrayList<String> errors = new ArrayList<String>();
 
 	@Override
-	public void syntaxError(Recognizer<?, ?> recognizer,
-			Object offendingSymbol, int line, int charPositionInLine,
-			String msg, RecognitionException e) {
+	public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
+			int charPositionInLine, String msg, RecognitionException e) {
 
 		errors.add("line " + line + " - " + msg);
 	}

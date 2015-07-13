@@ -65,8 +65,7 @@ public interface SferaScriptGrammarListener extends ParseTreeListener {
 	 * @param ctx
 	 *            the parse tree
 	 */
-	void enterGlobalScopeInit(
-			SferaScriptGrammarParser.GlobalScopeInitContext ctx);
+	void enterGlobalScopeInit(SferaScriptGrammarParser.GlobalScopeInitContext ctx);
 
 	/**
 	 * Exit a parse tree produced by
@@ -254,8 +253,7 @@ public interface SferaScriptGrammarListener extends ParseTreeListener {
 	 * @param ctx
 	 *            the parse tree
 	 */
-	void enterStringComparison(
-			SferaScriptGrammarParser.StringComparisonContext ctx);
+	void enterStringComparison(SferaScriptGrammarParser.StringComparisonContext ctx);
 
 	/**
 	 * Exit a parse tree produced by
@@ -264,8 +262,7 @@ public interface SferaScriptGrammarListener extends ParseTreeListener {
 	 * @param ctx
 	 *            the parse tree
 	 */
-	void exitStringComparison(
-			SferaScriptGrammarParser.StringComparisonContext ctx);
+	void exitStringComparison(SferaScriptGrammarParser.StringComparisonContext ctx);
 
 	/**
 	 * Enter a parse tree produced by
@@ -274,8 +271,7 @@ public interface SferaScriptGrammarListener extends ParseTreeListener {
 	 * @param ctx
 	 *            the parse tree
 	 */
-	void enterNumberComparison(
-			SferaScriptGrammarParser.NumberComparisonContext ctx);
+	void enterNumberComparison(SferaScriptGrammarParser.NumberComparisonContext ctx);
 
 	/**
 	 * Exit a parse tree produced by
@@ -284,8 +280,7 @@ public interface SferaScriptGrammarListener extends ParseTreeListener {
 	 * @param ctx
 	 *            the parse tree
 	 */
-	void exitNumberComparison(
-			SferaScriptGrammarParser.NumberComparisonContext ctx);
+	void exitNumberComparison(SferaScriptGrammarParser.NumberComparisonContext ctx);
 
 	/**
 	 * Enter a parse tree produced by
@@ -294,8 +289,7 @@ public interface SferaScriptGrammarListener extends ParseTreeListener {
 	 * @param ctx
 	 *            the parse tree
 	 */
-	void enterBooleanComparison(
-			SferaScriptGrammarParser.BooleanComparisonContext ctx);
+	void enterBooleanComparison(SferaScriptGrammarParser.BooleanComparisonContext ctx);
 
 	/**
 	 * Exit a parse tree produced by
@@ -304,8 +298,7 @@ public interface SferaScriptGrammarListener extends ParseTreeListener {
 	 * @param ctx
 	 *            the parse tree
 	 */
-	void exitBooleanComparison(
-			SferaScriptGrammarParser.BooleanComparisonContext ctx);
+	void exitBooleanComparison(SferaScriptGrammarParser.BooleanComparisonContext ctx);
 
 	/**
 	 * Enter a parse tree produced by
@@ -314,8 +307,7 @@ public interface SferaScriptGrammarListener extends ParseTreeListener {
 	 * @param ctx
 	 *            the parse tree
 	 */
-	void enterUnknownComparison(
-			SferaScriptGrammarParser.UnknownComparisonContext ctx);
+	void enterUnknownComparison(SferaScriptGrammarParser.UnknownComparisonContext ctx);
 
 	/**
 	 * Exit a parse tree produced by
@@ -324,8 +316,7 @@ public interface SferaScriptGrammarListener extends ParseTreeListener {
 	 * @param ctx
 	 *            the parse tree
 	 */
-	void exitUnknownComparison(
-			SferaScriptGrammarParser.UnknownComparisonContext ctx);
+	void exitUnknownComparison(SferaScriptGrammarParser.UnknownComparisonContext ctx);
 
 	/**
 	 * Enter a parse tree produced by

@@ -16,8 +16,7 @@ public class User {
 	 * @param salt
 	 * @param roles
 	 */
-	public User(String username, byte[] hashedPassword, byte[] salt,
-			String[] roles) {
+	public User(String username, byte[] hashedPassword, byte[] salt, String[] roles) {
 		this.username = username;
 		this.hashedPassword = hashedPassword;
 		this.salt = salt;
@@ -31,10 +30,9 @@ public class User {
 	 * @param salt
 	 * @param roles
 	 */
-	public User(String username, String hashedPassword, String salt,
-			String[] roles) {
-		this(username, Base64.getDecoder().decode(hashedPassword), Base64
-				.getDecoder().decode(salt), roles);
+	public User(String username, String hashedPassword, String salt, String[] roles) {
+		this(username, Base64.getDecoder().decode(hashedPassword), Base64.getDecoder().decode(salt),
+				roles);
 	}
 
 	/**

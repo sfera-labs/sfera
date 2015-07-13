@@ -70,8 +70,7 @@ public class EventsScheduler implements AutoStartService {
 		String name = trigger.getKey().getName();
 		String group = trigger.getKey().getGroup();
 		try {
-			JobDetail eventJob = newJob(TriggerEventJob.class).withIdentity(
-					name, group).build();
+			JobDetail eventJob = newJob(TriggerEventJob.class).withIdentity(name, group).build();
 			scheduler.scheduleJob(eventJob, trigger);
 		} catch (SchedulerException e) {
 			logger.error("Error scheduling job: " + name + " = " + group, e);
@@ -84,8 +83,7 @@ public class EventsScheduler implements AutoStartService {
 	 * @param value
 	 * @return
 	 */
-	private static TriggerBuilder<Trigger> newEventTrigger(String id,
-			String value) {
+	private static TriggerBuilder<Trigger> newEventTrigger(String id, String value) {
 		return newTrigger().withIdentity(value, id);
 	}
 
@@ -109,8 +107,7 @@ public class EventsScheduler implements AutoStartService {
 	 */
 	public static void cancel(String id) {
 		try {
-			Set<TriggerKey> keys = scheduler.getTriggerKeys(GroupMatcher
-					.groupEquals(id));
+			Set<TriggerKey> keys = scheduler.getTriggerKeys(GroupMatcher.groupEquals(id));
 			scheduler.unscheduleJobs(new ArrayList<TriggerKey>(keys));
 		} catch (SchedulerException e) {
 			logger.error("Error unscheduling jobs: " + id, e);
@@ -124,8 +121,8 @@ public class EventsScheduler implements AutoStartService {
 	 * @param delay
 	 */
 	public static void delay(String id, String value, int delay) {
-		Trigger trigger = newEventTrigger(id, value).startAt(
-				futureDate(delay, IntervalUnit.SECOND)).build();
+		Trigger trigger = newEventTrigger(id, value).startAt(futureDate(delay, IntervalUnit.SECOND))
+				.build();
 		sheduleEvent(trigger);
 	}
 
@@ -136,13 +133,11 @@ public class EventsScheduler implements AutoStartService {
 	 * @param initialDelay
 	 * @param delay
 	 */
-	public static void repeat(String id, String value, int initialDelay,
-			int delay) {
+	public static void repeat(String id, String value, int initialDelay, int delay) {
 		Trigger trigger = newEventTrigger(id, value)
 				.startAt(futureDate(initialDelay, IntervalUnit.SECOND))
-				.withSchedule(
-						simpleSchedule().withIntervalInSeconds(delay)
-								.repeatForever()).build();
+				.withSchedule(simpleSchedule().withIntervalInSeconds(delay).repeatForever())
+				.build();
 		sheduleEvent(trigger);
 	}
 
@@ -154,13 +149,12 @@ public class EventsScheduler implements AutoStartService {
 	 * @param delay
 	 * @param times
 	 */
-	public static void repeat(String id, String value, int initialDelay,
-			int delay, int times) {
+	public static void repeat(String id, String value, int initialDelay, int delay, int times) {
 		Trigger trigger = newEventTrigger(id, value)
 				.startAt(futureDate(initialDelay, IntervalUnit.SECOND))
 				.withSchedule(
-						simpleSchedule().withIntervalInSeconds(delay)
-								.withRepeatCount(times - 1)).build();
+						simpleSchedule().withIntervalInSeconds(delay).withRepeatCount(times - 1))
+				.build();
 		sheduleEvent(trigger);
 	}
 

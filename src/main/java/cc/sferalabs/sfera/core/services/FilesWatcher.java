@@ -36,6 +36,7 @@ public final class FilesWatcher extends LazyService {
 	private static WatchService WATCHER;
 
 	private static FilesWatcher INSTANCE = new FilesWatcher();
+
 	static {
 		try {
 			WATCHER = FileSystems.getDefault().newWatchService();
@@ -85,8 +86,7 @@ public final class FilesWatcher extends LazyService {
 			Set<WatchKey> keys = new HashSet<WatchKey>();
 			do { // in case there are other events combined
 				keys.add(wkey);
-			} while ((wkey = WATCHER.poll(1, TimeUnit.SECONDS)) != null
-					&& keys.size() < 50);
+			} while ((wkey = WATCHER.poll(1, TimeUnit.SECONDS)) != null && keys.size() < 50);
 
 			Set<WatcherTask> toExecute = new HashSet<>();
 			for (WatchKey key : keys) {
@@ -170,8 +170,8 @@ public final class FilesWatcher extends LazyService {
 	 * @param removeWhenDone
 	 * @throws Exception
 	 */
-	public static String register(Path path, Runnable task,
-			boolean removeWhenDone) throws Exception {
+	public static String register(Path path, Runnable task, boolean removeWhenDone)
+			throws Exception {
 		return register(new WatcherTask(path, task, removeWhenDone));
 	}
 
@@ -202,10 +202,9 @@ public final class FilesWatcher extends LazyService {
 		} else {
 			Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
 				@Override
-				public FileVisitResult preVisitDirectory(Path dir,
-						BasicFileAttributes attrs) throws IOException {
-					dir.register(WATCHER, ENTRY_CREATE, ENTRY_DELETE,
-							ENTRY_MODIFY);
+				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
+						throws IOException {
+					dir.register(WATCHER, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
 					registered.add(dir);
 					return FileVisitResult.CONTINUE;
 				}

@@ -18,41 +18,35 @@ public class SferaScriptGrammarLexer extends Lexer {
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache = new PredictionContextCache();
-	public static final int T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5,
-			T__5 = 6, T__6 = 7, T__7 = 8, T__8 = 9, Script = 10,
-			BooleanLiteral = 11, Unknown = 12, NodeId = 13, NumberLiteral = 14,
-			StringLiteral = 15, ET = 16, NE = 17, GT = 18, LT = 19, GE = 20,
-			LE = 21, OR = 22, AND = 23, NOT = 24, WS = 25, COMMENT = 26,
-			LINE_COMMENT = 27;
+	public static final int T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5, T__5 = 6, T__6 = 7,
+			T__7 = 8, T__8 = 9, Script = 10, BooleanLiteral = 11, Unknown = 12, NodeId = 13,
+			NumberLiteral = 14, StringLiteral = 15, ET = 16, NE = 17, GT = 18, LT = 19, GE = 20,
+			LE = 21, OR = 22, AND = 23, NOT = 24, WS = 25, COMMENT = 26, LINE_COMMENT = 27;
 	public static String[] modeNames = { "DEFAULT_MODE" };
 
-	public static final String[] ruleNames = { "T__0", "T__1", "T__2", "T__3",
-			"T__4", "T__5", "T__6", "T__7", "T__8", "Script", "BooleanLiteral",
-			"Unknown", "NodeId", "NodeFirstLetter", "LetterOrDigit",
-			"NumberLiteral", "StringLiteral", "DoubleQuotesStringCharacters",
-			"SingleQuotesStringCharacters", "DoubleQuotesStringCharacter",
-			"SingleQuotesStringCharacter", "EscapeSequence", "OctalEscape",
-			"UnicodeEscape", "HexDigit", "OctalDigit", "ZeroToThree", "ET",
-			"NE", "GT", "LT", "GE", "LE", "OR", "AND", "NOT", "WS", "COMMENT",
-			"LINE_COMMENT" };
+	public static final String[] ruleNames = { "T__0", "T__1", "T__2", "T__3", "T__4", "T__5",
+			"T__6", "T__7", "T__8", "Script", "BooleanLiteral", "Unknown", "NodeId",
+			"NodeFirstLetter", "LetterOrDigit", "NumberLiteral", "StringLiteral",
+			"DoubleQuotesStringCharacters", "SingleQuotesStringCharacters",
+			"DoubleQuotesStringCharacter", "SingleQuotesStringCharacter", "EscapeSequence",
+			"OctalEscape", "UnicodeEscape", "HexDigit", "OctalDigit", "ZeroToThree", "ET", "NE",
+			"GT", "LT", "GE", "LE", "OR", "AND", "NOT", "WS", "COMMENT", "LINE_COMMENT" };
 
-	private static final String[] _LITERAL_NAMES = { null, "'local'",
-			"'global'", "':'", "'('", "')'", "'.'", "','", "'['", "']'", null,
-			null, "'unknown'", null, null, null, "'=='", "'!='", "'>'", "'<'",
-			"'>='", "'<='", "'||'", "'&&'", "'!'" };
-	private static final String[] _SYMBOLIC_NAMES = { null, null, null, null,
-			null, null, null, null, null, null, "Script", "BooleanLiteral",
-			"Unknown", "NodeId", "NumberLiteral", "StringLiteral", "ET", "NE",
-			"GT", "LT", "GE", "LE", "OR", "AND", "NOT", "WS", "COMMENT",
-			"LINE_COMMENT" };
-	public static final Vocabulary VOCABULARY = new VocabularyImpl(
-			_LITERAL_NAMES, _SYMBOLIC_NAMES);
+	private static final String[] _LITERAL_NAMES = { null, "'local'", "'global'", "':'", "'('",
+			"')'", "'.'", "','", "'['", "']'", null, null, "'unknown'", null, null, null, "'=='",
+			"'!='", "'>'", "'<'", "'>='", "'<='", "'||'", "'&&'", "'!'" };
+	private static final String[] _SYMBOLIC_NAMES = { null, null, null, null, null, null, null,
+			null, null, null, "Script", "BooleanLiteral", "Unknown", "NodeId", "NumberLiteral",
+			"StringLiteral", "ET", "NE", "GT", "LT", "GE", "LE", "OR", "AND", "NOT", "WS",
+			"COMMENT", "LINE_COMMENT" };
+	public static final Vocabulary VOCABULARY = new VocabularyImpl(_LITERAL_NAMES, _SYMBOLIC_NAMES);
 
 	/**
 	 * @deprecated Use {@link #VOCABULARY} instead.
 	 */
 	@Deprecated
 	public static final String[] tokenNames;
+
 	static {
 		tokenNames = new String[_SYMBOLIC_NAMES.length];
 		for (int i = 0; i < tokenNames.length; i++) {
@@ -80,8 +74,7 @@ public class SferaScriptGrammarLexer extends Lexer {
 
 	public SferaScriptGrammarLexer(CharStream input) {
 		super(input);
-		_interp = new LexerATNSimulator(this, _ATN, _decisionToDFA,
-				_sharedContextCache);
+		_interp = new LexerATNSimulator(this, _ATN, _decisionToDFA, _sharedContextCache);
 	}
 
 	@Override
@@ -206,8 +199,8 @@ public class SferaScriptGrammarLexer extends Lexer {
 			+ "\2\2\u011b\u011c\b(\2\2\u011cP\3\2\2\2\27\2rt\u0082\u0090\u0098\u009d"
 			+ "\u00a3\u00a5\u00a9\u00ae\u00b1\u00b6\u00bb\u00bf\u00c3\u00c9\u00d6\u0100"
 			+ "\u010a\u0118\3\b\2\2";
-	public static final ATN _ATN = new ATNDeserializer()
-			.deserialize(_serializedATN.toCharArray());
+	public static final ATN _ATN = new ATNDeserializer().deserialize(_serializedATN.toCharArray());
+
 	static {
 		_decisionToDFA = new DFA[_ATN.getNumberOfDecisions()];
 		for (int i = 0; i < _ATN.getNumberOfDecisions(); i++) {
