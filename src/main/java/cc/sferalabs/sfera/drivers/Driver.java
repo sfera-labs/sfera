@@ -141,8 +141,6 @@ public abstract class Driver extends Task implements Node {
 				}
 				onQuit();
 				logger.info("Quitted");
-			} catch (InterruptedException t) {
-				logger.debug("onQuit() interrupted");
 			} catch (Throwable t) {
 				logger.error("Exception in onQuit()", t);
 			}
@@ -194,8 +192,7 @@ public abstract class Driver extends Task implements Node {
 
 	/**
 	 * 
-	 * @throws InterruptedException
 	 */
-	protected abstract void onQuit() throws InterruptedException;
+	protected abstract void onQuit();
 
 }

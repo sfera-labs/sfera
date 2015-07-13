@@ -24,7 +24,7 @@ public class ${driverName} extends Driver {
 	}
 
 	@Override
-	protected void onQuit() throws InterruptedException {
+	protected void onQuit() {
 		// TODO Auto-generated method stub
 
 	}
