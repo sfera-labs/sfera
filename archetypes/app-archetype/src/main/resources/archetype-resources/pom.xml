@@ -6,8 +6,8 @@
 	<artifactId>${artifactId}</artifactId>
 	<version>${version}</version>
 
-	<name>${driverName}</name>
-	<description>${driverDescription}</description>
+	<name>${appName}</name>
+	<description>${appDescription}</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
