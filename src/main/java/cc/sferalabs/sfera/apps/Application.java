@@ -2,6 +2,7 @@ package cc.sferalabs.sfera.apps;
 
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
+import java.util.EventListener;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,8 +11,9 @@ import cc.sferalabs.sfera.core.Configuration;
 import cc.sferalabs.sfera.core.services.FilesWatcher;
 import cc.sferalabs.sfera.core.services.Task;
 import cc.sferalabs.sfera.core.services.TasksManager;
+import cc.sferalabs.sfera.events.Bus;
 
-public abstract class Application {
+public abstract class Application implements EventListener {
 
 	protected final Logger logger;
 	private String configFile;
@@ -52,6 +54,7 @@ public abstract class Application {
 				}
 				try {
 					onEnable(config);
+					Bus.register(thisApp);
 					logger.info("Enabled");
 				} catch (Throwable t) {
 					logger.error("Initialization error", t);
@@ -64,11 +67,17 @@ public abstract class Application {
 	 * 
 	 */
 	public synchronized void disable() {
+		final Application thisApp = this;
 		TasksManager.getDefault().submit(new Task("App " + getClass().getName() + " disable") {
 
 			@Override
 			protected void execute() {
-				doDisable();
+				try {
+					Bus.unregister(thisApp);
+					doDisable();
+				} catch (Throwable t) {
+					logger.error("Error in onDisable()", t);
+				}
 			}
 		});
 	}
@@ -129,9 +138,9 @@ public abstract class Application {
 
 	/**
 	 * 
-	 * @param configuration
+	 * @param config
 	 */
-	protected abstract void onEnable(Configuration configuration);
+	protected abstract void onEnable(Configuration config);
 
 	/**
 	 * 

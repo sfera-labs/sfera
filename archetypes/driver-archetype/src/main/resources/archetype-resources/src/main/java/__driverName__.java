@@ -1,7 +1,7 @@
 package ${package};
 
-import cc.sferalabs.sfera.core.Configuration;
 import cc.sferalabs.sfera.drivers.Driver;
+import cc.sferalabs.sfera.core.Configuration;
 
 public class ${driverName} extends Driver {
 
@@ -11,8 +11,7 @@ public class ${driverName} extends Driver {
 	}
 
 	@Override
-	protected boolean onInit(Configuration configuration)
-			throws InterruptedException {
+	protected boolean onInit(Configuration config) throws InterruptedException {
 		// TODO Auto-generated method stub
 		return false;
 	}

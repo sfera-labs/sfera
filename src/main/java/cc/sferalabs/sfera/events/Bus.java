@@ -34,6 +34,14 @@ public abstract class Bus {
 	public static void register(EventListener listener) {
 		EVENT_BUS.register(listener);
 	}
+	
+	/**
+	 * 
+	 * @param listener
+	 */
+	public static void unregister(EventListener listener) {
+		EVENT_BUS.unregister(listener);
+	}
 
 	/**
 	 * 

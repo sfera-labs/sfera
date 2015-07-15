@@ -85,11 +85,14 @@ public abstract class Driver extends Task implements Node {
 
 	/**
 	 * 
-	 * @param configuration
-	 * @throws InterruptedException
+	 * @param config
 	 */
-	protected void onConfigChange(Configuration configuration) throws InterruptedException {
-		restart();
+	protected void onConfigChange(Configuration config) {
+		try {
+			restart();
+		} catch (InterruptedException e) {
+			logger.warn("onConfigChange() interrupted");
+		}
 	}
 
 	@Override
@@ -177,11 +180,11 @@ public abstract class Driver extends Task implements Node {
 
 	/**
 	 * 
-	 * @param configuration
+	 * @param config
 	 * @return
 	 * @throws InterruptedException
 	 */
-	protected abstract boolean onInit(Configuration configuration) throws InterruptedException;
+	protected abstract boolean onInit(Configuration config) throws InterruptedException;
 
 	/**
 	 * 

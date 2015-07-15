@@ -5,8 +5,8 @@
     http://maven.apache.org/xsd/archetype-descriptor-1.0.0.xsd">
 
 	<requiredProperties>
-		<requiredProperty key="driverName" />
-		<requiredProperty key="driverDescription" />
+		<requiredProperty key="appName" />
+		<requiredProperty key="appDescription" />
 	</requiredProperties>
 
 	<fileSets>
