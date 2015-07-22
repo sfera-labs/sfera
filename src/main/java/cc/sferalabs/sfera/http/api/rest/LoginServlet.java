@@ -1,4 +1,4 @@
-package cc.sferalabs.sfera.http.api;
+package cc.sferalabs.sfera.http.api.rest;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;

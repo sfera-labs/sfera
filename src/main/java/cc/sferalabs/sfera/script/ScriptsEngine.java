@@ -128,9 +128,12 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	 * 
 	 * @param command
 	 * @param param
+	 * @param user
+	 * @return
 	 * @throws Exception
 	 */
-	public static void executeDriverCommand(String command, String param) throws Exception {
+	public static Object executeDriverCommand(String command, String param, String user)
+			throws Exception {
 		ScriptErrorListener errorListener = new ScriptErrorListener();
 
 		SferaScriptGrammarParser parser = getParser(new ANTLRInputStream(command), errorListener);
@@ -159,9 +162,10 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 			commandScript += "()";
 		}
 
+		logger.info("Executing command: {} User: {}", commandScript, user);
 		Bindings bindings = new SimpleBindings();
 		bindings.put(driverName, driver);
-		driverCommandsEngine.eval(commandScript, bindings);
+		return driverCommandsEngine.eval(commandScript, bindings);
 	}
 
 	/**

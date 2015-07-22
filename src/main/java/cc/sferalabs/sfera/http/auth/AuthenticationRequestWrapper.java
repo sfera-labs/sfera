@@ -9,7 +9,7 @@ import javax.servlet.http.HttpSession;
 import org.eclipse.jetty.security.HashLoginService;
 import org.eclipse.jetty.server.UserIdentity;
 
-import cc.sferalabs.sfera.http.api.LoginServlet;
+import cc.sferalabs.sfera.http.api.rest.LoginServlet;
 
 public class AuthenticationRequestWrapper extends HttpServletRequestWrapper {
 

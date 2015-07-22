@@ -1,13 +1,37 @@
 package cc.sferalabs.sfera.http.api.websockets;
 
+import java.security.Principal;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.StatusCode;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 
 public class ApiSocket extends WebSocketAdapter {
 
 	private static final Logger logger = LogManager.getLogger();
+	ServletUpgradeRequest request;
+	Principal user;
+	WsSubscriber subscription;
+
+	/**
+	 * 
+	 * @param request
+	 */
+	public ApiSocket(ServletUpgradeRequest request) {
+		this.request = request;
+		this.user = request.getUserPrincipal();
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public String getUserName() {
+		return user.getName();
+	}
 
 	@Override
 	public void onWebSocketConnect(Session session) {
@@ -17,20 +41,19 @@ public class ApiSocket extends WebSocketAdapter {
 
 	@Override
 	public void onWebSocketText(String message) {
-		try {
-			super.onWebSocketText(message);
-			logger.debug("Received message: {}", message);
-			// TODO
-			getRemote().sendString("ciao!");
-
-		} catch (Exception e) {
-			logger.warn("Error processing message", e);
-		}
+		super.onWebSocketText(message);
+		logger.debug("Received message: {} - User: {}", message, user.getName());
+		Message m = new Message(message);
+		m.process(this);
 	}
 
 	@Override
 	public void onWebSocketClose(int statusCode, String reason) {
 		super.onWebSocketClose(statusCode, reason);
+		if (subscription != null) {
+			subscription.destroy();
+			subscription = null;
+		}
 		logger.debug("Socket Closed: {} - {}", statusCode, reason);
 	}
 
@@ -38,5 +61,7 @@ public class ApiSocket extends WebSocketAdapter {
 	public void onWebSocketError(Throwable cause) {
 		super.onWebSocketError(cause);
 		logger.warn("WebSocket error", cause);
+		getSession().close(StatusCode.SERVER_ERROR, cause.getMessage());
 	}
+
 }

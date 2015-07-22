@@ -1,4 +1,4 @@
-package cc.sferalabs.sfera.http.api;
+package cc.sferalabs.sfera.http.api.rest;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

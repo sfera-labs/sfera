@@ -1,11 +1,8 @@
-package cc.sferalabs.sfera.http.api;
+package cc.sferalabs.sfera.http.api.rest;
 
-import java.util.Arrays;
-import java.util.EventListener;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -13,40 +10,29 @@ import java.util.concurrent.TimeUnit;
 
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Event;
+import cc.sferalabs.sfera.events.NodesSpecSubscriber;
 
-import com.google.common.eventbus.Subscribe;
-
-public class Subscription implements EventListener {
+public class PollingSubscriber extends NodesSpecSubscriber {
 
 	private final String id;
 	private final BlockingQueue<Event> changes = new LinkedBlockingQueue<Event>();
-	private Set<String> nodes;
 	private long lastAckTs;
 	private Map<String, Event> lastPolled = new HashMap<String, Event>();
-
+	
 	/**
 	 * 
 	 */
-	public Subscription() {
+	PollingSubscriber() {
+		super();
 		this.id = UUID.randomUUID().toString();
-		Bus.register(this);
 	}
 
 	/**
 	 * 
-	 * @param nodes
+	 * @return
 	 */
-	public void setNodes(String nodes) {
-		if (!nodes.equals("*")) {
-			String[] ns = nodes.split(",");
-			this.nodes = new HashSet<String>(Arrays.asList(ns));
-		} else {
-			this.nodes = null;
-		}
-
-		for (Event e : Bus.getCurrentState().values()) {
-			monitorChanges(e);
-		}
+	public String getId() {
+		return id;
 	}
 
 	/**
@@ -57,7 +43,7 @@ public class Subscription implements EventListener {
 	 * @return
 	 * @throws InterruptedException
 	 */
-	public synchronized Map<String, Event> pollChanges(long ackTs, long timeout, TimeUnit unit)
+	public synchronized Collection<Event> pollChanges(long ackTs, long timeout, TimeUnit unit)
 			throws InterruptedException {
 		Map<String, Event> map;
 		if (ackTs > lastAckTs) {
@@ -77,25 +63,20 @@ public class Subscription implements EventListener {
 		lastAckTs = ackTs;
 		lastPolled = map;
 
-		return map;
+		return map.values();
 	}
 
-	/**
-	 * 
-	 * @param event
-	 */
-	@Subscribe
-	public void monitorChanges(Event event) {
-		if (nodes == null || nodes.contains(event.getId())) {
-			changes.add(event);
+	@Override
+	protected void handleEvent(Event event) {
+		changes.add(event);
+	}
+	
+	@Override
+	public void setNodesSpec(String spec) {
+		super.setNodesSpec(spec);
+		for (Event e : Bus.getCurrentState().values()) {
+			process(e);
 		}
 	}
 
-	/**
-	 * 
-	 * @return
-	 */
-	public String getId() {
-		return id;
-	}
 }

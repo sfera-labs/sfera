@@ -1,4 +1,4 @@
-package cc.sferalabs.sfera.http.api;
+package cc.sferalabs.sfera.http.api.rest;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -8,14 +8,14 @@ public class SubscriptionsSet implements Serializable {
 
 	private static final long serialVersionUID = 4456127014431500700L;
 
-	private transient Map<String, Subscription> map;
+	private transient Map<String, PollingSubscriber> map;
 
 	/**
 	 * 
 	 * @param id
 	 * @return
 	 */
-	public Subscription get(String id) {
+	public PollingSubscriber get(String id) {
 		if (map == null) {
 			return null;
 		}
@@ -28,7 +28,7 @@ public class SubscriptionsSet implements Serializable {
 	 * @param subscription
 	 * @return
 	 */
-	public Subscription put(String id, Subscription subscription) {
+	public PollingSubscriber put(String id, PollingSubscriber subscription) {
 		if (map == null) {
 			map = new HashMap<>();
 		}

@@ -1,4 +1,4 @@
-package cc.sferalabs.sfera.http.api;
+package cc.sferalabs.sfera.http.api.rest;
 
 import java.io.PrintWriter;
 
@@ -31,15 +31,15 @@ public class SubscribeServlet extends AuthorizedApiServlet {
 			session.setAttribute(SESSION_ATTR_SUBSCRIPTIONS, subscriptions);
 			logger.debug("Creted new subscriptions set for session '{}'", session.getId());
 		}
-		Subscription subscription = (id == null) ? null : subscriptions.get(id);
+		PollingSubscriber subscription = (id == null) ? null : subscriptions.get(id);
 		if (subscription == null) {
-			subscription = new Subscription();
+			subscription = new PollingSubscriber();
 			id = subscription.getId();
 			subscriptions.put(id, subscription);
 			logger.debug("Creted new subscription for session '{}' with ID: {}", session.getId(),
 					id);
 		}
-		subscription.setNodes(nodes);
+		subscription.setNodesSpec(nodes);
 		logger.debug("Subscribed: session '{}' subscription '{}' nodes: {}", session.getId(), id,
 				nodes);
 

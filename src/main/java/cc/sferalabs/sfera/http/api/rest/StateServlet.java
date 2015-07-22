@@ -1,16 +1,13 @@
-package cc.sferalabs.sfera.http.api;
+package cc.sferalabs.sfera.http.api.rest;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
-import org.json.simple.JSONObject;
 
 import cc.sferalabs.sfera.events.Event;
 
@@ -19,7 +16,6 @@ public class StateServlet extends AuthorizedApiServlet {
 
 	public static final String PATH = ApiServlet.PATH + "state/*";
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected void processAuthorizedRequest(HttpServletRequest req, HttpServletResponse resp)
 			throws Exception {
@@ -41,28 +37,21 @@ public class StateServlet extends AuthorizedApiServlet {
 
 		String uri = req.getRequestURI();
 		String subId = uri.substring(req.getServletPath().length() + 1);
-		Subscription subscription = (subId == null) ? null : subscriptions.get(subId);
+		PollingSubscriber subscription = (subId == null) ? null : subscriptions.get(subId);
 		if (subscription == null) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
 
-		Map<String, Event> changes = subscription.pollChanges(ts, 5, TimeUnit.SECONDS);
-		JSONObject obj = new JSONObject();
-		obj.put("timestamp", System.currentTimeMillis());
-		JSONObject nodes = new JSONObject();
-		for (Entry<String, Event> change : changes.entrySet()) {
-			nodes.put(change.getKey(), change.getValue().getValue());
+		Collection<Event> changes = subscription.pollChanges(ts, 20, TimeUnit.SECONDS);
+		RestResponse rr = new RestResponse(resp);
+		rr.put("timestamp", System.currentTimeMillis());
+		Map<String, Object> nodes = new HashMap<>();
+		for (Event ev : changes) {
+			nodes.put(ev.getId(), ev.getValue());
 		}
-		obj.put("nodes", nodes);
-
-		StringWriter out = new StringWriter();
-		obj.writeJSONString(out);
-
-		resp.setContentType("application/json");
-		resp.setStatus(HttpServletResponse.SC_OK);
-		PrintWriter writer = resp.getWriter();
-		writer.write(out.toString());
+		rr.put("nodes", nodes);
+		rr.send();
 	}
 
 }

@@ -16,7 +16,7 @@ public class User {
 	 * @param salt
 	 * @param roles
 	 */
-	public User(String username, byte[] hashedPassword, byte[] salt, String[] roles) {
+	User(String username, byte[] hashedPassword, byte[] salt, String[] roles) {
 		this.username = username;
 		this.hashedPassword = hashedPassword;
 		this.salt = salt;
@@ -30,7 +30,7 @@ public class User {
 	 * @param salt
 	 * @param roles
 	 */
-	public User(String username, String hashedPassword, String salt, String[] roles) {
+	User(String username, String hashedPassword, String salt, String[] roles) {
 		this(username, Base64.getDecoder().decode(hashedPassword), Base64.getDecoder().decode(salt),
 				roles);
 	}
@@ -57,6 +57,20 @@ public class User {
 	 */
 	byte[] getSalt() {
 		return salt;
+	}
+
+	/**
+	 * 
+	 * @return true if the user has the specified role, false otherwise
+	 */
+	public boolean isInRole(String role) {
+		for (String r : roles) {
+			if (r.equals(role)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
