@@ -1,7 +1,6 @@
 package cc.sferalabs.sfera.http.api.rest;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.logging.log4j.LogManager;
@@ -15,13 +14,12 @@ public class LogoutServlet extends ApiServlet {
 	private static final Logger logger = LogManager.getLogger();
 
 	@Override
-	protected void processRequest(HttpServletRequest req, HttpServletResponse resp)
-			throws Exception {
+	protected void processRequest(HttpServletRequest req, RestResponse resp) throws Exception {
 		HttpSession session = req.getSession(false);
 		if (session != null) {
 			String user = req.getRemoteUser();
 			session.invalidate();
-			resp.setStatus(HttpServletResponse.SC_OK);
+			resp.sendResult("ok");
 			logger.info("Logout: {}", user);
 		}
 	}

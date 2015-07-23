@@ -39,6 +39,7 @@ import cc.sferalabs.sfera.core.Configuration;
 import cc.sferalabs.sfera.core.SystemNode;
 import cc.sferalabs.sfera.core.services.AutoStartService;
 import cc.sferalabs.sfera.http.api.rest.CommandServlet;
+import cc.sferalabs.sfera.http.api.rest.EventServlet;
 import cc.sferalabs.sfera.http.api.rest.LoginServlet;
 import cc.sferalabs.sfera.http.api.rest.LogoutServlet;
 import cc.sferalabs.sfera.http.api.rest.StateServlet;
@@ -59,7 +60,6 @@ public class HttpServer implements AutoStartService {
 			".*DES.*", ".*DSS.*" };
 
 	private static Server server;
-
 	private static ServletContextHandler contexts;
 
 	@Override
@@ -195,6 +195,7 @@ public class HttpServer implements AutoStartService {
 		addServlet(SubscribeServlet.class, SubscribeServlet.PATH);
 		addServlet(StateServlet.class, StateServlet.PATH);
 		addServlet(CommandServlet.class, CommandServlet.PATH);
+		addServlet(EventServlet.class, EventServlet.PATH);
 		addServlet(ApiWebSocketServlet.class, ApiWebSocketServlet.PATH);
 	}
 

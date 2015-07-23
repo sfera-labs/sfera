@@ -17,7 +17,7 @@ public class StateServlet extends AuthorizedApiServlet {
 	public static final String PATH = ApiServlet.PATH + "state/*";
 
 	@Override
-	protected void processAuthorizedRequest(HttpServletRequest req, HttpServletResponse resp)
+	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
 			throws Exception {
 		long ts;
 		try {
@@ -31,27 +31,26 @@ public class StateServlet extends AuthorizedApiServlet {
 		SubscriptionsSet subscriptions = (SubscriptionsSet) session
 				.getAttribute(SubscribeServlet.SESSION_ATTR_SUBSCRIPTIONS);
 		if (subscriptions == null) {
-			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+			resp.sendError(HttpServletResponse.SC_NOT_FOUND, "No subscriptions");
 			return;
 		}
 
 		String uri = req.getRequestURI();
 		String subId = uri.substring(req.getServletPath().length() + 1);
-		PollingSubscriber subscription = (subId == null) ? null : subscriptions.get(subId);
+		PollingSubscription subscription = (subId == null) ? null : subscriptions.get(subId);
 		if (subscription == null) {
-			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+			resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Subscription not found");
 			return;
 		}
 
 		Collection<Event> changes = subscription.pollChanges(ts, 20, TimeUnit.SECONDS);
-		RestResponse rr = new RestResponse(resp);
-		rr.put("timestamp", System.currentTimeMillis());
+		resp.put("timestamp", System.currentTimeMillis());
 		Map<String, Object> nodes = new HashMap<>();
 		for (Event ev : changes) {
 			nodes.put(ev.getId(), ev.getValue());
 		}
-		rr.put("nodes", nodes);
-		rr.send();
+		resp.put("nodes", nodes);
+		resp.send();
 	}
 
 }

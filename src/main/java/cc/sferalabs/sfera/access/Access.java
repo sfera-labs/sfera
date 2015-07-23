@@ -95,7 +95,7 @@ public class Access {
 		Files.write(Paths.get(USERS_FILE_PATH), userLine.getBytes(StandardCharsets.UTF_8),
 				StandardOpenOption.APPEND);
 	}
-	
+
 	/**
 	 * 
 	 * @param username

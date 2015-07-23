@@ -14,7 +14,7 @@ public class ApiSocket extends WebSocketAdapter {
 	private static final Logger logger = LogManager.getLogger();
 	ServletUpgradeRequest request;
 	Principal user;
-	WsSubscriber subscription;
+	WsEventListener subscription;
 
 	/**
 	 * 
@@ -24,7 +24,7 @@ public class ApiSocket extends WebSocketAdapter {
 		this.request = request;
 		this.user = request.getUserPrincipal();
 	}
-	
+
 	/**
 	 * 
 	 * @return

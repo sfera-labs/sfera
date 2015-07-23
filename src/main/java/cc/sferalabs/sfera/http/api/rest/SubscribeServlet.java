@@ -1,9 +1,6 @@
 package cc.sferalabs.sfera.http.api.rest;
 
-import java.io.PrintWriter;
-
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.logging.log4j.LogManager;
@@ -18,7 +15,7 @@ public class SubscribeServlet extends AuthorizedApiServlet {
 	private static final Logger logger = LogManager.getLogger();
 
 	@Override
-	protected void processAuthorizedRequest(HttpServletRequest req, HttpServletResponse resp)
+	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
 			throws Exception {
 		String id = req.getParameter("id");
 		String nodes = req.getParameter("nodes");
@@ -31,22 +28,20 @@ public class SubscribeServlet extends AuthorizedApiServlet {
 			session.setAttribute(SESSION_ATTR_SUBSCRIPTIONS, subscriptions);
 			logger.debug("Creted new subscriptions set for session '{}'", session.getId());
 		}
-		PollingSubscriber subscription = (id == null) ? null : subscriptions.get(id);
+		PollingSubscription subscription = (id == null) ? null : subscriptions.get(id);
 		if (subscription == null) {
-			subscription = new PollingSubscriber();
+			subscription = new PollingSubscription();
 			id = subscription.getId();
 			subscriptions.put(id, subscription);
 			logger.debug("Creted new subscription for session '{}' with ID: {}", session.getId(),
 					id);
 		}
-		subscription.setNodesSpec(nodes);
+		subscription.setIdSpec(nodes);
 		logger.debug("Subscribed: session '{}' subscription '{}' nodes: {}", session.getId(), id,
 				nodes);
 
-		resp.setContentType("application/json");
-		resp.setStatus(HttpServletResponse.SC_OK);
-		PrintWriter writer = resp.getWriter();
-		writer.write("{\"id\":\"" + id + "\"}");
+		resp.put("id", id);
+		resp.send();
 	}
 
 }

@@ -16,7 +16,7 @@ public class CommandServlet extends AuthorizedApiServlet {
 	private final static Logger logger = LogManager.getLogger();
 
 	@Override
-	protected void processAuthorizedRequest(HttpServletRequest req, HttpServletResponse resp)
+	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
 			throws Exception {
 		try {
 			Object res = null;
@@ -27,10 +27,7 @@ public class CommandServlet extends AuthorizedApiServlet {
 					break;
 				}
 			}
-
-			RestResponse rr = new RestResponse(resp);
-			rr.put("result", res);
-			rr.send();
+			resp.sendResult(res);
 
 		} catch (Exception e) {
 			logger.error("Command error", e);

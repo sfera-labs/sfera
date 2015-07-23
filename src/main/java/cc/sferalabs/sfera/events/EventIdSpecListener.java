@@ -6,14 +6,14 @@ import java.util.List;
 
 import com.google.common.eventbus.Subscribe;
 
-public abstract class NodesSpecSubscriber implements EventListener {
+public abstract class EventIdSpecListener implements EventListener {
 
 	private String spec;
 
 	/**
 	 * 
 	 */
-	public NodesSpecSubscriber() {
+	public EventIdSpecListener() {
 		Bus.register(this);
 	}
 
@@ -21,7 +21,16 @@ public abstract class NodesSpecSubscriber implements EventListener {
 	 * 
 	 * @param spec
 	 */
-	public void setNodesSpec(String spec) {
+	public EventIdSpecListener(String spec) {
+		this();
+		setIdSpec(spec);
+	}
+
+	/**
+	 * 
+	 * @param spec
+	 */
+	public void setIdSpec(String spec) {
 		this.spec = spec;
 	}
 
@@ -47,21 +56,17 @@ public abstract class NodesSpecSubscriber implements EventListener {
 	 * @return
 	 */
 	protected boolean matches(String eventId) {
-		if (spec == null) {
-			return false;
+		if (spec == null || spec.equals("*")) {
+			return true;
 		}
 
 		// TODO implement spec matching
-
-		if (spec.equals("*")) {
-			return true;
-		}
 
 		String[] ns = spec.split(",");
 		List<String> nodes = Arrays.asList(ns);
 		return nodes.contains(eventId);
 	}
-	
+
 	/**
 	 * 
 	 */

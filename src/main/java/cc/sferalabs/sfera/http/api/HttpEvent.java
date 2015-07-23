@@ -23,8 +23,7 @@ public class HttpEvent extends StringEvent {
 	private static final HttpNode httpNode = new HttpNode();
 
 	private final String username;
-	private final HttpResponse resp;
-	private boolean handled = false;
+	private final JsonMessage resp;
 
 	/**
 	 * 
@@ -32,9 +31,16 @@ public class HttpEvent extends StringEvent {
 	 * @param value
 	 * @param username
 	 * @param resp
+	 * @throws Exception
 	 */
-	public HttpEvent(String id, String value, String username, HttpResponse resp) {
+	public HttpEvent(String id, String value, String username, JsonMessage resp) throws Exception {
 		super(httpNode, id, value);
+		if (id == null) {
+			throw new Exception("null event id");
+		}
+		if (value == null) {
+			throw new Exception("null event value");
+		}
 		this.username = username;
 		this.resp = resp;
 	}
@@ -55,12 +61,8 @@ public class HttpEvent extends StringEvent {
 	 * @throws IllegalStateException
 	 *             if this event has already been handled
 	 */
-	public synchronized void reply(String result) throws IOException {
-		if (handled) {
-			throw new IllegalStateException("Already handled");
-		}
+	public void reply(String result) throws IOException {
 		resp.sendResult(result);
-		handled = true;
 	}
 
 }

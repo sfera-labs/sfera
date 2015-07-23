@@ -8,14 +8,14 @@ public class SubscriptionsSet implements Serializable {
 
 	private static final long serialVersionUID = 4456127014431500700L;
 
-	private transient Map<String, PollingSubscriber> map;
+	private transient Map<String, PollingSubscription> map;
 
 	/**
 	 * 
 	 * @param id
 	 * @return
 	 */
-	public PollingSubscriber get(String id) {
+	public PollingSubscription get(String id) {
 		if (map == null) {
 			return null;
 		}
@@ -28,7 +28,7 @@ public class SubscriptionsSet implements Serializable {
 	 * @param subscription
 	 * @return
 	 */
-	public PollingSubscriber put(String id, PollingSubscriber subscription) {
+	public PollingSubscription put(String id, PollingSubscription subscription) {
 		if (map == null) {
 			map = new HashMap<>();
 		}

@@ -10,19 +10,19 @@ import java.util.concurrent.TimeUnit;
 
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Event;
-import cc.sferalabs.sfera.events.NodesSpecSubscriber;
+import cc.sferalabs.sfera.events.EventIdSpecListener;
 
-public class PollingSubscriber extends NodesSpecSubscriber {
+public class PollingSubscription extends EventIdSpecListener {
 
 	private final String id;
 	private final BlockingQueue<Event> changes = new LinkedBlockingQueue<Event>();
 	private long lastAckTs;
 	private Map<String, Event> lastPolled = new HashMap<String, Event>();
-	
+
 	/**
 	 * 
 	 */
-	PollingSubscriber() {
+	PollingSubscription() {
 		super();
 		this.id = UUID.randomUUID().toString();
 	}
@@ -70,10 +70,10 @@ public class PollingSubscriber extends NodesSpecSubscriber {
 	protected void handleEvent(Event event) {
 		changes.add(event);
 	}
-	
+
 	@Override
-	public void setNodesSpec(String spec) {
-		super.setNodesSpec(spec);
+	public void setIdSpec(String spec) {
+		super.setIdSpec(spec);
 		for (Event e : Bus.getCurrentState().values()) {
 			process(e);
 		}

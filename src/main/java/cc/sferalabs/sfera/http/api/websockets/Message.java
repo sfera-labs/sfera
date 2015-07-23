@@ -60,9 +60,8 @@ class Message {
 	 * @return
 	 */
 	public void process(ApiSocket socket) {
-		WsResponse resp = new WsResponse(socket);
+		WsMessage resp = new WsMessage("response", socket);
 		try {
-			resp.put("type", "response");
 			resp.put("action", action);
 			String id = parameterMap.get("id");
 			resp.put("id", id);
@@ -72,49 +71,38 @@ class Message {
 			}
 
 			if (action.equals("subscribe")) {
-				String nodes = parameterMap.get("nodes");
-				if (nodes == null) {
-					resp.sendError("Param 'nodes' not found");
-					return;
-				}
-
+				String spec = parameterMap.get("spec");
 				if (socket.subscription != null) {
 					socket.subscription.destroy();
 				}
-				socket.subscription = new WsSubscriber(socket.getRemote(), nodes);
+				socket.subscription = new WsEventListener(socket, spec);
 				resp.sendResult("ok");
 
 			} else if (action.equals("command")) {
-				Object res = null;
 				for (String command : parameterMap.keySet()) {
 					if (command.indexOf('.') > 0) { // driver command
 						String param = parameterMap.get(command);
 						try {
-							res = ScriptsEngine.executeDriverCommand(command, param,
+							Object res = ScriptsEngine.executeDriverCommand(command, param,
 									socket.getUserName());
-							break;
+							resp.sendResult(res);
+							return;
 						} catch (Exception e) {
 							resp.sendError(e.getMessage());
 							return;
 						}
 					}
 				}
-				resp.sendResult(res);
 
 			} else if (action.equals("event")) {
 				String eid = parameterMap.get("eid");
-				if (eid == null) {
-					resp.sendError("Param 'eid' not found");
-					return;
-				}
 				String eval = parameterMap.get("eval");
-				if (eval == null) {
-					resp.sendError("Param 'eval' not found");
-					return;
+				try {
+					HttpEvent httpEvent = new HttpEvent(eid, eval, socket.getUserName(), resp);
+					Bus.post(httpEvent);
+				} catch (Exception e) {
+					resp.sendError(e.getMessage());
 				}
-
-				HttpEvent httpEvent = new HttpEvent(eid, eval, socket.getUserName(), resp);
-				Bus.post(httpEvent);
 
 			} else {
 				resp.sendError("Unknown action");

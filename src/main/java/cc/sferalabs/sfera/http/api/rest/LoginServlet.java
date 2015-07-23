@@ -17,8 +17,7 @@ public class LoginServlet extends ApiServlet {
 	private static final Logger logger = LogManager.getLogger();
 
 	@Override
-	protected void processRequest(HttpServletRequest req, HttpServletResponse resp)
-			throws Exception {
+	protected void processRequest(HttpServletRequest req, RestResponse resp) throws Exception {
 		String user = req.getParameter("user");
 		String password = req.getParameter("password");
 
@@ -26,7 +25,7 @@ public class LoginServlet extends ApiServlet {
 			req.login(user, password);
 			HttpSession session = req.getSession(true);
 			session.setAttribute(SESSION_ATTR_USERNAME, user);
-			resp.setStatus(HttpServletResponse.SC_OK);
+			resp.sendResult("ok");
 			logger.info("Login: {}", user);
 		} catch (ServletException e) {
 			logger.warn(e.getMessage());
@@ -34,7 +33,7 @@ public class LoginServlet extends ApiServlet {
 			if (session != null) {
 				session.invalidate();
 			}
-			resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+			resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
 		}
 	}
 
