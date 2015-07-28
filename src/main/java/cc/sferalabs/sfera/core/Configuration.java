@@ -8,6 +8,8 @@ import java.nio.file.Paths;
 import java.util.Properties;
 
 public class Configuration {
+	
+	// TODO maybe use YAML ??
 
 	private static final String CONFIG_DIR = "config";
 

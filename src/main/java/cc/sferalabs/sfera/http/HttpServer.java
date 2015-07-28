@@ -55,7 +55,6 @@ public class HttpServer implements AutoStartService {
 
 	private static final Logger logger = LogManager.getLogger();
 	private static final String[] EXCLUDED_PROTOCOLS = { "SSL", "SSLv2", "SSLv2Hello", "SSLv3" };
-	private static final String[] INCLUDED_CIPHER_SUITES = { "TLS_DHE_RSA.*", "TLS_ECDHE.*" };
 	private static final String[] EXCLUDED_CIPHER_SUITES = { ".*NULL.*", ".*RC4.*", ".*MD5.*",
 			".*DES.*", ".*DSS.*" };
 
@@ -65,8 +64,12 @@ public class HttpServer implements AutoStartService {
 	@Override
 	public void init() throws Exception {
 		Configuration config = SystemNode.getConfiguration();
-		Integer http_port = config.getIntProperty("http_port", null);
-		Integer https_port = config.getIntProperty("https_port", null);
+		Integer http_port = null;
+		Integer https_port = null;
+		if (config != null) {
+			http_port = config.getIntProperty("http_port", null);
+			https_port = config.getIntProperty("https_port", null);
+		}
 
 		if (http_port == null && https_port == null) {
 			logger.warn("No HTTP port defined in configuration. Server disabled");
@@ -108,7 +111,6 @@ public class HttpServer implements AutoStartService {
 				sslContextFactory.setKeyManagerPassword(keyManagerPassword);
 			}
 			sslContextFactory.addExcludeProtocols(EXCLUDED_PROTOCOLS);
-			sslContextFactory.setIncludeCipherSuites(INCLUDED_CIPHER_SUITES);
 			sslContextFactory.setExcludeCipherSuites(EXCLUDED_CIPHER_SUITES);
 			sslContextFactory.setRenegotiationAllowed(false);
 			sslContextFactory.setUseCipherSuitesOrder(false);
