@@ -36,11 +36,12 @@ public final class FilesWatcher extends LazyService {
 	private static WatchService WATCHER;
 
 	private static FilesWatcher INSTANCE = new FilesWatcher();
+	private static Thread THREAD;
 
 	static {
 		try {
 			WATCHER = FileSystems.getDefault().newWatchService();
-			TasksManager.getDefault().submit("Files Watcher", INSTANCE::watch);
+			THREAD = TasksManager.executeSystem("Files Watcher", INSTANCE::watch);
 		} catch (IOException e) {
 			logger.error("Error instantiating FilesWatcher", e);
 		}
@@ -49,8 +50,8 @@ public final class FilesWatcher extends LazyService {
 	@Override
 	public void quit() throws Exception {
 		run = false;
-		if (WATCHER != null) {
-			WATCHER.close();
+		if (THREAD != null) {
+			THREAD.interrupt();
 		}
 	}
 
@@ -72,6 +73,13 @@ public final class FilesWatcher extends LazyService {
 		} catch (ClosedWatchServiceException e) {
 			if (run) {
 				logger.error("WatchService Error. File Watcher stopped", e);
+			}
+		} finally {
+			if (WATCHER != null) {
+				try {
+					WATCHER.close();
+				} catch (IOException e) {
+				}
 			}
 		}
 	}
@@ -149,7 +157,7 @@ public final class FilesWatcher extends LazyService {
 					logger.error("Error registering path " + t.path, e);
 				}
 			}
-			TasksManager.getDefault().execute(t.task);
+			TasksManager.execute(t.task);
 		}
 	}
 

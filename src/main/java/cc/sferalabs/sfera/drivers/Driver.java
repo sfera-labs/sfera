@@ -61,7 +61,7 @@ public abstract class Driver extends Task implements Node {
 	public synchronized void start() {
 		if (future == null) {
 			quit = false;
-			future = TasksManager.getDefault().submit(this);
+			future = TasksManager.submit(this);
 		} else {
 			throw new IllegalStateException("Running");
 		}

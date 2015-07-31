@@ -29,7 +29,7 @@ public class Console extends Task implements AutoStartService {
 	public void init() throws Exception {
 		run = true;
 		stdIn = new BufferedReader(new InputStreamReader(System.in));
-		TasksManager.getDefault().execute(this);
+		TasksManager.executeSystem(this);
 	}
 
 	@Override
@@ -65,60 +65,68 @@ public class Console extends Task implements AutoStartService {
 			if (cmd.isEmpty()) {
 				return;
 			}
-
-			String[] args = cmd.split("\\s+");
 			try {
-				switch (args[0]) {
-				case "quit":
-					if (args.length == 3) {
-						if (args[1].equals("driver")) {
-							Driver d = Drivers.getDriver(args[2]);
-							if (d != null) {
-								d.quit();
-							}
-						}
-					} else {
-						Bus.post(SystemStateEvent.QUIT);
-					}
-					break;
-
-				case "start":
-					if (args.length == 3) {
-						if (args[1].equals("driver")) {
-							Driver d = Drivers.getDriver(args[2]);
-							if (d != null) {
-								d.start();
-							}
-						}
-					} else {
-						System.err.println("Add target");
-					}
-					break;
-
-				case "restart":
-					if (args.length == 3) {
-						if (args[1].equals("driver")) {
-							Driver d = Drivers.getDriver(args[2]);
-							if (d != null) {
-								d.restart();
-							}
-						}
-					} else {
-						System.err.println("Add target");
-					}
-					break;
-
-				case "kill":
-					System.exit(0);
-					break;
-
-				default:
-					System.err.println("Unknown command '" + cmd + "'");
-					break;
-				}
+				processCommad(cmd);
 			} catch (Throwable t) {
 				logger.error("Error executing command '" + cmd + "'", t);
 			}
+		}
+	}
+
+	/**
+	 * 
+	 * @param cmd
+	 * @throws Exception
+	 */
+	private static void processCommad(String cmd) throws Exception {
+		String[] args = cmd.split("\\s+");
+		switch (args[0]) {
+		case "quit":
+			if (args.length == 3) {
+				if (args[1].equals("driver")) {
+					Driver d = Drivers.getDriver(args[2]);
+					if (d != null) {
+						d.quit();
+					}
+				}
+			} else {
+				Bus.post(SystemStateEvent.QUIT);
+			}
+			break;
+
+		case "start":
+			if (args.length == 3) {
+				if (args[1].equals("driver")) {
+					Driver d = Drivers.getDriver(args[2]);
+					if (d != null) {
+						d.start();
+					}
+				}
+			} else {
+				System.err.println("Add target");
+			}
+			break;
+
+		case "restart":
+			if (args.length == 3) {
+				if (args[1].equals("driver")) {
+					Driver d = Drivers.getDriver(args[2]);
+					if (d != null) {
+						d.restart();
+					}
+				}
+			} else {
+				System.err.println("Add target");
+			}
+			break;
+
+		case "kill":
+			System.exit(0);
+			break;
+
+		default:
+			System.err.println("Unknown command '" + cmd + "'");
+			break;
 		}
 	}
 

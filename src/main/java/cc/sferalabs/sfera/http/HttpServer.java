@@ -245,7 +245,7 @@ public class HttpServer implements AutoStartService {
 				throw new HttpServerException(e);
 			}
 		} else {
-			throw new HttpServerException("Service not available");
+			throw new HttpServerException("HTTP server service not available");
 		}
 	}
 

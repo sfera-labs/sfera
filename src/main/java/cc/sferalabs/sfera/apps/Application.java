@@ -41,7 +41,7 @@ public abstract class Application implements EventListener {
 	public synchronized void enable() throws IOException {
 		final Configuration config = new Configuration(configFile);
 		final Application thisApp = this;
-		TasksManager.getDefault().submit(new Task("App " + getClass().getName() + " enable") {
+		TasksManager.submit(new Task("App " + getClass().getName() + " enable") {
 
 			@Override
 			protected void execute() {
@@ -68,7 +68,7 @@ public abstract class Application implements EventListener {
 	 */
 	public synchronized void disable() {
 		final Application thisApp = this;
-		TasksManager.getDefault().submit(new Task("App " + getClass().getName() + " disable") {
+		TasksManager.submit(new Task("App " + getClass().getName() + " disable") {
 
 			@Override
 			protected void execute() {

@@ -15,6 +15,7 @@ import cc.sferalabs.sfera.apps.Applications;
 import cc.sferalabs.sfera.core.events.SystemStateEvent;
 import cc.sferalabs.sfera.core.services.AutoStartService;
 import cc.sferalabs.sfera.core.services.Service;
+import cc.sferalabs.sfera.core.services.Task;
 import cc.sferalabs.sfera.core.services.TasksManager;
 import cc.sferalabs.sfera.drivers.Drivers;
 import cc.sferalabs.sfera.events.Bus;
@@ -121,42 +122,55 @@ public class SystemNode implements Node, EventListener {
 	 * 
 	 */
 	private void quit() {
-		logger.warn("System stopped");
+		TasksManager.executeSystem(new Task("System quit") {
 
-		logger.debug("Quitting drivers...");
-		Drivers.quit();
+			@Override
+			protected void execute() {
+				logger.warn("System stopped");
 
-		logger.debug("Disabling apps...");
-		Applications.disable();
+				logger.debug("Disabling apps...");
+				Applications.disable();
 
-		logger.debug("Waiting 5 seconds for drivers/apps to quit...");
-		try {
-			Thread.sleep(5000);
-		} catch (InterruptedException e) {
-		}
+				logger.debug("Quitting drivers...");
+				Drivers.quit();
 
-		logger.debug("Terminating tasks...");
-		try {
-			TasksManager.getDefault().getExecutorService().shutdownNow();
-			TasksManager.getDefault().getExecutorService().awaitTermination(5, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
-		}
-		logger.debug("Tasks terminated");
+				logger.debug("Terminating tasks...");
+				TasksManager.getExecutorService().shutdownNow();
+				try {
+					if (TasksManager.getExecutorService().awaitTermination(15, TimeUnit.SECONDS)) {
+						logger.debug("Tasks terminated");
+					} else {
+						logger.debug(
+								"Some tasks are taking long to terminate. We gave them a chance...");
+					}
+				} catch (InterruptedException e) {
+				}
 
-		for (Service service : services) {
-			try {
-				String name = service.getClass().getSimpleName();
-				logger.debug("Quitting service {}...", name);
-				service.quit();
-				logger.debug("Service {} quitted", name);
-			} catch (Exception e) {
-				logger.error("Error quitting service '" + service.getClass() + "'", e);
+				for (Service service : services) {
+					try {
+						String name = service.getClass().getSimpleName();
+						logger.debug("Quitting service {}...", name);
+						service.quit();
+						logger.debug("Service {} quitted", name);
+					} catch (Exception e) {
+						logger.error("Error quitting service '" + service.getClass() + "'", e);
+					}
+				}
+
+				// just in case something interrupted this thread
+				// Thread.interrupted() clears the interrupted status
+				Thread.interrupted();
+				logger.debug("Waiting 5 seconds for services to quit...");
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e) {
+				}
+
+				logger.info("Quitted");
+				System.exit(0);
+				logger.error("If you are reding this in the logs run as fast as you can!");
 			}
-		}
-
-		logger.info("Quitted");
-		System.exit(0);
-		logger.error("If you are reding this in the logs run as fast as you can!");
+		});
 	}
 
 	/**
