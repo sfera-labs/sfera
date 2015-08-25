@@ -1,0 +1,13 @@
+uno: "uno"
+due: due
+tre: 3
+qua: yes
+cin: true
+sei: 
+    - a: a
+      a1: a1
+    - b: b
+set: [1,2,3]
+ott:
+    p: off
+    q: 1.2

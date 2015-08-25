@@ -54,14 +54,14 @@ public abstract class Drivers {
 				for (Path file : stream) {
 					if (Files.isRegularFile(file) && !Files.isHidden(file)) {
 						String fileName = file.getFileName().toString();
-						String driverId = fileName.replace(".ini", "");
+						String driverId = fileName.replace(Configuration.FILE_EXTENSION, "");
 						inConfig.add(driverId);
 						try {
 							if (drivers.containsKey(driverId)) {
 								continue;
 							}
 							Configuration config = new Configuration(file);
-							String driverClass = config.getProperty("type", null);
+							String driverClass = config.get("type", null);
 							if (driverClass == null) {
 								throw new Exception("type not specified in configuration");
 							}

@@ -52,8 +52,9 @@ public abstract class Applications {
 					if (Files.isRegularFile(file) && !Files.isHidden(file)) {
 						String fileName = file.getFileName().toString();
 						String appClass = fileName;
-						if (appClass.endsWith(".ini")) {
-							appClass = appClass.substring(0, appClass.length() - 4);
+						if (appClass.endsWith(Configuration.FILE_EXTENSION)) {
+							appClass = appClass.substring(0,
+									appClass.length() - Configuration.FILE_EXTENSION.length());
 						}
 						if (!appClass.contains(".")) {
 							appClass = DEFAULT_APPS_PACKAGE + "." + appClass.toLowerCase() + "."

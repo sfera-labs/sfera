@@ -81,7 +81,7 @@ public class SystemNode implements Node, EventListener {
 	 */
 	private void init() {
 		try {
-			config = new Configuration("sfera.ini");
+			config = new Configuration("sfera.yml");
 		} catch (NoSuchFileException e) {
 			// no config file, that's fine...
 		} catch (Exception e) {

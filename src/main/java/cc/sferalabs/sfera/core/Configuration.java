@@ -5,16 +5,18 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Properties;
+import java.util.List;
+import java.util.Map;
+
+import org.yaml.snakeyaml.Yaml;
 
 public class Configuration {
-	
-	// TODO maybe use YAML ??
 
 	private static final String CONFIG_DIR = "config";
+	public static final String FILE_EXTENSION = ".yml";
 
 	private final Path path;
-	private final Properties props;
+	private final Object config;
 
 	/**
 	 * 
@@ -27,14 +29,24 @@ public class Configuration {
 
 	/**
 	 * 
-	 * @param configFilile
+	 * @param configFile
 	 * @throws IOException
 	 */
-	public Configuration(Path configFilile) throws IOException {
-		path = configFilile;
-		props = new Properties();
+	public Configuration(Path configFile) throws IOException {
+		path = configFile;
+		config = load();
+	}
+
+	/**
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
+	private Object load() throws IOException {
+		Yaml yaml = new Yaml();
 		try (BufferedReader r = Files.newBufferedReader(path)) {
-			props.load(r);
+			Object obj = yaml.load(r);
+			return obj;
 		}
 	}
 
@@ -69,53 +81,16 @@ public class Configuration {
 	 * @param defaultValue
 	 * @return
 	 */
-	public String getProperty(String key, String defaultValue) {
-		String val = props.getProperty(key, defaultValue);
-		if (val == null) {
-			return null;
-		}
-
-		return val.trim();
-	}
-
-	/**
-	 * 
-	 * @param key
-	 * @param defaultValue
-	 * @return
-	 */
-	public Integer getIntProperty(String key, Integer defaultValue) {
-		String val = getProperty(key, null);
-		if (val == null) {
+	@SuppressWarnings("unchecked")
+	public <T> T get(String key, T defaultValue) {
+		if (config == null) {
 			return defaultValue;
 		}
-
-		try {
-			return Integer.parseInt(val);
-		} catch (NumberFormatException e) {
+		Object obj = ((Map<String, Object>) config).get(key);
+		if (obj == null) {
 			return defaultValue;
 		}
-	}
-
-	/**
-	 * 
-	 * @param key
-	 * @param defaultValue
-	 * @return
-	 */
-	public Boolean getBoolProperty(String key, Boolean defaultValue) {
-		String val = getProperty(key, null);
-		if (val == null) {
-			return defaultValue;
-		}
-
-		if (val.equalsIgnoreCase("true")) {
-			return true;
-		}
-		if (val.equalsIgnoreCase("false")) {
-			return false;
-		}
-		return defaultValue;
+		return (T) obj;
 	}
 
 }

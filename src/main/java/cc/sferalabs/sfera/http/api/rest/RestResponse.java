@@ -49,11 +49,6 @@ class RestResponse extends JsonMessage {
 	}
 
 	@Override
-	public void sendResult(Object result) throws IOException, IllegalStateException {
-		super.sendResult(result);
-	}
-
-	@Override
 	public void sendError(String message) throws IOException, IllegalStateException {
 		sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message);
 	}

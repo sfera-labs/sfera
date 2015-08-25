@@ -67,8 +67,8 @@ public class HttpServer implements AutoStartService {
 		Integer http_port = null;
 		Integer https_port = null;
 		if (config != null) {
-			http_port = config.getIntProperty("http_port", null);
-			https_port = config.getIntProperty("https_port", null);
+			http_port = config.get("http_port", null);
+			https_port = config.get("https_port", null);
 		}
 
 		if (http_port == null && https_port == null) {
@@ -76,10 +76,10 @@ public class HttpServer implements AutoStartService {
 			return;
 		}
 
-		int maxThreads = config.getIntProperty("http_max_threads",
+		int maxThreads = config.get("http_max_threads",
 				Runtime.getRuntime().availableProcessors() * 128);
-		int minThreads = config.getIntProperty("http_min_threads", 8);
-		int idleTimeout = config.getIntProperty("http_threads_idle_timeout", 60000);
+		int minThreads = config.get("http_min_threads", 8);
+		int idleTimeout = config.get("http_threads_idle_timeout", 60000);
 
 		QueuedThreadPool threadPool = new QueuedThreadPool(maxThreads, minThreads, idleTimeout);
 
@@ -94,7 +94,7 @@ public class HttpServer implements AutoStartService {
 		}
 
 		if (https_port != null) {
-			String keyStorePassword = config.getProperty("keystore_password", null);
+			String keyStorePassword = config.get("keystore_password", null);
 			if (keyStorePassword == null) {
 				throw new Exception("'keystore_password' not specified in configuration");
 			}
@@ -106,7 +106,7 @@ public class HttpServer implements AutoStartService {
 			SslContextFactory sslContextFactory = new SslContextFactory();
 			sslContextFactory.setKeyStorePath(KEYSTORE_PATH);
 			sslContextFactory.setKeyStorePassword(keyStorePassword);
-			String keyManagerPassword = config.getProperty("keymanager_password", null);
+			String keyManagerPassword = config.get("keymanager_password", null);
 			if (keyManagerPassword != null) {
 				sslContextFactory.setKeyManagerPassword(keyManagerPassword);
 			}
@@ -138,7 +138,7 @@ public class HttpServer implements AutoStartService {
 		hsm.setStoreDirectory(new File(SESSIONS_STORE_DIR));
 		// TODO try to make session restorable when server not stopped properly
 		hsm.setSessionCookie("session");
-		int maxInactiveInterval = config.getIntProperty("http_session_max_inactive", 3600);
+		int maxInactiveInterval = config.get("http_session_max_inactive", 3600);
 		hsm.setMaxInactiveInterval(maxInactiveInterval);
 		SessionHandler sessionHandler = new SessionHandler(hsm);
 		sessionHandler.addEventListener(new HttpSessionListener() {
