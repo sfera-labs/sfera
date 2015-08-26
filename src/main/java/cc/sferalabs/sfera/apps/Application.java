@@ -15,7 +15,7 @@ import cc.sferalabs.sfera.events.Bus;
 
 public abstract class Application implements EventListener {
 
-	protected final Logger logger;
+	protected final Logger log;
 	private String configFile;
 	private String configWatcherId;
 
@@ -23,7 +23,7 @@ public abstract class Application implements EventListener {
 	 * 
 	 */
 	public Application() {
-		this.logger = LogManager.getLogger(getClass().getName());
+		this.log = LogManager.getLogger(getClass().getName());
 	}
 
 	/**
@@ -45,19 +45,19 @@ public abstract class Application implements EventListener {
 
 			@Override
 			protected void execute() {
-				logger.info("Enabling...");
+				log.info("Enabling...");
 				try {
 					configWatcherId = FilesWatcher.register(config.getRealPath(),
 							thisApp::onConfigFileModified, false);
 				} catch (Exception e) {
-					logger.error("Error watching config file", e);
+					log.error("Error watching config file", e);
 				}
 				try {
 					onEnable(config);
 					Bus.register(thisApp);
-					logger.info("Enabled");
+					log.info("Enabled");
 				} catch (Throwable t) {
-					logger.error("Initialization error", t);
+					log.error("Initialization error", t);
 				}
 			}
 		});
@@ -76,7 +76,7 @@ public abstract class Application implements EventListener {
 					Bus.unregister(thisApp);
 					doDisable();
 				} catch (Throwable t) {
-					logger.error("Error in onDisable()", t);
+					log.error("Error in onDisable()", t);
 				}
 			}
 		});
@@ -86,13 +86,13 @@ public abstract class Application implements EventListener {
 	 * 
 	 */
 	private void doDisable() {
-		logger.info("Disabling...");
+		log.info("Disabling...");
 		FilesWatcher.unregister(Configuration.getPath(configFile), configWatcherId);
 		try {
 			onDisable();
-			logger.info("Disabled");
+			log.info("Disabled");
 		} catch (Throwable t) {
-			logger.error("Error while disabling", t);
+			log.error("Error while disabling", t);
 		}
 	}
 
@@ -114,13 +114,13 @@ public abstract class Application implements EventListener {
 			try {
 				config = new Configuration(configFile);
 			} catch (NoSuchFileException e) {
-				logger.debug("Configuration file deleted");
+				log.debug("Configuration file deleted");
 				return;
 			}
-			logger.info("Configuration changed");
+			log.info("Configuration changed");
 			onConfigChange(config);
 		} catch (Throwable t) {
-			logger.error("Error in onConfigChange()", t);
+			log.error("Error in onConfigChange()", t);
 		}
 	}
 

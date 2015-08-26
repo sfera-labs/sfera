@@ -36,4 +36,21 @@ public class ConfigurationTest {
 		assertEquals(def, config.get("notThere", def));
 	}
 
+	@Test
+	public void testLoadAs() throws IOException, URISyntaxException {
+		URL file = getClass().getResource("/config-test.yml");
+		assertNotNull("Test file missing", file);
+		Configuration config = new Configuration(Paths.get(file.toURI()));
+		ConfigTestStructure cts = config.loadAs(ConfigTestStructure.class);
+		assertEquals("uno", cts.uno);
+		assertEquals("due", cts.due);
+		assertEquals(3, cts.tre);
+		assertEquals(true, cts.qua);
+		assertEquals(true, cts.cin);
+		assertEquals("[{a=a, a1=a1}, {b=b}]", cts.sei.toString());
+		assertEquals(3, cts.set.size());
+		assertEquals("{p=false, q=1.2}", cts.ott.toString());
+		assertNull(cts.notThere);
+	}
+
 }

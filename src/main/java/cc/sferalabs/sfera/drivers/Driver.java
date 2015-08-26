@@ -20,7 +20,7 @@ public abstract class Driver extends Task implements Node {
 	private boolean quit = false;
 	private Future<?> future;
 
-	protected final Logger logger;
+	protected final Logger log;
 
 	/**
 	 * 
@@ -29,7 +29,7 @@ public abstract class Driver extends Task implements Node {
 	public Driver(String id) {
 		super("driver." + id);
 		this.id = id;
-		this.logger = LogManager.getLogger(getClass().getName() + "." + id);
+		this.log = LogManager.getLogger(getClass().getName() + "." + id);
 	}
 
 	@Override
@@ -91,7 +91,7 @@ public abstract class Driver extends Task implements Node {
 		try {
 			restart();
 		} catch (InterruptedException e) {
-			logger.warn("onConfigChange() interrupted");
+			log.warn("onConfigChange() interrupted");
 		}
 	}
 
@@ -101,16 +101,16 @@ public abstract class Driver extends Task implements Node {
 			Configuration config = null;
 			String configWatcherId = null;
 			try {
-				logger.info("Starting...");
+				log.info("Starting...");
 				config = new Configuration(configFile);
 				try {
 					configWatcherId = FilesWatcher.register(config.getRealPath(),
 							this::onConfigFileModified, false);
 				} catch (IOException e) {
-					logger.error("Error watching config file", e);
+					log.error("Error watching config file", e);
 				}
 				if (onInit(config)) {
-					logger.info("Started");
+					log.info("Started");
 					try {
 						while (!quit) {
 							try {
@@ -119,33 +119,33 @@ public abstract class Driver extends Task implements Node {
 								}
 							} catch (InterruptedException ie) {
 								if (quit) {
-									logger.warn("Driver interrupted");
+									log.warn("Driver interrupted");
 								} else {
-									logger.debug("Driver interrupted but not quitted");
+									log.debug("Driver interrupted but not quitted");
 								}
 							}
 						}
 					} catch (Throwable t) {
-						logger.error("Exception in loop()", t);
+						log.error("Exception in loop()", t);
 					}
 				} else {
-					logger.warn("Initialization failed");
+					log.warn("Initialization failed");
 				}
 			} catch (InterruptedException t) {
-				logger.debug("Initialization interrupted");
+				log.debug("Initialization interrupted");
 			} catch (Throwable t) {
-				logger.error("Exception in onInit()", t);
+				log.error("Exception in onInit()", t);
 			}
 
 			try {
-				logger.info("Quitting...");
+				log.info("Quitting...");
 				if (configWatcherId != null) {
 					FilesWatcher.unregister(config.getRealPath(), configWatcherId);
 				}
 				onQuit();
-				logger.info("Quitted");
+				log.info("Quitted");
 			} catch (Throwable t) {
-				logger.error("Exception in onQuit()", t);
+				log.error("Exception in onQuit()", t);
 			}
 
 			if (!quit) {
@@ -168,13 +168,13 @@ public abstract class Driver extends Task implements Node {
 			try {
 				config = new Configuration(configFile);
 			} catch (NoSuchFileException e) {
-				logger.debug("Configuration file deleted");
+				log.debug("Configuration file deleted");
 				return;
 			}
-			logger.info("Configuration changed");
+			log.info("Configuration changed");
 			onConfigChange(config);
 		} catch (Throwable t) {
-			logger.error("Error in onConfigChange()", t);
+			log.error("Error in onConfigChange()", t);
 		}
 	}
 

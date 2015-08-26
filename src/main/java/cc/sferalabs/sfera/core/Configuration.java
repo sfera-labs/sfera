@@ -44,8 +44,20 @@ public class Configuration {
 	private Object load() throws IOException {
 		Yaml yaml = new Yaml();
 		try (BufferedReader r = Files.newBufferedReader(path)) {
-			Object obj = yaml.load(r);
-			return obj;
+			return yaml.load(r);
+		}
+	}
+
+	/**
+	 * 
+	 * @param clazz
+	 * @return
+	 * @throws IOException
+	 */
+	public <T> T loadAs(Class<T> clazz) throws IOException {
+		Yaml yaml = new Yaml();
+		try (BufferedReader r = Files.newBufferedReader(path)) {
+			return yaml.loadAs(r, clazz);
 		}
 	}
 
