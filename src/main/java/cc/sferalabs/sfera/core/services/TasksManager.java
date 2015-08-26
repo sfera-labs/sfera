@@ -16,7 +16,7 @@ public class TasksManager {
 	public static void execute(String name, Runnable task) {
 		execute(Task.create(name, task));
 	}
-	
+
 	/**
 	 * 
 	 * @param t
@@ -24,7 +24,7 @@ public class TasksManager {
 	public static void execute(Task t) {
 		EXECUTOR_SERVICE.execute(t);
 	}
-	
+
 	/**
 	 * 
 	 * @param name
@@ -34,7 +34,7 @@ public class TasksManager {
 	public static Future<?> submit(String name, Runnable task) {
 		return submit(Task.create(name, task));
 	}
-	
+
 	/**
 	 * 
 	 * @param t
@@ -43,7 +43,7 @@ public class TasksManager {
 	public static Future<?> submit(Task t) {
 		return EXECUTOR_SERVICE.submit(t);
 	}
-	
+
 	/**
 	 * 
 	 * @param name
@@ -52,7 +52,7 @@ public class TasksManager {
 	public static Thread executeSystem(String name, Runnable task) {
 		return executeSystem(Task.create(name, task));
 	}
-	
+
 	/**
 	 * 
 	 * @param t
