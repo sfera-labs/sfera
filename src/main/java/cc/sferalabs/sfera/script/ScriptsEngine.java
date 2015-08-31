@@ -352,7 +352,7 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 			loggerName = loggerName
 					.substring(0, loggerName.length() - SCRIPT_FILES_EXTENSION.length())
 					.replace('/', '.');
-			fileScope.put("logger", LogManager.getLogger(loggerName));
+			fileScope.put("log", LogManager.getLogger(loggerName));
 
 			ScriptGrammarListener scriptListener = new ScriptGrammarListener(scriptFile, fileSystem,
 					(Compilable) scriptEngine, directoryScope, fileScope);

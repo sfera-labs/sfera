@@ -143,6 +143,7 @@ public abstract class Driver extends Task implements Node {
 					FilesWatcher.unregister(config.getRealPath(), configWatcherId);
 				}
 				onQuit();
+				// TODO set to UNKNOWN all driver's datapoints?
 				log.info("Quitted");
 			} catch (Throwable t) {
 				log.error("Exception in onQuit()", t);

@@ -17,36 +17,36 @@ local {
 }
 
 scheduler.event == "1" : {
-	logger.info("21 " + localVar);
-	logger.info("21 " + globVar);
-	logger.info("21 " + globVar1);
-	logger.info("21 " + localF());
+	log.info("21 " + localVar);
+	log.info("21 " + globVar);
+	log.info("21 " + globVar1);
+	log.info("21 " + localF());
 	localVar = "localVar-edited";
 	var myVar = "myVar";
 }
 
 scheduler.event == "1" : {
-	logger.info("22 " + localVar);
-	logger.info("22 " + globVar);
-	logger.info("22 " + globVar1);
-	logger.info("22 " + localF());
+	log.info("22 " + localVar);
+	log.info("22 " + globVar);
+	log.info("22 " + globVar1);
+	log.info("22 " + localF());
 	globVar = "globVar-edited";
 	globVar1 = "globVar1-edited";
 }
 
 
 scheduler.event == "3" : {
-	logger.info("23 " + localVar);
-	logger.info("23 " + globVar);
-	logger.info("23 " + globVar1);
-	logger.info("23 " + localF());
-	logger.info("23 " + globalF());
-	logger.info("23 " + mul(3,5));
+	log.info("23 " + localVar);
+	log.info("23 " + globVar);
+	log.info("23 " + globVar1);
+	log.info("23 " + localF());
+	log.info("23 " + globalF());
+	log.info("23 " + mul(3,5));
 	var odds = _.filter([1, 2, 3, 4, 5, 6], function (num) {
     	return num % 2 == 1;
 	});
 	for (var i = 0; i < odds.length; i++) {
-		logger.info("23 " + odds[i]);
+		log.info("23 " + odds[i]);
 	}
-	// logger.info("23 " + myVar); // error
+	// log.info("23 " + myVar); // error
 }

@@ -14,8 +14,8 @@ local {
 }
 
 // scheduler.event == "1" : {
-// 	logger.info("11 " + globVar);
-// 	logger.info("11 " + globVar1);
+// 	log.info("11 " + globVar);
+// 	log.info("11 " + globVar1);
 // 	localVar = "localVar-edited";
 // 	globVar = "globVar-edited";
 // 	globVar1 = "globVar1-edited";
@@ -23,7 +23,7 @@ local {
 
 
 // scheduler.event == "2" : {
-// 	logger.info("12 " + globVar);
-// 	logger.info("12 " + globVar1);
-// 	logger.info("12 " + globalF());
+// 	log.info("12 " + globVar);
+// 	log.info("12 " + globVar1);
+// 	log.info("12 " + globalF());
 // }

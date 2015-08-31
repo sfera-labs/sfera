@@ -6,6 +6,6 @@ local {
 }
 
 scheduler.ciao : {
-	logger.info("scheduler event: " + _e.getValue());
+	log.info("scheduler event: " + _e.getValue());
 	//EventsScheduler.cancel("ciao", "mamma");
 }
