@@ -57,7 +57,6 @@ class Message {
 	/**
 	 * 
 	 * @param socket
-	 * @return
 	 */
 	public void process(ApiSocket socket) {
 		WsMessage resp = new WsMessage("response", socket);

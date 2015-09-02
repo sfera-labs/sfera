@@ -13,6 +13,14 @@ import cc.sferalabs.sfera.core.services.Task;
 import cc.sferalabs.sfera.core.services.TasksManager;
 import cc.sferalabs.sfera.events.Bus;
 
+/**
+ * Skeleton for the implementation of applications
+ * 
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ * 
+ */
 public abstract class Application implements EventListener {
 
 	protected final Logger log;
@@ -27,16 +35,21 @@ public abstract class Application implements EventListener {
 	}
 
 	/**
+	 * Sets the path of the application's configuration file
 	 * 
 	 * @param configFile
+	 *            the path of the configuration file
 	 */
 	public void setConfigFile(String configFile) {
 		this.configFile = configFile;
 	}
 
 	/**
+	 * Enables this application in a separate thread. This is the entry point of
+	 * the application life-cycle
 	 * 
 	 * @throws IOException
+	 *             if an I/O error occurs loading the configuration
 	 */
 	public synchronized void enable() throws IOException {
 		final Configuration config = new Configuration(configFile);
@@ -64,7 +77,7 @@ public abstract class Application implements EventListener {
 	}
 
 	/**
-	 * 
+	 * Disables this application in a separate thread
 	 */
 	public synchronized void disable() {
 		final Application thisApp = this;
@@ -83,7 +96,7 @@ public abstract class Application implements EventListener {
 	}
 
 	/**
-	 * 
+	 *  
 	 */
 	private void doDisable() {
 		log.info("Disabling...");
@@ -125,8 +138,11 @@ public abstract class Application implements EventListener {
 	}
 
 	/**
+	 * Callback method called when the configuration of this application is
+	 * modified. The default implementation restarts the application
 	 * 
 	 * @param configuration
+	 *            the new configuration
 	 */
 	protected void onConfigChange(Configuration configuration) throws InterruptedException {
 		try {
@@ -137,13 +153,14 @@ public abstract class Application implements EventListener {
 	}
 
 	/**
+	 * Callback method called when the application is enabled
 	 * 
 	 * @param config
 	 */
 	protected abstract void onEnable(Configuration config);
 
 	/**
-	 * 
+	 * Callback method called when the application is disabled
 	 */
 	protected abstract void onDisable();
 

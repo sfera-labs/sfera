@@ -12,7 +12,7 @@ public abstract class LoggerUtils {
 	public static final Marker SFERA_MARKER = MarkerManager.getMarker("SFERA");
 
 	/**
-	 * Reload the logger configuration.
+	 * Reloads the logger configuration.
 	 */
 	public static void reloadConfig() {
 		((org.apache.logging.log4j.core.LoggerContext) LogManager.getContext(false)).reconfigure();

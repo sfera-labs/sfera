@@ -13,6 +13,13 @@ import cc.sferalabs.sfera.core.services.Task;
 import cc.sferalabs.sfera.core.services.TasksManager;
 import cc.sferalabs.sfera.events.Node;
 
+/**
+ *
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 public abstract class Driver extends Task implements Node {
 
 	private final String id;

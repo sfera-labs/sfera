@@ -21,6 +21,7 @@ public class SchedulerEvent extends BaseEvent {
 	/**
 	 * 
 	 * @param id
+	 * @param value
 	 */
 	public SchedulerEvent(String id, String value) {
 		super(SCHEDULER_NODE, id);

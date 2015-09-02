@@ -251,7 +251,6 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 
 	/**
 	 * 
-	 * @throws IOException
 	 */
 	private synchronized static void loadScriptFiles() {
 		logger.info("Loading scripts...");

@@ -16,6 +16,14 @@ import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.SubscriberExceptionHandler;
 
+/**
+ * 
+ *
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 public abstract class Bus {
 
 	private static final SubscriberExceptionHandler SUBSCRIBER_EXCEPTION_HANDLER = new EventsSubscriberExceptionHandler();

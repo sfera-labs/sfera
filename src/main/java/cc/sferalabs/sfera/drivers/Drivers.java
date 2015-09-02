@@ -22,6 +22,13 @@ import cc.sferalabs.sfera.core.services.FilesWatcher;
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.script.ScriptsEngine;
 
+/**
+ *
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 public abstract class Drivers {
 
 	private static final String DEFAULT_DRIVERS_PACKAGE = Sfera.BASE_PACKAGE + ".drivers";

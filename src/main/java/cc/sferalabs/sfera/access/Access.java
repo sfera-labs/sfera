@@ -22,16 +22,27 @@ import javax.crypto.spec.PBEKeySpec;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class Access {
+/**
+ * Utility class for users authorization and authentication
+ *
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ * 
+ */
+public abstract class Access {
 
+	/** Users credentials configuration file */
+	private static final String USERS_FILE_PATH = "data/access/passwd";
+
+	/** Map of existing users indexed by username */
 	private static final Map<String, User> users = new ConcurrentSkipListMap<String, User>(
 			String.CASE_INSENSITIVE_ORDER);
-
-	private static final String USERS_FILE_PATH = "data/access/passwd";
 
 	private static final Logger logger = LogManager.getLogger();
 
 	/**
+	 * Initialize user credentials reading from the configuration file
 	 * 
 	 * @throws IOException
 	 */
@@ -63,12 +74,19 @@ public class Access {
 	}
 
 	/**
+	 * Creates a new user and adds it to the list
 	 * 
 	 * @param username
+	 *            username for the new user
 	 * @param plainPassword
+	 *            plain-text password
 	 * @param roles
+	 *            list of roles the user belongs to
+	 * 
 	 * @throws UsernameAlreadyUsedException
+	 *             if a user with the specified username already exists
 	 * @throws IOException
+	 *             if an I/O error occurs writing to the configuration file
 	 */
 	public synchronized static void addUser(String username, String plainPassword, String[] roles)
 			throws UsernameAlreadyUsedException, IOException {
@@ -97,8 +115,10 @@ public class Access {
 	}
 
 	/**
+	 * Returns the user with the specified username
 	 * 
 	 * @param username
+	 *            the username
 	 * @return
 	 */
 	public synchronized static User getUser(String username) {
@@ -106,6 +126,7 @@ public class Access {
 	}
 
 	/**
+	 * Returns a set containing all the existing users
 	 * 
 	 * @return
 	 */
@@ -114,10 +135,16 @@ public class Access {
 	}
 
 	/**
+	 * Returns whether or not the <code>attemptedPassword</code> corresponds to
+	 * the actual password of the user identified by <code>username</code>
 	 * 
 	 * @param username
+	 *            the username
 	 * @param attemptedPassword
-	 * @return
+	 *            the attempted password
+	 * @return <code>true</code> if <code>attemptedPassword</code> corresponds
+	 *         to the actual password of the user identified by
+	 *         <code>username</code>, <code>false</code> otherwise
 	 */
 	public synchronized static boolean authenticate(String username, String attemptedPassword) {
 		User u = users.get(username);
@@ -135,7 +162,7 @@ public class Access {
 
 	/**
 	 * 
-	 * @return
+	 * @return random bytes sequence to be used as salt
 	 */
 	private static byte[] generateSalt() {
 		try {
@@ -152,8 +179,10 @@ public class Access {
 	/**
 	 * 
 	 * @param password
+	 *            plain-text password
 	 * @param salt
-	 * @return
+	 *            the salt
+	 * @return bytes sequence representing the encrypted password
 	 */
 	private static byte[] getEncryptedPassword(String password, byte[] salt) {
 		try {

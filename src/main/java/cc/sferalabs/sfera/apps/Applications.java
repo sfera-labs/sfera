@@ -19,6 +19,14 @@ import cc.sferalabs.sfera.core.SystemClassLoader;
 import cc.sferalabs.sfera.core.services.FilesWatcher;
 import cc.sferalabs.sfera.events.Bus;
 
+/**
+ * Utility class for managing applications
+ * 
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 public abstract class Applications {
 
 	private static final String DEFAULT_APPS_PACKAGE = Sfera.BASE_PACKAGE + ".apps";
@@ -28,7 +36,8 @@ public abstract class Applications {
 	private static List<Application> applications = new ArrayList<>();
 
 	/**
-	 * 
+	 * Instantiates the configured applications and register the applications
+	 * configuration director to be monitored for changes
 	 */
 	public synchronized static void load() {
 		instantiateApps();
@@ -41,9 +50,9 @@ public abstract class Applications {
 	}
 
 	/**
-	 * 
+	 * Instantiates configured applications
 	 */
-	public static void instantiateApps() {
+	private static void instantiateApps() {
 		Path configDir = Configuration.getConfigDir().resolve(CONFIG_DIR);
 		List<String> inConfig = new ArrayList<String>();
 		if (Files.exists(configDir)) {
@@ -114,7 +123,7 @@ public abstract class Applications {
 	}
 
 	/**
-	 * 
+	 * Disables all the running applications
 	 */
 	public synchronized static void disable() {
 		for (Application a : applications) {

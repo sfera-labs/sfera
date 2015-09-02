@@ -2,6 +2,14 @@ package cc.sferalabs.sfera.access;
 
 import java.util.Base64;
 
+/**
+ * Class to hold user information
+ *
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 public class User {
 
 	private final String username;
@@ -10,11 +18,16 @@ public class User {
 	private final String[] roles;
 
 	/**
+	 * User constructor
 	 * 
 	 * @param username
+	 *            the username
 	 * @param hashedPassword
+	 *            the hashed password
 	 * @param salt
+	 *            the salt
 	 * @param roles
+	 *            list of roles
 	 */
 	User(String username, byte[] hashedPassword, byte[] salt, String[] roles) {
 		this.username = username;
@@ -24,11 +37,16 @@ public class User {
 	}
 
 	/**
+	 * User constructor
 	 * 
 	 * @param username
+	 *            the username
 	 * @param hashedPassword
+	 *            the hashed password base64-encoded
 	 * @param salt
+	 *            the salt
 	 * @param roles
+	 *            list of roles
 	 */
 	User(String username, String hashedPassword, String salt, String[] roles) {
 		this(username, Base64.getDecoder().decode(hashedPassword), Base64.getDecoder().decode(salt),
@@ -61,6 +79,8 @@ public class User {
 
 	/**
 	 * 
+	 * @param role
+	 *            a role identifier
 	 * @return true if the user has the specified role, false otherwise
 	 */
 	public boolean isInRole(String role) {
