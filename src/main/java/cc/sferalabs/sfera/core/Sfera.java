@@ -3,8 +3,17 @@ package cc.sferalabs.sfera.core;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+/**
+ * Entry point class containing the main method
+ * 
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 public class Sfera {
 
+	/** Package prefix used by Sfera */
 	public static final String BASE_PACKAGE = "cc.sferalabs.sfera";
 
 	static {
@@ -15,8 +24,10 @@ public class Sfera {
 	}
 
 	/**
+	 * The main method
 	 * 
 	 * @param args
+	 *            program arguments
 	 */
 	public static void main(String[] args) {
 		System.setProperty("java.awt.headless", "true");

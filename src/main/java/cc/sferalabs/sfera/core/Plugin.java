@@ -12,9 +12,17 @@ import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
+/**
+ * This class represents an installed sfera plugin
+ * 
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 public class Plugin {
 
-	final static String PLUGIN_POM_FILE = "pom.xml";
+	private final static String PLUGIN_POM_FILE = "pom.xml";
 
 	private final Path path;
 	private final String id;
@@ -22,11 +30,14 @@ public class Plugin {
 	private final String description;
 
 	/**
+	 * Creates a plugin object from the specified jar file
 	 * 
 	 * @param jarFile
+	 *            the jar file containing the plugin
 	 * @throws Exception
+	 *             if an error occours loadinf the plugin
 	 */
-	public Plugin(Path jarFile) throws Exception {
+	Plugin(Path jarFile) throws Exception {
 		if (!Files.isRegularFile(jarFile)) {
 			throw new Exception("not a regular file");
 		}
@@ -110,7 +121,7 @@ public class Plugin {
 
 	/**
 	 * 
-	 * @return
+	 * @return the id of the plugin
 	 */
 	public String getId() {
 		return id;
@@ -118,7 +129,7 @@ public class Plugin {
 
 	/**
 	 * 
-	 * @return
+	 * @return the path of the jar containing the plugin
 	 */
 	public Path getPath() {
 		return path;
@@ -126,7 +137,7 @@ public class Plugin {
 
 	/**
 	 * 
-	 * @return
+	 * @return the name of the plugin
 	 */
 	public String getName() {
 		return name;
@@ -134,7 +145,7 @@ public class Plugin {
 
 	/**
 	 * 
-	 * @return
+	 * @return the description of the plugin
 	 */
 	public String getDescription() {
 		return description;

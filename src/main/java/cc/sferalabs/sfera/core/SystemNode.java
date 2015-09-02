@@ -23,6 +23,14 @@ import cc.sferalabs.sfera.events.Node;
 
 import com.google.common.eventbus.Subscribe;
 
+/**
+ * The system node
+ * 
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 public class SystemNode implements Node, EventListener {
 
 	private static final Logger logger = LogManager.getLogger();
@@ -31,14 +39,14 @@ public class SystemNode implements Node, EventListener {
 	private Configuration config;
 
 	/**
-	 * 
+	 * Constructor for singleton instance
 	 */
 	private SystemNode() {
 	}
 
 	/**
 	 * 
-	 * @return
+	 * @return the system node instance
 	 */
 	public static SystemNode getInstance() {
 		return INSTANCE;
@@ -46,14 +54,19 @@ public class SystemNode implements Node, EventListener {
 
 	/**
 	 * 
-	 * @return
+	 * @return the system configuration
 	 */
 	public static Configuration getConfiguration() {
 		return INSTANCE.config;
 	}
 
+	@Override
+	public String getId() {
+		return "system";
+	}
+
 	/**
-	 * 
+	 * Starts the process
 	 */
 	void start() {
 		logger.info("======== Started ========");
@@ -64,11 +77,6 @@ public class SystemNode implements Node, EventListener {
 		Bus.post(SystemStateEvent.READY);
 	}
 
-	@Override
-	public String getId() {
-		return "system";
-	}
-
 	@Subscribe
 	public void handleSystemStateEvent(SystemStateEvent event) {
 		if (event == SystemStateEvent.QUIT) {
@@ -77,7 +85,7 @@ public class SystemNode implements Node, EventListener {
 	}
 
 	/**
-	 * 
+	 * Initializes data structures, launches services, drivers and applications
 	 */
 	private void init() {
 		try {
@@ -119,7 +127,7 @@ public class SystemNode implements Node, EventListener {
 	}
 
 	/**
-	 * 
+	 * Gracefully stops the process quitting applications, drivers and services
 	 */
 	private void quit() {
 		TasksManager.executeSystem(new Task("System quit") {
@@ -174,8 +182,10 @@ public class SystemNode implements Node, EventListener {
 	}
 
 	/**
+	 * Adds the passed service to the system life-cycle
 	 * 
 	 * @param service
+	 *            the service to be added
 	 */
 	public static void addToLifeCycle(Service service) {
 		services.add(service);

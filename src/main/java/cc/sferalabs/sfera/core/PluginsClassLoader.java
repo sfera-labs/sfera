@@ -13,13 +13,21 @@ import cc.sferalabs.sfera.events.Bus;
 
 import com.google.common.eventbus.Subscribe;
 
-public class SystemClassLoader {
+/**
+ * Utility class to load classes from installed plugins
+ * 
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
+public abstract class PluginsClassLoader {
 
 	private static final Logger logger = LogManager.getLogger();
 	private static ClassLoader CLASS_LOADER;
 
 	/**
-	 * 
+	 * Adds the installed plugins to the base class loader
 	 */
 	private synchronized static void load() {
 		ClassLoader cl;
@@ -30,36 +38,56 @@ public class SystemClassLoader {
 			for (Plugin plugin : plugins) {
 				urls[i++] = plugin.getPath().toUri().toURL();
 			}
-			cl = new URLClassLoader(urls, SystemClassLoader.class.getClassLoader());
+			cl = new URLClassLoader(urls, PluginsClassLoader.class.getClassLoader());
 			logger.debug("Class loader created");
 		} catch (Exception e) {
 			logger.error("Error creating plugins class loader", e);
-			cl = SystemClassLoader.class.getClassLoader();
+			cl = PluginsClassLoader.class.getClassLoader();
 		}
 		CLASS_LOADER = cl;
 	}
 
 	/**
+	 * Returns the {@code Class} object associated with the class or interface
+	 * with the given string name
 	 * 
 	 * @param className
-	 * @return
+	 *            fully qualified name of the desired class
+	 * @return class object representing the desired class
 	 * @throws ClassNotFoundException
+	 *             if the class cannot be located
+	 * 
+	 * @see java.lang.Class#forName(String, boolean, ClassLoader)
+	 * @see java.lang.ClassLoader
 	 */
 	public synchronized static Class<?> getClass(String className) throws ClassNotFoundException {
 		if (CLASS_LOADER == null) {
-			load();
-			Bus.register(new PluginsListener());
+			init();
 		}
 		return Class.forName(className, true, CLASS_LOADER);
 	}
 
 	/**
+	 * Initializes the class loader and registers a {@code PluginsListener} for
+	 * handling plugin reload events
+	 */
+	private static void init() {
+		load();
+		Bus.register(new PluginsListener());
+	}
+
+	/**
+	 * Listener for reloading plugins when modified
+	 * 
+	 * @author Giampiero Baggiani
+	 *
+	 * @version 1.0.0
 	 *
 	 */
 	private static class PluginsListener implements EventListener {
 
 		@Subscribe
-		private void reload(PluginsEvent event) {
+		public void reload(PluginsEvent event) {
 			if (event == PluginsEvent.RELOAD) {
 				load();
 			}

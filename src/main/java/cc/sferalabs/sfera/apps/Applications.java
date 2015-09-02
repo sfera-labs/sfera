@@ -15,7 +15,7 @@ import org.apache.logging.log4j.Logger;
 
 import cc.sferalabs.sfera.core.Configuration;
 import cc.sferalabs.sfera.core.Sfera;
-import cc.sferalabs.sfera.core.SystemClassLoader;
+import cc.sferalabs.sfera.core.PluginsClassLoader;
 import cc.sferalabs.sfera.core.services.FilesWatcher;
 import cc.sferalabs.sfera.events.Bus;
 
@@ -36,8 +36,8 @@ public abstract class Applications {
 	private static List<Application> applications = new ArrayList<>();
 
 	/**
-	 * Instantiates the configured applications and register the applications
-	 * configuration director to be monitored for changes
+	 * Instantiates the configured applications and registers the applications
+	 * configuration directory to be monitored for changes
 	 */
 	public synchronized static void load() {
 		instantiateApps();
@@ -74,7 +74,7 @@ public abstract class Applications {
 							if (appAlreadyInstantiated(appClass)) {
 								continue;
 							}
-							Class<?> clazz = SystemClassLoader.getClass(appClass);
+							Class<?> clazz = PluginsClassLoader.getClass(appClass);
 							Constructor<?> constructor = clazz.getConstructor();
 							Application appInstance = (Application) constructor.newInstance();
 							appInstance.setConfigFile(CONFIG_DIR + "/" + fileName);

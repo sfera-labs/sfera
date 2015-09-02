@@ -17,6 +17,14 @@ import cc.sferalabs.sfera.core.events.PluginsEvent;
 import cc.sferalabs.sfera.core.services.FilesWatcher;
 import cc.sferalabs.sfera.events.Bus;
 
+/**
+ * Utility class for managing plugins
+ * 
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 public abstract class Plugins {
 
 	private static final String DIR_PATH = "plugins";
@@ -24,9 +32,10 @@ public abstract class Plugins {
 	private static final Logger logger = LogManager.getLogger();
 
 	/**
-	 * 
+	 * Loads the installed plugins and registers the plugins directory to be
+	 * monitored for changes
 	 */
-	public static void load() {
+	static void load() {
 		doLoad();
 		try {
 			FilesWatcher.register(Paths.get(DIR_PATH), Plugins::doLoad, false);
@@ -36,7 +45,7 @@ public abstract class Plugins {
 	}
 
 	/**
-	 * 
+	 * Loads the installed plugins
 	 */
 	private static void doLoad() {
 		plugins = new ConcurrentHashMap<>();
@@ -63,7 +72,7 @@ public abstract class Plugins {
 
 	/**
 	 * 
-	 * @return
+	 * @return a Map containing all the installed plugins indexed by id
 	 */
 	public static Map<String, Plugin> getAll() {
 		return new HashMap<String, Plugin>(plugins);
@@ -72,7 +81,8 @@ public abstract class Plugins {
 	/**
 	 * 
 	 * @param id
-	 * @return
+	 *            the id whose associated plugin is to be returned
+	 * @return the plugin with the specified id
 	 */
 	public static Plugin get(String id) {
 		return plugins.get(id);
