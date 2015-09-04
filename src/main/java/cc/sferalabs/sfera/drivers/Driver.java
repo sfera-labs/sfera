@@ -2,6 +2,8 @@ package cc.sferalabs.sfera.drivers;
 
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.concurrent.Future;
 
 import org.apache.logging.log4j.LogManager;
@@ -205,5 +207,21 @@ public abstract class Driver extends Task implements Node {
 	 * 
 	 */
 	protected abstract void onQuit();
+
+	/**
+	 * @return the path to the directory to be used to store data for all
+	 *         instances of this driver
+	 */
+	protected Path getDriverGlobalDataDir() {
+		return Paths.get("data/drivers/", getClass().getPackage().getName());
+	}
+
+	/**
+	 * @return the path to the directory to be used to store data this driver
+	 *         instance
+	 */
+	protected Path getDriverInstanceDataDir() {
+		return getDriverGlobalDataDir().resolve(getId());
+	}
 
 }
