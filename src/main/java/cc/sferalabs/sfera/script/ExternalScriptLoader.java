@@ -1,5 +1,6 @@
 package cc.sferalabs.sfera.script;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
@@ -8,9 +9,9 @@ import javax.script.Bindings;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
-public class ScriptLoader {
+public class ExternalScriptLoader {
 
-	static final String VAR_NAME = ScriptLoader.class.getSimpleName();
+	static final String VAR_NAME = ExternalScriptLoader.class.getSimpleName();
 
 	private final ScriptEngine engine;
 	private final FileSystem fileSystem;
@@ -22,7 +23,7 @@ public class ScriptLoader {
 	 * @param fileSystem
 	 * @param bindings
 	 */
-	public ScriptLoader(ScriptEngine engine, FileSystem fileSystem, Bindings bindings) {
+	public ExternalScriptLoader(ScriptEngine engine, FileSystem fileSystem, Bindings bindings) {
 		this.engine = engine;
 		this.fileSystem = fileSystem;
 		this.bindings = bindings;
@@ -35,6 +36,8 @@ public class ScriptLoader {
 	 * @throws IOException
 	 */
 	public void load(String file) throws ScriptException, IOException {
-		engine.eval(Files.newBufferedReader(fileSystem.getPath(file)), bindings);
+		try (BufferedReader br = Files.newBufferedReader(fileSystem.getPath(file))) {
+			engine.eval(br, bindings);
+		}
 	}
 }

@@ -17,8 +17,8 @@ public class Scope {
 	 */
 	public Scope(FileSystem fileSystem, ScriptEngine scriptEngine, Bindings bindings) {
 		this.bindings = bindings;
-		ScriptLoader scriptLoader = new ScriptLoader(scriptEngine, fileSystem, bindings);
-		bindings.put(ScriptLoader.VAR_NAME, scriptLoader);
+		ExternalScriptLoader scriptLoader = new ExternalScriptLoader(scriptEngine, fileSystem, bindings);
+		bindings.put(ExternalScriptLoader.VAR_NAME, scriptLoader);
 	}
 
 	/**
