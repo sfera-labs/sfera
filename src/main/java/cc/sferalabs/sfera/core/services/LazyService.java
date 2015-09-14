@@ -1,13 +1,13 @@
 package cc.sferalabs.sfera.core.services;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.core.SystemNode;
 
 public abstract class LazyService implements Service {
 
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger logger = LoggerFactory.getLogger(LazyService.class);
 
 	/**
 	 * 

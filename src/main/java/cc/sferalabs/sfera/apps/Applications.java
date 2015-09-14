@@ -10,12 +10,12 @@ import java.util.EventListener;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.core.Configuration;
-import cc.sferalabs.sfera.core.Sfera;
 import cc.sferalabs.sfera.core.PluginsClassLoader;
+import cc.sferalabs.sfera.core.Sfera;
 import cc.sferalabs.sfera.core.services.FilesWatcher;
 import cc.sferalabs.sfera.events.Bus;
 
@@ -31,7 +31,7 @@ public abstract class Applications {
 
 	private static final String DEFAULT_APPS_PACKAGE = Sfera.BASE_PACKAGE + ".apps";
 	private static final String CONFIG_DIR = "apps";
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger logger = LoggerFactory.getLogger(Applications.class);
 
 	private static List<Application> applications = new ArrayList<>();
 

@@ -2,16 +2,16 @@ package cc.sferalabs.sfera.http.api.websockets;
 
 import java.security.Principal;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ApiSocket extends WebSocketAdapter {
 
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger logger = LoggerFactory.getLogger(ApiSocket.class);
 	ServletUpgradeRequest request;
 	Principal user;
 	WsEventListener subscription;

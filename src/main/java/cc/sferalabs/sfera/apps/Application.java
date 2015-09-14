@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import java.util.EventListener;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.core.Configuration;
 import cc.sferalabs.sfera.core.services.FilesWatcher;
@@ -31,7 +31,7 @@ public abstract class Application implements EventListener {
 	 * 
 	 */
 	public Application() {
-		this.log = LogManager.getLogger(getClass().getName());
+		this.log = LoggerFactory.getLogger(getClass().getName());
 	}
 
 	/**

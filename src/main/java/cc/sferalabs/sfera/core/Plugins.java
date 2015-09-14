@@ -10,8 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.core.events.PluginsEvent;
 import cc.sferalabs.sfera.core.services.FilesWatcher;
@@ -29,7 +29,7 @@ public abstract class Plugins {
 
 	private static final String DIR_PATH = "plugins";
 	private static ConcurrentHashMap<String, Plugin> plugins;
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger logger = LoggerFactory.getLogger(Plugins.class);
 
 	/**
 	 * Loads the installed plugins and registers the plugins directory to be

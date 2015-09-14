@@ -3,8 +3,8 @@ package cc.sferalabs.sfera.http.api.rest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("serial")
 public class SubscribeServlet extends AuthorizedApiServlet {
@@ -12,7 +12,7 @@ public class SubscribeServlet extends AuthorizedApiServlet {
 	public static final String PATH = ApiServlet.PATH + "subscribe";
 
 	public static final String SESSION_ATTR_SUBSCRIPTIONS = "subscriptions";
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger logger = LoggerFactory.getLogger(SubscribeServlet.class);
 
 	@Override
 	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)

@@ -6,15 +6,15 @@ import javax.script.Bindings;
 import javax.script.ScriptException;
 import javax.script.SimpleBindings;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.core.services.Task;
 import cc.sferalabs.sfera.events.Event;
 
 public class ActionTask extends Task {
 
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger logger = LoggerFactory.getLogger(ActionTask.class);
 
 	private final Event triggerEvent;
 	private final Rule rule;

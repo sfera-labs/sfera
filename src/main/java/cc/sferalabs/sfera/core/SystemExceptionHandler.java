@@ -2,8 +2,8 @@ package cc.sferalabs.sfera.core;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Default system exception handler
@@ -15,7 +15,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class SystemExceptionHandler implements UncaughtExceptionHandler {
 
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger logger = LoggerFactory.getLogger(SystemExceptionHandler.class);
 
 	@Override
 	public void uncaughtException(Thread t, Throwable e) {

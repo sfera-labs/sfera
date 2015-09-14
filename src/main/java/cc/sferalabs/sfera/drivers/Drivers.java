@@ -12,12 +12,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.core.Configuration;
-import cc.sferalabs.sfera.core.Sfera;
 import cc.sferalabs.sfera.core.PluginsClassLoader;
+import cc.sferalabs.sfera.core.Sfera;
 import cc.sferalabs.sfera.core.services.FilesWatcher;
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.script.ScriptsEngine;
@@ -33,7 +33,7 @@ public abstract class Drivers {
 
 	private static final String DEFAULT_DRIVERS_PACKAGE = Sfera.BASE_PACKAGE + ".drivers";
 	private static final String CONFIG_DIR = "drivers";
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger logger = LoggerFactory.getLogger(Drivers.class);
 
 	private static Map<String, Driver> drivers = new HashMap<>();
 

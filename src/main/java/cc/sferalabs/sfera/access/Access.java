@@ -19,8 +19,8 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility class for users authorization and authentication
@@ -39,7 +39,7 @@ public abstract class Access {
 	private static final Map<String, User> users = new ConcurrentSkipListMap<String, User>(
 			String.CASE_INSENSITIVE_ORDER);
 
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger logger = LoggerFactory.getLogger(Access.class);
 
 	/**
 	 * Initialize user credentials reading from the configuration file

@@ -7,8 +7,10 @@ import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.eventbus.Subscribe;
 
 import cc.sferalabs.sfera.access.Access;
 import cc.sferalabs.sfera.apps.Applications;
@@ -21,8 +23,6 @@ import cc.sferalabs.sfera.drivers.Drivers;
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Node;
 
-import com.google.common.eventbus.Subscribe;
-
 /**
  * The system node
  * 
@@ -33,7 +33,7 @@ import com.google.common.eventbus.Subscribe;
  */
 public class SystemNode implements Node, EventListener {
 
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger logger = LoggerFactory.getLogger(SystemNode.class);
 	private static final SystemNode INSTANCE = new SystemNode();
 	private static final List<Service> services = new ArrayList<>();
 	private Configuration config;
@@ -42,6 +42,11 @@ public class SystemNode implements Node, EventListener {
 	 * Constructor for singleton instance
 	 */
 	private SystemNode() {
+	}
+	
+	@Override
+	public String getId() {
+		return "system";
 	}
 
 	/**
@@ -58,11 +63,6 @@ public class SystemNode implements Node, EventListener {
 	 */
 	public static Configuration getConfiguration() {
 		return INSTANCE.config;
-	}
-
-	@Override
-	public String getId() {
-		return "system";
 	}
 
 	/**

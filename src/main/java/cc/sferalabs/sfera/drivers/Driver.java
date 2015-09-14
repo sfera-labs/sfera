@@ -6,8 +6,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.Future;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.core.Configuration;
 import cc.sferalabs.sfera.core.services.FilesWatcher;
@@ -38,7 +38,7 @@ public abstract class Driver extends Task implements Node {
 	public Driver(String id) {
 		super("driver." + id);
 		this.id = id;
-		this.log = LogManager.getLogger(getClass().getName() + "." + id);
+		this.log = LoggerFactory.getLogger(getClass().getName() + "." + id);
 	}
 
 	@Override

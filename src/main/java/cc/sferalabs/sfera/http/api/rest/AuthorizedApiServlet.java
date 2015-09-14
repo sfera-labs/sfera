@@ -3,13 +3,13 @@ package cc.sferalabs.sfera.http.api.rest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("serial")
 public abstract class AuthorizedApiServlet extends ApiServlet {
 
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger logger = LoggerFactory.getLogger(AuthorizedApiServlet.class);
 
 	@Override
 	protected void processRequest(HttpServletRequest req, RestResponse resp) throws Exception {

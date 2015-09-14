@@ -13,8 +13,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.security.HashLoginService;
 import org.eclipse.jetty.server.HttpConfiguration;
@@ -32,6 +30,8 @@ import org.eclipse.jetty.servlet.ServletMapping;
 import org.eclipse.jetty.util.security.Credential;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.access.Access;
 import cc.sferalabs.sfera.access.User;
@@ -53,7 +53,7 @@ public class HttpServer implements AutoStartService {
 	private static final String KEYSTORE_PATH = "data/http/sfera.keys";
 	private static final String SESSIONS_STORE_DIR = "data/http/sessions";
 
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger logger = LoggerFactory.getLogger(HttpServer.class);
 	private static final String[] EXCLUDED_PROTOCOLS = { "SSL", "SSLv2", "SSLv2Hello", "SSLv3" };
 	private static final String[] EXCLUDED_CIPHER_SUITES = { ".*NULL.*", ".*RC4.*", ".*MD5.*",
 			".*DES.*", ".*DSS.*" };

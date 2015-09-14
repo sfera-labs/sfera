@@ -4,8 +4,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.core.services.AutoStartService;
 
@@ -18,7 +18,7 @@ public class Database implements AutoStartService {
 
 	private static Connection dbConnection = null;
 
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger logger = LoggerFactory.getLogger(Database.class);
 
 	@Override
 	public void init() throws Exception {

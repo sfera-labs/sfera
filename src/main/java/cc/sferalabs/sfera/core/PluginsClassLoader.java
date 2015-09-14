@@ -5,13 +5,13 @@ import java.net.URLClassLoader;
 import java.util.Collection;
 import java.util.EventListener;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.eventbus.Subscribe;
 
 import cc.sferalabs.sfera.core.events.PluginsEvent;
 import cc.sferalabs.sfera.events.Bus;
-
-import com.google.common.eventbus.Subscribe;
 
 /**
  * Utility class to load classes from installed plugins
@@ -23,7 +23,7 @@ import com.google.common.eventbus.Subscribe;
  */
 public abstract class PluginsClassLoader {
 
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger logger = LoggerFactory.getLogger(PluginsClassLoader.class);
 	private static ClassLoader CLASS_LOADER;
 
 	/**

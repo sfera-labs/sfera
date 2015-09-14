@@ -33,8 +33,10 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.eventbus.Subscribe;
 
 import cc.sferalabs.sfera.core.Plugin;
 import cc.sferalabs.sfera.core.Plugins;
@@ -50,15 +52,13 @@ import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.ParseContext;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.TerminalNodeContext;
 
-import com.google.common.eventbus.Subscribe;
-
 public class ScriptsEngine implements AutoStartService, EventListener {
 
 	private static final String SCRIPTS_DIR = "scripts";
 	private static final String SCRIPT_FILES_EXTENSION = ".ev";
 	private static final ScriptEngineManager scriptEngineManager = new ScriptEngineManager();
 	private static final ScriptEngine driverCommandsEngine = getNewEngine();
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger logger = LoggerFactory.getLogger(ScriptsEngine.class);
 
 	private static HashMap<String, HashSet<Rule>> triggersActionsMap;
 	private static HashMap<Path, List<String>> errors;
@@ -351,7 +351,7 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 			loggerName = loggerName
 					.substring(0, loggerName.length() - SCRIPT_FILES_EXTENSION.length())
 					.replace('/', '.');
-			fileScope.put("log", LogManager.getLogger(loggerName));
+			fileScope.put("log", LoggerFactory.getLogger(loggerName));
 
 			ScriptGrammarListener scriptListener = new ScriptGrammarListener(scriptFile, fileSystem,
 					(Compilable) scriptEngine, directoryScope, fileScope);

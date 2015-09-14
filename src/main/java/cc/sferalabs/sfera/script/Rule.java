@@ -6,8 +6,8 @@ import javax.script.Compilable;
 import javax.script.CompiledScript;
 import javax.script.ScriptException;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.core.services.TasksManager;
 import cc.sferalabs.sfera.events.Event;
@@ -15,7 +15,7 @@ import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.TriggerContext;
 
 public class Rule {
 
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger logger = LoggerFactory.getLogger(Rule.class);
 
 	final TriggerCondition condition;
 	final CompiledScript action;

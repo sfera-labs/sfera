@@ -23,12 +23,12 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class FilesWatcher extends LazyService {
 
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger logger = LoggerFactory.getLogger(FilesWatcher.class);
 	private static final Map<Path, Set<WatcherTask>> PATHS_TASKS_MAP = new HashMap<>();
 	private static final Set<Path> NON_EXISTING_PATHS = new HashSet<Path>();
 	private static final Object LOCK = new Object();

@@ -7,15 +7,15 @@ import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.http.api.JsonMessage;
 
 class RestResponse extends JsonMessage {
 
 	private static final long ASYNC_RESP_TIMEOUT = 30000;
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger logger = LoggerFactory.getLogger(RestResponse.class);
 
 	private final HttpServletResponse resp;
 	private AsyncContext asyncContext;

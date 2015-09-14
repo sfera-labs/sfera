@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Event;
@@ -14,7 +14,7 @@ import cc.sferalabs.sfera.events.EventIdSpecListener;
 
 class WsEventListener extends EventIdSpecListener {
 
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger logger = LoggerFactory.getLogger(WsEventListener.class);
 
 	private final ApiSocket socket;
 

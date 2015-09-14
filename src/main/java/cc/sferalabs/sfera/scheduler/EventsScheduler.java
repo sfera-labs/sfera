@@ -8,8 +8,6 @@ import static org.quartz.TriggerBuilder.newTrigger;
 import java.util.ArrayList;
 import java.util.Set;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.quartz.DateBuilder.IntervalUnit;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
@@ -20,6 +18,8 @@ import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.matchers.GroupMatcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.core.services.AutoStartService;
 import cc.sferalabs.sfera.script.ScriptsEngine;
@@ -42,7 +42,7 @@ import cc.sferalabs.sfera.script.ScriptsEngine;
 
 public class EventsScheduler implements AutoStartService {
 
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger logger = LoggerFactory.getLogger(EventsScheduler.class);
 
 	private static Scheduler scheduler;
 

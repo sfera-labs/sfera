@@ -1,14 +1,14 @@
 package cc.sferalabs.sfera.http.api.websockets;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
 import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ApiSocketCreator implements WebSocketCreator {
 
-	private final static Logger logger = LogManager.getLogger();
+	private final static Logger logger = LoggerFactory.getLogger(ApiSocketCreator.class);
 
 	@Override
 	public Object createWebSocket(ServletUpgradeRequest req, ServletUpgradeResponse resp) {

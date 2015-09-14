@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.http.api.HttpEvent;
@@ -13,7 +13,7 @@ import cc.sferalabs.sfera.script.ScriptsEngine;
 
 class Message {
 
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger logger = LoggerFactory.getLogger(Message.class);
 	private final String action;
 	private final Map<String, String> parameterMap = new HashMap<>();
 

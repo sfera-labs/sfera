@@ -3,8 +3,8 @@ package cc.sferalabs.sfera.http.api.rest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.script.ScriptsEngine;
 
@@ -13,7 +13,7 @@ public class CommandServlet extends AuthorizedApiServlet {
 
 	public static final String PATH = ApiServlet.PATH + "command";
 
-	private final static Logger logger = LogManager.getLogger();
+	private final static Logger logger = LoggerFactory.getLogger(CommandServlet.class);
 
 	@Override
 	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)

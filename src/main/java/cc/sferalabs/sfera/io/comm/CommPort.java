@@ -2,20 +2,14 @@ package cc.sferalabs.sfera.io.comm;
 
 import java.nio.charset.Charset;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jssc.SerialPort;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.Marker;
-import org.apache.logging.log4j.MarkerManager;
-
-import cc.sferalabs.sfera.util.logging.LoggerUtils;
 
 public abstract class CommPort {
 
-	private static final Logger logger = LogManager.getLogger();
-	static final Marker COMM_MARKER = MarkerManager.getMarker("SFERA_COMM")
-			.setParents(LoggerUtils.SFERA_MARKER);
+	private static final Logger logger = LoggerFactory.getLogger(CommPort.class);
 
 	public static final int PARITY_NONE = SerialPort.PARITY_NONE;
 	public static final int PARITY_ODD = SerialPort.PARITY_ODD;
@@ -36,25 +30,25 @@ public abstract class CommPort {
 	 * @throws CommPortException
 	 */
 	public static CommPort open(String portName) throws CommPortException {
-		logger.debug(COMM_MARKER, "trying getting local port '{}'", portName);
+		logger.debug("Trying getting local port '{}'", portName);
 		CommPort commPort = null;
 		try {
 			commPort = new LocalCommPort(portName);
 		} catch (CommPortException e) {
-			logger.debug(COMM_MARKER, "error getting local port '{}': {}", portName,
+			logger.debug("Error getting local port '{}': {}", portName,
 					e.getLocalizedMessage());
 			try {
-				logger.debug(COMM_MARKER, "trying getting IP port '{}'", portName);
+				logger.debug("Trying getting IP port '{}'", portName);
 				commPort = new IPCommPort(portName);
 			} catch (CommPortException e1) {
-				logger.debug(COMM_MARKER, "error getting IP port '{}': {}", portName,
+				logger.debug("Error getting IP port '{}': {}", portName,
 						e.getLocalizedMessage());
 			}
 		}
 		if (commPort == null) {
 			throw new CommPortException("could not open port " + portName);
 		}
-		logger.debug(COMM_MARKER, "comm port '{}' open", portName);
+		logger.debug("Comm port '{}' open", portName);
 		return commPort;
 	}
 

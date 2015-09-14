@@ -5,8 +5,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("serial")
 public class LoginServlet extends ApiServlet {
@@ -14,7 +14,7 @@ public class LoginServlet extends ApiServlet {
 	public static final String PATH = ApiServlet.PATH + "login";
 
 	public static final String SESSION_ATTR_USERNAME = "user";
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger logger = LoggerFactory.getLogger(LoginServlet.class);
 
 	@Override
 	protected void processRequest(HttpServletRequest req, RestResponse resp) throws Exception {

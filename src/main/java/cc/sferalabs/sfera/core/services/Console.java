@@ -4,8 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.core.events.SystemStateEvent;
 import cc.sferalabs.sfera.drivers.Driver;
@@ -16,7 +16,7 @@ public class Console extends Task implements AutoStartService {
 
 	private static BufferedReader stdIn;
 	private boolean run;
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger logger = LoggerFactory.getLogger(Console.class);
 
 	/**
 	 * 
