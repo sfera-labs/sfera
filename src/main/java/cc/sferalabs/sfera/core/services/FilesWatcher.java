@@ -165,6 +165,7 @@ public final class FilesWatcher extends LazyService {
 	 * 
 	 * @param path
 	 * @param task
+	 * @return
 	 * @throws Exception
 	 */
 	public static String register(Path path, Runnable task) throws Exception {
@@ -176,6 +177,7 @@ public final class FilesWatcher extends LazyService {
 	 * @param path
 	 * @param task
 	 * @param removeWhenDone
+	 * @return
 	 * @throws Exception
 	 */
 	public static String register(Path path, Runnable task, boolean removeWhenDone)
@@ -186,6 +188,7 @@ public final class FilesWatcher extends LazyService {
 	/**
 	 * 
 	 * @param watcherTask
+	 * @return
 	 * @throws Exception
 	 */
 	private static String register(WatcherTask watcherTask) throws Exception {

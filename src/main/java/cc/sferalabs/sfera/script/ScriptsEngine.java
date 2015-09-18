@@ -265,12 +265,6 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 				}
 			}
 
-			for (Entry<Path, List<String>> error : errors.entrySet()) {
-				Path file = error.getKey();
-				for (String message : error.getValue()) {
-					logger.error("Errors in script file '{}': {}", file, message);
-				}
-			}
 		} catch (IOException e) {
 			logger.error("Error loading script files", e);
 		}
@@ -383,6 +377,7 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	 * @param message
 	 */
 	private static void addError(Path file, String message) {
+		logger.error("Errors in script file '{}': {}", file, message);
 		List<String> messages = errors.get(file);
 		if (messages == null) {
 			messages = new ArrayList<String>();
