@@ -43,7 +43,7 @@ public class SystemNode implements Node, EventListener {
 	 */
 	private SystemNode() {
 	}
-	
+
 	@Override
 	public String getId() {
 		return "system";

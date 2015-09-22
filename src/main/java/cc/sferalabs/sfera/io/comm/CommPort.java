@@ -35,14 +35,12 @@ public abstract class CommPort {
 		try {
 			commPort = new LocalCommPort(portName);
 		} catch (CommPortException e) {
-			logger.debug("Error getting local port '{}': {}", portName,
-					e.getLocalizedMessage());
+			logger.debug("Error getting local port '{}': {}", portName, e.getLocalizedMessage());
 			try {
 				logger.debug("Trying getting IP port '{}'", portName);
 				commPort = new IPCommPort(portName);
 			} catch (CommPortException e1) {
-				logger.debug("Error getting IP port '{}': {}", portName,
-						e.getLocalizedMessage());
+				logger.debug("Error getting IP port '{}': {}", portName, e.getLocalizedMessage());
 			}
 		}
 		if (commPort == null) {

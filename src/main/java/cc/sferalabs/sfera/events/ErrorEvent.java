@@ -8,7 +8,7 @@ package cc.sferalabs.sfera.events;
  *
  */
 public interface ErrorEvent extends Event {
-	
+
 	/**
 	 * 
 	 * @return

@@ -1,5 +1,16 @@
+/*
+sdjkld
+*/
+
+import /yauys/juahsjuhs/judhsjsh.js;
+import jaksjdaks/sd_.123/udhs.js;
+
+init {
+	
+}
+
 ciao : {}
-ciao.mamma : {}
+ciao.mamma : { var sjksdj = 0; }
 ciao.mamma(1, 2) : {}
 ciao.mamma() > 1 : {}
 ciao.mamma("dss") != 23.4 : {}

@@ -1,9 +1,12 @@
 package cc.sferalabs.sfera.script;
 
 import java.nio.file.Path;
+import java.util.List;
 
+import javax.script.Bindings;
 import javax.script.Compilable;
 import javax.script.CompiledScript;
+import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
 import org.slf4j.Logger;
@@ -21,8 +24,8 @@ public class Rule {
 	final CompiledScript action;
 	final Path scriptFile;
 	final int startLine;
-	final Scope globalScope;
-	final Scope localScope;
+	final Bindings fileScope;
+	final List<Bindings> imports;
 
 	/**
 	 * 
@@ -30,18 +33,18 @@ public class Rule {
 	 * @param action
 	 * @param scriptFile
 	 * @param engine
-	 * @param globalScope
-	 * @param localScope
+	 * @param fileScope
+	 * @param imports
 	 * @throws ScriptException
 	 */
-	public Rule(TriggerContext condition, String action, Path scriptFile, Compilable engine,
-			Scope globalScope, Scope localScope) throws ScriptException {
+	public Rule(TriggerContext condition, String action, Path scriptFile, ScriptEngine engine,
+			Bindings fileScope, List<Bindings> imports) throws ScriptException {
 		this.condition = new TriggerCondition(condition);
-		this.action = engine.compile(action);
+		this.action = ((Compilable) engine).compile(action);
 		this.scriptFile = scriptFile;
 		this.startLine = condition.getStart().getLine();
-		this.globalScope = globalScope;
-		this.localScope = localScope;
+		this.fileScope = fileScope;
+		this.imports = imports;
 	}
 
 	/**

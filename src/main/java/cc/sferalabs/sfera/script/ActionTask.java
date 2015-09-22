@@ -3,8 +3,8 @@ package cc.sferalabs.sfera.script;
 import java.util.Map.Entry;
 
 import javax.script.Bindings;
+import javax.script.ScriptEngine;
 import javax.script.ScriptException;
-import javax.script.SimpleBindings;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,20 +34,22 @@ public class ActionTask extends Task {
 	@Override
 	protected void execute() {
 		try {
-			Bindings b = new SimpleBindings();
-			b.putAll(rule.globalScope.getBindings());
-			b.putAll(rule.localScope.getBindings());
+			ScriptEngine engine = rule.action.getEngine();
+			Bindings b = engine.createBindings();
+			for (Bindings imp : rule.imports) {
+				b.putAll(imp);
+			}
+			b.putAll(rule.fileScope);
 			b.put("_e", triggerEvent);
 			rule.action.eval(b);
-			Bindings nashornGlobal = (Bindings) b.get("nashorn.global");
-			if (nashornGlobal != null) {
-				for (Entry<String, Object> binding : nashornGlobal.entrySet()) {
-					String name = binding.getKey();
-					if (rule.localScope.getBindings().containsKey(name)) {
-						rule.localScope.put(name, binding.getValue());
-					}
-					if (rule.globalScope.getBindings().containsKey(name)) {
-						rule.globalScope.put(name, binding.getValue());
+			for (Entry<String, Object> e : b.entrySet()) {
+				String key = e.getKey();
+				Object val = e.getValue();
+				if (rule.fileScope.replace(key, val) == null) {
+					for (Bindings imp : rule.imports) {
+						if (imp.replace(key, val) != null) {
+							break;
+						}
 					}
 				}
 			}

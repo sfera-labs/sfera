@@ -3,7 +3,6 @@ package cc.sferalabs.sfera.script;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
@@ -18,11 +17,12 @@ import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import javax.script.Bindings;
-import javax.script.Compilable;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -56,19 +56,21 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 
 	private static final String SCRIPTS_DIR = "scripts";
 	private static final String SCRIPT_FILES_EXTENSION = ".ev";
+	private static final String LIBRARY_FILES_EXTENSION = ".js";
 	private static final ScriptEngineManager scriptEngineManager = new ScriptEngineManager();
 	private static final ScriptEngine driverCommandsEngine = getNewEngine();
 	private static final Logger logger = LoggerFactory.getLogger(ScriptsEngine.class);
 
-	private static HashMap<String, HashSet<Rule>> triggersActionsMap;
+	private static HashMap<String, HashSet<Rule>> triggersRulesMap;
 	private static HashMap<Path, List<String>> errors;
+	private static Map<Path, Bindings> libraries;
 
 	@Override
 	public void init() throws Exception {
 		Bus.register(this);
-		loadScriptFiles();
+		loadScripts();
 		try {
-			FilesWatcher.register(Paths.get(SCRIPTS_DIR), ScriptsEngine::loadScriptFiles, false);
+			FilesWatcher.register(Paths.get(SCRIPTS_DIR), ScriptsEngine::loadScripts, false);
 		} catch (Exception e) {
 			logger.error("Error registering script files watcher", e);
 		}
@@ -77,7 +79,7 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	@Subscribe
 	public static void handlePluginsReload(PluginsEvent event) {
 		if (event == PluginsEvent.RELOAD) {
-			loadScriptFiles();
+			loadScripts();
 		}
 	}
 
@@ -106,7 +108,7 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 			List<String> idParts = getParts(id);
 
 			for (String idPart : idParts) {
-				HashSet<Rule> triggeredActions = triggersActionsMap.get(idPart);
+				HashSet<Rule> triggeredActions = triggersRulesMap.get(idPart);
 				if (triggeredActions != null) {
 					for (Rule rule : triggeredActions) {
 						if (rule.eval(event)) {
@@ -252,18 +254,15 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	/**
 	 * 
 	 */
-	private synchronized static void loadScriptFiles() {
+	private synchronized static void loadScripts() {
 		logger.info("Loading scripts...");
 		try {
-			triggersActionsMap = new HashMap<String, HashSet<Rule>>();
-			errors = new HashMap<Path, List<String>>();
+			triggersRulesMap = new HashMap<>();
+			errors = new HashMap<>();
+			libraries = new HashMap<>();
 
-			loadScriptFilesIn(FileSystems.getDefault());
-			for (Plugin plugin : Plugins.getAll().values()) {
-				try (FileSystem pluginFs = FileSystems.newFileSystem(plugin.getPath(), null)) {
-					loadScriptFilesIn(pluginFs);
-				}
-			}
+			loadFiles(LIBRARY_FILES_EXTENSION, (Path libFile) -> getBindings(libFile));
+			loadFiles(SCRIPT_FILES_EXTENSION, (Path scriptFile) -> parseScriptFile(scriptFile));
 
 		} catch (IOException e) {
 			logger.error("Error loading script files", e);
@@ -272,19 +271,41 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 
 	/**
 	 * 
-	 * @param fileSystem
+	 * @param filesExtension
+	 * @param action
 	 * @throws IOException
 	 */
-	private static void loadScriptFilesIn(final FileSystem fileSystem) throws IOException {
+	private static void loadFiles(String filesExtension, Consumer<Path> action) throws IOException {
+		loadFilesIn(FileSystems.getDefault(), filesExtension, action);
+		for (Plugin plugin : Plugins.getAll().values()) {
+			try (FileSystem pluginFs = FileSystems.newFileSystem(plugin.getPath(), null)) {
+				loadFilesIn(pluginFs, filesExtension, action);
+			}
+		}
+	}
+
+	/**
+	 * 
+	 * @param fileSystem
+	 * @param filesExtension
+	 * @param action
+	 * @throws IOException
+	 */
+	private static void loadFilesIn(final FileSystem fileSystem, String filesExtension,
+			Consumer<Path> action) throws IOException {
 		try {
 			Files.walkFileTree(fileSystem.getPath(SCRIPTS_DIR), new SimpleFileVisitor<Path>() {
 
 				@Override
-				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
+				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
 						throws IOException {
-					try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
-						createNewEnvironment(fileSystem, stream);
+					super.visitFile(file, attrs);
+					if (Files.isRegularFile(file)
+							&& file.getFileName().toString().endsWith(filesExtension)) {
+						logger.info("Loading file '{}'", file);
+						action.accept(file);
 					}
+
 					return FileVisitResult.CONTINUE;
 				}
 			});
@@ -294,39 +315,27 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 
 	/**
 	 * 
-	 * @param fileSystem
-	 * @param stream
+	 * @param libFile
 	 */
-	private static void createNewEnvironment(FileSystem fileSystem, DirectoryStream<Path> stream) {
-		ScriptEngine scriptEngine = getNewEngine();
-		Bindings dirScopeBindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE);
-		Scope directoryScope = new Scope(fileSystem, scriptEngine, dirScopeBindings);
-		for (Path file : stream) {
-			if (Files.isRegularFile(file)
-					&& file.getFileName().toString().endsWith(SCRIPT_FILES_EXTENSION)) {
-				logger.info("Loading script file '{}'", file);
-				try {
-					parseScriptFile(file, fileSystem, scriptEngine, directoryScope);
-				} catch (IOException e) {
-					addError(file, "IOException: " + e.getLocalizedMessage());
-				}
-			}
+	private static void getBindings(Path libFile) {
+		try (BufferedReader br = Files.newBufferedReader(libFile, StandardCharsets.UTF_8)) {
+			ScriptEngine engine = getNewEngine();
+			engine.eval(br);
+			Bindings bs = engine.getBindings(ScriptContext.ENGINE_SCOPE);
+			libraries.put(libFile, bs);
+		} catch (Exception e) {
+			addError(libFile, e.toString());
 		}
 	}
 
 	/**
 	 * 
 	 * @param scriptFile
-	 * @param fileSystem
-	 * @param scriptEngine
-	 * @param directoryScope
-	 * @throws IOException
 	 */
-	private static void parseScriptFile(Path scriptFile, FileSystem fileSystem,
-			ScriptEngine scriptEngine, Scope directoryScope) throws IOException {
-		try (BufferedReader r = Files.newBufferedReader(scriptFile, StandardCharsets.UTF_8)) {
+	private static void parseScriptFile(Path scriptFile) {
+		try (BufferedReader br = Files.newBufferedReader(scriptFile, StandardCharsets.UTF_8)) {
 			ScriptErrorListener grammarErrorListener = new ScriptErrorListener();
-			SferaScriptGrammarParser parser = getParser(new ANTLRInputStream(r),
+			SferaScriptGrammarParser parser = getParser(new ANTLRInputStream(br),
 					grammarErrorListener);
 
 			ParseContext tree = parser.parse();
@@ -335,39 +344,39 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 				for (String e : grammarErrorListener.errors) {
 					addError(scriptFile, e);
 				}
-
 				return;
 			}
 
-			Scope fileScope = new Scope(fileSystem, scriptEngine, scriptEngine.createBindings());
+			ScriptEngine scriptEngine = getNewEngine();
 
 			String loggerName = scriptFile.toString();
 			loggerName = loggerName
 					.substring(0, loggerName.length() - SCRIPT_FILES_EXTENSION.length())
 					.replace('/', '.');
-			fileScope.put("log", LoggerFactory.getLogger(loggerName));
+			scriptEngine.put("log", LoggerFactory.getLogger(loggerName));
 
-			ScriptGrammarListener scriptListener = new ScriptGrammarListener(scriptFile, fileSystem,
-					(Compilable) scriptEngine, directoryScope, fileScope);
+			ScriptGrammarListener scriptListener = new ScriptGrammarListener(scriptFile, libraries,
+					scriptEngine);
 			ParseTreeWalker.DEFAULT.walk(scriptListener, tree);
 
 			if (!scriptListener.errors.isEmpty()) {
 				for (String e : scriptListener.errors) {
 					addError(scriptFile, e);
 				}
-
 				return;
 			}
 
-			for (Entry<String, HashSet<Rule>> entry : scriptListener.triggerActionsMap.entrySet()) {
+			for (Entry<String, HashSet<Rule>> entry : scriptListener.triggerRulesMap.entrySet()) {
 				String trigger = entry.getKey();
-				HashSet<Rule> actions = triggersActionsMap.get(trigger);
-				if (actions == null) {
-					actions = new HashSet<Rule>();
-					triggersActionsMap.put(trigger, actions);
+				HashSet<Rule> rules = triggersRulesMap.get(trigger);
+				if (rules == null) {
+					rules = new HashSet<Rule>();
+					triggersRulesMap.put(trigger, rules);
 				}
-				actions.addAll(entry.getValue());
+				rules.addAll(entry.getValue());
 			}
+		} catch (Exception e) {
+			addError(scriptFile, e.toString());
 		}
 	}
 
@@ -377,7 +386,7 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	 * @param message
 	 */
 	private static void addError(Path file, String message) {
-		logger.error("Errors in script file '{}': {}", file, message);
+		logger.error("Error loading script file '{}': {}", file, message);
 		List<String> messages = errors.get(file);
 		if (messages == null) {
 			messages = new ArrayList<String>();
