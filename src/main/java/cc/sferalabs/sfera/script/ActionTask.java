@@ -12,7 +12,15 @@ import org.slf4j.LoggerFactory;
 import cc.sferalabs.sfera.core.services.Task;
 import cc.sferalabs.sfera.events.Event;
 
-public class ActionTask extends Task {
+/**
+ * Class representing a script action
+ * 
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
+class ActionTask extends Task {
 
 	private static final Logger logger = LoggerFactory.getLogger(ActionTask.class);
 
@@ -25,7 +33,7 @@ public class ActionTask extends Task {
 	 * @param rule
 	 * @param localScope
 	 */
-	public ActionTask(Event triggerEvent, Rule rule) {
+	ActionTask(Event triggerEvent, Rule rule) {
 		super("script:" + rule.scriptFile + ":" + rule.startLine);
 		this.triggerEvent = triggerEvent;
 		this.rule = rule;

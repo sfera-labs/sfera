@@ -26,6 +26,7 @@ import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import javax.script.SimpleBindings;
 
 import org.antlr.v4.runtime.ANTLRErrorListener;
@@ -52,6 +53,14 @@ import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.ParseContext;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.TerminalNodeContext;
 
+/**
+ * Service for the processing of scripts.
+ * 
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 public class ScriptsEngine implements AutoStartService, EventListener {
 
 	private static final String SCRIPTS_DIR = "scripts";
@@ -76,6 +85,12 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 		}
 	}
 
+	/**
+	 * Reload scripts when plugins reloaded
+	 * 
+	 * @param event
+	 *            the plugins event
+	 */
 	@Subscribe
 	public static void handlePluginsReload(PluginsEvent event) {
 		if (event == PluginsEvent.RELOAD) {
@@ -89,15 +104,19 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 
 	/**
 	 * 
-	 * @return
+	 * @return a new Nashorn {@code ScriptEngine}
+	 * @see ScriptEngineManager
 	 */
 	private static ScriptEngine getNewEngine() {
 		return scriptEngineManager.getEngineByName("nashorn");
 	}
 
 	/**
+	 * Executes the script actions triggered by the specified event. This method
+	 * should only be called by the events Bus.
 	 * 
 	 * @param event
+	 *            the trigger event
 	 */
 	@Subscribe
 	public synchronized static void executeActionsTriggeredBy(Event event) {
@@ -108,10 +127,10 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 			List<String> idParts = getParts(id);
 
 			for (String idPart : idParts) {
-				HashSet<Rule> triggeredActions = triggersRulesMap.get(idPart);
-				if (triggeredActions != null) {
-					for (Rule rule : triggeredActions) {
-						if (rule.eval(event)) {
+				HashSet<Rule> triggeredRules = triggersRulesMap.get(idPart);
+				if (triggeredRules != null) {
+					for (Rule rule : triggeredRules) {
+						if (rule.evalCondition(event)) {
 							toExecute.add(rule);
 						}
 					}
@@ -119,7 +138,7 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 			}
 
 			for (Rule rule : toExecute) {
-				rule.execute(event);
+				rule.executeAction(event);
 			}
 		} catch (Exception e) {
 			logger.error("Error executing actions triggered by event: " + event.getId(), e);
@@ -127,36 +146,50 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	}
 
 	/**
+	 * <p>Executes a single action on a driver instance.</p>
+	 * <p>If an action is of the form "driver.action(value)" then this should be
+	 * passed as the {@code action} parameter.</p>
+	 * If an action is of the form "driver.action = value" then "driver.action"
+	 * should be passed as the {@code action} parameter and "value" as the
+	 * {@code param} parameter.
 	 * 
-	 * @param command
+	 * @param action
+	 *            the action
 	 * @param param
+	 *            optional parameter
 	 * @param user
-	 * @return
-	 * @throws Exception
+	 *            the user who requested the action
+	 * @return The value returned by the script
+	 * @throws ScriptException
+	 *             if an error occurs executing the action script
+	 * @throws IllegalArgumentException
+	 *             if {@code action} or {@code param} have syntax errors
 	 */
-	public static Object executeDriverCommand(String command, String param, String user)
-			throws Exception {
+	public static Object executeDriverAction(String action, String param, String user)
+			throws ScriptException, IllegalArgumentException {
 		ScriptErrorListener errorListener = new ScriptErrorListener();
 
-		SferaScriptGrammarParser parser = getParser(new ANTLRInputStream(command), errorListener);
+		SferaScriptGrammarParser parser = getParser(new ANTLRInputStream(action), errorListener);
 		TerminalNodeContext commandContext = parser.terminalNode();
 		if (!errorListener.errors.isEmpty()) {
-			throw new Exception("Invalid node syntax: " + errorListener.errors.get(0));
+			throw new IllegalArgumentException(
+					"Invalid node syntax: " + errorListener.errors.get(0));
 		}
 
 		String driverName = commandContext.NodeId().getText();
 		Driver driver = Drivers.getDriver(driverName);
 
 		if (driver == null) {
-			throw new Exception("Driver '" + driverName + "' not found");
+			throw new IllegalArgumentException("Driver '" + driverName + "' not found");
 		}
 
-		String commandScript = command;
+		String commandScript = action;
 		if (param != null) {
 			parser = getParser(new ANTLRInputStream(param), errorListener);
 			parser.paramsList();
 			if (!errorListener.errors.isEmpty()) {
-				throw new Exception("Invalid param syntax: " + errorListener.errors.get(0));
+				throw new IllegalArgumentException(
+						"Invalid param syntax: " + errorListener.errors.get(0));
 			}
 			commandScript += "=" + param;
 
@@ -228,20 +261,30 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	}
 
 	/**
+	 * Sets the specified key/value pair in the global scope of the script
+	 * engine.
 	 * 
 	 * @param key
+	 *            key to set
 	 * @param value
+	 *            value to set
 	 */
 	public synchronized static void putObjectInGlobalScope(String key, Object value) {
 		scriptEngineManager.put(key, value);
 	}
 
 	/**
+	 * Adds the specified Java type to the global scope of the script engine.
+	 * After this call the type will be accessible from the script using the
+	 * class simple name.
 	 * 
 	 * @param clazz
-	 * @throws Exception
+	 *            the Java type to add
+	 * @throws ScriptException
+	 *             if the method fails
+	 * @see Class#getSimpleName
 	 */
-	public synchronized static void putTypeInGlobalScope(Class<?> clazz) throws Exception {
+	public synchronized static void putTypeInGlobalScope(Class<?> clazz) throws ScriptException {
 		String typeName = clazz.getSimpleName();
 		ScriptEngine engine = getNewEngine();
 		String script = "var " + typeName + " = Java.type('" + clazz.getName() + "');";
@@ -252,7 +295,7 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	}
 
 	/**
-	 * 
+	 * Loads the script files
 	 */
 	private synchronized static void loadScripts() {
 		logger.info("Loading scripts...");

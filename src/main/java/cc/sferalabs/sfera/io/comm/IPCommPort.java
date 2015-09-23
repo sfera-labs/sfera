@@ -12,6 +12,14 @@ import java.nio.charset.Charset;
 import cc.sferalabs.sfera.core.services.Task;
 import cc.sferalabs.sfera.core.services.TasksManager;
 
+/**
+ * Class representing a remote IP/serial gateway.
+ * 
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 public class IPCommPort extends CommPort {
 
 	private static final int SOCKET_CONNECT_TIMEOUT = 3000;
@@ -26,13 +34,13 @@ public class IPCommPort extends CommPort {
 	private class ReaderTask extends Task {
 
 		private boolean run = true;
-		private CommPortReader reader;
+		private CommPortListener reader;
 
 		/**
 		 * 
 		 * @param reader
 		 */
-		public ReaderTask(CommPortReader reader) {
+		public ReaderTask(CommPortListener reader) {
 			super("CommPortReader:" + socket.getInetAddress().getHostName());
 			this.reader = reader;
 		}
@@ -109,7 +117,7 @@ public class IPCommPort extends CommPort {
 	}
 
 	@Override
-	public synchronized void setReader(CommPortReader reader) throws CommPortException {
+	public synchronized void setListener(CommPortListener reader) throws CommPortException {
 		if (readerTask != null) {
 			throw new CommPortException("Comm port reader already set");
 		}
@@ -118,7 +126,7 @@ public class IPCommPort extends CommPort {
 	}
 
 	@Override
-	public synchronized void removeReader() throws CommPortException {
+	public synchronized void removeListener() throws CommPortException {
 		if (readerTask != null) {
 			readerTask.run = false;
 			readerTask = null;
@@ -155,7 +163,7 @@ public class IPCommPort extends CommPort {
 		closed = true;
 		if (readerTask != null) {
 			try {
-				removeReader();
+				removeListener();
 			} catch (Exception e) {
 			}
 		}

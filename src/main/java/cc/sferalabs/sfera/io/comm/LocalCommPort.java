@@ -9,6 +9,14 @@ import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 import jssc.SerialPortTimeoutException;
 
+/**
+ * Class representing a serial port available on the host machine.
+ * 
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 public class LocalCommPort extends CommPort {
 
 	private final SerialPort serialPort;
@@ -18,7 +26,7 @@ public class LocalCommPort extends CommPort {
 	 * @param portName
 	 * @throws CommPortException
 	 */
-	public LocalCommPort(String portName) throws CommPortException {
+	protected LocalCommPort(String portName) throws CommPortException {
 		try {
 			this.serialPort = new SerialPort(portName);
 			if (!serialPort.openPort()) {
@@ -56,7 +64,7 @@ public class LocalCommPort extends CommPort {
 	}
 
 	@Override
-	public void setReader(CommPortReader reader) throws CommPortException {
+	public void setListener(CommPortListener listener) throws CommPortException {
 		SerialPortEventListener spel = new SerialPortEventListener() {
 
 			@Override
@@ -65,10 +73,10 @@ public class LocalCommPort extends CommPort {
 					int len = event.getEventValue();
 					byte[] bytes = new byte[len];
 					readBytes(bytes, 0, len);
-					reader.onRead(bytes);
+					listener.onRead(bytes);
 
 				} catch (Throwable t) {
-					reader.onError(t);
+					listener.onError(t);
 				}
 			}
 		};
@@ -80,7 +88,7 @@ public class LocalCommPort extends CommPort {
 	}
 
 	@Override
-	public void removeReader() throws CommPortException {
+	public void removeListener() throws CommPortException {
 		try {
 			serialPort.removeEventListener();
 		} catch (SerialPortException e) {
@@ -91,7 +99,11 @@ public class LocalCommPort extends CommPort {
 	@Override
 	public int getAvailableBytesCount() throws CommPortException {
 		try {
-			return serialPort.getInputBufferBytesCount();
+			int n = serialPort.getInputBufferBytesCount();
+			if (n < 0) {
+				throw new CommPortException("operation failed");
+			}
+			return n;
 		} catch (SerialPortException e) {
 			throw new CommPortException(e.getLocalizedMessage(), e);
 		}
@@ -122,7 +134,7 @@ public class LocalCommPort extends CommPort {
 	@Override
 	public void close() throws CommPortException {
 		try {
-			removeReader();
+			removeListener();
 		} catch (Exception e) {
 		}
 		try {
@@ -137,6 +149,9 @@ public class LocalCommPort extends CommPort {
 	@Override
 	public int readBytes(byte[] b, int offset, int len) throws CommPortException {
 		try {
+			if (len < 0) {
+				throw new IndexOutOfBoundsException("len is negative");
+			}
 			byte[] read = serialPort.readBytes(len);
 			for (int i = 0; i < read.length; i++) {
 				b[offset + i] = read[i];

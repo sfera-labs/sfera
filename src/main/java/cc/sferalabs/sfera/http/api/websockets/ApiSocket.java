@@ -9,7 +9,15 @@ import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ApiSocket extends WebSocketAdapter {
+/**
+ * {@link WebSocketAdapter} to process API requests
+ * 
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
+class ApiSocket extends WebSocketAdapter {
 
 	private static final Logger logger = LoggerFactory.getLogger(ApiSocket.class);
 	ServletUpgradeRequest request;
@@ -20,7 +28,7 @@ public class ApiSocket extends WebSocketAdapter {
 	 * 
 	 * @param request
 	 */
-	public ApiSocket(ServletUpgradeRequest request) {
+	ApiSocket(ServletUpgradeRequest request) {
 		this.request = request;
 		this.user = request.getUserPrincipal();
 	}

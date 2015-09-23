@@ -17,7 +17,15 @@ import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.TransientEventC
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.TriggerContext;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.UnknownComparisonContext;
 
-public class TriggerCondition {
+/**
+ * Class representing a script trigger condition
+ * 
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
+class TriggerCondition {
 
 	private final TriggerContext condition;
 
@@ -25,7 +33,7 @@ public class TriggerCondition {
 	 * 
 	 * @param condition
 	 */
-	public TriggerCondition(TriggerContext condition) {
+	TriggerCondition(TriggerContext condition) {
 		this.condition = condition;
 	}
 
@@ -129,7 +137,7 @@ public class TriggerCondition {
 	private boolean eval(TransientEventContext ctx, Event event) {
 		String eventId = event.getId();
 		String condition = ctx.getText();
-		if (event.getId().startsWith(ctx.getText())) {
+		if (eventId.startsWith(condition)) {
 			if (eventId.length() == condition.length()) { // equal
 				return true;
 			}

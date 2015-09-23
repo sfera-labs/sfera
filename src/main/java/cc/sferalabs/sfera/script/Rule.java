@@ -16,7 +16,15 @@ import cc.sferalabs.sfera.core.services.TasksManager;
 import cc.sferalabs.sfera.events.Event;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.TriggerContext;
 
-public class Rule {
+/**
+ * Class representing a script rule.
+ * 
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
+class Rule {
 
 	private static final Logger logger = LoggerFactory.getLogger(Rule.class);
 
@@ -37,7 +45,7 @@ public class Rule {
 	 * @param imports
 	 * @throws ScriptException
 	 */
-	public Rule(TriggerContext condition, String action, Path scriptFile, ScriptEngine engine,
+	Rule(TriggerContext condition, String action, Path scriptFile, ScriptEngine engine,
 			Bindings fileScope, List<Bindings> imports) throws ScriptException {
 		this.condition = new TriggerCondition(condition);
 		this.action = ((Compilable) engine).compile(action);
@@ -51,7 +59,7 @@ public class Rule {
 	 * 
 	 * @param event
 	 */
-	public void execute(Event event) {
+	public void executeAction(Event event) {
 		TasksManager.execute(new ActionTask(event, this));
 	}
 
@@ -60,7 +68,7 @@ public class Rule {
 	 * @param event
 	 * @return
 	 */
-	public boolean eval(Event event) {
+	public boolean evalCondition(Event event) {
 		try {
 			return condition.eval(event);
 		} catch (Exception e) {

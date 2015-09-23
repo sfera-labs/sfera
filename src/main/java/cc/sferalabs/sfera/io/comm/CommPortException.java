@@ -1,17 +1,20 @@
 package cc.sferalabs.sfera.io.comm;
 
+/**
+ *
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
+@SuppressWarnings("serial")
 public class CommPortException extends Exception {
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 7492995860952339470L;
 
 	/**
 	 * 
 	 * @param message
 	 */
-	public CommPortException(String message) {
+	CommPortException(String message) {
 		super(message);
 	}
 
@@ -20,7 +23,7 @@ public class CommPortException extends Exception {
 	 * @param message
 	 * @param cause
 	 */
-	public CommPortException(String message, Throwable cause) {
+	CommPortException(String message, Throwable cause) {
 		super(message, cause);
 	}
 }

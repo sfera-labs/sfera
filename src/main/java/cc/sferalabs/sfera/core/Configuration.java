@@ -9,6 +9,13 @@ import java.util.Map;
 
 import org.yaml.snakeyaml.Yaml;
 
+/**
+ *
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 public class Configuration {
 
 	/** File extension for configuration files */

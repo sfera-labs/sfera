@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.events.Bus;
-import cc.sferalabs.sfera.http.api.HttpEvent;
+import cc.sferalabs.sfera.http.api.RemoteEvent;
 import cc.sferalabs.sfera.script.ScriptsEngine;
 
 class Message {
@@ -82,7 +82,7 @@ class Message {
 					if (command.indexOf('.') > 0) { // driver command
 						String param = parameterMap.get(command);
 						try {
-							Object res = ScriptsEngine.executeDriverCommand(command, param,
+							Object res = ScriptsEngine.executeDriverAction(command, param,
 									socket.getUserName());
 							resp.sendResult(res);
 							return;
@@ -97,8 +97,8 @@ class Message {
 				String eid = parameterMap.get("eid");
 				String eval = parameterMap.get("eval");
 				try {
-					HttpEvent httpEvent = new HttpEvent(eid, eval, socket.getUserName(), resp);
-					Bus.post(httpEvent);
+					RemoteEvent remoteEvent = new RemoteEvent(eid, eval, socket.getUserName(), resp);
+					Bus.post(remoteEvent);
 				} catch (Exception e) {
 					resp.sendError(e.getMessage());
 				}

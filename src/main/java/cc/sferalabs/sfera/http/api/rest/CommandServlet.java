@@ -23,7 +23,7 @@ public class CommandServlet extends AuthorizedApiServlet {
 			for (String command : req.getParameterMap().keySet()) {
 				if (command.indexOf('.') > 0) { // driver command
 					String param = req.getParameter(command);
-					res = ScriptsEngine.executeDriverCommand(command, param, req.getRemoteUser());
+					res = ScriptsEngine.executeDriverAction(command, param, req.getRemoteUser());
 					break;
 				}
 			}

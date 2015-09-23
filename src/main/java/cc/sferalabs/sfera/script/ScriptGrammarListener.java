@@ -23,7 +23,14 @@ import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.StableEventCont
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.TransientEventContext;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.TriggerContext;
 
-public class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
+/**
+ *
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
+class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 
 	private final Path scriptFile;
 	private final ScriptEngine engine;
@@ -42,8 +49,7 @@ public class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 	 * @param libraries
 	 * @param engine
 	 */
-	public ScriptGrammarListener(Path scriptFile, Map<Path, Bindings> libraries,
-			ScriptEngine engine) {
+	ScriptGrammarListener(Path scriptFile, Map<Path, Bindings> libraries, ScriptEngine engine) {
 		this.scriptFile = scriptFile;
 		this.engine = engine;
 		this.fileScope = engine.getBindings(ScriptContext.ENGINE_SCOPE);

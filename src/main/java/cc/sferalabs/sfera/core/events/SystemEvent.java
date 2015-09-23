@@ -1,12 +1,14 @@
 package cc.sferalabs.sfera.core.events;
 
-import cc.sferalabs.sfera.core.SystemNode;
-import cc.sferalabs.sfera.events.BaseEvent;
+import cc.sferalabs.sfera.events.Event;
 
-public abstract class SystemEvent extends BaseEvent {
-
-	public SystemEvent(String id) {
-		super(SystemNode.getInstance(), id);
-	}
+/**
+ *
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
+public interface SystemEvent extends Event {
 
 }

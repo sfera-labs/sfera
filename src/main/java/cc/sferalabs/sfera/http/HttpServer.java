@@ -48,6 +48,14 @@ import cc.sferalabs.sfera.http.api.websockets.ApiWebSocketServlet;
 import cc.sferalabs.sfera.http.auth.AuthenticationFilter;
 import cc.sferalabs.sfera.http.auth.AuthenticationRequestWrapper;
 
+/**
+ * HTTP Server
+ * 
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 public class HttpServer implements AutoStartService {
 
 	private static final String KEYSTORE_PATH = "data/http/sfera.keys";
@@ -202,10 +210,15 @@ public class HttpServer implements AutoStartService {
 	}
 
 	/**
+	 * Registers the specified servlet class to handle the requests on paths
+	 * matching the specified path spec
 	 * 
 	 * @param servlet
+	 *            the servlet class
 	 * @param pathSpec
+	 *            the path spec to map servlet to
 	 * @throws HttpServerException
+	 *             if an error occurs
 	 */
 	public synchronized static void addServlet(Class<? extends Servlet> servlet, String pathSpec)
 			throws HttpServerException {
@@ -213,10 +226,15 @@ public class HttpServer implements AutoStartService {
 	}
 
 	/**
+	 * Registers the servlet contained by the servlet holder to handle the
+	 * requests on paths matching the specified path spec
 	 * 
 	 * @param servlet
+	 *            the servlet holder
 	 * @param pathSpec
+	 *            the path spec to map servlet to
 	 * @throws HttpServerException
+	 *             if an error occurs
 	 */
 	public synchronized static void addServlet(ServletHolder servlet, String pathSpec)
 			throws HttpServerException {
@@ -250,9 +268,12 @@ public class HttpServer implements AutoStartService {
 	}
 
 	/**
+	 * Removes the previously registered servlet holder
 	 * 
 	 * @param servlet
+	 *            the servlet holder
 	 * @throws HttpServerException
+	 *             if an error occurs
 	 */
 	public synchronized static void removeServlet(ServletHolder servlet)
 			throws HttpServerException {
@@ -289,9 +310,12 @@ public class HttpServer implements AutoStartService {
 	}
 
 	/**
+	 * Removes the previously registered servlets of the specified class
 	 * 
 	 * @param servlet
+	 *            the servlet class
 	 * @throws HttpServerException
+	 *             if an error occurs
 	 */
 	public synchronized static void removeServlet(Class<? extends Servlet> servlet)
 			throws HttpServerException {
