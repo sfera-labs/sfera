@@ -9,7 +9,7 @@ import cc.sferalabs.sfera.events.Node;
 import cc.sferalabs.sfera.events.StringEvent;
 
 /**
- * Event generated when requested via remote API
+ * Event generated when requested via remote API.
  * 
  * @author Giampiero Baggiani
  *

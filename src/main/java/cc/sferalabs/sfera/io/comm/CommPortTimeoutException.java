@@ -1,5 +1,12 @@
 package cc.sferalabs.sfera.io.comm;
 
+/**
+ *
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 public class CommPortTimeoutException extends Exception {
 
 	/**
@@ -11,7 +18,7 @@ public class CommPortTimeoutException extends Exception {
 	 * 
 	 * @param message
 	 */
-	public CommPortTimeoutException(String message) {
+	CommPortTimeoutException(String message) {
 		super(message);
 	}
 
@@ -20,7 +27,7 @@ public class CommPortTimeoutException extends Exception {
 	 * @param message
 	 * @param cause
 	 */
-	public CommPortTimeoutException(String message, Throwable cause) {
+	CommPortTimeoutException(String message, Throwable cause) {
 		super(message, cause);
 	}
 }

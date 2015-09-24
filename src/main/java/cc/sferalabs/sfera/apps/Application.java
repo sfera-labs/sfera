@@ -3,6 +3,7 @@ package cc.sferalabs.sfera.apps;
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import java.util.EventListener;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +26,7 @@ public abstract class Application implements EventListener {
 
 	protected final Logger log;
 	private String configFile;
-	private String configWatcherId;
+	private UUID configWatcherId;
 
 	/**
 	 * 

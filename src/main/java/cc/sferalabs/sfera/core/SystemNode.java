@@ -143,13 +143,13 @@ public class SystemNode implements Node, EventListener {
 				Drivers.quit();
 
 				logger.debug("Terminating tasks...");
-				TasksManager.getExecutorService().shutdownNow();
+				TasksManager.shutdownTasksNow();
 				try {
-					if (TasksManager.getExecutorService().awaitTermination(15, TimeUnit.SECONDS)) {
+					if (TasksManager.awaitTasksTermination(15, TimeUnit.SECONDS)) {
 						logger.debug("Tasks terminated");
 					} else {
 						logger.debug(
-								"Some tasks are taking long to terminate. We gave them a chance...");
+								"Some tasks are taking too long to terminate. We gave them a chance...");
 					}
 				} catch (InterruptedException e) {
 				}

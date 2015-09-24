@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.UUID;
 import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
@@ -108,7 +109,7 @@ public abstract class Driver extends Task implements Node {
 	protected void execute() {
 		while (!quit) {
 			Configuration config = null;
-			String configWatcherId = null;
+			UUID configWatcherId = null;
 			try {
 				log.info("Starting...");
 				config = new Configuration(configFile);

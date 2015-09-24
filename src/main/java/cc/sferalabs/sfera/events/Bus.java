@@ -24,7 +24,7 @@ import cc.sferalabs.sfera.core.services.TasksManager;
 public abstract class Bus {
 
 	private static final SubscriberExceptionHandler SUBSCRIBER_EXCEPTION_HANDLER = new EventsSubscriberExceptionHandler();
-	private static final EventBus EVENT_BUS = new AsyncEventBus(TasksManager.getExecutorService(),
+	private static final EventBus EVENT_BUS = new AsyncEventBus(TasksManager.getTasksExecutorService(),
 			SUBSCRIBER_EXCEPTION_HANDLER);
 	private static final Map<String, Event> EVENTS_MAP = new HashMap<String, Event>();
 

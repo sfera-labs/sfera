@@ -11,7 +11,7 @@ package cc.sferalabs.sfera.core.services;
 public interface AutoStartService extends Service {
 
 	/**
-	 * Initializes the service
+	 * Initializes the service. Called during start-up phase
 	 * 
 	 * @throws Exception
 	 *             if an error occurs

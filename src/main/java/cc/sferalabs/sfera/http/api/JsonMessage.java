@@ -4,6 +4,13 @@ import java.io.IOException;
 
 import org.json.simple.JSONObject;
 
+/**
+ *
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 public abstract class JsonMessage {
 
 	private final JSONObject obj = new JSONObject();
@@ -17,6 +24,7 @@ public abstract class JsonMessage {
 	/**
 	 * 
 	 * @throws IOException
+	 *             if an I/O error occurs
 	 * @throws IllegalStateException
 	 *             if this response has already been sent
 	 */
@@ -32,6 +40,7 @@ public abstract class JsonMessage {
 	 * 
 	 * @param result
 	 * @throws IOException
+	 *             if an I/O error occurs
 	 * @throws IllegalStateException
 	 *             if this response has already been sent
 	 */
@@ -43,6 +52,7 @@ public abstract class JsonMessage {
 	 * 
 	 * @param message
 	 * @throws IOException
+	 *             if an I/O error occurs
 	 * @throws IllegalStateException
 	 *             if this response has already been sent
 	 */
@@ -55,6 +65,7 @@ public abstract class JsonMessage {
 	 * @param key
 	 * @param value
 	 * @throws IOException
+	 *             if an I/O error occurs
 	 * @throws IllegalStateException
 	 *             if this response has already been sent
 	 */

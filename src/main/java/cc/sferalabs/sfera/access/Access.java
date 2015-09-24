@@ -45,6 +45,7 @@ public abstract class Access {
 	 * Initialize user credentials reading from the configuration file
 	 * 
 	 * @throws IOException
+	 *             if an I/O error occurs loading the saved data
 	 */
 	public synchronized static void init() throws IOException {
 		List<String> lines;
@@ -86,7 +87,7 @@ public abstract class Access {
 	 * @throws UsernameAlreadyUsedException
 	 *             if a user with the specified username already exists
 	 * @throws IOException
-	 *             if an I/O error occurs writing to the configuration file
+	 *             if an I/O error occurs saving the access data
 	 */
 	public synchronized static void addUser(String username, String plainPassword, String[] roles)
 			throws UsernameAlreadyUsedException, IOException {
@@ -115,20 +116,23 @@ public abstract class Access {
 	}
 
 	/**
-	 * Returns the user with the specified username
+	 * Returns the user with the specified username, or {@code null} if no user
+	 * with the specified username exists.
 	 * 
 	 * @param username
 	 *            the username
-	 * @return
+	 * @return the user with the specified username, or {@code null} if no user
+	 *         with the specified username exists
+	 * 
 	 */
 	public synchronized static User getUser(String username) {
 		return users.get(username);
 	}
 
 	/**
-	 * Returns a set containing all the existing users
+	 * Returns a set containing all the existing users.
 	 * 
-	 * @return
+	 * @return a set containing all the existing users
 	 */
 	public synchronized static Set<User> getUsers() {
 		return new HashSet<User>(users.values());

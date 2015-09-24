@@ -26,6 +26,15 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Utility service for watching files and triggering actions upon files
+ * modification
+ * 
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 public final class FilesWatcher extends LazyService {
 
 	private static final Logger logger = LoggerFactory.getLogger(FilesWatcher.class);
@@ -162,36 +171,60 @@ public final class FilesWatcher extends LazyService {
 	}
 
 	/**
+	 * Registers the specified {@code task} to be executed when the file located
+	 * at the specified {@code path} is modified.
+	 * <p>
+	 * Equivalent to {@link #register(Path, Runnable, boolean)
+	 * FilesWatcher.register}{@code (path, task, true);}
+	 * </p>
 	 * 
 	 * @param path
+	 *            the path of the file to be watched
 	 * @param task
-	 * @return
-	 * @throws Exception
+	 *            the task to be executed on file modification
+	 * @return a {@code UUID} that can be used to
+	 *         {@link #unregister(Path, UUID) unregister} the task in the
+	 *         future
+	 * @throws IOException
+	 *             If an I/O error occurs
 	 */
-	public static String register(Path path, Runnable task) throws Exception {
+	public static UUID register(Path path, Runnable task) throws IOException {
 		return register(path, task, true);
 	}
 
 	/**
+	 * Registers the specified {@code task} to be executed when the file located
+	 * at the specified {@code path} is modified.
 	 * 
 	 * @param path
+	 *            the path of the file to be watched
 	 * @param task
+	 *            the task to be executed on file modification
 	 * @param removeWhenDone
-	 * @return
-	 * @throws Exception
+	 *            if {@code true} the task will be executed once after the first
+	 *            modification and then removed. Otherwise the task will be
+	 *            executed at every modification until
+	 *            {@link #unregister(Path, UUID) unregistered}
+	 * @return a {@code UUID} that can be used to
+	 *         {@link #unregister(Path, UUID) unregister} the task in the
+	 *         future
+	 * @throws IOException
+	 *             If an I/O error occurs
 	 */
-	public static String register(Path path, Runnable task, boolean removeWhenDone)
-			throws Exception {
+	public static UUID register(Path path, Runnable task, boolean removeWhenDone)
+			throws IOException {
 		return register(new WatcherTask(path, task, removeWhenDone));
 	}
 
 	/**
+	 * Performs the actual registration task.
 	 * 
 	 * @param watcherTask
 	 * @return
-	 * @throws Exception
+	 * @throws IOException
+	 *             If an I/O error occurs
 	 */
-	private static String register(WatcherTask watcherTask) throws Exception {
+	private static UUID register(WatcherTask watcherTask) throws IOException {
 		if (WATCHER == null) {
 			throw new IllegalStateException("Not initialized");
 		}
@@ -238,11 +271,17 @@ public final class FilesWatcher extends LazyService {
 	}
 
 	/**
+	 * Unregisters the previously {@link #register(Path, Runnable, boolean)
+	 * registered} task on the specified {@code path} and with the specified
+	 * {@code UUID} returned by the {@link #register(Path, Runnable, boolean)}
+	 * method.
 	 * 
 	 * @param path
+	 *            the path the task was registered on
 	 * @param id
+	 *            the registration {@code UUID}
 	 */
-	public static void unregister(Path path, String id) {
+	public static void unregister(Path path, UUID id) {
 		synchronized (LOCK) {
 			Set<WatcherTask> ts = PATHS_TASKS_MAP.get(path);
 			if (ts != null) {
@@ -266,7 +305,7 @@ public final class FilesWatcher extends LazyService {
 	 */
 	private static class WatcherTask {
 
-		private final String id;
+		private final UUID id;
 		private final Path path;
 		private final Task task;
 		private final boolean remove;
@@ -278,7 +317,7 @@ public final class FilesWatcher extends LazyService {
 		 * @param remove
 		 */
 		WatcherTask(Path path, Runnable task, boolean remove) {
-			this.id = UUID.randomUUID().toString();
+			this.id = UUID.randomUUID();
 			this.path = path;
 			this.task = Task.create("File '" + path + "' watcher", task);
 			this.remove = remove;
@@ -288,7 +327,7 @@ public final class FilesWatcher extends LazyService {
 		 * 
 		 * @return
 		 */
-		public String getId() {
+		public UUID getId() {
 			return id;
 		}
 
