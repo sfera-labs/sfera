@@ -1,6 +1,7 @@
 package cc.sferalabs.sfera.http.api.websockets;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,9 +41,7 @@ class WsEventListener extends EventIdSpecListener {
 
 	@Override
 	protected void handleEvent(Event event) {
-		List<Event> evs = new ArrayList<>();
-		evs.add(event);
-		sendEvents(evs);
+		sendEvents(Arrays.asList(event));
 	}
 
 	/**
@@ -51,7 +50,7 @@ class WsEventListener extends EventIdSpecListener {
 	 */
 	private void sendEvents(List<Event> events) {
 		try {
-			WsMessage m = new WsMessage("event", socket);
+			OutgoingMessage m = new OutgoingMessage("event", socket);
 			Map<String, Object> eventsMap = new HashMap<>();
 			for (Event e : events) {
 				eventsMap.put(e.getId(), e.getValue());

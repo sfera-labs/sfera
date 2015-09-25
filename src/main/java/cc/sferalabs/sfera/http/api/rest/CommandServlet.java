@@ -1,5 +1,8 @@
 package cc.sferalabs.sfera.http.api.rest;
 
+import java.io.IOException;
+
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -17,7 +20,7 @@ public class CommandServlet extends AuthorizedApiServlet {
 
 	@Override
 	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
-			throws Exception {
+			throws ServletException, IOException {
 		try {
 			Object res = null;
 			for (String command : req.getParameterMap().keySet()) {

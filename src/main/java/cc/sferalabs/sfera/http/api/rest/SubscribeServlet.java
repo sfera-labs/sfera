@@ -1,5 +1,8 @@
 package cc.sferalabs.sfera.http.api.rest;
 
+import java.io.IOException;
+
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -16,7 +19,7 @@ public class SubscribeServlet extends AuthorizedApiServlet {
 
 	@Override
 	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
-			throws Exception {
+			throws ServletException, IOException {
 		String id = req.getParameter("id");
 		String nodes = req.getParameter("nodes");
 
@@ -32,7 +35,7 @@ public class SubscribeServlet extends AuthorizedApiServlet {
 		if (subscription == null) {
 			subscription = new PollingSubscription();
 			id = subscription.getId();
-			subscriptions.put(id, subscription);
+			subscriptions.put(subscription);
 			logger.debug("Creted new subscription for session '{}' with ID: {}", session.getId(),
 					id);
 		}

@@ -1,6 +1,8 @@
 package cc.sferalabs.sfera.http.api.rest;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,15 +26,24 @@ public class SubscriptionsSet implements Serializable {
 
 	/**
 	 * 
-	 * @param id
 	 * @param subscription
 	 * @return
 	 */
-	public PollingSubscription put(String id, PollingSubscription subscription) {
+	public PollingSubscription put(PollingSubscription subscription) {
 		if (map == null) {
 			map = new HashMap<>();
 		}
-		return map.put(id, subscription);
+		return map.put(subscription.getId(), subscription);
+	}
+
+	/**
+	 * @return
+	 */
+	public Collection<PollingSubscription> values() {
+		if (map == null) {
+			return new ArrayList<>();
+		}
+		return map.values();
 	}
 
 }

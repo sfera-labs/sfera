@@ -1,10 +1,12 @@
 package cc.sferalabs.sfera.http.api.rest;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -18,7 +20,7 @@ public class StateServlet extends AuthorizedApiServlet {
 
 	@Override
 	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
-			throws Exception {
+			throws ServletException, IOException {
 		long ts;
 		try {
 			ts = Long.parseLong(req.getParameter("ts"));
@@ -43,14 +45,17 @@ public class StateServlet extends AuthorizedApiServlet {
 			return;
 		}
 
-		Collection<Event> changes = subscription.pollChanges(ts, 20, TimeUnit.SECONDS);
-		resp.put("timestamp", System.currentTimeMillis());
-		Map<String, Object> nodes = new HashMap<>();
-		for (Event ev : changes) {
-			nodes.put(ev.getId(), ev.getValue());
+		try {
+			Collection<Event> changes = subscription.pollChanges(ts, 20, TimeUnit.SECONDS);
+			resp.put("timestamp", System.currentTimeMillis());
+			Map<String, Object> nodes = new HashMap<>();
+			for (Event ev : changes) {
+				nodes.put(ev.getId(), ev.getValue());
+			}
+			resp.put("nodes", nodes);
+			resp.send();
+		} catch (InterruptedException e) {
 		}
-		resp.put("nodes", nodes);
-		resp.send();
 	}
 
 }

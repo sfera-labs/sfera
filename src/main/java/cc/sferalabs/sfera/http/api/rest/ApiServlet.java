@@ -10,24 +10,41 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Abstract class to be extended by all servlets handling REST API requests.
+ * 
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 @SuppressWarnings("serial")
 public abstract class ApiServlet extends HttpServlet {
 
 	/**
-	 * 
+	 * Base path for REST API URLs
 	 */
 	public static final String PATH = "/api/";
 
 	private static final Logger logger = LoggerFactory.getLogger(ApiServlet.class);
 
 	/**
+	 * Processes the API request.
 	 * 
 	 * @param req
+	 *            an {@link HttpServletRequest} object that contains the request
+	 *            the client has made of the servlet
 	 * @param resp
-	 * @throws Exception
+	 *            an {@link HttpServletResponse} object that contains the
+	 *            response the servlet sends to the client
+	 * 
+	 * @throws ServletException
+	 *             if the request could not be handled
+	 * @throws IOException
+	 *             if an I/O error occurs
 	 */
 	abstract protected void processRequest(HttpServletRequest req, RestResponse resp)
-			throws Exception;
+			throws ServletException, IOException;
 
 	/**
 	 * 
@@ -43,8 +60,12 @@ public abstract class ApiServlet extends HttpServlet {
 			resp.setCharacterEncoding("UTF-8");
 			processRequest(req, rr);
 		} catch (Throwable t) {
-			logger.error("Exception processing HTTP API request", t);
-			rr.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, t.getMessage());
+			logger.error("Exception processing HTTP API request: " + req.getRequestURI(), t);
+			String error = t.getMessage();
+			if (error == null) {
+				error = t.toString();
+			}
+			rr.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, error);
 		}
 	}
 

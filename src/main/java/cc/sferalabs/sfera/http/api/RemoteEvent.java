@@ -45,10 +45,11 @@ public class RemoteEvent extends StringEvent {
 	 *            the username of the user associated to this event
 	 * @param resp
 	 *            the response object to be used to send a reply
-	 * @throws Exception
+	 * @throws NullPointerException
+	 *             if {@code id} or {@code value} are {@code null}
 	 */
 	public RemoteEvent(String id, String value, String username, JsonMessage resp)
-			throws Exception {
+			throws NullPointerException {
 		super(REMOTE_NODE, Objects.requireNonNull(id, "id must not be null"),
 				Objects.requireNonNull(value, "value must not be null"));
 		this.username = username;

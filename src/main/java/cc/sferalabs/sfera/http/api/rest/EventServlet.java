@@ -1,5 +1,8 @@
 package cc.sferalabs.sfera.http.api.rest;
 
+import java.io.IOException;
+
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -13,7 +16,7 @@ public class EventServlet extends AuthorizedApiServlet {
 
 	@Override
 	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
-			throws Exception {
+			throws ServletException, IOException {
 		String eid = req.getParameter("eid");
 		String eval = req.getParameter("eval");
 		try {

@@ -1,5 +1,7 @@
 package cc.sferalabs.sfera.http.api.rest;
 
+import java.io.IOException;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,7 +19,7 @@ public class LoginServlet extends ApiServlet {
 	private static final Logger logger = LoggerFactory.getLogger(LoginServlet.class);
 
 	@Override
-	protected void processRequest(HttpServletRequest req, RestResponse resp) throws Exception {
+	protected void processRequest(HttpServletRequest req, RestResponse resp) throws ServletException, IOException {
 		String user = req.getParameter("user");
 		String password = req.getParameter("password");
 

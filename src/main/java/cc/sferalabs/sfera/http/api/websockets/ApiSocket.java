@@ -51,8 +51,12 @@ class ApiSocket extends WebSocketAdapter {
 	public void onWebSocketText(String message) {
 		super.onWebSocketText(message);
 		logger.debug("Received message: {} - User: {}", message, user.getName());
-		Message m = new Message(message);
-		m.process(this);
+		IncomingMessage m = new IncomingMessage(message);
+		try {
+			m.process(this);
+		} catch (Exception e) {
+			logger.warn("Error processing message", e);
+		}
 	}
 
 	@Override

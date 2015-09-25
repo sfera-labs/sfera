@@ -6,7 +6,14 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.SubscriberExceptionContext;
 import com.google.common.eventbus.SubscriberExceptionHandler;
 
-public class EventsSubscriberExceptionHandler implements SubscriberExceptionHandler {
+/**
+ *
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
+class EventsSubscriberExceptionHandler implements SubscriberExceptionHandler {
 
 	@Override
 	public void handleException(Throwable exception, SubscriberExceptionContext context) {

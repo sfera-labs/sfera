@@ -4,24 +4,30 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.http.api.RemoteEvent;
 import cc.sferalabs.sfera.script.ScriptsEngine;
 
-class Message {
+/**
+ * Class representing an incoming WebSocket message.
+ * 
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
+class IncomingMessage {
 
-	private static final Logger logger = LoggerFactory.getLogger(Message.class);
 	private final String action;
 	private final Map<String, String> parameterMap = new HashMap<>();
 
 	/**
+	 * Construct an IncomingMessage parsing the specified message.
 	 * 
 	 * @param message
+	 *            the message to parse
 	 */
-	Message(String message) {
+	IncomingMessage(String message) {
 		message = message.trim();
 		int qm = message.indexOf('?');
 		if (qm < 0) {
@@ -55,11 +61,15 @@ class Message {
 	}
 
 	/**
+	 * Process this incoming message and sends a response.
 	 * 
 	 * @param socket
+	 *            the WebSocket to send the response to
+	 * @throws IOException
+	 *             if an I/O error occurs
 	 */
-	public void process(ApiSocket socket) {
-		WsMessage resp = new WsMessage("response", socket);
+	void process(ApiSocket socket) throws IOException {
+		OutgoingMessage resp = new OutgoingMessage("response", socket);
 		try {
 			resp.put("action", action);
 			String id = parameterMap.get("id");
@@ -97,7 +107,8 @@ class Message {
 				String eid = parameterMap.get("eid");
 				String eval = parameterMap.get("eval");
 				try {
-					RemoteEvent remoteEvent = new RemoteEvent(eid, eval, socket.getUserName(), resp);
+					RemoteEvent remoteEvent = new RemoteEvent(eid, eval, socket.getUserName(),
+							resp);
 					Bus.post(remoteEvent);
 				} catch (Exception e) {
 					resp.sendError(e.getMessage());
@@ -106,12 +117,9 @@ class Message {
 			} else {
 				resp.sendError("Unknown action");
 			}
-		} catch (Exception e) {
-			logger.warn("Error processing message", e);
-			try {
-				resp.sendError("Server error: " + e.getMessage());
-			} catch (IOException ioe) {
-			}
+		} catch (IOException e) {
+			resp.sendError("Server error: " + e.getMessage());
+			throw e;
 		}
 	}
 

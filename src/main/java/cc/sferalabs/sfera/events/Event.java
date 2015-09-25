@@ -25,7 +25,8 @@ public interface Event {
 	public Node getSource();
 
 	/**
-	 * The time stamp in milliseconds of the moment this event was created
+	 * Returns the timestamp in milliseconds of the moment this event was
+	 * created
 	 * 
 	 * @return the event creation timestamp
 	 */
