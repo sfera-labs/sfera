@@ -27,6 +27,12 @@ public class Console extends Task implements AutoStartService {
 
 	@Override
 	public void init() throws Exception {
+		String enabled = System.getProperty("sfera.console");
+		if (enabled == null || !enabled.equalsIgnoreCase("true")) {
+			logger.debug("Console disabled");
+			return;
+		}
+		logger.info("Console enabled");
 		run = true;
 		stdIn = new BufferedReader(new InputStreamReader(System.in));
 		TasksManager.executeSystem(this);
@@ -37,7 +43,9 @@ public class Console extends Task implements AutoStartService {
 		run = false;
 		if (stdIn != null) {
 			try {
+				logger.debug("Closing System.in");
 				System.in.close();
+				logger.debug("System.in closed");
 			} catch (Exception e) {
 			}
 		}

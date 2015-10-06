@@ -73,11 +73,11 @@ class IncomingMessage {
 		try {
 			resp.put("action", action);
 			String id = parameterMap.get("id");
-			resp.put("id", id);
 			if (id == null) {
 				resp.sendError("Param 'id' not found");
 				return;
 			}
+			resp.put("id", id);
 
 			if (action.equals("subscribe")) {
 				String spec = parameterMap.get("spec");
