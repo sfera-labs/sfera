@@ -1,7 +1,6 @@
 package cc.sferalabs.sfera.core.services;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 
 import org.slf4j.Logger;
@@ -41,43 +40,27 @@ public class Console extends Task implements AutoStartService {
 	@Override
 	public void quit() throws Exception {
 		run = false;
-		if (stdIn != null) {
-			try {
-				logger.debug("Closing System.in");
-				System.in.close();
-				logger.debug("System.in closed");
-			} catch (Exception e) {
-			}
-		}
 	}
 
 	@Override
 	protected void execute() {
 		try {
 			while (run) {
-				checkStandardInput();
+				if (stdIn.ready()) {
+					String cmd = stdIn.readLine().trim();
+					if (!cmd.isEmpty()) {
+						try {
+							processCommad(cmd);
+						} catch (Throwable t) {
+							System.err.println(t.getMessage());
+							logger.warn("Error executing command '" + cmd + "'", t);
+						}
+					}
+				}
+				Thread.sleep(500);
 			}
 		} catch (Exception e) {
 			logger.error("Error reading input. Console stopped", e);
-		}
-	}
-
-	/**
-	 * 
-	 * @throws IOException
-	 */
-	private static void checkStandardInput() throws IOException {
-		String cmd;
-		if ((cmd = stdIn.readLine()) != null) {
-			cmd = cmd.trim();
-			if (cmd.isEmpty()) {
-				return;
-			}
-			try {
-				processCommad(cmd);
-			} catch (Throwable t) {
-				logger.error("Error executing command '" + cmd + "'", t);
-			}
 		}
 	}
 
@@ -87,6 +70,7 @@ public class Console extends Task implements AutoStartService {
 	 * @throws Exception
 	 */
 	private static void processCommad(String cmd) throws Exception {
+		logger.debug("Processing command: {}", cmd);
 		String[] args = cmd.split("\\s+");
 		switch (args[0]) {
 		case "quit":
@@ -108,10 +92,12 @@ public class Console extends Task implements AutoStartService {
 					Driver d = Drivers.getDriver(args[2]);
 					if (d != null) {
 						d.start();
+					} else {
+						throw new Exception("Driver '" + args[2] + "' not found");
 					}
 				}
 			} else {
-				System.err.println("Add target");
+				throw new Exception("Add target");
 			}
 			break;
 
@@ -121,10 +107,12 @@ public class Console extends Task implements AutoStartService {
 					Driver d = Drivers.getDriver(args[2]);
 					if (d != null) {
 						d.restart();
+					} else {
+						throw new Exception("Driver '" + args[2] + "' not found");
 					}
 				}
 			} else {
-				System.err.println("Add target");
+				throw new Exception("Add target");
 			}
 			break;
 
@@ -133,8 +121,7 @@ public class Console extends Task implements AutoStartService {
 			break;
 
 		default:
-			System.err.println("Unknown command '" + cmd + "'");
-			break;
+			throw new Exception("Unknown command '" + cmd + "'");
 		}
 	}
 

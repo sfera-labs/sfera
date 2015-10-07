@@ -182,9 +182,8 @@ public final class FilesWatcher extends LazyService {
 	 *            the path of the file to be watched
 	 * @param task
 	 *            the task to be executed on file modification
-	 * @return a {@code UUID} that can be used to
-	 *         {@link #unregister(Path, UUID) unregister} the task in the
-	 *         future
+	 * @return a {@code UUID} that can be used to {@link #unregister(Path, UUID)
+	 *         unregister} the task in the future
 	 * @throws IOException
 	 *             If an I/O error occurs
 	 */
@@ -205,9 +204,8 @@ public final class FilesWatcher extends LazyService {
 	 *            modification and then removed. Otherwise the task will be
 	 *            executed at every modification until
 	 *            {@link #unregister(Path, UUID) unregistered}
-	 * @return a {@code UUID} that can be used to
-	 *         {@link #unregister(Path, UUID) unregister} the task in the
-	 *         future
+	 * @return a {@code UUID} that can be used to {@link #unregister(Path, UUID)
+	 *         unregister} the task in the future
 	 * @throws IOException
 	 *             If an I/O error occurs
 	 */

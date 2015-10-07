@@ -84,9 +84,8 @@ public class TasksManager {
 	}
 
 	/**
-	 * Executes the specified task at system level. Sfera life cycle will
-	 * interrupt this task only after all the regular tasks have been
-	 * interrupted.
+	 * Executes the specified task at system level. Sfera life cycle will not
+	 * interrupt this task.
 	 * 
 	 * @param task
 	 *            the task to execute

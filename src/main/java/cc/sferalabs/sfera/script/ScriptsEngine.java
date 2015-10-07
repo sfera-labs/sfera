@@ -146,9 +146,13 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	}
 
 	/**
-	 * <p>Executes a single action on a driver instance.</p>
-	 * <p>If an action is of the form "driver.action(value)" then this should be
-	 * passed as the {@code action} parameter.</p>
+	 * <p>
+	 * Executes a single action on a driver instance.
+	 * </p>
+	 * <p>
+	 * If an action is of the form "driver.action(value)" then this should be
+	 * passed as the {@code action} parameter.
+	 * </p>
 	 * If an action is of the form "driver.action = value" then "driver.action"
 	 * should be passed as the {@code action} parameter and "value" as the
 	 * {@code param} parameter.

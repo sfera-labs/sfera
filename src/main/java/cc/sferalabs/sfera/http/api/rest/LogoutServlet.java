@@ -25,10 +25,10 @@ public class LogoutServlet extends ApiServlet {
 
 			SubscriptionsSet subscriptions = (SubscriptionsSet) session
 					.getAttribute(SubscribeServlet.SESSION_ATTR_SUBSCRIPTIONS);
-			if (subscriptions != null) {				
+			if (subscriptions != null) {
 				for (PollingSubscription ps : subscriptions.values()) {
 					ps.destroy();
-				 }
+				}
 			}
 			session.invalidate();
 

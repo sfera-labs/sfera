@@ -66,7 +66,7 @@ public abstract class EventIdSpecListener implements EventListener {
 		List<String> nodes = Arrays.asList(ns);
 		return nodes.contains(eventId);
 	}
-	
+
 	/**
 	 * 
 	 */
