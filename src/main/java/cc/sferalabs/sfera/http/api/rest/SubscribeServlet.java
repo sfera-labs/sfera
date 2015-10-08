@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("serial")
-public class SubscribeServlet extends AuthorizedApiServlet {
+public class SubscribeServlet extends AuthorizedUserServlet {
 
 	public static final String PATH = ApiServlet.PATH + "subscribe";
 
@@ -43,8 +43,7 @@ public class SubscribeServlet extends AuthorizedApiServlet {
 		logger.debug("Subscribed: session '{}' subscription '{}' nodes: {}", session.getId(), id,
 				nodes);
 
-		resp.put("id", id);
-		resp.send();
+		resp.send("id", id);
 	}
 
 }

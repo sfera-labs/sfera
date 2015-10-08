@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import cc.sferalabs.sfera.script.ScriptsEngine;
 
 @SuppressWarnings("serial")
-public class CommandServlet extends AuthorizedApiServlet {
+public class CommandServlet extends AuthorizedUserServlet {
 
 	public static final String PATH = ApiServlet.PATH + "command";
 

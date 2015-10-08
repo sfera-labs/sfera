@@ -22,6 +22,8 @@ import org.slf4j.LoggerFactory;
 public abstract class AuthorizedApiServlet extends ApiServlet {
 
 	private static final Logger logger = LoggerFactory.getLogger(AuthorizedApiServlet.class);
+	
+	public abstract String[] getRoles();
 
 	@Override
 	protected void processRequest(HttpServletRequest req, RestResponse resp)
@@ -41,7 +43,13 @@ public abstract class AuthorizedApiServlet extends ApiServlet {
 	 * @return
 	 */
 	protected boolean isAuthorized(HttpServletRequest req) {
-		return req.isUserInRole("admin") || req.isUserInRole("api");
+		for (String role : getRoles()) {
+			if (req.isUserInRole(role)) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 
 	/**

@@ -14,7 +14,7 @@ import javax.servlet.http.HttpSession;
 import cc.sferalabs.sfera.events.Event;
 
 @SuppressWarnings("serial")
-public class StateServlet extends AuthorizedApiServlet {
+public class StateServlet extends AuthorizedUserServlet {
 
 	public static final String PATH = ApiServlet.PATH + "state/*";
 
@@ -52,8 +52,7 @@ public class StateServlet extends AuthorizedApiServlet {
 			for (Event ev : changes) {
 				nodes.put(ev.getId(), ev.getValue());
 			}
-			resp.put("nodes", nodes);
-			resp.send();
+			resp.send("nodes", nodes);
 		} catch (InterruptedException e) {
 		}
 	}

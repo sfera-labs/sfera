@@ -1,12 +1,8 @@
 package cc.sferalabs.sfera.http.api.websockets;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
-import cc.sferalabs.sfera.events.Bus;
-import cc.sferalabs.sfera.http.api.RemoteEvent;
-import cc.sferalabs.sfera.script.ScriptsEngine;
+import java.util.Set;
 
 /**
  * Class representing an incoming WebSocket message.
@@ -61,66 +57,30 @@ class IncomingMessage {
 	}
 
 	/**
-	 * Process this incoming message and sends a response.
-	 * 
-	 * @param socket
-	 *            the WebSocket to send the response to
-	 * @throws IOException
-	 *             if an I/O error occurs
+	 * @return the action
 	 */
-	void process(ApiSocket socket) throws IOException {
-		OutgoingMessage resp = new OutgoingMessage("response", socket);
-		try {
-			resp.put("action", action);
-			String id = parameterMap.get("id");
-			if (id == null) {
-				resp.sendError("Param 'id' not found");
-				return;
-			}
-			resp.put("id", id);
+	String getAction() {
+		return action;
+	}
 
-			if (action.equals("subscribe")) {
-				String spec = parameterMap.get("spec");
-				if (socket.subscription != null) {
-					socket.subscription.destroy();
-				}
-				socket.subscription = new WsEventListener(socket, spec);
-				resp.sendResult("ok");
-
-			} else if (action.equals("command")) {
-				for (String command : parameterMap.keySet()) {
-					if (command.indexOf('.') > 0) { // driver command
-						String param = parameterMap.get(command);
-						try {
-							Object res = ScriptsEngine.executeDriverAction(command, param,
-									socket.getUserName());
-							resp.sendResult(res);
-							return;
-						} catch (Exception e) {
-							resp.sendError(e.getMessage());
-							return;
-						}
-					}
-				}
-
-			} else if (action.equals("event")) {
-				String eid = parameterMap.get("eid");
-				String eval = parameterMap.get("eval");
-				try {
-					RemoteEvent remoteEvent = new RemoteEvent(eid, eval, socket.getUserName(),
-							resp);
-					Bus.post(remoteEvent);
-				} catch (Exception e) {
-					resp.sendError(e.getMessage());
-				}
-
-			} else {
-				resp.sendError("Unknown action");
-			}
-		} catch (IOException e) {
-			resp.sendError("Server error: " + e.getMessage());
-			throw e;
-		}
+	/**
+	 * Returns the value of the specified parameter, or {@code null} if there is
+	 * no such parameter.
+	 * 
+	 * @param the
+	 *            parameter name
+	 * @return the parameter value, or {@code null} if there is no such
+	 *         parameter
+	 */
+	String getParameter(String name) {
+		return parameterMap.get(name);
+	}
+	
+	/**
+	 * @return the set of available parameters
+	 */
+	Set<String> getParameters() {
+		return parameterMap.keySet();
 	}
 
 }

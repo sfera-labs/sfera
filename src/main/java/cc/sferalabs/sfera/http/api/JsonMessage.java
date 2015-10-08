@@ -90,7 +90,7 @@ public abstract class JsonMessage {
 	 * @throws IllegalStateException
 	 *             if this message has already been sent
 	 */
-	private void send(String key, Object value) throws IOException, IllegalStateException {
+	public void send(String key, Object value) throws IOException, IllegalStateException {
 		put(key, value);
 		send();
 	}

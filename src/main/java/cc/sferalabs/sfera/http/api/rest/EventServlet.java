@@ -10,7 +10,7 @@ import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.http.api.RemoteEvent;
 
 @SuppressWarnings("serial")
-public class EventServlet extends AuthorizedApiServlet {
+public class EventServlet extends AuthorizedUserServlet {
 
 	public static final String PATH = ApiServlet.PATH + "event";
 

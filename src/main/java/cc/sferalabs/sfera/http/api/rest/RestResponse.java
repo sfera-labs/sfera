@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.http.api.JsonMessage;
 
-class RestResponse extends JsonMessage {
+public class RestResponse extends JsonMessage {
 
 	private static final long ASYNC_RESP_TIMEOUT = 30000;
 	private static final Logger logger = LoggerFactory.getLogger(RestResponse.class);
@@ -28,6 +28,14 @@ class RestResponse extends JsonMessage {
 		this.resp = resp;
 		resp.setContentType("application/json");
 		resp.setStatus(HttpServletResponse.SC_OK);
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public HttpServletResponse getHttpServletResponse() {
+		return resp;
 	}
 
 	/**
@@ -73,14 +81,15 @@ class RestResponse extends JsonMessage {
 		@Override
 		public void onTimeout(AsyncEvent event) throws IOException {
 			logger.warn("Async response timed out");
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Timeout");
+			sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Timeout");
 			asyncContext.complete();
 		}
 
 		@Override
 		public void onError(AsyncEvent event) throws IOException {
-			logger.error("Async response error", event.getThrowable());
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			Throwable t = event.getThrowable();
+			logger.error("Async response error", t);
+			sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, t.getMessage());
 			asyncContext.complete();
 		}
 
