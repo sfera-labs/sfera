@@ -98,11 +98,22 @@ public abstract class Access {
 		byte[] salt = generateSalt();
 		byte[] hashedPassword = getEncryptedPassword(plainPassword, salt);
 
-		users.put(username, new User(username, hashedPassword, salt, roles));
+		User u = new User(username, hashedPassword, salt, roles);
+		users.put(username, u);
+		writeUser(u);
 
-		String userLine = username + ":";
-		userLine += Base64.getEncoder().encodeToString(hashedPassword) + ":";
-		userLine += Base64.getEncoder().encodeToString(salt) + ":";
+		logger.debug("User '{}' added", username);
+	}
+
+	/**
+	 * @param user
+	 * @throws IOException
+	 */
+	private static void writeUser(User user) throws IOException {
+		String userLine = user.getUsername() + ":";
+		userLine += Base64.getEncoder().encodeToString(user.getHashedPassword()) + ":";
+		userLine += Base64.getEncoder().encodeToString(user.getSalt()) + ":";
+		String[] roles = user.getRoles();
 		for (int i = 0; i < roles.length; i++) {
 			if (i != 0) {
 				userLine += ",";
@@ -112,7 +123,30 @@ public abstract class Access {
 		userLine += "\n";
 
 		Files.write(Paths.get(USERS_FILE_PATH), userLine.getBytes(StandardCharsets.UTF_8),
-				StandardOpenOption.APPEND);
+				StandardOpenOption.APPEND, StandardOpenOption.CREATE);
+	}
+
+	/**
+	 * Removes the specified user
+	 * 
+	 * @param username
+	 *            username of the user to be removed
+	 * 
+	 * @throws IOException
+	 *             if an I/O error occurs saving the access data
+	 */
+	public synchronized static void removeUser(String username) throws IOException {
+		User removed = users.remove(username);
+		if (removed == null) {
+			return;
+		}
+
+		Files.deleteIfExists(Paths.get(USERS_FILE_PATH));
+		for (User u : users.values()) {
+			writeUser(u);
+		}
+
+		logger.debug("User '{}' removed", username);
 	}
 
 	/**
