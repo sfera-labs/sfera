@@ -87,7 +87,7 @@ public class SystemNode implements Node, EventListener {
 	/**
 	 * Initializes data structures, launches services, drivers and applications
 	 */
-	private void init() {
+	private synchronized void init() {
 		try {
 			config = new Configuration("sfera.yml");
 		} catch (NoSuchFileException e) {
@@ -129,7 +129,7 @@ public class SystemNode implements Node, EventListener {
 	/**
 	 * Gracefully stops the process quitting applications, drivers and services
 	 */
-	private void quit() {
+	private synchronized void quit() {
 		TasksManager.executeSystem(new Task("System quit") {
 
 			@Override
@@ -182,7 +182,7 @@ public class SystemNode implements Node, EventListener {
 	}
 
 	/**
-	 * Adds the passed service to the system life-cycle
+	 * Adds the specified service to the system life-cycle
 	 * 
 	 * @param service
 	 *            the service to be added

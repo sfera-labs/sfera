@@ -36,6 +36,7 @@ class ApiSocket extends WebSocketAdapter {
 	ApiSocket(ServletUpgradeRequest request) {
 		this.request = request;
 		this.user = request.getUserPrincipal();
+		logger.debug("Socket created");
 	}
 
 	/**
@@ -50,6 +51,12 @@ class ApiSocket extends WebSocketAdapter {
 	public void onWebSocketConnect(Session session) {
 		super.onWebSocketConnect(session);
 		logger.debug("Socket Connected");
+		OutgoingMessage msg = new OutgoingMessage("connection", this);
+		try {
+			msg.sendResult("ok");
+		} catch (IllegalStateException | IOException e) {
+			logger.warn("Error sending connection response", e);
+		}
 	}
 
 	@Override
