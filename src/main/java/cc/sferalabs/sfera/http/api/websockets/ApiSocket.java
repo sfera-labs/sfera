@@ -25,18 +25,19 @@ import cc.sferalabs.sfera.script.ScriptsEngine;
 class ApiSocket extends WebSocketAdapter {
 
 	private static final Logger logger = LoggerFactory.getLogger(ApiSocket.class);
-	ServletUpgradeRequest request;
-	Principal user;
-	WsEventListener subscription;
+
+	private final String host;
+	private final Principal user;
+	private WsEventListener subscription;
 
 	/**
 	 * 
 	 * @param request
 	 */
 	ApiSocket(ServletUpgradeRequest request) {
-		this.request = request;
+		this.host = request.getRemoteHostName();
 		this.user = request.getUserPrincipal();
-		logger.debug("Socket created");
+		logger.debug("Socket created - Host: {}", this.host);
 	}
 
 	/**
@@ -50,7 +51,7 @@ class ApiSocket extends WebSocketAdapter {
 	@Override
 	public void onWebSocketConnect(Session session) {
 		super.onWebSocketConnect(session);
-		logger.debug("Socket Connected");
+		logger.debug("Socket connected - Host: {}", this.host);
 		OutgoingMessage msg = new OutgoingMessage("connection", this);
 		try {
 			msg.sendResult("ok");
@@ -62,7 +63,8 @@ class ApiSocket extends WebSocketAdapter {
 	@Override
 	public void onWebSocketText(String message) {
 		super.onWebSocketText(message);
-		logger.debug("Received message: {} - User: {}", message, user.getName());
+		logger.debug("Received message: {} - Host: {} User: {}", message, this.host,
+				user.getName());
 		IncomingMessage m = new IncomingMessage(message);
 		try {
 			process(m);
@@ -141,13 +143,13 @@ class ApiSocket extends WebSocketAdapter {
 			subscription.destroy();
 			subscription = null;
 		}
-		logger.debug("Socket Closed: {} - {}", statusCode, reason);
+		logger.debug("Socket Closed: [{}] {} - Host: {}", statusCode, reason, this.host);
 	}
 
 	@Override
 	public void onWebSocketError(Throwable cause) {
 		super.onWebSocketError(cause);
-		logger.warn("WebSocket error", cause);
+		logger.warn("WebSocket error - Host: " + this.host, cause);
 		getSession().close(StatusCode.SERVER_ERROR, cause.getMessage());
 	}
 
