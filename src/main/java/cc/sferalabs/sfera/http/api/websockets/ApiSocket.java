@@ -3,6 +3,8 @@ package cc.sferalabs.sfera.http.api.websockets;
 import java.io.IOException;
 import java.security.Principal;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
@@ -26,7 +28,7 @@ class ApiSocket extends WebSocketAdapter {
 
 	private static final Logger logger = LoggerFactory.getLogger(ApiSocket.class);
 
-	private final String host;
+	private final HttpServletRequest request;
 	private final Principal user;
 	private WsEventListener subscription;
 
@@ -35,9 +37,9 @@ class ApiSocket extends WebSocketAdapter {
 	 * @param request
 	 */
 	ApiSocket(ServletUpgradeRequest request) {
-		this.host = request.getRemoteHostName();
+		this.request = request.getHttpServletRequest();
 		this.user = request.getUserPrincipal();
-		logger.debug("Socket created - Host: {}", this.host);
+		logger.debug("Socket created - Host: {}", this.request.getRemoteHost());
 	}
 
 	/**
@@ -51,7 +53,7 @@ class ApiSocket extends WebSocketAdapter {
 	@Override
 	public void onWebSocketConnect(Session session) {
 		super.onWebSocketConnect(session);
-		logger.debug("Socket connected - Host: {}", this.host);
+		logger.debug("Socket connected - Host: {}", this.request.getRemoteHost());
 		OutgoingMessage msg = new OutgoingMessage("connection", this);
 		try {
 			msg.sendResult("ok");
@@ -63,8 +65,8 @@ class ApiSocket extends WebSocketAdapter {
 	@Override
 	public void onWebSocketText(String message) {
 		super.onWebSocketText(message);
-		logger.debug("Received message: {} - Host: {} User: {}", message, this.host,
-				user.getName());
+		logger.debug("Received message: {} - Host: {} User: {}", message,
+				this.request.getRemoteHost(), user.getName());
 		IncomingMessage m = new IncomingMessage(message);
 		try {
 			process(m);
@@ -121,7 +123,8 @@ class ApiSocket extends WebSocketAdapter {
 				String eid = message.getParameter("eid");
 				String eval = message.getParameter("eval");
 				try {
-					RemoteEvent remoteEvent = new RemoteEvent(eid, eval, getUserName(), resp);
+					RemoteEvent remoteEvent = new RemoteEvent(eid, eval, getUserName(), request,
+							resp);
 					Bus.post(remoteEvent);
 				} catch (Exception e) {
 					resp.sendError(e.getMessage());
@@ -143,13 +146,14 @@ class ApiSocket extends WebSocketAdapter {
 			subscription.destroy();
 			subscription = null;
 		}
-		logger.debug("Socket Closed: [{}] {} - Host: {}", statusCode, reason, this.host);
+		logger.debug("Socket Closed: [{}] {} - Host: {}", statusCode, reason,
+				this.request.getRemoteHost());
 	}
 
 	@Override
 	public void onWebSocketError(Throwable cause) {
 		super.onWebSocketError(cause);
-		logger.warn("WebSocket error - Host: " + this.host, cause);
+		logger.warn("WebSocket error - Host: " + this.request.getRemoteHost(), cause);
 		getSession().close(StatusCode.SERVER_ERROR, cause.getMessage());
 	}
 

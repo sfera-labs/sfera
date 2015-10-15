@@ -1,13 +1,11 @@
 package cc.sferalabs.sfera.http.api.rest.admin;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -71,15 +69,15 @@ public class EditFileServlet extends AuthorizedAdminServlet {
 	private void writeToFile(String content, String path, String md5) throws Exception {
 		Path temp = null;
 		try {
-			temp = Files.createTempFile(getClass().getName(), null);
-			Files.write(temp, content.getBytes(StandardCharsets.UTF_8));
+			byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
 			if (md5 != null) {
-				//TODO fix md5 calc
-				String tempMd5 = getMd5(temp);
-				if (!tempMd5.equals(md5)) {
+				String bytesMd5 = getMd5(bytes);
+				if (!bytesMd5.equals(md5)) {
 					throw new Exception("md5 mismatch");
 				}
 			}
+			temp = Files.createTempFile(getClass().getName(), null);
+			Files.write(temp, bytes);
 			Path target = Paths.get(path);
 			Path parent = target.getParent();
 			if (parent != null) {
@@ -98,14 +96,14 @@ public class EditFileServlet extends AuthorizedAdminServlet {
 
 	/**
 	 * 
-	 * @param temp
+	 * @param bytes
 	 * @return
 	 * @throws IOException
 	 * @throws NoSuchAlgorithmException
 	 */
-	private String getMd5(Path temp) throws IOException, NoSuchAlgorithmException {
+	private String getMd5(byte[] bytes) throws IOException, NoSuchAlgorithmException {
 		MessageDigest md = MessageDigest.getInstance("MD5");
-		byte[] digest = md.digest(Files.readAllBytes(temp));
+		byte[] digest = md.digest(bytes);
 		return DatatypeConverter.printHexBinary(digest);
 	}
 

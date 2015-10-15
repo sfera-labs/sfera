@@ -21,7 +21,7 @@ public class EventServlet extends AuthorizedUserServlet {
 		String eval = req.getParameter("eval");
 		try {
 			resp.setAsyncContext(req.startAsync());
-			RemoteEvent remoteEvent = new RemoteEvent(eid, eval, req.getRemoteUser(), resp);
+			RemoteEvent remoteEvent = new RemoteEvent(eid, eval, req.getRemoteUser(), req, resp);
 			Bus.post(remoteEvent);
 		} catch (Exception e) {
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());

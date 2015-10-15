@@ -80,8 +80,9 @@ public class User {
 	/**
 	 * 
 	 * @param role
-	 *            a role identifier
-	 * @return true if the user has the specified role, false otherwise
+	 *            the role identifier
+	 * @return {@code true} if the user has the specified role, {@code false}
+	 *         otherwise
 	 */
 	public boolean isInRole(String role) {
 		for (String r : roles) {

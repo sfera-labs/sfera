@@ -3,6 +3,8 @@ package cc.sferalabs.sfera.http.api;
 import java.io.IOException;
 import java.util.Objects;
 
+import javax.servlet.http.HttpServletRequest;
+
 import cc.sferalabs.sfera.access.Access;
 import cc.sferalabs.sfera.access.User;
 import cc.sferalabs.sfera.events.Node;
@@ -32,7 +34,8 @@ public class RemoteEvent extends StringEvent {
 	private static final RemoteNode REMOTE_NODE = new RemoteNode();
 
 	private final String username;
-	private final JsonMessage resp;
+	private final HttpServletRequest request;
+	private final JsonMessage response;
 
 	/**
 	 * Construct a RemoteEvent
@@ -42,27 +45,39 @@ public class RemoteEvent extends StringEvent {
 	 * @param value
 	 *            the event value
 	 * @param username
-	 *            the username of the user associated to this event
+	 *            the username of the user associated with this event
+	 * @param req
+	 *            the request associated with this event
 	 * @param resp
 	 *            the response object to be used to send a reply
 	 * @throws NullPointerException
-	 *             if {@code id} or {@code value} are {@code null}
+	 *             if any of the parameters are {@code null}
 	 */
-	public RemoteEvent(String id, String value, String username, JsonMessage resp)
-			throws NullPointerException {
+	public RemoteEvent(String id, String value, String username, HttpServletRequest req,
+			JsonMessage resp) throws NullPointerException {
 		super(REMOTE_NODE, Objects.requireNonNull(id, "id must not be null"),
 				Objects.requireNonNull(value, "value must not be null"));
-		this.username = username;
-		this.resp = resp;
+		this.username = Objects.requireNonNull(username, "username must not be null");
+		this.request = Objects.requireNonNull(req, "req must not be null");
+		this.response = Objects.requireNonNull(resp, "resp must not be null");
 	}
 
 	/**
-	 * Returns the user associated to this event.
+	 * Returns the user associated with this event.
 	 * 
 	 * @return the user
 	 */
 	public User getUser() {
 		return Access.getUser(username);
+	}
+	
+	/**
+	 * Returns the request associated with this event.
+	 * 
+	 * @return the request
+	 */
+	public HttpServletRequest getRequest() {
+		return request;
 	}
 
 	/**
@@ -77,7 +92,7 @@ public class RemoteEvent extends StringEvent {
 	 *             if this event has already been handled
 	 */
 	public void reply(String result) throws IOException {
-		resp.sendResult(result);
+		response.sendResult(result);
 	}
 
 }
