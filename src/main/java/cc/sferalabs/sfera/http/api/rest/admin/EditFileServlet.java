@@ -2,10 +2,12 @@ package cc.sferalabs.sfera.http.api.rest.admin;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -38,14 +40,19 @@ public class EditFileServlet extends AuthorizedAdminServlet {
 			throws ServletException, IOException {
 		String path = req.getParameter("path");
 		String md5 = req.getParameter("md5");
+		String content = req.getParameter("content");
 
 		if (path == null) {
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Param 'path' not specified");
 			return;
 		}
+		if (content == null) {
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Param 'content' not specified");
+			return;
+		}
 
 		try {
-			writeToFile(req.getInputStream(), path, md5);
+			writeToFile(content, path, md5);
 			resp.sendResult("ok");
 		} catch (Exception e) {
 			logger.error("File edit error", e);
@@ -56,18 +63,18 @@ public class EditFileServlet extends AuthorizedAdminServlet {
 
 	/**
 	 * 
-	 * @param in
+	 * @param content
 	 * @param path
 	 * @param md5
 	 * @throws Exception
 	 */
-	private void writeToFile(InputStream in, String path, String md5) throws Exception {
+	private void writeToFile(String content, String path, String md5) throws Exception {
 		Path temp = null;
 		try {
 			temp = Files.createTempFile(getClass().getName(), null);
-
-			Files.copy(in, temp, StandardCopyOption.REPLACE_EXISTING);
+			Files.write(temp, content.getBytes(StandardCharsets.UTF_8));
 			if (md5 != null) {
+				//TODO fix md5 calc
 				String tempMd5 = getMd5(temp);
 				if (!tempMd5.equals(md5)) {
 					throw new Exception("md5 mismatch");
