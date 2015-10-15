@@ -43,10 +43,6 @@ public class EditFileServlet extends AuthorizedAdminServlet {
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Param 'path' not specified");
 			return;
 		}
-		if (md5 == null) {
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Param 'md5' not specified");
-			return;
-		}
 
 		try {
 			writeToFile(req.getInputStream(), path, md5);
@@ -71,9 +67,11 @@ public class EditFileServlet extends AuthorizedAdminServlet {
 			temp = Files.createTempFile(getClass().getName(), null);
 
 			Files.copy(in, temp, StandardCopyOption.REPLACE_EXISTING);
-			String tempMd5 = getMd5(temp);
-			if (!tempMd5.equals(md5)) {
-				throw new Exception("md5 mismatch");
+			if (md5 != null) {
+				String tempMd5 = getMd5(temp);
+				if (!tempMd5.equals(md5)) {
+					throw new Exception("md5 mismatch");
+				}
 			}
 			Path target = Paths.get(path);
 			Path parent = target.getParent();
