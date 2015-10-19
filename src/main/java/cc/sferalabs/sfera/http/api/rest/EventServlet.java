@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import cc.sferalabs.sfera.events.Bus;
-import cc.sferalabs.sfera.http.api.RemoteEvent;
+import cc.sferalabs.sfera.http.api.HttpApiEvent;
 
 @SuppressWarnings("serial")
 public class EventServlet extends AuthorizedUserServlet {
@@ -21,7 +21,7 @@ public class EventServlet extends AuthorizedUserServlet {
 		String eval = req.getParameter("eval");
 		try {
 			resp.setAsyncContext(req.startAsync());
-			RemoteEvent remoteEvent = new RemoteEvent(eid, eval, req.getRemoteUser(), req, resp);
+			HttpApiEvent remoteEvent = new HttpApiEvent(eid, eval, req.getRemoteUser(), req, resp);
 			Bus.post(remoteEvent);
 		} catch (Exception e) {
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());

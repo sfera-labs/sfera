@@ -22,7 +22,6 @@ import cc.sferalabs.sfera.core.services.TasksManager;
 import cc.sferalabs.sfera.drivers.Drivers;
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Node;
-import cc.sferalabs.sfera.events.StringEvent;
 
 /**
  * The system node
@@ -191,27 +190,5 @@ public class SystemNode implements Node, EventListener {
 	public static void addToLifeCycle(Service service) {
 		services.add(service);
 	}
-
-	// TODO rethink ===========
-	public static class GuiEvent extends StringEvent {
-
-		private final static Node GUI_NODE = new Node() {
-
-			@Override
-			public String getId() {
-				return "gui";
-			}
-		};
-
-		public GuiEvent(String attr, String val) {
-			super(GUI_NODE, attr, val);
-		}
-
-	}
-
-	public static void guiEvent(String attr, String val) {
-		Bus.post(new GuiEvent(attr, val));
-	}
-	// TODO ====================
 
 }

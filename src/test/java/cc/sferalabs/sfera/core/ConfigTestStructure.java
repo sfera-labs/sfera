@@ -9,7 +9,7 @@ public class ConfigTestStructure {
 	public int tre;
 	public boolean qua;
 	public boolean cin;
-	public List<Map<String, String>> sei; 
+	public List<Map<String, String>> sei;
 	public List<Integer> set;
 	public Map<String, Object> ott;
 	public Object notThere;

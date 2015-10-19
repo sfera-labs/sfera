@@ -75,7 +75,7 @@ class IncomingMessage {
 	String getParameter(String name) {
 		return parameterMap.get(name);
 	}
-	
+
 	/**
 	 * @return the set of available parameters
 	 */

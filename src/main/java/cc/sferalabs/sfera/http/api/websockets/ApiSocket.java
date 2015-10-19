@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.events.Bus;
-import cc.sferalabs.sfera.http.api.RemoteEvent;
+import cc.sferalabs.sfera.http.api.HttpApiEvent;
 import cc.sferalabs.sfera.script.ScriptsEngine;
 
 /**
@@ -123,7 +123,7 @@ class ApiSocket extends WebSocketAdapter {
 				String eid = message.getParameter("eid");
 				String eval = message.getParameter("eval");
 				try {
-					RemoteEvent remoteEvent = new RemoteEvent(eid, eval, getUserName(), request,
+					HttpApiEvent remoteEvent = new HttpApiEvent(eid, eval, getUserName(), request,
 							resp);
 					Bus.post(remoteEvent);
 				} catch (Exception e) {

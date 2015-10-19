@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 public abstract class AuthorizedApiServlet extends ApiServlet {
 
 	private static final Logger logger = LoggerFactory.getLogger(AuthorizedApiServlet.class);
-	
+
 	public abstract String[] getRoles();
 
 	@Override
@@ -48,7 +48,7 @@ public abstract class AuthorizedApiServlet extends ApiServlet {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 

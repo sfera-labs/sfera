@@ -29,7 +29,7 @@ public class RestResponse extends JsonMessage {
 		resp.setContentType("application/json");
 		resp.setStatus(HttpServletResponse.SC_OK);
 	}
-	
+
 	/**
 	 * 
 	 * @return

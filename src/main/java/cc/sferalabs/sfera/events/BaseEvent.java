@@ -12,6 +12,7 @@ public abstract class BaseEvent implements Event {
 
 	private final Node source;
 	private final String id;
+	private final String subId;
 	private final long timestamp;
 
 	/**
@@ -27,11 +28,17 @@ public abstract class BaseEvent implements Event {
 		this.timestamp = System.currentTimeMillis();
 		this.source = source;
 		this.id = source.getId() + "." + id;
+		this.subId = id;
 	}
 
 	@Override
 	public String getId() {
 		return id;
+	}
+
+	@Override
+	public String getSubId() {
+		return subId;
 	}
 
 	@Override

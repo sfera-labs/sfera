@@ -280,6 +280,28 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	/**
 	 * Adds the specified Java type to the global scope of the script engine.
 	 * After this call the type will be accessible from the script using the
+	 * specified key.
+	 * 
+	 * @param key
+	 *            the key to associate the type to
+	 * @param clazz
+	 *            the Java type to add
+	 * @throws ScriptException
+	 *             if the method fails
+	 */
+	public synchronized static void putTypeInGlobalScope(String key, Class<?> clazz)
+			throws ScriptException {
+		ScriptEngine engine = getNewEngine();
+		String script = "var " + key + " = Java.type('" + clazz.getName() + "');";
+		Bindings bindings = engine.createBindings();
+		engine.eval(script, bindings);
+		Object type = bindings.get(key);
+		putObjectInGlobalScope(key, type);
+	}
+
+	/**
+	 * Adds the specified Java type to the global scope of the script engine.
+	 * After this call the type will be accessible from the script using the
 	 * class simple name.
 	 * 
 	 * @param clazz
@@ -289,13 +311,7 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	 * @see Class#getSimpleName
 	 */
 	public synchronized static void putTypeInGlobalScope(Class<?> clazz) throws ScriptException {
-		String typeName = clazz.getSimpleName();
-		ScriptEngine engine = getNewEngine();
-		String script = "var " + typeName + " = Java.type('" + clazz.getName() + "');";
-		Bindings bindings = engine.createBindings();
-		engine.eval(script, bindings);
-		Object type = bindings.get(typeName);
-		putObjectInGlobalScope(typeName, type);
+		putTypeInGlobalScope(clazz.getSimpleName(), clazz);
 	}
 
 	/**

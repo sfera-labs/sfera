@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.SubscriberExceptionContext;
 import com.google.common.eventbus.SubscriberExceptionHandler;
 
 import cc.sferalabs.sfera.core.services.TasksManager;
@@ -23,12 +24,25 @@ import cc.sferalabs.sfera.core.services.TasksManager;
  */
 public abstract class Bus {
 
-	private static final SubscriberExceptionHandler SUBSCRIBER_EXCEPTION_HANDLER = new EventsSubscriberExceptionHandler();
+	private static final Logger logger = LoggerFactory.getLogger(Bus.class);
+
+	private static final SubscriberExceptionHandler SUBSCRIBER_EXCEPTION_HANDLER = new SubscriberExceptionHandler() {
+
+		@Override
+		public void handleException(Throwable exception, SubscriberExceptionContext context) {
+			Class<?> listenerClass = context.getSubscriber().getClass();
+			String method = context.getSubscriberMethod().getName();
+			String event = context.getEvent().getClass().getSimpleName();
+
+			Logger logger = LoggerFactory.getLogger(listenerClass);
+			logger.error("Error dispatching event '" + event + "' to '"
+					+ listenerClass.getSimpleName() + "." + method + "'", exception);
+		}
+	};
+
 	private static final EventBus EVENT_BUS = new AsyncEventBus(
 			TasksManager.getTasksExecutorService(), SUBSCRIBER_EXCEPTION_HANDLER);
 	private static final Map<String, Event> EVENTS_MAP = new HashMap<String, Event>();
-
-	private static final Logger logger = LoggerFactory.getLogger(Bus.class);
 
 	/**
 	 * Registers the specified listener to the event bus.

@@ -18,6 +18,13 @@ public interface Event {
 	public String getId();
 
 	/**
+	 * Returns the event ID without the source ID prefix
+	 * 
+	 * @return the event ID without the source ID prefix
+	 */
+	public String getSubId();
+
+	/**
 	 * Returns the source node that generated this event
 	 * 
 	 * @return the source node
