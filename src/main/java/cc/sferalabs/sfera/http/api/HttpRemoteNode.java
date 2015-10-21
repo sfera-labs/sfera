@@ -22,15 +22,15 @@ import cc.sferalabs.sfera.events.Node;
 public class HttpRemoteNode implements Node {
 
 	private final HttpServletRequest request;
-	private final String username;
 	private final JsonMessage response;
 
 	/**
-	 * @param req
+	 * 
+	 * @param request
+	 * @param response
 	 */
-	public HttpRemoteNode(HttpServletRequest request, String username, JsonMessage response) {
+	public HttpRemoteNode(HttpServletRequest request, JsonMessage response) {
 		this.request = Objects.requireNonNull(request, "request must not be null");
-		this.username = Objects.requireNonNull(username, "username must not be null");
 		this.response = Objects.requireNonNull(response, "response must not be null");
 	}
 
@@ -40,12 +40,12 @@ public class HttpRemoteNode implements Node {
 	}
 
 	/**
-	 * Returns the user associated with this event.
+	 * Returns the user associated with this remote.
 	 * 
 	 * @return the user
 	 */
 	public User getUser() {
-		return Access.getUser(username);
+		return Access.getUser(request.getRemoteUser());
 	}
 
 	/**

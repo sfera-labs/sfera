@@ -46,4 +46,15 @@ public class UI implements Node {
 		Bus.post(new UISetEvent(id, attribute, value));
 	}
 
+	/**
+	 * 
+	 * @param id
+	 * @param attribute
+	 * @param value
+	 * @param session
+	 */
+	public static void set(String id, String attribute, String value, String session) {
+		Bus.post(new UISessionSetEvent(id, attribute, value, session));
+	}
+
 }

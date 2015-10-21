@@ -8,29 +8,14 @@ import com.google.common.eventbus.Subscribe;
 
 public abstract class EventIdSpecListener implements EventListener {
 
-	private String spec;
-
-	/**
-	 * 
-	 */
-	public EventIdSpecListener() {
-		Bus.register(this);
-	}
+	private final String spec;
 
 	/**
 	 * 
 	 * @param spec
 	 */
 	public EventIdSpecListener(String spec) {
-		this();
-		setIdSpec(spec);
-	}
-
-	/**
-	 * 
-	 * @param spec
-	 */
-	public void setIdSpec(String spec) {
+		Bus.register(this);
 		this.spec = spec;
 	}
 
@@ -47,15 +32,7 @@ public abstract class EventIdSpecListener implements EventListener {
 	 * @return
 	 */
 	protected boolean matches(Event event) {
-		return matches(event.getId());
-	}
-
-	/**
-	 * 
-	 * @param eventId
-	 * @return
-	 */
-	protected boolean matches(String eventId) {
+		String eventId = event.getId();
 		if (spec == null || spec.equals("*")) {
 			return true;
 		}

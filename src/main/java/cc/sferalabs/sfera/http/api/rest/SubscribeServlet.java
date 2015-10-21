@@ -24,25 +24,21 @@ public class SubscribeServlet extends AuthorizedUserServlet {
 		String nodes = req.getParameter("nodes");
 
 		HttpSession session = req.getSession(false);
+		String sessionId = session.getId();
 		SubscriptionsSet subscriptions = (SubscriptionsSet) session
 				.getAttribute(SESSION_ATTR_SUBSCRIPTIONS);
 		if (subscriptions == null) {
 			subscriptions = new SubscriptionsSet();
 			session.setAttribute(SESSION_ATTR_SUBSCRIPTIONS, subscriptions);
-			logger.debug("Creted new subscriptions set for session '{}'", session.getId());
+			logger.debug("Creted new subscriptions set for session '{}'", sessionId);
 		}
-		PollingSubscription subscription = (id == null) ? null : subscriptions.get(id);
-		if (subscription == null) {
-			subscription = new PollingSubscription();
-			id = subscription.getId();
-			subscriptions.put(subscription);
-			logger.debug("Creted new subscription for session '{}' with ID: {}", session.getId(),
-					id);
+		PollingSubscription subscription = new PollingSubscription(id, nodes, sessionId);
+		PollingSubscription prev = subscriptions.put(subscription);
+		if (prev != null) {
+			prev.destroy();
 		}
-		subscription.setIdSpec(nodes);
-		logger.debug("Subscribed: session '{}' subscription '{}' nodes: {}", session.getId(), id,
-				nodes);
-
+		id = subscription.getId();
+		logger.debug("Subscribed: session '{}' subscription '{}' nodes: {}", sessionId, id, nodes);
 		resp.send("id", id);
 	}
 

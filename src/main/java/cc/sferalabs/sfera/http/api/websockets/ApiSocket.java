@@ -1,7 +1,6 @@
 package cc.sferalabs.sfera.http.api.websockets;
 
 import java.io.IOException;
-import java.security.Principal;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -12,6 +11,8 @@ import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cc.sferalabs.sfera.core.services.Task;
+import cc.sferalabs.sfera.core.services.TasksManager;
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.http.api.HttpApiEvent;
 import cc.sferalabs.sfera.script.ScriptsEngine;
@@ -28,37 +29,45 @@ class ApiSocket extends WebSocketAdapter {
 
 	private static final Logger logger = LoggerFactory.getLogger(ApiSocket.class);
 
-	private final HttpServletRequest request;
-	private final Principal user;
+	private static final String PING_STRING = "&";
+
+	private final HttpServletRequest httpRequest;
 	private WsEventListener subscription;
+	private final Task pingTask;
 
 	/**
 	 * 
 	 * @param request
 	 */
 	ApiSocket(ServletUpgradeRequest request) {
-		this.request = request.getHttpServletRequest();
-		this.user = request.getUserPrincipal();
-		logger.debug("Socket created - Host: {}", this.request.getRemoteHost());
+		this.httpRequest = request.getHttpServletRequest();
+		this.pingTask = new PingTask(this);
+		logger.debug("Socket created - Host: {}", this.httpRequest.getRemoteHost());
 	}
 
 	/**
-	 * 
-	 * @return
+	 * @return the httpRequest
 	 */
-	public String getUserName() {
-		return user.getName();
+	HttpServletRequest getHttpRequest() {
+		return httpRequest;
 	}
 
 	@Override
 	public void onWebSocketConnect(Session session) {
 		super.onWebSocketConnect(session);
-		logger.debug("Socket connected - Host: {}", this.request.getRemoteHost());
-		OutgoingMessage msg = new OutgoingMessage("connection", this);
+		String host = httpRequest.getRemoteHost();
+		logger.debug("Socket connected - Host: {}", host);
+		ping();
+	}
+
+	/**
+	 * 
+	 */
+	void ping() {
 		try {
-			msg.sendResult("ok");
-		} catch (IllegalStateException | IOException e) {
-			logger.warn("Error sending connection response", e);
+			send(PING_STRING);
+		} catch (IOException e) {
+			getSession().close(1002, "Ping error");
 		}
 	}
 
@@ -66,7 +75,13 @@ class ApiSocket extends WebSocketAdapter {
 	public void onWebSocketText(String message) {
 		super.onWebSocketText(message);
 		logger.debug("Received message: {} - Host: {} User: {}", message,
-				this.request.getRemoteHost(), user.getName());
+				this.httpRequest.getRemoteHost(), httpRequest.getRemoteUser());
+
+		if (message.equals(PING_STRING)) {
+			TasksManager.execute(pingTask);
+			return;
+		}
+
 		IncomingMessage m = new IncomingMessage(message);
 		try {
 			process(m);
@@ -95,43 +110,46 @@ class ApiSocket extends WebSocketAdapter {
 			}
 			resp.put("id", id);
 
-			if (action.equals("subscribe")) {
+			switch (action) {
+			case "subscribe":
 				String spec = message.getParameter("nodes");
 				if (subscription != null) {
 					subscription.destroy();
 				}
 				subscription = new WsEventListener(this, spec);
 				resp.sendResult("ok");
+				break;
 
-			} else if (action.equals("command")) {
+			case "command":
 				for (String command : message.getParameters()) {
 					if (command.indexOf('.') > 0) { // driver command
 						String param = message.getParameter(command);
 						try {
 							Object res = ScriptsEngine.executeDriverAction(command, param,
-									getUserName());
+									httpRequest.getRemoteUser());
 							resp.sendResult(res);
-							return;
 						} catch (Exception e) {
 							resp.sendError(e.getMessage());
-							return;
 						}
+						break;
 					}
 				}
+				break;
 
-			} else if (action.equals("event")) {
+			case "event":
 				String eid = message.getParameter("eid");
 				String eval = message.getParameter("eval");
 				try {
-					HttpApiEvent remoteEvent = new HttpApiEvent(eid, eval, getUserName(), request,
-							resp);
+					HttpApiEvent remoteEvent = new HttpApiEvent(eid, eval, httpRequest, resp);
 					Bus.post(remoteEvent);
 				} catch (Exception e) {
 					resp.sendError(e.getMessage());
 				}
+				break;
 
-			} else {
+			default:
 				resp.sendError("Unknown action");
+				break;
 			}
 		} catch (IOException e) {
 			resp.sendError("Server error: " + e.getMessage());
@@ -147,14 +165,23 @@ class ApiSocket extends WebSocketAdapter {
 			subscription = null;
 		}
 		logger.debug("Socket Closed: [{}] {} - Host: {}", statusCode, reason,
-				this.request.getRemoteHost());
+				httpRequest.getRemoteHost());
 	}
 
 	@Override
 	public void onWebSocketError(Throwable cause) {
 		super.onWebSocketError(cause);
-		logger.warn("WebSocket error - Host: " + this.request.getRemoteHost(), cause);
+		logger.warn("WebSocket error - Host: " + httpRequest.getRemoteHost(), cause);
 		getSession().close(StatusCode.SERVER_ERROR, cause.getMessage());
+	}
+
+	/**
+	 * @param text
+	 * @throws IOException
+	 */
+	void send(String text) throws IOException {
+		logger.debug("Sending: '{}' - Host: {}", text, httpRequest.getRemoteHost());
+		getRemote().sendString(text);
 	}
 
 }

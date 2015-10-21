@@ -32,7 +32,7 @@ class OutgoingMessage extends JsonMessage {
 
 	@Override
 	protected void doSend(String text) throws IOException {
-		socket.getRemote().sendString(text);
+		socket.send(text);
 	}
 
 }

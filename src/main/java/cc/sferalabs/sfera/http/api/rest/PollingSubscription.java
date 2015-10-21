@@ -10,9 +10,9 @@ import java.util.concurrent.TimeUnit;
 
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Event;
-import cc.sferalabs.sfera.events.EventIdSpecListener;
+import cc.sferalabs.sfera.http.SessionFilterEventIdSpecListener;
 
-public class PollingSubscription extends EventIdSpecListener {
+public class PollingSubscription extends SessionFilterEventIdSpecListener {
 
 	private final String id;
 	private final BlockingQueue<Event> changes = new LinkedBlockingQueue<Event>();
@@ -21,10 +21,16 @@ public class PollingSubscription extends EventIdSpecListener {
 
 	/**
 	 * 
+	 * @param id
+	 * @param spec
+	 * @param session
 	 */
-	PollingSubscription() {
-		super();
-		this.id = UUID.randomUUID().toString();
+	PollingSubscription(String id, String spec, String session) {
+		super(spec, session);
+		this.id = id != null ? id : UUID.randomUUID().toString();
+		for (Event e : Bus.getCurrentState().values()) {
+			process(e);
+		}
 	}
 
 	/**
@@ -69,14 +75,6 @@ public class PollingSubscription extends EventIdSpecListener {
 	@Override
 	protected void handleEvent(Event event) {
 		changes.add(event);
-	}
-
-	@Override
-	public void setIdSpec(String spec) {
-		super.setIdSpec(spec);
-		for (Event e : Bus.getCurrentState().values()) {
-			process(e);
-		}
 	}
 
 }

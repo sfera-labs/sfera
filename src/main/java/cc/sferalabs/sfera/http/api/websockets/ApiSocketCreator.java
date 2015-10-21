@@ -6,6 +6,13 @@ import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ *
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 public class ApiSocketCreator implements WebSocketCreator {
 
 	private final static Logger logger = LoggerFactory.getLogger(ApiSocketCreator.class);
@@ -15,7 +22,7 @@ public class ApiSocketCreator implements WebSocketCreator {
 		if (isAuthorized(req)) {
 			return new ApiSocket(req);
 		} else {
-			logger.warn("Unauthorized websocket upgrade request from {}", req.getRemoteHostName());
+			logger.warn("Unauthorized WebSocket upgrade request from {}", req.getRemoteHostName());
 			return null;
 		}
 	}
@@ -26,7 +33,7 @@ public class ApiSocketCreator implements WebSocketCreator {
 	 * @return
 	 */
 	private boolean isAuthorized(ServletUpgradeRequest req) {
-		return req.isUserInRole("admin") || req.isUserInRole("api");
+		return req.isUserInRole("admin") || req.isUserInRole("user");
 	}
 
 }

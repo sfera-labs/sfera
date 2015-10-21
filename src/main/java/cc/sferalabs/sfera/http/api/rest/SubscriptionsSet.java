@@ -46,4 +46,15 @@ public class SubscriptionsSet implements Serializable {
 		return map.values();
 	}
 
+	/**
+	 * @param id
+	 * @return
+	 */
+	public PollingSubscription remove(String id) {
+		if (map == null) {
+			return null;
+		}
+		return map.remove(id);
+	}
+
 }

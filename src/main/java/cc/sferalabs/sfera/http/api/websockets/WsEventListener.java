@@ -11,9 +11,9 @@ import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Event;
-import cc.sferalabs.sfera.events.EventIdSpecListener;
+import cc.sferalabs.sfera.http.SessionFilterEventIdSpecListener;
 
-class WsEventListener extends EventIdSpecListener {
+class WsEventListener extends SessionFilterEventIdSpecListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(WsEventListener.class);
 
@@ -25,7 +25,7 @@ class WsEventListener extends EventIdSpecListener {
 	 * @param eventIdSpec
 	 */
 	WsEventListener(ApiSocket socket, String eventIdSpec) {
-		super(eventIdSpec);
+		super(eventIdSpec, socket.getHttpRequest().getSession().getId());
 		this.socket = socket;
 
 		List<Event> evs = new ArrayList<>();
@@ -56,7 +56,6 @@ class WsEventListener extends EventIdSpecListener {
 				eventsMap.put(e.getId(), e.getValue());
 			}
 			m.put("events", eventsMap);
-			logger.debug("Sending events: {}", eventsMap);
 			m.send();
 		} catch (Exception e) {
 			logger.warn("Error sending event", e);

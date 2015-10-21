@@ -23,8 +23,6 @@ public class HttpApiEvent extends StringEvent {
 	 *            the event id
 	 * @param value
 	 *            the event value
-	 * @param username
-	 *            the username of the user associated with this event
 	 * @param request
 	 *            the request associated with this event
 	 * @param response
@@ -32,9 +30,9 @@ public class HttpApiEvent extends StringEvent {
 	 * @throws NullPointerException
 	 *             if any of the parameters are {@code null}
 	 */
-	public HttpApiEvent(String id, String value, String username, HttpServletRequest request,
-			JsonMessage response) throws NullPointerException {
-		super(new HttpRemoteNode(request, username, response),
+	public HttpApiEvent(String id, String value, HttpServletRequest request, JsonMessage response)
+			throws NullPointerException {
+		super(new HttpRemoteNode(request, response),
 				Objects.requireNonNull(id, "id must not be null"),
 				Objects.requireNonNull(value, "value must not be null"));
 	}
