@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jetty.websocket.api.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,17 +50,20 @@ class WsEventListener extends SessionFilterEventIdSpecListener {
 	 * @param events
 	 */
 	private void sendEvents(List<Event> events) {
+		Map<String, Object> eventsMap = new HashMap<>();
 		try {
 			OutgoingMessage m = new OutgoingMessage("event", socket);
-			Map<String, Object> eventsMap = new HashMap<>();
 			for (Event e : events) {
 				eventsMap.put(e.getId(), e.getValue());
 			}
 			m.put("events", eventsMap);
 			m.send();
 		} catch (Exception e) {
-			logger.warn("Error sending event", e);
-			socket.getSession().close();
+			logger.warn("Error sending events " + eventsMap, e);
+			Session session = socket.getSession();
+			if (session != null) {
+				session.close();
+			}
 		}
 	}
 

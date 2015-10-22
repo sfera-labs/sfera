@@ -10,6 +10,19 @@ import javax.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * <p>
+ * API servlet handling user login.
+ * </p>
+ * <p>
+ * The request requires the parameters 'user' and 'password'.
+ * </p>
+ * 
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 @SuppressWarnings("serial")
 public class LoginServlet extends ApiServlet {
 

@@ -11,6 +11,14 @@ import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.script.ScriptsEngine;
 
+/**
+ * API servlet handling driver commands.
+ * 
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 @SuppressWarnings("serial")
 public class CommandServlet extends AuthorizedUserServlet {
 

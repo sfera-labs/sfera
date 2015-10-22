@@ -3,7 +3,6 @@
  */
 package cc.sferalabs.sfera.http.api.websockets;
 
-import cc.sferalabs.sfera.core.SystemNode;
 import cc.sferalabs.sfera.core.services.Task;
 
 /**
@@ -16,21 +15,22 @@ import cc.sferalabs.sfera.core.services.Task;
 class PingTask extends Task {
 
 	private final ApiSocket socket;
-	private final long interval;
+	private final long pingInterval;
 
 	/**
 	 * @param socket
+	 * @param pingInterval 
 	 */
-	PingTask(ApiSocket socket) {
+	PingTask(ApiSocket socket, long pingInterval) {
 		super("WS Ping " + socket.getHttpRequest().getRemoteHost());
 		this.socket = socket;
-		this.interval = SystemNode.getConfiguration().get("http_ws_ping_interval", 10000l);
+		this.pingInterval = pingInterval;
 	}
 
 	@Override
 	protected void execute() {
 		try {
-			Thread.sleep(interval);
+			Thread.sleep(pingInterval);
 			socket.ping();
 		} catch (InterruptedException e) {
 		}

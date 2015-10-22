@@ -34,14 +34,20 @@ class ApiSocket extends WebSocketAdapter {
 	private final HttpServletRequest httpRequest;
 	private WsEventListener subscription;
 	private final Task pingTask;
+	private final long pingInterval;
+	private final long pongTimeout;
 
 	/**
 	 * 
 	 * @param request
+	 * @param pingInterval
+	 * @param pongTimeout
 	 */
-	ApiSocket(ServletUpgradeRequest request) {
+	ApiSocket(ServletUpgradeRequest request, long pingInterval, long pongTimeout) {
 		this.httpRequest = request.getHttpServletRequest();
-		this.pingTask = new PingTask(this);
+		this.pingInterval = pingInterval;
+		this.pongTimeout = pongTimeout;
+		this.pingTask = new PingTask(this, pingInterval);
 		logger.debug("Socket created - Host: {}", this.httpRequest.getRemoteHost());
 	}
 
@@ -54,10 +60,17 @@ class ApiSocket extends WebSocketAdapter {
 
 	@Override
 	public void onWebSocketConnect(Session session) {
-		super.onWebSocketConnect(session);
-		String host = httpRequest.getRemoteHost();
-		logger.debug("Socket connected - Host: {}", host);
-		ping();
+		try {
+			super.onWebSocketConnect(session);
+			OutgoingMessage resp = new OutgoingMessage("connection", this);
+			resp.put("pingInterval", pingInterval);
+			resp.put("pongTimeout", pongTimeout);
+			resp.send();
+			ping();
+			logger.debug("Socket connected - Host: {}", httpRequest.getRemoteHost());
+		} catch (Exception e) {
+			logger.warn("Connection error", e);
+		}
 	}
 
 	/**
@@ -179,7 +192,7 @@ class ApiSocket extends WebSocketAdapter {
 	 * @param text
 	 * @throws IOException
 	 */
-	void send(String text) throws IOException {
+	synchronized void send(String text) throws IOException {
 		logger.debug("Sending: '{}' - Host: {}", text, httpRequest.getRemoteHost());
 		getRemote().sendString(text);
 	}

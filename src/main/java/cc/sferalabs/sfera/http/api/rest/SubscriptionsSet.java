@@ -6,7 +6,14 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SubscriptionsSet implements Serializable {
+/**
+ *
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
+class SubscriptionsSet implements Serializable {
 
 	private static final long serialVersionUID = 4456127014431500700L;
 

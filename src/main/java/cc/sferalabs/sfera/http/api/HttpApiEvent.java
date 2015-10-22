@@ -5,9 +5,11 @@ import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
 
 import cc.sferalabs.sfera.events.StringEvent;
+import cc.sferalabs.sfera.http.api.rest.EventServlet;
 
 /**
- * Event generated when requested via remote API.
+ * Event generated when requested via remote API through the
+ * {@link EventServlet} servlet.
  * 
  * @author Giampiero Baggiani
  *

@@ -13,7 +13,8 @@ import cc.sferalabs.sfera.access.User;
 import cc.sferalabs.sfera.events.Node;
 
 /**
- *
+ * Node used as source for {@link HttpApiEvent} events.
+ * 
  * @author Giampiero Baggiani
  *
  * @version 1.0.0
@@ -25,9 +26,12 @@ public class HttpRemoteNode implements Node {
 	private final JsonMessage response;
 
 	/**
+	 * Construct a HttpRemoteNode
 	 * 
 	 * @param request
+	 *            the request associated with this remote
 	 * @param response
+	 *            the response object to be used to send a reply
 	 */
 	public HttpRemoteNode(HttpServletRequest request, JsonMessage response) {
 		this.request = Objects.requireNonNull(request, "request must not be null");
@@ -67,7 +71,7 @@ public class HttpRemoteNode implements Node {
 	 * @throws IllegalStateException
 	 *             if this event has already been handled
 	 */
-	public void reply(String result) throws IOException {
+	public void reply(Object result) throws IOException {
 		response.sendResult(result);
 	}
 

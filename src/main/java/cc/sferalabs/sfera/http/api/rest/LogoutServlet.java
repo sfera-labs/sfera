@@ -9,6 +9,16 @@ import javax.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * <p>
+ * API servlet handling user logout.
+ * </p>
+ * 
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 @SuppressWarnings("serial")
 public class LogoutServlet extends ApiServlet {
 

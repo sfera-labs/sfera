@@ -9,6 +9,22 @@ import javax.servlet.http.HttpServletResponse;
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.http.api.HttpApiEvent;
 
+/**
+ * <p>
+ * API servlet handlig event triggering requests.
+ * </p>
+ * <p>
+ * A successful request to this servlet will trigger an {@link HttpApiEvent}
+ * event whose source is an {@link HttpRemoteNode} instance, the ID will
+ * correspond to the value of the specified 'eid' request parameter and the
+ * value must be specified in the 'eval' request parameter.
+ * </p>
+ * 
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 @SuppressWarnings("serial")
 public class EventServlet extends AuthorizedUserServlet {
 

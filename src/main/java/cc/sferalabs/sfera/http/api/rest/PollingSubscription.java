@@ -12,6 +12,15 @@ import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Event;
 import cc.sferalabs.sfera.http.SessionFilterEventIdSpecListener;
 
+/**
+ * Class handling a polling subscription requested via {@link SubscribeServletk}
+ * .
+ * 
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 public class PollingSubscription extends SessionFilterEventIdSpecListener {
 
 	private final String id;
@@ -20,10 +29,14 @@ public class PollingSubscription extends SessionFilterEventIdSpecListener {
 	private Map<String, Event> lastPolled = new HashMap<String, Event>();
 
 	/**
+	 * Constructs a PollingSubscription.
 	 * 
 	 * @param id
+	 *            subscription ID, if {@code null} a random ID will be generated
 	 * @param spec
+	 *            specification of the event IDs matched by this subscription
 	 * @param session
+	 *            session ID
 	 */
 	PollingSubscription(String id, String spec, String session) {
 		super(spec, session);
@@ -34,8 +47,9 @@ public class PollingSubscription extends SessionFilterEventIdSpecListener {
 	}
 
 	/**
+	 * Returns the subscription ID
 	 * 
-	 * @return
+	 * @return the subscription ID
 	 */
 	public String getId() {
 		return id;
