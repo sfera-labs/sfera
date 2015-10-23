@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
@@ -79,8 +80,8 @@ public class ApiSocket extends WebSocketAdapter {
 	void ping() {
 		try {
 			send(PING_STRING);
-		} catch (IOException e) {
-			getSession().close(1002, "Ping error");
+		} catch (Exception e) {
+			getSession().close(1002, "Ping error: " + e.getMessage());
 		}
 	}
 
@@ -194,7 +195,10 @@ public class ApiSocket extends WebSocketAdapter {
 	 */
 	synchronized void send(String text) throws IOException {
 		logger.debug("Sending: '{}' - Host: {}", text, httpRequest.getRemoteHost());
-		getRemote().sendString(text);
+		RemoteEndpoint remote = getRemote();
+		if (remote != null) {
+			remote.sendString(text);
+		}
 	}
 
 }

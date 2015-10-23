@@ -31,7 +31,7 @@ public abstract class Application implements EventListener {
 	/**
 	 * Construct an Application
 	 */
-	Application() {
+	protected Application() {
 		this.log = LoggerFactory.getLogger(getClass().getName());
 	}
 
