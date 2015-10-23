@@ -23,6 +23,10 @@ public abstract class AuthorizedApiServlet extends ApiServlet {
 
 	private static final Logger logger = LoggerFactory.getLogger(AuthorizedApiServlet.class);
 
+	/**
+	 * @return an array containing the user roles required by this servlet for
+	 *         requests to be authorized
+	 */
 	public abstract String[] getRoles();
 
 	@Override
@@ -38,9 +42,13 @@ public abstract class AuthorizedApiServlet extends ApiServlet {
 	}
 
 	/**
+	 * Returns a boolean indicating whether the specified request is authorized.
 	 * 
 	 * @param req
-	 * @return
+	 *            the request to be authorized
+	 * 
+	 * @return {@code true} if the reqast is authorized, {@code false}
+	 *         otherwise.
 	 */
 	protected boolean isAuthorized(HttpServletRequest req) {
 		for (String role : getRoles()) {

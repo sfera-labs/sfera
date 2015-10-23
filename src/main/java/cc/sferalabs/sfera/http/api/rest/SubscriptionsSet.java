@@ -7,7 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- *
+ * A set of {@link PollingSubscription}s.
+ * 
  * @author Giampiero Baggiani
  *
  * @version 1.0.0
@@ -24,7 +25,7 @@ class SubscriptionsSet implements Serializable {
 	 * @param id
 	 * @return
 	 */
-	public PollingSubscription get(String id) {
+	PollingSubscription get(String id) {
 		if (map == null) {
 			return null;
 		}
@@ -36,7 +37,7 @@ class SubscriptionsSet implements Serializable {
 	 * @param subscription
 	 * @return
 	 */
-	public PollingSubscription put(PollingSubscription subscription) {
+	PollingSubscription put(PollingSubscription subscription) {
 		if (map == null) {
 			map = new HashMap<>();
 		}
@@ -46,7 +47,7 @@ class SubscriptionsSet implements Serializable {
 	/**
 	 * @return
 	 */
-	public Collection<PollingSubscription> values() {
+	Collection<PollingSubscription> values() {
 		if (map == null) {
 			return new ArrayList<>();
 		}
@@ -57,7 +58,7 @@ class SubscriptionsSet implements Serializable {
 	 * @param id
 	 * @return
 	 */
-	public PollingSubscription remove(String id) {
+	PollingSubscription remove(String id) {
 		if (map == null) {
 			return null;
 		}

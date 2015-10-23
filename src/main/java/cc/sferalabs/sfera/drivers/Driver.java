@@ -17,7 +17,8 @@ import cc.sferalabs.sfera.core.services.TasksManager;
 import cc.sferalabs.sfera.events.Node;
 
 /**
- *
+ * Abstract class to be implemented to create drivers.
+ * 
  * @author Giampiero Baggiani
  *
  * @version 1.0.0
@@ -33,10 +34,12 @@ public abstract class Driver extends Task implements Node {
 	protected final Logger log;
 
 	/**
+	 * Contruct a Driver
 	 * 
 	 * @param id
+	 *            the driver ID
 	 */
-	public Driver(String id) {
+	protected Driver(String id) {
 		super("driver." + id);
 		this.id = id;
 		this.log = LoggerFactory.getLogger(getClass().getName() + "." + id);
@@ -48,15 +51,18 @@ public abstract class Driver extends Task implements Node {
 	}
 
 	/**
+	 * Sets the path of the configuration file relative to the configuration
+	 * directory.
 	 * 
 	 * @param configFile
+	 *            the relative configuration file path
 	 */
-	public void setConfigFile(String configFile) {
+	void setConfigFile(String configFile) {
 		this.configFile = configFile;
 	}
 
 	/**
-	 * 
+	 * Interrupts the driver process.
 	 */
 	public synchronized void quit() {
 		quit = true;
@@ -66,7 +72,7 @@ public abstract class Driver extends Task implements Node {
 	}
 
 	/**
-	 * 
+	 * Stars the driver in a separate process.
 	 */
 	public synchronized void start() {
 		if (future == null) {
@@ -78,8 +84,10 @@ public abstract class Driver extends Task implements Node {
 	}
 
 	/**
+	 * Gracefully restarts the driver process.
 	 * 
 	 * @throws InterruptedException
+	 *             if interrupted while waiting for the driver to quit
 	 */
 	public synchronized void restart() throws InterruptedException {
 		quit();
@@ -94,6 +102,13 @@ public abstract class Driver extends Task implements Node {
 	}
 
 	/**
+	 * <p>
+	 * Callback method called when the driver configuration has changed.
+	 * </p>
+	 * <p>
+	 * The default implementation simple restarts the driver. Subclasses can
+	 * override this method to optimize the handling of configuration change.
+	 * </p>
 	 * 
 	 * @param config
 	 */
@@ -115,7 +130,7 @@ public abstract class Driver extends Task implements Node {
 				config = new Configuration(configFile);
 				try {
 					configWatcherId = FilesWatcher.register(config.getRealPath(),
-							this::onConfigFileModified, false);
+							this::reloadConfiguration, false);
 				} catch (IOException e) {
 					log.error("Error watching config file", e);
 				}
@@ -173,7 +188,7 @@ public abstract class Driver extends Task implements Node {
 	/**
 	 * 
 	 */
-	public void onConfigFileModified() {
+	private void reloadConfiguration() {
 		Configuration config = null;
 		try {
 			try {
@@ -185,31 +200,42 @@ public abstract class Driver extends Task implements Node {
 			log.info("Configuration changed");
 			onConfigChange(config);
 		} catch (Throwable t) {
-			log.error("Error in onConfigChange()", t);
+			log.error("Error reloading configuration", t);
 		}
 	}
 
 	/**
+	 * Callback method called on driver initialization.
 	 * 
 	 * @param config
-	 * @return
+	 *            the driver configuration
+	 * @return {@code true} if the initialization is successful, {@code false}
+	 *         otherwise
 	 * @throws InterruptedException
+	 *             if interrupted while executing
 	 */
 	protected abstract boolean onInit(Configuration config) throws InterruptedException;
 
 	/**
+	 * Callback method continuously called after a successful initialization
+	 * until {@code false} is returned.
 	 * 
-	 * @return
+	 * @return {@code true} if this method has to be called again, {@code false}
+	 *         to quit the drivers
 	 * @throws InterruptedException
+	 *             if interrupted while executing
 	 */
 	protected abstract boolean loop() throws InterruptedException;
 
 	/**
-	 * 
+	 * Callback method called when the driver is about to quit.
 	 */
 	protected abstract void onQuit();
 
 	/**
+	 * Returns the path to the directory to be used to store data for all
+	 * instances of this driver.
+	 * 
 	 * @return the path to the directory to be used to store data for all
 	 *         instances of this driver
 	 */
@@ -218,6 +244,9 @@ public abstract class Driver extends Task implements Node {
 	}
 
 	/**
+	 * Returns the path to the directory to be used to store data this driver
+	 * instance.
+	 * 
 	 * @return the path to the directory to be used to store data this driver
 	 *         instance
 	 */

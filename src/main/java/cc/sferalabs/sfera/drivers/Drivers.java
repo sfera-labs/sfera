@@ -23,7 +23,8 @@ import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.script.ScriptsEngine;
 
 /**
- *
+ * Utility class for managing drivers.
+ * 
  * @author Giampiero Baggiani
  *
  * @version 1.0.0
@@ -38,7 +39,7 @@ public abstract class Drivers {
 	private static Map<String, Driver> drivers = new HashMap<>();
 
 	/**
-	 * 
+	 * Instantiate and starts all drivers defined in configuration.
 	 */
 	public synchronized static void load() {
 		instantiateDrivers();
@@ -51,7 +52,7 @@ public abstract class Drivers {
 	}
 
 	/**
-	 * 
+	 * Instantiate and starts all drivers defined in configuration.
 	 */
 	private static void instantiateDrivers() {
 		Path configDir = Configuration.getConfigDir().resolve(CONFIG_DIR);
@@ -114,7 +115,7 @@ public abstract class Drivers {
 	}
 
 	/**
-	 * 
+	 * Quits all the drivers.
 	 */
 	public synchronized static void quit() {
 		for (final Driver d : drivers.values()) {
@@ -123,9 +124,12 @@ public abstract class Drivers {
 	}
 
 	/**
+	 * Returns the driver instance with the specified ID.
 	 * 
 	 * @param id
-	 * @return
+	 *            the ID of the driver to be returned
+	 * @return the driver instance with the specified ID or {@code null} if no
+	 *         such driver is found
 	 */
 	public synchronized static Driver getDriver(String id) {
 		return drivers.get(id);

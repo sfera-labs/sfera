@@ -15,9 +15,10 @@ import cc.sferalabs.sfera.http.api.HttpApiEvent;
  * </p>
  * <p>
  * A successful request to this servlet will trigger an {@link HttpApiEvent}
- * event whose source is an {@link HttpRemoteNode} instance, the ID will
- * correspond to the value of the specified 'eid' request parameter and the
- * value must be specified in the 'eval' request parameter.
+ * event whose source is an {@link cc.sferalabs.sfera.http.api.HttpRemoteNode
+ * HttpRemoteNode} instance, the ID will correspond to the value of the
+ * specified 'eid' request parameter and the value must be specified in the
+ * 'eval' request parameter.
  * </p>
  * 
  * @author Giampiero Baggiani

@@ -24,7 +24,7 @@ public class ApiSocketCreator implements WebSocketCreator {
 	 * @param pingInterval
 	 * @param pongTimeout
 	 */
-	public ApiSocketCreator(long pingInterval, long pongTimeout) {
+	ApiSocketCreator(long pingInterval, long pongTimeout) {
 		this.pingInterval = pingInterval;
 		this.pongTimeout = pongTimeout;
 	}

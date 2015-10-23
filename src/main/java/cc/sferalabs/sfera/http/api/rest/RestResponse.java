@@ -12,6 +12,14 @@ import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.http.api.JsonMessage;
 
+/**
+ * Class representing a response for an API REST request.
+ * 
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 public class RestResponse extends JsonMessage {
 
 	private static final long ASYNC_RESP_TIMEOUT = 30000;
@@ -21,8 +29,10 @@ public class RestResponse extends JsonMessage {
 	private AsyncContext asyncContext;
 
 	/**
+	 * Construct a RestResponse.
 	 * 
 	 * @param resp
+	 *            the {@code HttpServletResponse} to send the response to
 	 */
 	RestResponse(HttpServletResponse resp) {
 		this.resp = resp;
@@ -31,16 +41,19 @@ public class RestResponse extends JsonMessage {
 	}
 
 	/**
+	 * Returns the {@code HttpServletResponse} associated to this response
 	 * 
-	 * @return
+	 * @return the {@code HttpServletResponse} associated to this response
 	 */
 	public HttpServletResponse getHttpServletResponse() {
 		return resp;
 	}
 
 	/**
+	 * Sets the {@link AsyncContext} to be used for asynchronous mode requests.
 	 * 
 	 * @param asyncContext
+	 *            the {@code AsyncContext} to be used
 	 */
 	public void setAsyncContext(AsyncContext asyncContext) {
 		this.asyncContext = asyncContext;
@@ -62,11 +75,17 @@ public class RestResponse extends JsonMessage {
 	}
 
 	/**
+	 * Sets the status code for this HTTP response to the specified one, sets
+	 * the 'error' attribute of this message to the specified message and sends.
 	 * 
 	 * @param sc
+	 *            the status code
 	 * @param message
+	 *            the error message
 	 * @throws IOException
+	 *             if an I/O error occurs
 	 * @throws IllegalStateException
+	 *             if this message has already been sent
 	 */
 	public void sendError(int sc, String message) throws IOException, IllegalStateException {
 		resp.setStatus(sc);
@@ -74,6 +93,10 @@ public class RestResponse extends JsonMessage {
 	}
 
 	/**
+	 *
+	 * @author Giampiero Baggiani
+	 *
+	 * @version 1.0.0
 	 *
 	 */
 	private class RestResponseAsyncListener implements AsyncListener {

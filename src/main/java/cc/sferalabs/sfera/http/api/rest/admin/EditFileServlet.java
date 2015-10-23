@@ -20,7 +20,8 @@ import org.slf4j.LoggerFactory;
 import cc.sferalabs.sfera.http.api.rest.RestResponse;
 
 /**
- *
+ * API admin servlet handling file editing.
+ * 
  * @author Giampiero Baggiani
  *
  * @version 1.0.0

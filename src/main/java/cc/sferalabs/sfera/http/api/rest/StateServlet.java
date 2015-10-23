@@ -13,6 +13,16 @@ import javax.servlet.http.HttpSession;
 
 import cc.sferalabs.sfera.events.Event;
 
+/**
+ * <p>
+ * API servlet handling state requests.
+ * </p>
+ * 
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 @SuppressWarnings("serial")
 public class StateServlet extends AuthorizedUserServlet {
 
@@ -47,13 +57,13 @@ public class StateServlet extends AuthorizedUserServlet {
 
 		try {
 			Collection<Event> changes = subscription.pollChanges(ts, 20, TimeUnit.SECONDS);
-			resp.put("timestamp", System.currentTimeMillis());
 			Map<String, Object> nodes = new HashMap<>();
 			for (Event ev : changes) {
 				nodes.put(ev.getId(), ev.getValue());
 			}
-			resp.send("nodes", nodes);
+			resp.sendResult(nodes);
 		} catch (InterruptedException e) {
+			resp.sendError("Interrupted");
 		}
 	}
 

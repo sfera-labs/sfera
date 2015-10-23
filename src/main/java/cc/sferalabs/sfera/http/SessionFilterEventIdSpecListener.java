@@ -8,7 +8,7 @@ import cc.sferalabs.sfera.events.EventIdSpecListener;
 import cc.sferalabs.sfera.ui.UISessionSetEvent;
 
 /**
- *
+ * 
  * @author Giampiero Baggiani
  *
  * @version 1.0.0
@@ -23,7 +23,7 @@ public abstract class SessionFilterEventIdSpecListener extends EventIdSpecListen
 	 * @param spec
 	 * @param session
 	 */
-	public SessionFilterEventIdSpecListener(String spec, String session) {
+	protected SessionFilterEventIdSpecListener(String spec, String session) {
 		super(spec);
 		this.session = session;
 	}

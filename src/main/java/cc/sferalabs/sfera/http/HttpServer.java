@@ -44,6 +44,8 @@ import cc.sferalabs.sfera.http.api.rest.LoginServlet;
 import cc.sferalabs.sfera.http.api.rest.LogoutServlet;
 import cc.sferalabs.sfera.http.api.rest.StateServlet;
 import cc.sferalabs.sfera.http.api.rest.SubscribeServlet;
+import cc.sferalabs.sfera.http.api.rest.admin.EditFileServlet;
+import cc.sferalabs.sfera.http.api.rest.admin.GetFileServlet;
 import cc.sferalabs.sfera.http.api.websockets.ApiWebSocketServlet;
 import cc.sferalabs.sfera.http.auth.AuthenticationFilter;
 import cc.sferalabs.sfera.http.auth.AuthenticationRequestWrapper;
@@ -207,6 +209,8 @@ public class HttpServer implements AutoStartService {
 		addServlet(CommandServlet.class, CommandServlet.PATH);
 		addServlet(EventServlet.class, EventServlet.PATH);
 		addServlet(ApiWebSocketServlet.class, ApiWebSocketServlet.PATH);
+		addServlet(EditFileServlet.class, EditFileServlet.PATH);
+		addServlet(GetFileServlet.class, GetFileServlet.PATH);
 	}
 
 	/**

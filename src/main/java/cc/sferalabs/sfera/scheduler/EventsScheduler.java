@@ -40,6 +40,13 @@ import cc.sferalabs.sfera.script.ScriptsEngine;
  import static org.quartz.impl.matchers.EverythingMatcher.*;
  */
 
+/**
+ *
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 public class EventsScheduler implements AutoStartService {
 
 	private static final Logger logger = LoggerFactory.getLogger(EventsScheduler.class);

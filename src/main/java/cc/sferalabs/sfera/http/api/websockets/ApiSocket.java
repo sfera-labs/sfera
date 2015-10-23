@@ -25,7 +25,7 @@ import cc.sferalabs.sfera.script.ScriptsEngine;
  * @version 1.0.0
  *
  */
-class ApiSocket extends WebSocketAdapter {
+public class ApiSocket extends WebSocketAdapter {
 
 	private static final Logger logger = LoggerFactory.getLogger(ApiSocket.class);
 
@@ -60,8 +60,8 @@ class ApiSocket extends WebSocketAdapter {
 
 	@Override
 	public void onWebSocketConnect(Session session) {
+		super.onWebSocketConnect(session);
 		try {
-			super.onWebSocketConnect(session);
 			OutgoingMessage resp = new OutgoingMessage("connection", this);
 			resp.put("pingInterval", pingInterval);
 			resp.put("pongTimeout", pongTimeout);
@@ -87,7 +87,7 @@ class ApiSocket extends WebSocketAdapter {
 	@Override
 	public void onWebSocketText(String message) {
 		super.onWebSocketText(message);
-		logger.debug("Received message: {} - Host: {} User: {}", message,
+		logger.debug("Received message: '{}' - Host: {} User: {}", message,
 				this.httpRequest.getRemoteHost(), httpRequest.getRemoteUser());
 
 		if (message.equals(PING_STRING)) {
@@ -125,7 +125,7 @@ class ApiSocket extends WebSocketAdapter {
 
 			switch (action) {
 			case "subscribe":
-				String spec = message.getParameter("nodes");
+				String spec = message.getParameter("spec");
 				if (subscription != null) {
 					subscription.destroy();
 				}

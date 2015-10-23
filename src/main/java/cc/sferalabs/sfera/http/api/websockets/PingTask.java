@@ -6,7 +6,8 @@ package cc.sferalabs.sfera.http.api.websockets;
 import cc.sferalabs.sfera.core.services.Task;
 
 /**
- *
+ * Task executing pings on WebSocket connections.
+ * 
  * @author Giampiero Baggiani
  *
  * @version 1.0.0
@@ -19,7 +20,7 @@ class PingTask extends Task {
 
 	/**
 	 * @param socket
-	 * @param pingInterval 
+	 * @param pingInterval
 	 */
 	PingTask(ApiSocket socket, long pingInterval) {
 		super("WS Ping " + socket.getHttpRequest().getRemoteHost());

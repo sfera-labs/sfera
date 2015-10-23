@@ -6,6 +6,13 @@ import org.quartz.TriggerKey;
 
 import cc.sferalabs.sfera.events.Bus;
 
+/**
+ *
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 public class TriggerEventJob implements Job {
 
 	@Override

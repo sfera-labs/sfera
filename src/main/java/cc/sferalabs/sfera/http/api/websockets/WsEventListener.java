@@ -14,6 +14,15 @@ import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Event;
 import cc.sferalabs.sfera.http.SessionFilterEventIdSpecListener;
 
+/**
+ * Class handling the delivery of events for WebSocket connections that have
+ * subscribed.
+ * 
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 class WsEventListener extends SessionFilterEventIdSpecListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(WsEventListener.class);

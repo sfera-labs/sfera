@@ -46,8 +46,7 @@ public class GetFileServlet extends AuthorizedAdminServlet {
 			Files.copy(source, resp.getHttpServletResponse().getOutputStream());
 		} catch (Exception e) {
 			logger.error("File get error", e);
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-					"File get error: " + e.getMessage());
+			resp.sendError("File get error: " + e.getMessage());
 		}
 	}
 

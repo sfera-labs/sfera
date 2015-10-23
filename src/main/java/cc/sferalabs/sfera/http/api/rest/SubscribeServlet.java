@@ -9,6 +9,14 @@ import javax.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * API servlet handlig subscription requests.
+ * 
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 @SuppressWarnings("serial")
 public class SubscribeServlet extends AuthorizedUserServlet {
 
@@ -21,7 +29,7 @@ public class SubscribeServlet extends AuthorizedUserServlet {
 	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
 			throws ServletException, IOException {
 		String id = req.getParameter("id");
-		String nodes = req.getParameter("nodes");
+		String spec = req.getParameter("spec");
 
 		HttpSession session = req.getSession(false);
 		String sessionId = session.getId();
@@ -32,13 +40,13 @@ public class SubscribeServlet extends AuthorizedUserServlet {
 			session.setAttribute(SESSION_ATTR_SUBSCRIPTIONS, subscriptions);
 			logger.debug("Creted new subscriptions set for session '{}'", sessionId);
 		}
-		PollingSubscription subscription = new PollingSubscription(id, nodes, sessionId);
+		PollingSubscription subscription = new PollingSubscription(id, spec, sessionId);
 		PollingSubscription prev = subscriptions.put(subscription);
 		if (prev != null) {
 			prev.destroy();
 		}
 		id = subscription.getId();
-		logger.debug("Subscribed: session '{}' subscription '{}' nodes: {}", sessionId, id, nodes);
+		logger.debug("Subscribed: session '{}' subscription '{}' spec: {}", sessionId, id, spec);
 		resp.send("id", id);
 	}
 

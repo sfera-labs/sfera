@@ -3,6 +3,13 @@ package cc.sferalabs.sfera.scheduler;
 import cc.sferalabs.sfera.events.BaseEvent;
 import cc.sferalabs.sfera.events.Node;
 
+/**
+ *
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 public class SchedulerEvent extends BaseEvent {
 
 	/**

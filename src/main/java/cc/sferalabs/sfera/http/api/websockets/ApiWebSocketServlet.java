@@ -6,6 +6,14 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import cc.sferalabs.sfera.core.SystemNode;
 import cc.sferalabs.sfera.http.api.rest.ApiServlet;
 
+/**
+ * Implementation of {@link WebSocketServlet} for handling of API requests.
+ * 
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 @SuppressWarnings("serial")
 public class ApiWebSocketServlet extends WebSocketServlet {
 
@@ -16,7 +24,7 @@ public class ApiWebSocketServlet extends WebSocketServlet {
 		long pingInterval = SystemNode.getConfiguration().get("http_ws_ping_interval", 10000l);
 		long pongTimeout = SystemNode.getConfiguration().get("http_ws_pong_timeout", 5000l);
 		factory.setCreator(new ApiSocketCreator(pingInterval, pongTimeout));
-		factory.getPolicy().setIdleTimeout(pingInterval + pongTimeout + 200);
+		factory.getPolicy().setIdleTimeout(pingInterval + pongTimeout);
 	}
 
 }

@@ -13,8 +13,7 @@ import cc.sferalabs.sfera.events.Event;
 import cc.sferalabs.sfera.http.SessionFilterEventIdSpecListener;
 
 /**
- * Class handling a polling subscription requested via {@link SubscribeServletk}
- * .
+ * Class handling a polling subscription requested via {@link SubscribeServlet}.
  * 
  * @author Giampiero Baggiani
  *
@@ -56,17 +55,32 @@ public class PollingSubscription extends SessionFilterEventIdSpecListener {
 	}
 
 	/**
+	 * <p>
+	 * Returns a collection of all the events not acknowledged. An event is
+	 * considered acknowledged if after being returned by this method a
+	 * subsequent call is made with an {@code ack} value greather than the
+	 * previous one.
+	 * </p>
+	 * <p>
+	 * The collection will be empty if the timeout expires before any new event
+	 * is collected.
+	 * </p>
 	 * 
-	 * @param ackTs
+	 * @param ack
+	 *            the acknowledgement value
 	 * @param timeout
+	 *            how long to wait before giving up, in units of unit
 	 * @param unit
-	 * @return
+	 *            a {@code TimeUnit} determining how to interpret the timeout
+	 *            parameter
+	 * @return a collection of all the events not acknowledged
 	 * @throws InterruptedException
+	 *             if interrupted while waiting
 	 */
-	public synchronized Collection<Event> pollChanges(long ackTs, long timeout, TimeUnit unit)
+	public synchronized Collection<Event> pollChanges(long ack, long timeout, TimeUnit unit)
 			throws InterruptedException {
 		Map<String, Event> map;
-		if (ackTs > lastAckTs) {
+		if (ack > lastAckTs) {
 			map = new HashMap<String, Event>();
 		} else {
 			map = lastPolled;
@@ -80,7 +94,7 @@ public class PollingSubscription extends SessionFilterEventIdSpecListener {
 			e = changes.poll();
 		}
 
-		lastAckTs = ackTs;
+		lastAckTs = ack;
 		lastPolled = map;
 
 		return map.values();

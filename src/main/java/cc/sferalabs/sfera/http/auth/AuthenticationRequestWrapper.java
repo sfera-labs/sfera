@@ -11,29 +11,40 @@ import org.eclipse.jetty.server.UserIdentity;
 
 import cc.sferalabs.sfera.http.api.rest.LoginServlet;
 
+/**
+ * {@link HttpServletRequestWrapper} for authenticating requests.
+ * 
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 public class AuthenticationRequestWrapper extends HttpServletRequestWrapper {
 
 	private static HashLoginService loginService;
 
 	/**
+	 * Construct a AuthenticationRequestWrapper.
 	 * 
 	 * @param request
+	 *            the wrapped {@code HttpServletRequest}
 	 */
 	public AuthenticationRequestWrapper(HttpServletRequest request) {
 		super(request);
 	}
 
 	/**
+	 * Sets the login service to be used.
 	 * 
 	 * @param loginService
+	 *            the login service
 	 */
 	public static void setLoginService(HashLoginService loginService) {
 		AuthenticationRequestWrapper.loginService = loginService;
 	}
 
 	/**
-	 * 
-	 * @return
+	 * @return the user identity
 	 */
 	private UserIdentity getUser() {
 		if (loginService == null) {

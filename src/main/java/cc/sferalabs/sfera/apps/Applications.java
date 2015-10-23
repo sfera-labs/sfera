@@ -20,7 +20,7 @@ import cc.sferalabs.sfera.core.services.FilesWatcher;
 import cc.sferalabs.sfera.events.Bus;
 
 /**
- * Utility class for managing applications
+ * Utility class for managing applications.
  * 
  * @author Giampiero Baggiani
  *

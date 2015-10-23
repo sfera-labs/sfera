@@ -6,13 +6,25 @@ import java.util.List;
 
 import com.google.common.eventbus.Subscribe;
 
+/**
+ * Abstract class for event listeners wanting to subscribe for events whose IDs
+ * match a specific template (specification).
+ * 
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 public abstract class EventIdSpecListener implements EventListener {
 
 	private final String spec;
 
 	/**
+	 * Construct an EventIdSpecListener with the specified specification and
+	 * registers itself to the Bus.
 	 * 
 	 * @param spec
+	 *            the event ID specification
 	 */
 	public EventIdSpecListener(String spec) {
 		Bus.register(this);
@@ -27,9 +39,13 @@ public abstract class EventIdSpecListener implements EventListener {
 	}
 
 	/**
+	 * Returns a boolean representing whether the specified event matches the
+	 * specification.
 	 * 
 	 * @param event
-	 * @return
+	 *            the event to match
+	 * @return {@code true} if the event matches the specification,
+	 *         {@code false} otherwise.
 	 */
 	protected boolean matches(Event event) {
 		String eventId = event.getId();
@@ -45,15 +61,17 @@ public abstract class EventIdSpecListener implements EventListener {
 	}
 
 	/**
-	 * 
+	 * Clears the resources used by this listener.
 	 */
 	public void destroy() {
 		Bus.unregister(this);
 	}
 
 	/**
+	 * Handle the events matching the specification
 	 * 
 	 * @param event
+	 *            the event to handle
 	 */
 	protected abstract void handleEvent(Event event);
 

@@ -15,7 +15,7 @@ import cc.sferalabs.sfera.core.services.TasksManager;
 import cc.sferalabs.sfera.events.Bus;
 
 /**
- * Skeleton for the implementation of applications
+ * Skeleton for the implementation of applications.
  * 
  * @author Giampiero Baggiani
  *
@@ -29,9 +29,9 @@ public abstract class Application implements EventListener {
 	private UUID configWatcherId;
 
 	/**
-	 * 
+	 * Construct an Application
 	 */
-	public Application() {
+	Application() {
 		this.log = LoggerFactory.getLogger(getClass().getName());
 	}
 
@@ -62,7 +62,7 @@ public abstract class Application implements EventListener {
 				log.info("Enabling...");
 				try {
 					configWatcherId = FilesWatcher.register(config.getRealPath(),
-							thisApp::onConfigFileModified, false);
+							thisApp::relaodConfiguration, false);
 				} catch (Exception e) {
 					log.error("Error watching config file", e);
 				}
@@ -122,7 +122,7 @@ public abstract class Application implements EventListener {
 	/**
 	 * 
 	 */
-	private void onConfigFileModified() {
+	private void relaodConfiguration() {
 		Configuration config = null;
 		try {
 			try {
@@ -140,7 +140,7 @@ public abstract class Application implements EventListener {
 
 	/**
 	 * Callback method called when the configuration of this application is
-	 * modified. The default implementation restarts the application
+	 * modified. The default implementation restarts the application.
 	 * 
 	 * @param configuration
 	 *            the new configuration
@@ -154,14 +154,15 @@ public abstract class Application implements EventListener {
 	}
 
 	/**
-	 * Callback method called when the application is enabled
+	 * Callback method called when the application is enabled.
 	 * 
 	 * @param config
+	 *            the configuration
 	 */
 	protected abstract void onEnable(Configuration config);
 
 	/**
-	 * Callback method called when the application is disabled
+	 * Callback method called when the application is disabled.
 	 */
 	protected abstract void onDisable();
 
