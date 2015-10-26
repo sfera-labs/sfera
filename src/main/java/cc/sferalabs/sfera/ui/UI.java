@@ -21,6 +21,8 @@ import cc.sferalabs.sfera.script.ScriptsEngine;
  */
 public class UI implements Node {
 
+	private static final UI INSTANCE = new UI();
+
 	private static final Logger logger = LoggerFactory.getLogger(UI.class);
 
 	static {
@@ -29,6 +31,13 @@ public class UI implements Node {
 		} catch (ScriptException e) {
 			logger.error("Error adding 'ui' to script engine", e);
 		}
+	}
+
+	/**
+	 * @return
+	 */
+	public static UI getInstance() {
+		return INSTANCE;
 	}
 
 	@Override

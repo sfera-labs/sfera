@@ -1,5 +1,6 @@
 package cc.sferalabs.sfera.http.api;
 
+import java.io.IOException;
 import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
@@ -18,6 +19,8 @@ import cc.sferalabs.sfera.http.api.rest.EventServlet;
  */
 public class HttpApiEvent extends StringEvent {
 
+	private final JsonMessage response;
+
 	/**
 	 * Construct a RemoteEvent
 	 * 
@@ -34,14 +37,28 @@ public class HttpApiEvent extends StringEvent {
 	 */
 	public HttpApiEvent(String id, String value, HttpServletRequest request, JsonMessage response)
 			throws NullPointerException {
-		super(new HttpRemoteNode(request, response),
-				Objects.requireNonNull(id, "id must not be null"),
+		super(new HttpRemoteNode(request), Objects.requireNonNull(id, "id must not be null"),
 				Objects.requireNonNull(value, "value must not be null"));
+		this.response = Objects.requireNonNull(response, "response must not be null");
 	}
 
 	@Override
 	public HttpRemoteNode getSource() {
 		return (HttpRemoteNode) super.getSource();
+	}
+
+	/**
+	 * Sends the specified result as a response to the remote.
+	 * 
+	 * @param result
+	 *            the result to send
+	 * @throws IOException
+	 *             if unable to send the response
+	 * @throws IllegalStateException
+	 *             if this event has already been handled
+	 */
+	public void reply(Object result) throws IOException {
+		response.sendResult(result);
 	}
 
 }

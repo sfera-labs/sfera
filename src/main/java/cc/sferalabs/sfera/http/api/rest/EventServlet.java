@@ -11,14 +11,12 @@ import cc.sferalabs.sfera.http.api.HttpApiEvent;
 
 /**
  * <p>
- * API servlet handlig event triggering requests.
+ * API servlet handling requests for events triggering.
  * </p>
  * <p>
- * A successful request to this servlet will trigger an {@link HttpApiEvent}
- * event whose source is an {@link cc.sferalabs.sfera.http.api.HttpRemoteNode
- * HttpRemoteNode} instance, the ID will correspond to the value of the
- * specified 'eid' request parameter and the value must be specified in the
- * 'eval' request parameter.
+ * The triggered events will be instances of {@link HttpApiEvent} and the source
+ * node an {@link cc.sferalabs.sfera.http.api.HttpRemoteNode HttpRemoteNode}
+ * instance.
  * </p>
  * 
  * @author Giampiero Baggiani
@@ -34,11 +32,11 @@ public class EventServlet extends AuthorizedUserServlet {
 	@Override
 	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
 			throws ServletException, IOException {
-		String eid = req.getParameter("eid");
-		String eval = req.getParameter("eval");
 		try {
+			String id = req.getParameterNames().nextElement();
+			String val = req.getParameter(id);
 			resp.setAsyncContext(req.startAsync());
-			HttpApiEvent remoteEvent = new HttpApiEvent(eid, eval, req, resp);
+			HttpApiEvent remoteEvent = new HttpApiEvent(id, val, req, resp);
 			Bus.post(remoteEvent);
 		} catch (Exception e) {
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());

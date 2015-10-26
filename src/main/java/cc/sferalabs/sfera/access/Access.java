@@ -186,7 +186,7 @@ public abstract class Access {
 	 */
 	public synchronized static boolean authenticate(String username, String attemptedPassword) {
 		User u = users.get(username);
-		if (u == null) {
+		if (u == null || attemptedPassword == null) {
 			return false;
 		}
 

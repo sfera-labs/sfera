@@ -31,12 +31,21 @@ public class StateServlet extends AuthorizedUserServlet {
 	@Override
 	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
 			throws ServletException, IOException {
-		long ts;
+		long ack;
 		try {
-			ts = Long.parseLong(req.getParameter("ts"));
+			ack = Long.parseLong(req.getParameter("ack"));
 		} catch (NumberFormatException nfe) {
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Timestamp not provided");
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "'ack' not provided");
 			return;
+		}
+		long timeout;
+		try {
+			timeout = Long.parseLong(req.getParameter("timeout"));
+			if (timeout < 0) {
+				timeout = 0;
+			}
+		} catch (NumberFormatException nfe) {
+			timeout = 0;
 		}
 
 		HttpSession session = req.getSession(false);
@@ -56,7 +65,7 @@ public class StateServlet extends AuthorizedUserServlet {
 		}
 
 		try {
-			Collection<Event> changes = subscription.pollChanges(ts, 20, TimeUnit.SECONDS);
+			Collection<Event> changes = subscription.pollChanges(ack, timeout, TimeUnit.SECONDS);
 			Map<String, Object> nodes = new HashMap<>();
 			for (Event ev : changes) {
 				nodes.put(ev.getId(), ev.getValue());
