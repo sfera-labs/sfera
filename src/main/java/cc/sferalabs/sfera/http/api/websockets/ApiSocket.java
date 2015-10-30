@@ -116,9 +116,9 @@ public class ApiSocket extends WebSocketAdapter {
 	private void process(JsonMessage message) throws IOException {
 		OutgoingWsMessage resp = new OutgoingWsMessage("response", this);
 		try {
-			String id = message.get("id");
-			if (id == null) {
-				resp.sendError("Attribute 'id' not found");
+			String tag = message.get("tag");
+			if (tag == null) {
+				resp.sendError("Attribute 'tag' not found");
 				return;
 			}
 			String action = message.get("action");
@@ -126,7 +126,7 @@ public class ApiSocket extends WebSocketAdapter {
 				resp.sendError("Attribute 'action' not found");
 				return;
 			}
-			resp.put("id", id);
+			resp.put("tag", tag);
 			resp.put("action", action);
 
 			switch (action) {
@@ -158,18 +158,14 @@ public class ApiSocket extends WebSocketAdapter {
 				break;
 
 			case "event":
-				String evId = message.get("eventId");
-				if (evId == null) {
-					resp.sendError("Attribute 'eventId' not found");
+				String id = message.get("id");
+				if (id == null) {
+					resp.sendError("Attribute 'id' not found");
 					return;
 				}
-				String evVal = message.get("eventVal");
-				if (evVal == null) {
-					resp.sendError("Attribute 'eventVal' not found");
-					return;
-				}
+				String value = message.get("value");
 				try {
-					HttpApiEvent remoteEvent = new HttpApiEvent(evId, evVal, httpRequest, resp);
+					HttpApiEvent remoteEvent = new HttpApiEvent(id, value, httpRequest, resp);
 					Bus.post(remoteEvent);
 				} catch (Exception e) {
 					resp.sendError(e.getMessage());

@@ -35,10 +35,10 @@ public class HttpApiEvent extends StringEvent {
 	 * @throws NullPointerException
 	 *             if any of the parameters are {@code null}
 	 */
-	public HttpApiEvent(String id, String value, HttpServletRequest request, OutgoingMessage response)
-			throws NullPointerException {
+	public HttpApiEvent(String id, String value, HttpServletRequest request,
+			OutgoingMessage response) throws NullPointerException {
 		super(new HttpRemoteNode(request), Objects.requireNonNull(id, "id must not be null"),
-				Objects.requireNonNull(value, "value must not be null"));
+				value);
 		this.response = Objects.requireNonNull(response, "response must not be null");
 	}
 
