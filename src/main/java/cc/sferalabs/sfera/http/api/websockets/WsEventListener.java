@@ -61,7 +61,7 @@ class WsEventListener extends SessionFilterEventIdSpecListener {
 	private void sendEvents(List<Event> events) {
 		Map<String, Object> eventsMap = new HashMap<>();
 		try {
-			OutgoingMessage m = new OutgoingMessage("event", socket);
+			OutgoingWsMessage m = new OutgoingWsMessage("event", socket);
 			for (Event e : events) {
 				eventsMap.put(e.getId(), e.getValue());
 			}

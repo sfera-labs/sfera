@@ -182,13 +182,13 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 
 		String driverName = commandContext.NodeId().getText();
 		Driver driver = Drivers.getDriver(driverName);
-
 		if (driver == null) {
 			throw new IllegalArgumentException("Driver '" + driverName + "' not found");
 		}
 
 		String commandScript = action;
 		if (param != null) {
+			// Parse the parameters to make sure it is not some executable code
 			parser = getParser(new ANTLRInputStream(param), errorListener);
 			parser.paramsList();
 			if (!errorListener.errors.isEmpty()) {

@@ -19,7 +19,7 @@ import cc.sferalabs.sfera.http.api.rest.EventServlet;
  */
 public class HttpApiEvent extends StringEvent {
 
-	private final JsonMessage response;
+	private final OutgoingMessage response;
 
 	/**
 	 * Construct a RemoteEvent
@@ -35,7 +35,7 @@ public class HttpApiEvent extends StringEvent {
 	 * @throws NullPointerException
 	 *             if any of the parameters are {@code null}
 	 */
-	public HttpApiEvent(String id, String value, HttpServletRequest request, JsonMessage response)
+	public HttpApiEvent(String id, String value, HttpServletRequest request, OutgoingMessage response)
 			throws NullPointerException {
 		super(new HttpRemoteNode(request), Objects.requireNonNull(id, "id must not be null"),
 				Objects.requireNonNull(value, "value must not be null"));

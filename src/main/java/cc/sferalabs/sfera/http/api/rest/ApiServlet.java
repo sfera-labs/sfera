@@ -50,9 +50,8 @@ public abstract class ApiServlet extends HttpServlet {
 	 * 
 	 * @param req
 	 * @param resp
-	 * @throws IOException
 	 */
-	private void doRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+	private void doRequest(HttpServletRequest req, HttpServletResponse resp) {
 		RestResponse rr = new RestResponse(resp);
 		try {
 			resp.setHeader("Cache-Control",
@@ -65,7 +64,11 @@ public abstract class ApiServlet extends HttpServlet {
 			if (error == null) {
 				error = t.toString();
 			}
-			rr.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, error);
+			try {
+				rr.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, error);
+			} catch (Exception e) {
+				logger.error("Error sending response", e);
+			}
 		}
 	}
 

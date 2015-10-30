@@ -1,21 +1,50 @@
 package cc.sferalabs.sfera.http.api;
 
-import java.io.IOException;
+import java.util.Set;
 
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 /**
- * Abstract class for API messages to be sent to the remote API client.
+ * Abstract class for API JSON messages.
  * 
  * @author Giampiero Baggiani
  *
  * @version 1.0.0
  *
  */
-public abstract class JsonMessage {
+public class JsonMessage {
 
-	private final JSONObject obj = new JSONObject();
-	private boolean sent = false;
+	private static final JSONParser PARSER = new JSONParser();
+
+	private final JSONObject obj;
+
+	/**
+	 * @param obj
+	 */
+	private JsonMessage(JSONObject obj) {
+		this.obj = obj;
+	}
+
+	/**
+	 * Constructs a JSON message parsing the specified string.
+	 * 
+	 * @param json
+	 *            the string to parse
+	 * @throws ParseException
+	 *             if a parsing error occurs
+	 */
+	public JsonMessage(String json) throws ParseException {
+		this((JSONObject) PARSER.parse(json));
+	}
+
+	/**
+	 * Constructs an empty JSON message.
+	 */
+	public JsonMessage() {
+		this(new JSONObject());
+	}
 
 	/**
 	 * Sets the attribute of this message specified by {@code key} to the
@@ -32,77 +61,40 @@ public abstract class JsonMessage {
 	}
 
 	/**
-	 * Sends this message.
+	 * Returns the value of the attribute of this message specified by
+	 * {@code key}, or {@code null} if this message does not have such
+	 * attribute.
 	 * 
-	 * @throws IOException
-	 *             if an I/O error occurs
-	 * @throws IllegalStateException
-	 *             if this message has already been sent
-	 */
-	public synchronized void send() throws IOException, IllegalStateException {
-		if (sent) {
-			throw new IllegalStateException("Already sent");
-		}
-		doSend(obj.toJSONString());
-		sent = true;
-	}
-
-	/**
-	 * Sets the 'result' attribute of this message to the specified value and
-	 * sends it.
-	 * 
-	 * @param result
-	 *            the value to set the 'result' attribute to
-	 * @throws IOException
-	 *             if an I/O error occurs
-	 * @throws IllegalStateException
-	 *             if this message has already been sent
-	 */
-	public void sendResult(Object result) throws IOException, IllegalStateException {
-		send("result", result);
-	}
-
-	/**
-	 * Sets the 'error' attribute of this message to the specified message and
-	 * sends it.
-	 * 
-	 * @param message
-	 *            the error message
-	 * @throws IOException
-	 *             if an I/O error occurs
-	 * @throws IllegalStateException
-	 *             if this message has already been sent
-	 */
-	public void sendError(String message) throws IOException, IllegalStateException {
-		send("error", message);
-	}
-
-	/**
-	 * Sets the attribute of this message specified by {@code key} to the
-	 * specified {@code value} and sends it.
+	 * @param <T>
+	 *            Type to cast the returned value to
 	 * 
 	 * @param key
-	 *            attribute to set
-	 * @param value
-	 *            value for the attribute to set
-	 * @throws IOException
-	 *             if an I/O error occurs
-	 * @throws IllegalStateException
-	 *             if this message has already been sent
+	 *            attribute to get
+	 * @return the value of the attribute, or {@code null} if no such attribute
+	 *         is found
 	 */
-	public void send(String key, Object value) throws IOException, IllegalStateException {
-		put(key, value);
-		send();
+	@SuppressWarnings("unchecked")
+	public <T> T get(String key) {
+		return (T) obj.get(key);
 	}
 
 	/**
-	 * Sends the text data to the remote end.
+	 * Returns a set containing the attributes of this message.
 	 * 
-	 * @param text
-	 *            data to be sent
-	 * @throws IOException
-	 *             if an I/O error occurs
+	 * @return a set containing the attributes of this message
 	 */
-	protected abstract void doSend(String text) throws IOException;
+	@SuppressWarnings("unchecked")
+	public Set<String> getAttributes() {
+		return obj.keySet();
+	}
+
+	/**
+	 * Returns this JSON message in string format.
+	 * 
+	 * @return this JSON message in string format
+	 */
+	protected String toJsonString() {
+		return obj.toJSONString();
+	}
 
 }

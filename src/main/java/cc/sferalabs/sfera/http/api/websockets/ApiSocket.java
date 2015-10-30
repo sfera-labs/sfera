@@ -16,6 +16,7 @@ import cc.sferalabs.sfera.core.services.Task;
 import cc.sferalabs.sfera.core.services.TasksManager;
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.http.api.HttpApiEvent;
+import cc.sferalabs.sfera.http.api.JsonMessage;
 import cc.sferalabs.sfera.script.ScriptsEngine;
 
 /**
@@ -63,7 +64,7 @@ public class ApiSocket extends WebSocketAdapter {
 	public void onWebSocketConnect(Session session) {
 		super.onWebSocketConnect(session);
 		try {
-			OutgoingMessage resp = new OutgoingMessage("connection", this);
+			OutgoingWsMessage resp = new OutgoingWsMessage("connection", this);
 			resp.put("pingInterval", pingInterval);
 			resp.put("pongTimeout", pongTimeout);
 			resp.send();
@@ -96,11 +97,11 @@ public class ApiSocket extends WebSocketAdapter {
 			return;
 		}
 
-		IncomingMessage m = new IncomingMessage(message);
 		try {
+			JsonMessage m = new JsonMessage(message);
 			process(m);
 		} catch (Exception e) {
-			logger.warn("Error processing message", e);
+			logger.warn("Error processing message '" + message + "'", e);
 		}
 	}
 
@@ -112,21 +113,25 @@ public class ApiSocket extends WebSocketAdapter {
 	 * @throws IOException
 	 *             if an I/O error occurs
 	 */
-	private void process(IncomingMessage message) throws IOException {
-		OutgoingMessage resp = new OutgoingMessage("response", this);
+	private void process(JsonMessage message) throws IOException {
+		OutgoingWsMessage resp = new OutgoingWsMessage("response", this);
 		try {
-			String action = message.getAction();
-			resp.put("action", action);
-			String id = message.getParameter("id");
+			String id = message.get("id");
 			if (id == null) {
-				resp.sendError("Param 'id' not found");
+				resp.sendError("Attribute 'id' not found");
+				return;
+			}
+			String action = message.get("action");
+			if (action == null) {
+				resp.sendError("Attribute 'action' not found");
 				return;
 			}
 			resp.put("id", id);
+			resp.put("action", action);
 
 			switch (action) {
 			case "subscribe":
-				String spec = message.getParameter("spec");
+				String spec = message.get("spec");
 				if (subscription != null) {
 					subscription.destroy();
 				}
@@ -135,26 +140,36 @@ public class ApiSocket extends WebSocketAdapter {
 				break;
 
 			case "command":
-				for (String command : message.getParameters()) {
-					if (command.indexOf('.') > 0) { // driver command
-						String param = message.getParameter(command);
-						try {
-							Object res = ScriptsEngine.executeDriverAction(command, param,
-									httpRequest.getRemoteUser());
-							resp.sendResult(res);
-						} catch (Exception e) {
-							resp.sendError(e.getMessage());
-						}
-						break;
-					}
+				String cmd = message.get("cmd");
+				if (cmd == null) {
+					resp.sendError("Attribute 'cmd' not found");
+					return;
 				}
+				String[] cmd_prm = cmd.split("=");
+				Object res = null;
+				try {
+					String param = cmd_prm.length == 1 ? null : cmd_prm[1];
+					res = ScriptsEngine.executeDriverAction(cmd_prm[0], param,
+							httpRequest.getRemoteUser());
+				} catch (Exception e) {
+					resp.sendError(e.getMessage());
+				}
+				resp.sendResult(res);
 				break;
 
 			case "event":
-				String eid = message.getParameter("eid");
-				String eval = message.getParameter("eval");
+				String evId = message.get("eventId");
+				if (evId == null) {
+					resp.sendError("Attribute 'eventId' not found");
+					return;
+				}
+				String evVal = message.get("eventVal");
+				if (evVal == null) {
+					resp.sendError("Attribute 'eventVal' not found");
+					return;
+				}
 				try {
-					HttpApiEvent remoteEvent = new HttpApiEvent(eid, eval, httpRequest, resp);
+					HttpApiEvent remoteEvent = new HttpApiEvent(evId, evVal, httpRequest, resp);
 					Bus.post(remoteEvent);
 				} catch (Exception e) {
 					resp.sendError(e.getMessage());
@@ -166,6 +181,7 @@ public class ApiSocket extends WebSocketAdapter {
 				break;
 			}
 		} catch (IOException e) {
+			logger.warn("Error processing WebSocket message", e);
 			resp.sendError("Server error: " + e.getMessage());
 			throw e;
 		}

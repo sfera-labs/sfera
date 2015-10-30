@@ -1,6 +1,7 @@
 package cc.sferalabs.sfera.http.api.rest;
 
 import java.io.IOException;
+import java.util.Enumeration;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -32,15 +33,17 @@ public class EventServlet extends AuthorizedUserServlet {
 	@Override
 	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
 			throws ServletException, IOException {
-		try {
-			String id = req.getParameterNames().nextElement();
-			String val = req.getParameter(id);
-			resp.setAsyncContext(req.startAsync());
-			HttpApiEvent remoteEvent = new HttpApiEvent(id, val, req, resp);
-			Bus.post(remoteEvent);
-		} catch (Exception e) {
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+		Enumeration<String> params = req.getParameterNames();
+		if (!params.hasMoreElements()) {
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "No event specified");
+			return;
 		}
+		
+		String id = params.nextElement();
+		String val = req.getParameter(id);
+		resp.setAsyncContext(req.startAsync());
+		HttpApiEvent remoteEvent = new HttpApiEvent(id, val, req, resp);
+		Bus.post(remoteEvent);
 	}
 
 }

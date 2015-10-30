@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cc.sferalabs.sfera.http.api.JsonMessage;
+import cc.sferalabs.sfera.http.api.OutgoingMessage;
 
 /**
  * Class representing a response for an API REST request.
@@ -20,7 +20,7 @@ import cc.sferalabs.sfera.http.api.JsonMessage;
  * @version 1.0.0
  *
  */
-public class RestResponse extends JsonMessage {
+public class RestResponse extends OutgoingMessage {
 
 	private static final long ASYNC_RESP_TIMEOUT = 30000;
 	private static final Logger logger = LoggerFactory.getLogger(RestResponse.class);
