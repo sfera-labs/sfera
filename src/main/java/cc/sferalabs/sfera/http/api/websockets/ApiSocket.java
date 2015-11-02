@@ -116,7 +116,7 @@ public class ApiSocket extends WebSocketAdapter {
 	private void process(JsonMessage message) throws IOException {
 		OutgoingWsMessage resp = new OutgoingWsMessage("response", this);
 		try {
-			String tag = message.get("tag");
+			Object tag = message.get("tag");
 			if (tag == null) {
 				resp.sendError("Attribute 'tag' not found");
 				return;
