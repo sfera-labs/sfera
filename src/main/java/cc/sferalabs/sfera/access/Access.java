@@ -173,29 +173,29 @@ public abstract class Access {
 	}
 
 	/**
-	 * Returns whether or not the <code>attemptedPassword</code> corresponds to
-	 * the actual password of the user identified by <code>username</code>
+	 * If authentication succeeds, returns the {@code User} associated with the
+	 * specified username. Otherwise it returns {@code null}.
 	 * 
 	 * @param username
 	 *            the username
 	 * @param attemptedPassword
 	 *            the attempted password
-	 * @return <code>true</code> if <code>attemptedPassword</code> corresponds
-	 *         to the actual password of the user identified by
-	 *         <code>username</code>, <code>false</code> otherwise
+	 * @return the {@code User} associated with the specified username if the
+	 *         authentication is successful; {@code null} otherwise
 	 */
-	public synchronized static boolean authenticate(String username, String attemptedPassword) {
-		User u = users.get(username);
-		if (u == null || attemptedPassword == null) {
-			return false;
+	public synchronized static User authenticate(String username, String attemptedPassword) {
+		if (attemptedPassword == null) {
+			return null;
 		}
-
+		User u = users.get(username);
+		if (u == null) {
+			return null;
+		}
 		byte[] hashedPassword = getEncryptedPassword(attemptedPassword, u.getSalt());
 		if (Arrays.equals(hashedPassword, u.getHashedPassword())) {
-			return true;
+			return u;
 		}
-
-		return false;
+		return null;
 	}
 
 	/**

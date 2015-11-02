@@ -28,7 +28,6 @@ public class LoginServlet extends ApiServlet {
 
 	public static final String PATH = ApiServlet.PATH + "login";
 
-	public static final String SESSION_ATTR_USERNAME = "user";
 	private static final Logger logger = LoggerFactory.getLogger(LoginServlet.class);
 
 	@Override
@@ -39,8 +38,6 @@ public class LoginServlet extends ApiServlet {
 
 		try {
 			req.login(user, password);
-			HttpSession session = req.getSession(true);
-			session.setAttribute(SESSION_ATTR_USERNAME, user);
 			resp.sendResult("ok");
 			logger.info("Login: {}", user);
 		} catch (ServletException e) {

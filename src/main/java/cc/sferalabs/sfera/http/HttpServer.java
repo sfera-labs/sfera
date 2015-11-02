@@ -10,11 +10,11 @@ import java.util.List;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
 import org.eclipse.jetty.http.HttpVersion;
-import org.eclipse.jetty.security.HashLoginService;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
@@ -27,14 +27,11 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.servlet.ServletMapping;
-import org.eclipse.jetty.util.security.Credential;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cc.sferalabs.sfera.access.Access;
-import cc.sferalabs.sfera.access.User;
 import cc.sferalabs.sfera.core.Configuration;
 import cc.sferalabs.sfera.core.SystemNode;
 import cc.sferalabs.sfera.core.services.AutoStartService;
@@ -42,13 +39,14 @@ import cc.sferalabs.sfera.http.api.rest.CommandServlet;
 import cc.sferalabs.sfera.http.api.rest.EventServlet;
 import cc.sferalabs.sfera.http.api.rest.LoginServlet;
 import cc.sferalabs.sfera.http.api.rest.LogoutServlet;
+import cc.sferalabs.sfera.http.api.rest.PollingSubscription;
 import cc.sferalabs.sfera.http.api.rest.StateServlet;
 import cc.sferalabs.sfera.http.api.rest.SubscribeServlet;
+import cc.sferalabs.sfera.http.api.rest.SubscriptionsSet;
 import cc.sferalabs.sfera.http.api.rest.admin.EditFileServlet;
 import cc.sferalabs.sfera.http.api.rest.admin.GetFileServlet;
 import cc.sferalabs.sfera.http.api.websockets.ApiWebSocketServlet;
 import cc.sferalabs.sfera.http.auth.AuthenticationFilter;
-import cc.sferalabs.sfera.http.auth.AuthenticationRequestWrapper;
 
 /**
  * HTTP Server
@@ -139,11 +137,6 @@ public class HttpServer implements AutoStartService {
 			logger.info("Starting HTTPS server on port {}", https_port);
 		}
 
-		HashLoginService loginService = new HashLoginService();
-		server.addBean(loginService);
-		AuthenticationRequestWrapper.setLoginService(loginService);
-		addUsers(loginService);
-
 		HashSessionManager hsm = new HashSessionManager();
 		hsm.setStoreDirectory(new File(SESSIONS_STORE_DIR));
 		// TODO try to make session restorable when server not stopped properly
@@ -160,12 +153,18 @@ public class HttpServer implements AutoStartService {
 
 			@Override
 			public void sessionDestroyed(HttpSessionEvent se) {
+				HttpSession session = se.getSession();
+				SubscriptionsSet subscriptions = (SubscriptionsSet) session.getAttribute(SubscribeServlet.SESSION_ATTR_SUBSCRIPTIONS);
+				if (subscriptions != null) {
+					for (PollingSubscription ps : subscriptions.values()) {
+						ps.destroy();
+					}
+				}
 				logger.debug("Session '{}' destroyed", se.getSession().getId());
 			}
 		});
 
-		contexts = new ServletContextHandler(server, "/",
-				ServletContextHandler.SESSIONS | ServletContextHandler.SECURITY);
+		contexts = new ServletContextHandler(server, "/", ServletContextHandler.SESSIONS);
 		contexts.setSessionHandler(sessionHandler);
 		contexts.addFilter(AuthenticationFilter.class, "/*", null);
 		contexts.addServlet(DefaultErrorServlet.class, "/*");
@@ -176,24 +175,6 @@ public class HttpServer implements AutoStartService {
 			server.start();
 		} catch (Exception e) {
 			throw new Exception("Error starting server: " + e.getLocalizedMessage(), e);
-		}
-	}
-
-	/**
-	 * 
-	 * @param loginService
-	 */
-	private void addUsers(HashLoginService loginService) {
-		for (User user : Access.getUsers()) {
-			loginService.putUser(user.getUsername(), new Credential() {
-
-				private static final long serialVersionUID = 3107948362308619263L;
-
-				@Override
-				public boolean check(Object credentials) {
-					return Access.authenticate(user.getUsername(), (String) credentials);
-				}
-			}, user.getRoles());
 		}
 	}
 

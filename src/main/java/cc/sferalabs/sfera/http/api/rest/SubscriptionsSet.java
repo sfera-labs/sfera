@@ -14,7 +14,7 @@ import java.util.Map;
  * @version 1.0.0
  *
  */
-class SubscriptionsSet implements Serializable {
+public class SubscriptionsSet implements Serializable {
 
 	private static final long serialVersionUID = 4456127014431500700L;
 
@@ -45,9 +45,9 @@ class SubscriptionsSet implements Serializable {
 	}
 
 	/**
-	 * @return
+	 * @return the contained subscriptions
 	 */
-	Collection<PollingSubscription> values() {
+	public Collection<PollingSubscription> values() {
 		if (map == null) {
 			return new ArrayList<>();
 		}

@@ -1,6 +1,7 @@
 package cc.sferalabs.sfera.access;
 
 import java.util.Base64;
+import java.util.Objects;
 
 /**
  * Class to hold user information
@@ -30,10 +31,11 @@ public class User {
 	 *            list of roles
 	 */
 	User(String username, byte[] hashedPassword, byte[] salt, String[] roles) {
-		this.username = username;
-		this.hashedPassword = hashedPassword;
-		this.salt = salt;
-		this.roles = roles;
+		this.username = Objects.requireNonNull(username, "username must not be null");
+		this.hashedPassword = Objects.requireNonNull(hashedPassword,
+				"hashedPassword must not be null");
+		this.salt = Objects.requireNonNull(salt, "salt must not be null");
+		this.roles = Objects.requireNonNull(roles, "roles must not be null");
 	}
 
 	/**

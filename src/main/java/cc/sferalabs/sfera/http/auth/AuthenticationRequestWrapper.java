@@ -2,14 +2,13 @@ package cc.sferalabs.sfera.http.auth;
 
 import java.security.Principal;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpSession;
 
-import org.eclipse.jetty.security.HashLoginService;
-import org.eclipse.jetty.server.UserIdentity;
-
-import cc.sferalabs.sfera.http.api.rest.LoginServlet;
+import cc.sferalabs.sfera.access.Access;
+import cc.sferalabs.sfera.access.User;
 
 /**
  * {@link HttpServletRequestWrapper} for authenticating requests.
@@ -21,7 +20,9 @@ import cc.sferalabs.sfera.http.api.rest.LoginServlet;
  */
 public class AuthenticationRequestWrapper extends HttpServletRequestWrapper {
 
-	private static HashLoginService loginService;
+	private static final String SESSION_ATTR_USERNAME = "user";
+
+	private User user;
 
 	/**
 	 * Construct a AuthenticationRequestWrapper.
@@ -32,57 +33,78 @@ public class AuthenticationRequestWrapper extends HttpServletRequestWrapper {
 	public AuthenticationRequestWrapper(HttpServletRequest request) {
 		super(request);
 	}
-
-	/**
-	 * Sets the login service to be used.
-	 * 
-	 * @param loginService
-	 *            the login service
-	 */
-	public static void setLoginService(HashLoginService loginService) {
-		AuthenticationRequestWrapper.loginService = loginService;
+	
+	@Override
+	public String getAuthType() {
+		return "API";
 	}
 
 	/**
-	 * @return the user identity
+	 * @return the user
 	 */
-	private UserIdentity getUser() {
-		if (loginService == null) {
-			throw new IllegalStateException("login service not set");
+	private User getUser() {
+		if (user != null) {
+			return user;
 		}
-		HttpServletRequest request = (HttpServletRequest) getRequest();
-		HttpSession session = request.getSession(false);
+		HttpSession session = getSession(false);
 		if (session == null) {
 			return null;
 		}
-		String userName = (String) session.getAttribute(LoginServlet.SESSION_ATTR_USERNAME);
-		if (userName == null) {
+		String username = (String) session.getAttribute(SESSION_ATTR_USERNAME);
+		if (username == null) {
 			return null;
 		}
-		return loginService.getUsers().get(userName);
+		user = Access.getUser(username);
+		return user;
+	}
+
+	@Override
+	public void login(String username, String password) throws ServletException {
+		user = Access.authenticate(username, password);
+		if (user == null) {
+			throw new ServletException("Authentication failed for username '" + username + "'");
+		}
+		HttpSession session = getSession(true);
+		session.setAttribute(SESSION_ATTR_USERNAME, username);
+	}
+
+	@Override
+	public void logout() throws ServletException {
+		user = null;
+		HttpSession session = getSession(false);
+		if (session != null) {
+			session.invalidate();
+		}
 	}
 
 	@Override
 	public boolean isUserInRole(String role) {
-		UserIdentity user = getUser();
+		User user = getUser();
 		if (user == null) {
 			return false;
 		}
-		return user.isUserInRole(role, null);
+		return user.isInRole(role);
 	}
 
 	@Override
 	public Principal getUserPrincipal() {
-		UserIdentity user = getUser();
+		User user = getUser();
 		if (user == null) {
 			return null;
 		}
-		return user.getUserPrincipal();
+
+		return new Principal() {
+
+			@Override
+			public String getName() {
+				return user.getUsername();
+			}
+		};
 	}
 
 	@Override
 	public String getRemoteUser() {
-		Principal p = getUserPrincipal();
-		return p == null ? null : p.getName();
+		User user = getUser();
+		return user == null ? null : user.getUsername();
 	}
 }
