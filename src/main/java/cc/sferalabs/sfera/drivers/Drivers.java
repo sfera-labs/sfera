@@ -19,6 +19,7 @@ import cc.sferalabs.sfera.core.Configuration;
 import cc.sferalabs.sfera.core.PluginsClassLoader;
 import cc.sferalabs.sfera.core.Sfera;
 import cc.sferalabs.sfera.core.services.FilesWatcher;
+import cc.sferalabs.sfera.core.services.console.Console;
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.script.ScriptsEngine;
 
@@ -49,6 +50,7 @@ public abstract class Drivers {
 		} catch (Exception e) {
 			logger.error("Error watching drivers config directory", e);
 		}
+		Console.addHandler("drivers", DriversConsoleCommandHandler.INSTANCE);
 	}
 
 	/**

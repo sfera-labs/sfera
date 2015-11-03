@@ -2,15 +2,13 @@ package cc.sferalabs.sfera.core;
 
 import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
-import java.util.EventListener;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.eventbus.Subscribe;
 
 import cc.sferalabs.sfera.access.Access;
 import cc.sferalabs.sfera.apps.Applications;
@@ -19,6 +17,7 @@ import cc.sferalabs.sfera.core.services.AutoStartService;
 import cc.sferalabs.sfera.core.services.Service;
 import cc.sferalabs.sfera.core.services.Task;
 import cc.sferalabs.sfera.core.services.TasksManager;
+import cc.sferalabs.sfera.core.services.console.Console;
 import cc.sferalabs.sfera.drivers.Drivers;
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Node;
@@ -31,7 +30,7 @@ import cc.sferalabs.sfera.events.Node;
  * @version 1.0.0
  *
  */
-public class SystemNode implements Node, EventListener {
+public class SystemNode implements Node {
 
 	private static final Logger logger = LoggerFactory.getLogger(SystemNode.class);
 	private static final SystemNode INSTANCE = new SystemNode();
@@ -70,18 +69,9 @@ public class SystemNode implements Node, EventListener {
 	 */
 	void start() {
 		logger.info("======== Started ========");
-
 		Bus.post(SystemStateEvent.START);
-		Bus.register(this);
 		init();
 		Bus.post(SystemStateEvent.READY);
-	}
-
-	@Subscribe
-	public void handleSystemStateEvent(SystemStateEvent event) {
-		if (event == SystemStateEvent.QUIT) {
-			quit();
-		}
 	}
 
 	/**
@@ -104,10 +94,12 @@ public class SystemNode implements Node, EventListener {
 
 		Plugins.load();
 
-		try {
-			ServiceLoader<AutoStartService> autoStartServices = ServiceLoader
-					.load(AutoStartService.class);
-			for (AutoStartService service : autoStartServices) {
+		ServiceLoader<AutoStartService> autoStartServices = ServiceLoader
+				.load(AutoStartService.class);
+		Iterator<AutoStartService> it = autoStartServices.iterator();
+		while (it.hasNext()) {
+			try {
+				AutoStartService service = it.next();
 				String name = service.getClass().getSimpleName();
 				try {
 					logger.debug("Initializing service {}...", name);
@@ -117,19 +109,21 @@ public class SystemNode implements Node, EventListener {
 				} catch (Exception e) {
 					logger.error("Error initiating service '" + name + "'", e);
 				}
+			} catch (Throwable e) {
+				logger.error("Error initializing service", e);
 			}
-		} catch (Throwable e) {
-			logger.error("Error loading services " + AutoStartService.class.getSimpleName(), e);
 		}
 
 		Drivers.load();
 		Applications.load();
+
+		Console.addHandler("sys", SystemConsoleCommandHandler.INSTANCE);
 	}
 
 	/**
 	 * Gracefully stops the process quitting applications, drivers and services
 	 */
-	private synchronized void quit() {
+	synchronized void quit() {
 		TasksManager.executeSystem(new Task("System quit") {
 
 			@Override

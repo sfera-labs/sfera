@@ -22,6 +22,8 @@ import javax.crypto.spec.PBEKeySpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cc.sferalabs.sfera.core.services.console.Console;
+
 /**
  * Utility class for users authorization and authentication
  *
@@ -72,6 +74,7 @@ public abstract class Access {
 			}
 			lineNum++;
 		}
+		Console.addHandler("access", AccessConsoleCommandHandler.INSTANCE);
 	}
 
 	/**
@@ -102,7 +105,7 @@ public abstract class Access {
 		users.put(username, u);
 		writeUser(u);
 
-		logger.debug("User '{}' added", username);
+		logger.info("User '{}' added {}", username, roles);
 	}
 
 	/**
@@ -138,6 +141,7 @@ public abstract class Access {
 	public synchronized static void removeUser(String username) throws IOException {
 		User removed = users.remove(username);
 		if (removed == null) {
+			logger.info("User '{}' not found", username);
 			return;
 		}
 
@@ -146,7 +150,7 @@ public abstract class Access {
 			writeUser(u);
 		}
 
-		logger.debug("User '{}' removed", username);
+		logger.info("User '{}' removed", username);
 	}
 
 	/**
