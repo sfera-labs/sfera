@@ -131,11 +131,11 @@ public class ApiSocket extends WebSocketAdapter {
 
 			switch (action) {
 			case "subscribe":
-				String spec = message.get("spec");
+				String nodes = message.get("nodes");
 				if (subscription != null) {
 					subscription.destroy();
 				}
-				subscription = new WsEventListener(this, spec);
+				subscription = new WsEventListener(this, nodes);
 				resp.sendResult("ok");
 				break;
 
@@ -189,6 +189,9 @@ public class ApiSocket extends WebSocketAdapter {
 		if (subscription != null) {
 			subscription.destroy();
 			subscription = null;
+		}
+		if (pingTask != null) {
+			pingTask.interrupt();
 		}
 		logger.debug("Socket Closed: [{}] {} - Host: {}", statusCode, reason,
 				httpRequest.getRemoteHost());
