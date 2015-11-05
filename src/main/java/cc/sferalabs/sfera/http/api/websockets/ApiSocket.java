@@ -34,7 +34,8 @@ public class ApiSocket extends WebSocketAdapter {
 	private static final String PING_STRING = "&";
 
 	private final HttpServletRequest httpRequest;
-	private WsEventListener subscription;
+	private WsEventListener nodesSubscription;
+	private WsFileWatcher filesSubscription;
 	private final Task pingTask;
 	private final long pingInterval;
 	private final long pongTimeout;
@@ -82,7 +83,7 @@ public class ApiSocket extends WebSocketAdapter {
 		try {
 			send(PING_STRING);
 		} catch (Exception e) {
-			getSession().close(1002, "Ping error: " + e.getMessage());
+			onWebSocketError(e);
 		}
 	}
 
@@ -132,11 +133,27 @@ public class ApiSocket extends WebSocketAdapter {
 			switch (action) {
 			case "subscribe":
 				String nodes = message.get("nodes");
-				if (subscription != null) {
-					subscription.destroy();
+				String files = message.get("files");
+				boolean ok = false;
+				if (nodes != null) {
+					if (nodesSubscription != null) {
+						nodesSubscription.destroy();
+					}
+					nodesSubscription = new WsEventListener(this, nodes);
+					ok = true;
 				}
-				subscription = new WsEventListener(this, nodes);
-				resp.sendResult("ok");
+				if (files != null) {
+					if (filesSubscription != null) {
+						filesSubscription.destroy();
+					}
+					filesSubscription = new WsFileWatcher(this, files);
+					ok = true;
+				}
+				if (ok) {
+					resp.sendResult("ok");
+				} else {
+					resp.sendError("Missing attributes");
+				}
 				break;
 
 			case "command":
@@ -186,9 +203,13 @@ public class ApiSocket extends WebSocketAdapter {
 	@Override
 	public void onWebSocketClose(int statusCode, String reason) {
 		super.onWebSocketClose(statusCode, reason);
-		if (subscription != null) {
-			subscription.destroy();
-			subscription = null;
+		if (nodesSubscription != null) {
+			nodesSubscription.destroy();
+			nodesSubscription = null;
+		}
+		if (filesSubscription != null) {
+			filesSubscription.destroy();
+			filesSubscription = null;
 		}
 		if (pingTask != null) {
 			pingTask.interrupt();
@@ -199,9 +220,11 @@ public class ApiSocket extends WebSocketAdapter {
 
 	@Override
 	public void onWebSocketError(Throwable cause) {
-		super.onWebSocketError(cause);
 		logger.warn("WebSocket error - Host: " + httpRequest.getRemoteHost(), cause);
-		getSession().close(StatusCode.SERVER_ERROR, cause.getMessage());
+		Session session = getSession();
+		if (session != null) {
+			session.close(StatusCode.PROTOCOL, cause.getMessage());
+		}
 	}
 
 	/**

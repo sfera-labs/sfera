@@ -103,7 +103,7 @@ public final class FilesWatcher extends LazyService {
 			Set<WatchKey> keys = new HashSet<WatchKey>();
 			do { // in case there are other events combined
 				keys.add(wkey);
-			} while ((wkey = WATCHER.poll(1, TimeUnit.SECONDS)) != null && keys.size() < 50);
+			} while ((wkey = WATCHER.poll(200, TimeUnit.MILLISECONDS)) != null && keys.size() < 10);
 
 			Set<WatcherTask> toExecute = new HashSet<>();
 			for (WatchKey key : keys) {

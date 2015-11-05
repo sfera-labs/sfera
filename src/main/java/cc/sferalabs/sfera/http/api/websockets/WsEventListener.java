@@ -6,10 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.jetty.websocket.api.Session;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Event;
 import cc.sferalabs.sfera.http.SessionFilterEventIdSpecListener;
@@ -24,8 +20,6 @@ import cc.sferalabs.sfera.http.SessionFilterEventIdSpecListener;
  *
  */
 class WsEventListener extends SessionFilterEventIdSpecListener {
-
-	private static final Logger logger = LoggerFactory.getLogger(WsEventListener.class);
 
 	private final ApiSocket socket;
 
@@ -65,14 +59,9 @@ class WsEventListener extends SessionFilterEventIdSpecListener {
 			for (Event e : events) {
 				eventsMap.put(e.getId(), e.getValue());
 			}
-			m.put("events", eventsMap);
-			m.send();
+			m.send("nodes", eventsMap);
 		} catch (Exception e) {
-			logger.warn("Error sending events " + eventsMap, e);
-			Session session = socket.getSession();
-			if (session != null) {
-				session.close();
-			}
+			socket.onWebSocketError(e);
 		}
 	}
 
