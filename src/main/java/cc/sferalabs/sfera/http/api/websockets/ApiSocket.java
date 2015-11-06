@@ -38,18 +38,18 @@ public class ApiSocket extends WebSocketAdapter {
 	private WsFileWatcher filesSubscription;
 	private final Task pingTask;
 	private final long pingInterval;
-	private final long pongTimeout;
+	private final long respTimeout;
 
 	/**
 	 * 
 	 * @param request
 	 * @param pingInterval
-	 * @param pongTimeout
+	 * @param respTimeout
 	 */
-	ApiSocket(ServletUpgradeRequest request, long pingInterval, long pongTimeout) {
+	ApiSocket(ServletUpgradeRequest request, long pingInterval, long respTimeout) {
 		this.httpRequest = request.getHttpServletRequest();
 		this.pingInterval = pingInterval;
-		this.pongTimeout = pongTimeout;
+		this.respTimeout = respTimeout;
 		this.pingTask = new PingTask(this, pingInterval);
 		logger.debug("Socket created - Host: {}", this.httpRequest.getRemoteHost());
 	}
@@ -65,15 +65,33 @@ public class ApiSocket extends WebSocketAdapter {
 	public void onWebSocketConnect(Session session) {
 		super.onWebSocketConnect(session);
 		try {
-			OutgoingWsMessage resp = new OutgoingWsMessage("connection", this);
-			resp.put("pingInterval", pingInterval);
-			resp.put("pongTimeout", pongTimeout);
-			resp.send();
-			ping();
-			logger.debug("Socket connected - Host: {}", httpRequest.getRemoteHost());
+			String host = httpRequest.getRemoteHost();
+			if (isAuthorized(httpRequest)) {
+				OutgoingWsMessage resp = new OutgoingWsMessage("connection", this);
+				resp.put("pingInterval", pingInterval);
+				resp.put("responseTimeout", respTimeout);
+				resp.send();
+				ping();
+				logger.debug("Socket connected - Host: {}", host);
+			} else {
+				logger.warn("Unauthorized WebSocket connection from {}", host);
+				OutgoingWsMessage resp = new OutgoingWsMessage("connection", this);
+				resp.sendError("Unauthorized");
+				Thread.sleep(respTimeout);
+				closeSocket(StatusCode.POLICY_VIOLATION, "Unauthorized");
+			}
 		} catch (Exception e) {
-			logger.warn("Connection error", e);
+			onWebSocketError(new Exception("Connection error", e));
 		}
+
+	}
+
+	/**
+	 * @param req
+	 * @return
+	 */
+	private boolean isAuthorized(HttpServletRequest req) {
+		return req.isUserInRole("admin") || req.isUserInRole("user");
 	}
 
 	/**
@@ -221,9 +239,18 @@ public class ApiSocket extends WebSocketAdapter {
 	@Override
 	public void onWebSocketError(Throwable cause) {
 		logger.warn("WebSocket error - Host: " + httpRequest.getRemoteHost(), cause);
+		closeSocket(StatusCode.PROTOCOL, cause.getMessage());
+	}
+
+	/**
+	 * 
+	 * @param statusCode
+	 * @param reason
+	 */
+	private void closeSocket(int statusCode, String reason) {
 		Session session = getSession();
 		if (session != null) {
-			session.close(StatusCode.PROTOCOL, cause.getMessage());
+			session.close(statusCode, reason);
 		}
 	}
 
@@ -232,9 +259,9 @@ public class ApiSocket extends WebSocketAdapter {
 	 * @throws IOException
 	 */
 	synchronized void send(String text) throws IOException {
-		logger.debug("Sending: '{}' - Host: {}", text, httpRequest.getRemoteHost());
 		RemoteEndpoint remote = getRemote();
 		if (remote != null) {
+			logger.debug("Sending: '{}' - Host: {}", text, httpRequest.getRemoteHost());
 			remote.sendString(text);
 		}
 	}

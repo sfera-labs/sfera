@@ -21,10 +21,10 @@ public class ApiWebSocketServlet extends WebSocketServlet {
 
 	@Override
 	public void configure(WebSocketServletFactory factory) {
-		long pingInterval = SystemNode.getConfiguration().get("http_ws_ping_interval", 10000l);
-		long pongTimeout = SystemNode.getConfiguration().get("http_ws_pong_timeout", 5000l);
-		factory.setCreator(new ApiSocketCreator(pingInterval, pongTimeout));
-		factory.getPolicy().setIdleTimeout(pingInterval + pongTimeout);
+		long pingInterval = SystemNode.getConfiguration().get("ws_ping_interval", 10000l);
+		long respTimeout = SystemNode.getConfiguration().get("ws_response_timeout", 5000l);
+		factory.setCreator(new ApiSocketCreator(pingInterval, respTimeout));
+		factory.getPolicy().setIdleTimeout(pingInterval + respTimeout);
 	}
 
 }
