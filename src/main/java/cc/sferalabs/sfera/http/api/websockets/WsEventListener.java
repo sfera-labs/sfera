@@ -29,7 +29,7 @@ class WsEventListener extends SessionFilterEventIdSpecListener {
 	 * @param eventIdSpec
 	 */
 	WsEventListener(ApiSocket socket, String eventIdSpec) {
-		super(eventIdSpec, socket.getHttpRequest().getSession().getId());
+		super(eventIdSpec, socket.originalRequest.getSession().getId());
 		this.socket = socket;
 
 		List<Event> evs = new ArrayList<>();
