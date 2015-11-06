@@ -29,7 +29,7 @@ public class SubscribeServlet extends AuthorizedUserServlet {
 	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
 			throws ServletException, IOException {
 		String id = req.getParameter("id");
-		String spec = req.getParameter("spec");
+		String nodes = req.getParameter("nodes");
 
 		HttpSession session = req.getSession(false);
 		String sessionId = session.getId();
@@ -38,15 +38,15 @@ public class SubscribeServlet extends AuthorizedUserServlet {
 		if (subscriptions == null) {
 			subscriptions = new SubscriptionsSet();
 			session.setAttribute(SESSION_ATTR_SUBSCRIPTIONS, subscriptions);
-			logger.debug("Creted new subscriptions set for session '{}'", sessionId);
+			logger.debug("Created new subscriptions set for session '{}'", sessionId);
 		}
-		PollingSubscription subscription = new PollingSubscription(id, spec, sessionId);
+		PollingSubscription subscription = new PollingSubscription(id, nodes, sessionId);
 		PollingSubscription prev = subscriptions.put(subscription);
 		if (prev != null) {
 			prev.destroy();
 		}
 		id = subscription.getId();
-		logger.debug("Subscribed: session '{}' subscription '{}' spec: {}", sessionId, id, spec);
+		logger.debug("Subscribed - session '{}' subscription '{}' nodes: {}", sessionId, id, nodes);
 		resp.send("id", id);
 	}
 
