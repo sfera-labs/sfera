@@ -3,7 +3,7 @@
  */
 package cc.sferalabs.sfera.ui;
 
-import cc.sferalabs.sfera.events.BaseEvent;
+import cc.sferalabs.sfera.events.ObjectEvent;
 
 /**
  *
@@ -12,15 +12,15 @@ import cc.sferalabs.sfera.events.BaseEvent;
  * @version 1.0.0
  *
  */
-public abstract class UIEvent extends BaseEvent {
+public abstract class UIEvent extends ObjectEvent {
 
 	/**
 	 * 
-	 * @param uiNode
 	 * @param id
+	 * @param value
 	 */
-	public UIEvent(UI uiNode, String id) {
-		super(uiNode, id);
+	public UIEvent(String id, Object value) {
+		super(UI.getInstance(), id, value);
 	}
 
 }

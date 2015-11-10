@@ -35,7 +35,7 @@ public class ApiSocket extends WebSocketAdapter {
 	private static final String PING_STRING = "&";
 
 	final HttpServletRequest originalRequest;
-	final String host;
+	final String hostname;
 	private final String user;
 	private final boolean isAuthorized;
 
@@ -54,7 +54,7 @@ public class ApiSocket extends WebSocketAdapter {
 	ApiSocket(ServletUpgradeRequest request, long pingInterval, long respTimeout) {
 		this.originalRequest = ((UpgradeHttpServletRequest) request.getHttpServletRequest())
 				.getHttpServletRequest();
-		this.host = request.getRemoteHostName();
+		this.hostname = request.getRemoteHostName();
 		this.user = this.originalRequest.getRemoteUser();
 		this.pingInterval = pingInterval;
 		this.respTimeout = respTimeout;
@@ -73,9 +73,9 @@ public class ApiSocket extends WebSocketAdapter {
 				resp.put("responseTimeout", respTimeout);
 				resp.send();
 				ping();
-				logger.debug("Socket connected - Host: {}", host);
+				logger.debug("Socket connected - Host: {}", hostname);
 			} else {
-				logger.warn("Unauthorized WebSocket connection from {}", host);
+				logger.warn("Unauthorized WebSocket connection from {}", hostname);
 				OutgoingWsMessage resp = new OutgoingWsMessage("connection", this);
 				resp.sendError("Unauthorized");
 				Thread.sleep(respTimeout);
@@ -101,7 +101,7 @@ public class ApiSocket extends WebSocketAdapter {
 	@Override
 	public void onWebSocketText(String message) {
 		super.onWebSocketText(message);
-		logger.debug("Received message: '{}' - Host: {} User: {}", message, host, user);
+		logger.debug("Received message: '{}' - Host: {} User: {}", message, hostname, user);
 
 		if (message.equals(PING_STRING)) {
 			TasksManager.execute(pingTask);
@@ -223,12 +223,12 @@ public class ApiSocket extends WebSocketAdapter {
 		if (pingTask != null) {
 			pingTask.interrupt();
 		}
-		logger.debug("Socket Closed: [{}] {} - Host: {}", statusCode, reason, host);
+		logger.debug("Socket Closed: [{}] {} - Host: {}", statusCode, reason, hostname);
 	}
 
 	@Override
 	public void onWebSocketError(Throwable cause) {
-		logger.warn("WebSocket error - Host: " + host, cause);
+		logger.warn("WebSocket error - Host: " + hostname, cause);
 		closeSocket(StatusCode.PROTOCOL, cause.getMessage());
 	}
 
@@ -251,7 +251,7 @@ public class ApiSocket extends WebSocketAdapter {
 	synchronized void send(String text) throws IOException {
 		RemoteEndpoint remote = getRemote();
 		if (remote != null) {
-			logger.debug("Sending: '{}' - Host: {}", text, host);
+			logger.debug("Sending: '{}' - Host: {}", text, hostname);
 			remote.sendString(text);
 		}
 	}

@@ -36,7 +36,7 @@ public class UI implements Node {
 	/**
 	 * @return
 	 */
-	public static UI getInstance() {
+	static UI getInstance() {
 		return INSTANCE;
 	}
 

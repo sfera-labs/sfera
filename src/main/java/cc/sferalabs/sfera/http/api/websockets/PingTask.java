@@ -23,7 +23,7 @@ class PingTask extends Task {
 	 * @param pingInterval
 	 */
 	PingTask(ApiSocket socket, long pingInterval) {
-		super("WS Ping " + socket.host);
+		super("WS Ping " + socket.hostname);
 		this.socket = socket;
 		this.pingInterval = pingInterval;
 	}
