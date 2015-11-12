@@ -14,11 +14,15 @@ public interface ConsoleCommandHandler {
 
 	/**
 	 * @param cmd
+	 *            the command text
 	 */
 	public void accept(String cmd);
-	
+
 	/**
-	 * @return
+	 * Returns an Strings array containing a help text for each accepted
+	 * command.
+	 * 
+	 * @return the help text lines
 	 */
 	public String[] getHelp();
 }

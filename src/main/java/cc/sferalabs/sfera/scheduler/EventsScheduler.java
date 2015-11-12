@@ -97,8 +97,9 @@ public class EventsScheduler implements AutoStartService {
 	/**
 	 * 
 	 * @param id
+	 *            ID of the event to cancel
 	 * @param value
-	 * @param delay
+	 *            value of the event to cancel
 	 */
 	public static void cancel(String id, String value) {
 		try {
@@ -111,6 +112,7 @@ public class EventsScheduler implements AutoStartService {
 	/**
 	 * 
 	 * @param id
+	 *            ID of the event to cancel
 	 */
 	public static void cancel(String id) {
 		try {
@@ -124,8 +126,11 @@ public class EventsScheduler implements AutoStartService {
 	/**
 	 * 
 	 * @param id
+	 *            ID of the event to trigger
 	 * @param value
+	 *            value of the event to trigger
 	 * @param delay
+	 *            delay in seconds after which the event will be triggered
 	 */
 	public static void delay(String id, String value, int delay) {
 		Trigger trigger = newEventTrigger(id, value).startAt(futureDate(delay, IntervalUnit.SECOND))
@@ -136,14 +141,18 @@ public class EventsScheduler implements AutoStartService {
 	/**
 	 * 
 	 * @param id
+	 *            ID of the event to trigger
 	 * @param value
+	 *            value of the event to trigger
 	 * @param initialDelay
-	 * @param delay
+	 *            delay in seconds after which the first event will be triggered
+	 * @param interval
+	 *            interval in seconds of the subsequent events
 	 */
-	public static void repeat(String id, String value, int initialDelay, int delay) {
+	public static void repeat(String id, String value, int initialDelay, int interval) {
 		Trigger trigger = newEventTrigger(id, value)
 				.startAt(futureDate(initialDelay, IntervalUnit.SECOND))
-				.withSchedule(simpleSchedule().withIntervalInSeconds(delay).repeatForever())
+				.withSchedule(simpleSchedule().withIntervalInSeconds(interval).repeatForever())
 				.build();
 		sheduleEvent(trigger);
 	}
@@ -151,16 +160,21 @@ public class EventsScheduler implements AutoStartService {
 	/**
 	 * 
 	 * @param id
+	 *            ID of the event to trigger
 	 * @param value
+	 *            value of the event to trigger
 	 * @param initialDelay
-	 * @param delay
+	 *            delay in seconds after which the first event will be triggered
+	 * @param interval
+	 *            interval in seconds of the subsequent events
 	 * @param times
+	 *            number of triggered events
 	 */
-	public static void repeat(String id, String value, int initialDelay, int delay, int times) {
+	public static void repeat(String id, String value, int initialDelay, int interval, int times) {
 		Trigger trigger = newEventTrigger(id, value)
 				.startAt(futureDate(initialDelay, IntervalUnit.SECOND))
 				.withSchedule(
-						simpleSchedule().withIntervalInSeconds(delay).withRepeatCount(times - 1))
+						simpleSchedule().withIntervalInSeconds(interval).withRepeatCount(times - 1))
 				.build();
 		sheduleEvent(trigger);
 	}

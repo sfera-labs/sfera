@@ -111,6 +111,7 @@ public abstract class Driver extends Task implements Node {
 	 * </p>
 	 * 
 	 * @param config
+	 *            the new configuration
 	 */
 	protected void onConfigChange(Configuration config) {
 		try {

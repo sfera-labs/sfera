@@ -22,11 +22,10 @@ public class LocalCommPort extends CommPort {
 	private final SerialPort serialPort;
 
 	/**
-	 * 
-	 * @param portName
-	 * @throws CommPortException
+	 * @param portName local port name
+	 * @throws CommPortException if an error occurs when creating or opening the port
 	 */
-	protected LocalCommPort(String portName) throws CommPortException {
+	LocalCommPort(String portName) throws CommPortException {
 		try {
 			this.serialPort = new SerialPort(portName);
 			if (!serialPort.openPort()) {

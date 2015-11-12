@@ -26,11 +26,10 @@ public class SchedulerEvent extends BaseEvent {
 	private final String value;
 
 	/**
-	 * 
 	 * @param id
 	 * @param value
 	 */
-	public SchedulerEvent(String id, String value) {
+	SchedulerEvent(String id, String value) {
 		super(SCHEDULER_NODE, id);
 		this.value = value;
 	}

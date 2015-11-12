@@ -17,7 +17,9 @@ public abstract class UIEvent extends ObjectEvent {
 	/**
 	 * 
 	 * @param id
+	 *            event ID
 	 * @param value
+	 *            event value
 	 */
 	public UIEvent(String id, Object value) {
 		super(UI.getInstance(), id, value);

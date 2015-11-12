@@ -52,7 +52,7 @@ public abstract class CommPort {
 	 *            "port.example.com:5001").
 	 * @return the created {@code CommPort}
 	 * @throws CommPortException
-	 *             if an error occur when creating or opening the port
+	 *             if an error occurs when creating or opening the port
 	 */
 	public static CommPort open(String portName) throws CommPortException {
 		logger.debug("Trying getting local port '{}'", portName);

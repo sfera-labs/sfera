@@ -8,7 +8,7 @@ import java.util.Map;
 
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Event;
-import cc.sferalabs.sfera.http.SessionFilterEventIdSpecListener;
+import cc.sferalabs.sfera.events.EventIdSpecListener;
 
 /**
  * Class handling the delivery of events for WebSocket connections that have
@@ -19,7 +19,7 @@ import cc.sferalabs.sfera.http.SessionFilterEventIdSpecListener;
  * @version 1.0.0
  *
  */
-class WsEventListener extends SessionFilterEventIdSpecListener {
+class WsEventListener extends EventIdSpecListener {
 
 	private final ApiSocket socket;
 
@@ -29,7 +29,7 @@ class WsEventListener extends SessionFilterEventIdSpecListener {
 	 * @param eventIdSpec
 	 */
 	WsEventListener(ApiSocket socket, String eventIdSpec) {
-		super(eventIdSpec, socket.originalRequest.getSession().getId());
+		super(eventIdSpec);
 		this.socket = socket;
 
 		List<Event> evs = new ArrayList<>();

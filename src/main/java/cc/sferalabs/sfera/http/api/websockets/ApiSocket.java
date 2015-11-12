@@ -34,8 +34,8 @@ public class ApiSocket extends WebSocketAdapter {
 
 	private static final String PING_STRING = "&";
 
-	final HttpServletRequest originalRequest;
 	final String hostname;
+	private final HttpServletRequest originalRequest;
 	private final String user;
 	private final boolean isAuthorized;
 
@@ -125,20 +125,20 @@ public class ApiSocket extends WebSocketAdapter {
 	 *             if an I/O error occurs
 	 */
 	private void process(JsonMessage message) throws IOException {
-		OutgoingWsMessage resp = new OutgoingWsMessage("response", this);
+		OutgoingWsMessage reply = new OutgoingWsMessage("reply", this);
 		try {
 			Object tag = message.get("tag");
 			if (tag == null) {
-				resp.sendError("Attribute 'tag' not found");
+				reply.sendError("Attribute 'tag' not found");
 				return;
 			}
 			String action = message.get("action");
 			if (action == null) {
-				resp.sendError("Attribute 'action' not found");
+				reply.sendError("Attribute 'action' not found");
 				return;
 			}
-			resp.put("tag", tag);
-			resp.put("action", action);
+			reply.put("tag", tag);
+			reply.put("action", action);
 
 			switch (action) {
 			case "subscribe":
@@ -160,16 +160,16 @@ public class ApiSocket extends WebSocketAdapter {
 					ok = true;
 				}
 				if (ok) {
-					resp.sendResult("ok");
+					reply.sendResult("ok");
 				} else {
-					resp.sendError("Missing attributes");
+					reply.sendError("Missing attributes");
 				}
 				break;
 
 			case "command":
 				String cmd = message.get("cmd");
 				if (cmd == null) {
-					resp.sendError("Attribute 'cmd' not found");
+					reply.sendError("Attribute 'cmd' not found");
 					return;
 				}
 				String[] cmd_prm = cmd.split("=");
@@ -178,33 +178,33 @@ public class ApiSocket extends WebSocketAdapter {
 					String param = cmd_prm.length == 1 ? null : cmd_prm[1];
 					res = ScriptsEngine.executeDriverAction(cmd_prm[0], param, user);
 				} catch (Exception e) {
-					resp.sendError(e.getMessage());
+					reply.sendError(e.getMessage());
 				}
-				resp.sendResult(res);
+				reply.sendResult(res);
 				break;
 
 			case "event":
 				String id = message.get("id");
 				if (id == null) {
-					resp.sendError("Attribute 'id' not found");
+					reply.sendError("Attribute 'id' not found");
 					return;
 				}
 				String value = message.get("value");
 				try {
-					HttpApiEvent remoteEvent = new HttpApiEvent(id, value, originalRequest, resp);
+					HttpApiEvent remoteEvent = new HttpApiEvent(id, value, originalRequest, reply);
 					Bus.post(remoteEvent);
 				} catch (Exception e) {
-					resp.sendError(e.getMessage());
+					reply.sendError(e.getMessage());
 				}
 				break;
 
 			default:
-				resp.sendError("Unknown action");
+				reply.sendError("Unknown action");
 				break;
 			}
 		} catch (IOException e) {
 			logger.warn("Error processing WebSocket message", e);
-			resp.sendError("Server error: " + e.getMessage());
+			reply.sendError("Server error: " + e.getMessage());
 			throw e;
 		}
 	}

@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Event;
-import cc.sferalabs.sfera.http.SessionFilterEventIdSpecListener;
+import cc.sferalabs.sfera.events.EventIdSpecListener;
 
 /**
  * Class handling a polling subscription requested via {@link SubscribeServlet}.
@@ -20,7 +20,7 @@ import cc.sferalabs.sfera.http.SessionFilterEventIdSpecListener;
  * @version 1.0.0
  *
  */
-public class PollingSubscription extends SessionFilterEventIdSpecListener {
+public class PollingSubscription extends EventIdSpecListener {
 
 	private final String id;
 	private final BlockingQueue<Event> changes = new LinkedBlockingQueue<Event>();
@@ -37,8 +37,8 @@ public class PollingSubscription extends SessionFilterEventIdSpecListener {
 	 * @param session
 	 *            session ID
 	 */
-	PollingSubscription(String id, String spec, String session) {
-		super(spec, session);
+	PollingSubscription(String id, String spec) {
+		super(spec);
 		this.id = id != null ? id : UUID.randomUUID().toString();
 		for (Event e : Bus.getCurrentState().values()) {
 			process(e);
@@ -58,7 +58,7 @@ public class PollingSubscription extends SessionFilterEventIdSpecListener {
 	 * <p>
 	 * Returns a collection of all the events not acknowledged. An event is
 	 * considered acknowledged if after being returned by this method a
-	 * subsequent call is made with an {@code ack} value greather than the
+	 * subsequent call is made with an {@code ack} value greater than the
 	 * previous one.
 	 * </p>
 	 * <p>

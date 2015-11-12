@@ -40,7 +40,7 @@ public class SubscribeServlet extends AuthorizedUserServlet {
 			session.setAttribute(SESSION_ATTR_SUBSCRIPTIONS, subscriptions);
 			logger.debug("Created new subscriptions set for session '{}'", sessionId);
 		}
-		PollingSubscription subscription = new PollingSubscription(id, nodes, sessionId);
+		PollingSubscription subscription = new PollingSubscription(id, nodes);
 		PollingSubscription prev = subscriptions.put(subscription);
 		if (prev != null) {
 			prev.destroy();

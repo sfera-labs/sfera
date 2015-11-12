@@ -71,10 +71,10 @@ public class IPCommPort extends CommPort {
 	}
 
 	/**
-	 * 
-	 * @param portName
+	 * @param portName local port name
+	 * @throws CommPortException if an error occurs when creating or opening the port
 	 */
-	protected IPCommPort(String portName) throws CommPortException {
+	IPCommPort(String portName) throws CommPortException {
 		int colon = portName.indexOf(':');
 		if (colon < 0) {
 			throw new CommPortException("port name format error");

@@ -139,13 +139,14 @@ public abstract class Application implements EventListener {
 	}
 
 	/**
+	 * 
 	 * Callback method called when the configuration of this application is
 	 * modified. The default implementation restarts the application.
 	 * 
 	 * @param configuration
 	 *            the new configuration
 	 */
-	protected void onConfigChange(Configuration configuration) throws InterruptedException {
+	protected void onConfigChange(Configuration configuration) {
 		try {
 			restart();
 		} catch (IOException e) {
