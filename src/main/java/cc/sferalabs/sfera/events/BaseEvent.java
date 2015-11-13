@@ -50,4 +50,9 @@ public abstract class BaseEvent implements Event {
 	public long getTimestamp() {
 		return timestamp;
 	}
+
+	@Override
+	public Object getScriptConditionValue() {
+		return getValue();
+	}
 }

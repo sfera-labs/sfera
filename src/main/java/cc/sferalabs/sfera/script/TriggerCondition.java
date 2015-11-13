@@ -13,6 +13,7 @@ import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.NumberCompariso
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.OrExpressionContext;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.StableEventContext;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.StringComparisonContext;
+import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.TerminalNodeContext;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.TransientEventContext;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.TriggerContext;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.UnknownComparisonContext;
@@ -174,35 +175,53 @@ class TriggerCondition {
 	}
 
 	/**
+	 * @return
+	 */
+	private Object getEventValue(TerminalNodeContext ctx) {
+		Event event = Bus.getEvent(ctx.getText());
+		if (event == null) {
+			return null;
+		}
+
+		return event.getScriptConditionValue();
+	}
+
+	/**
 	 * 
 	 * @param ctx
 	 * @return
 	 * @throws Exception
 	 */
 	private boolean eval(StringComparisonContext ctx) throws Exception {
-		Object value = Bus.getValueOf(ctx.terminalNode().getText());
+		Object value = getEventValue(ctx.terminalNode());
 
 		if (value == null) {
 			return false;
 		}
 
-		String txtValue = value.toString();
+		if (!(value instanceof String)) {
+			int line = ctx.getStart().getLine();
+			throw new Exception("line " + line + ": Type error: " + ctx.terminalNode().getText()
+					+ " not a String");
+		}
 
 		String literal = ctx.StringLiteral().getText();
 		literal = literal.substring(1, literal.length() - 1);
 
+		String stringValue = (String) value;
+
 		if (ctx.ET() != null) {
-			return literal.equals(txtValue);
+			return stringValue.equals(literal);
 		} else if (ctx.NE() != null) {
-			return !literal.equals(txtValue);
+			return !stringValue.equals(literal);
 		} else if (ctx.GT() != null) {
-			return txtValue.compareTo(literal) > 0;
+			return stringValue.compareTo(literal) > 0;
 		} else if (ctx.LT() != null) {
-			return txtValue.compareTo(literal) < 0;
+			return stringValue.compareTo(literal) < 0;
 		} else if (ctx.GE() != null) {
-			return txtValue.compareTo(literal) >= 0;
+			return stringValue.compareTo(literal) >= 0;
 		} else { // LE
-			return txtValue.compareTo(literal) <= 0;
+			return stringValue.compareTo(literal) <= 0;
 		}
 	}
 
@@ -213,30 +232,33 @@ class TriggerCondition {
 	 * @throws Exception
 	 */
 	private boolean eval(NumberComparisonContext ctx) throws Exception {
-		Object value = Bus.getValueOf(ctx.terminalNode().getText());
+		Object value = getEventValue(ctx.terminalNode());
 
 		if (value == null) {
 			return false;
 		}
 
-		if (!(value instanceof Double)) {
+		if (!(value instanceof Number)) {
 			int line = ctx.getStart().getLine();
 			throw new Exception("line " + line + ": Type error: " + ctx.terminalNode().getText()
 					+ " not a number");
 		}
 
+		double literal = Double.parseDouble(ctx.NumberLiteral().getText());
+		double doubleValue = ((Number) value).doubleValue();
+
 		if (ctx.ET() != null) {
-			return (Double) value == Double.parseDouble(ctx.NumberLiteral().getText());
+			return doubleValue == literal;
 		} else if (ctx.NE() != null) {
-			return (Double) value != Double.parseDouble(ctx.NumberLiteral().getText());
+			return doubleValue != literal;
 		} else if (ctx.GT() != null) {
-			return (Double) value > Double.parseDouble(ctx.NumberLiteral().getText());
+			return doubleValue > literal;
 		} else if (ctx.LT() != null) {
-			return (Double) value < Double.parseDouble(ctx.NumberLiteral().getText());
+			return doubleValue < literal;
 		} else if (ctx.GE() != null) {
-			return (Double) value >= Double.parseDouble(ctx.NumberLiteral().getText());
+			return doubleValue >= literal;
 		} else { // LE
-			return (Double) value <= Double.parseDouble(ctx.NumberLiteral().getText());
+			return doubleValue <= literal;
 		}
 	}
 
@@ -247,7 +269,7 @@ class TriggerCondition {
 	 * @throws Exception
 	 */
 	private boolean eval(BooleanComparisonContext ctx) throws Exception {
-		Object value = Bus.getValueOf(ctx.terminalNode().getText());
+		Object value = getEventValue(ctx.terminalNode());
 
 		if (value == null) {
 			return false;
@@ -259,10 +281,13 @@ class TriggerCondition {
 					+ " not a boolean");
 		}
 
+		boolean literal = Boolean.parseBoolean(ctx.BooleanLiteral().getText());
+		boolean booleanValue = (boolean) value;
+
 		if (ctx.ET() != null) {
-			return Boolean.parseBoolean(ctx.BooleanLiteral().getText()) == (Boolean) value;
+			return booleanValue == literal;
 		} else { // NE
-			return Boolean.parseBoolean(ctx.BooleanLiteral().getText()) != (Boolean) value;
+			return booleanValue != literal;
 		}
 	}
 
@@ -272,7 +297,7 @@ class TriggerCondition {
 	 * @return
 	 */
 	private boolean eval(UnknownComparisonContext ctx) {
-		Object value = Bus.getValueOf(ctx.terminalNode().getText());
+		Object value = getEventValue(ctx.terminalNode());
 
 		if (ctx.ET() != null) {
 			return value == null;

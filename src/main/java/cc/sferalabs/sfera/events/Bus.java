@@ -122,6 +122,17 @@ public abstract class Bus {
 	}
 
 	/**
+	 * Returns the last event that was posted on the bus with the specified ID.
+	 * 
+	 * @param id
+	 *            the event ID
+	 * @return the last event that was posted on the bus with the specified ID
+	 */
+	public static Event getEvent(String id) {
+		return EVENTS_MAP.get(id);
+	}
+
+	/**
 	 * Returns a map with all the events ID posted mapped to the last
 	 * corresponding event instance posted.
 	 * 

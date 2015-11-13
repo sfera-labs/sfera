@@ -10,7 +10,7 @@ package cc.sferalabs.sfera.events;
  */
 public abstract class NumberEvent extends BaseEvent {
 
-	private final Double value;
+	private final Number value;
 
 	/**
 	 * Constructs a {@code NumberEvent} event with the specified ID, source and
@@ -23,28 +23,13 @@ public abstract class NumberEvent extends BaseEvent {
 	 * @param value
 	 *            the event value
 	 */
-	public NumberEvent(Node source, String id, Double value) {
+	public NumberEvent(Node source, String id, Number value) {
 		super(source, id);
 		this.value = value;
 	}
 
-	/**
-	 * Constructs a {@code NumberEvent} event with the specified ID, source and
-	 * value.
-	 * 
-	 * @param source
-	 *            the source node
-	 * @param id
-	 *            the event ID
-	 * @param value
-	 *            the event value
-	 */
-	public NumberEvent(Node source, String id, Integer value) {
-		this(source, id, value == null ? null : value.doubleValue());
-	}
-
 	@Override
-	public Double getValue() {
+	public Number getValue() {
 		return value;
 	}
 
