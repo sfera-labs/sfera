@@ -38,12 +38,12 @@ public class EventServlet extends AuthorizedUserServlet {
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "No event specified");
 			return;
 		}
-		
+
 		String id = params.nextElement();
 		String val = req.getParameter(id);
-		resp.setAsyncContext(req.startAsync());
-		HttpApiEvent remoteEvent = new HttpApiEvent(id, val, req, resp);
+		HttpApiEvent remoteEvent = new HttpApiEvent(id, val, req);
 		Bus.post(remoteEvent);
+		resp.sendResult("ok");
 	}
 
 }

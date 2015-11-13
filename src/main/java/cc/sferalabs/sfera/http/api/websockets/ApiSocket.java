@@ -179,6 +179,7 @@ public class ApiSocket extends WebSocketAdapter {
 					res = ScriptsEngine.executeDriverAction(cmd_prm[0], param, user);
 				} catch (Exception e) {
 					reply.sendError(e.getMessage());
+					return;
 				}
 				reply.sendResult(res);
 				break;
@@ -191,8 +192,9 @@ public class ApiSocket extends WebSocketAdapter {
 				}
 				String value = message.get("value");
 				try {
-					HttpApiEvent remoteEvent = new HttpApiEvent(id, value, originalRequest, reply);
+					HttpApiEvent remoteEvent = new HttpApiEvent(id, value, originalRequest);
 					Bus.post(remoteEvent);
+					reply.sendResult("ok");
 				} catch (Exception e) {
 					reply.sendError(e.getMessage());
 				}
