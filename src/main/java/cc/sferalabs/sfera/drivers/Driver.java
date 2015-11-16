@@ -28,7 +28,7 @@ public abstract class Driver extends Task implements Node {
 
 	private final String id;
 	private String configFile;
-	private boolean quit = false;
+	private volatile boolean quit = false;
 	private Future<?> future;
 
 	protected final Logger log;

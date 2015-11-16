@@ -21,6 +21,7 @@ import cc.sferalabs.sfera.core.Sfera;
 import cc.sferalabs.sfera.core.services.FilesWatcher;
 import cc.sferalabs.sfera.core.services.console.Console;
 import cc.sferalabs.sfera.events.Bus;
+import cc.sferalabs.sfera.events.Nodes;
 import cc.sferalabs.sfera.script.ScriptsEngine;
 
 /**
@@ -37,7 +38,7 @@ public abstract class Drivers {
 	private static final String CONFIG_DIR = "drivers";
 	private static final Logger logger = LoggerFactory.getLogger(Drivers.class);
 
-	private static Map<String, Driver> drivers = new HashMap<>();
+	private static final Map<String, Driver> drivers = new HashMap<>();
 
 	/**
 	 * Instantiate and starts all drivers defined in configuration.
@@ -50,13 +51,13 @@ public abstract class Drivers {
 		} catch (Exception e) {
 			logger.error("Error watching drivers config directory", e);
 		}
-		Console.addHandler("drivers", DriversConsoleCommandHandler.INSTANCE);
+		Console.setHandler("drivers", DriversConsoleCommandHandler.INSTANCE);
 	}
 
 	/**
-	 * Instantiate and starts all drivers defined in configuration.
+	 * 
 	 */
-	private static void instantiateDrivers() {
+	private synchronized static void instantiateDrivers() {
 		Path configDir = Configuration.getConfigDir().resolve(CONFIG_DIR);
 		List<String> inConfig = new ArrayList<String>();
 		if (Files.exists(configDir)) {
@@ -84,7 +85,7 @@ public abstract class Drivers {
 									.getConstructor(new Class[] { String.class });
 							Driver driverInstance = (Driver) constructor.newInstance(driverId);
 							driverInstance.setConfigFile(CONFIG_DIR + "/" + fileName);
-							drivers.put(driverId, driverInstance);
+							addDriver(driverId, driverInstance);
 							ScriptsEngine.putObjectInGlobalScope(driverInstance.getId(),
 									driverInstance);
 							if (driverInstance instanceof EventListener) {
@@ -105,15 +106,38 @@ public abstract class Drivers {
 			logger.debug("Drivers config directory not found");
 		}
 
+		List<Driver> toRemove = new ArrayList<>();
 		Iterator<Driver> it = drivers.values().iterator();
 		while (it.hasNext()) {
 			Driver d = it.next();
 			if (!inConfig.contains(d.getId())) {
 				logger.info("Configuration file for driver '{}' deleted", d.getId());
-				d.quit();
-				it.remove();
+				toRemove.add(d);
 			}
 		}
+		
+		for (Driver d : toRemove) {
+			d.quit();
+			removeDriver(d);
+		}
+	}
+
+	/**
+	 * @param d
+	 */
+	private static void removeDriver(Driver d) {
+		String id = d.getId();
+		drivers.remove(id);
+		Nodes.remove(id);
+	}
+
+	/**
+	 * @param driverId
+	 * @param driverInstance
+	 */
+	private static void addDriver(String driverId, Driver driverInstance) {
+		drivers.put(driverId, driverInstance);
+		Nodes.put(driverInstance);
 	}
 
 	/**

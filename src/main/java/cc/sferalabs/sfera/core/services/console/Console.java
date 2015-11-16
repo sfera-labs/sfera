@@ -35,7 +35,7 @@ public class Console extends LazyService {
 	 * @param handler
 	 *            the handler
 	 */
-	public static synchronized void addHandler(String key, ConsoleCommandHandler handler) {
+	public static synchronized void setHandler(String key, ConsoleCommandHandler handler) {
 		if (INSTANCE.init()) {
 			INSTANCE.handlers.put(key, handler);
 			logger.debug("Added console handler: {}", key);

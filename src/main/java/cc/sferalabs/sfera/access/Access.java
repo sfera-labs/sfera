@@ -74,7 +74,7 @@ public abstract class Access {
 			}
 			lineNum++;
 		}
-		Console.addHandler("access", AccessConsoleCommandHandler.INSTANCE);
+		Console.setHandler("access", AccessConsoleCommandHandler.INSTANCE);
 	}
 
 	/**

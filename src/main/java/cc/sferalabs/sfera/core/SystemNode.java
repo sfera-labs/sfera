@@ -117,7 +117,7 @@ public class SystemNode implements Node {
 		Drivers.load();
 		Applications.load();
 
-		Console.addHandler("sys", SystemConsoleCommandHandler.INSTANCE);
+		Console.setHandler("sys", SystemConsoleCommandHandler.INSTANCE);
 	}
 
 	/**
