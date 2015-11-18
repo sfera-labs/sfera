@@ -41,8 +41,8 @@ public abstract class CommPort {
 	 * Creates a {@code CommPort} and opens the connection. It first tries
 	 * opening a local port with the specified {@code portName}, if it fails,
 	 * tries to use {@code portName} as a {@literal <}hostname{@literal >}:
-	 * {@literal <}port{@literal >} pair for an IP/serial gateway and connect to
-	 * it.
+	 * {@literal <}port{@literal >} pair for an IP/serial gateway and connects
+	 * to it.
 	 * 
 	 * @param portName
 	 *            the port to connect to. It can be the name of a local serial
@@ -168,16 +168,20 @@ public abstract class CommPort {
 	public abstract void close() throws CommPortException;
 
 	/**
+	 * <p>
 	 * Reads up to {@code len} bytes of data from the input stream into the
 	 * specified byte array starting from the index specified by {@code offset}.
-	 * An attempt is made to read as many as len bytes, but a smaller number may
-	 * be read. The number of bytes actually read is returned.
-	 * 
+	 * An attempt is made to read as many as {@code len} bytes, but a smaller
+	 * number may be read. The number of bytes actually read is returned.
+	 * </p>
+	 * <p>
 	 * This method blocks until input data is available or it is no longer
 	 * possible to read data.
-	 * 
+	 * </p>
+	 * <p>
 	 * Elements {@code b[0]} through {@code b[offset]} and elements
 	 * {@code b[offset+len]} through {@code b[b.length-1]} are unaffected.
+	 * </p>
 	 * 
 	 * @param b
 	 *            the buffer into which the data is read

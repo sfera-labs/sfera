@@ -3,14 +3,8 @@
  */
 package cc.sferalabs.sfera.ui;
 
-import javax.script.ScriptException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Node;
-import cc.sferalabs.sfera.script.ScriptsEngine;
 
 /**
  *
@@ -22,16 +16,6 @@ import cc.sferalabs.sfera.script.ScriptsEngine;
 public class UI implements Node {
 
 	private static final UI INSTANCE = new UI();
-
-	private static final Logger logger = LoggerFactory.getLogger(UI.class);
-
-	static {
-		try {
-			ScriptsEngine.putTypeInGlobalScope("ui", UI.class);
-		} catch (ScriptException e) {
-			logger.error("Error adding 'ui' to script engine", e);
-		}
-	}
 
 	/**
 	 * @return

@@ -44,10 +44,10 @@ import cc.sferalabs.sfera.core.Plugins;
 import cc.sferalabs.sfera.core.events.PluginsEvent;
 import cc.sferalabs.sfera.core.services.AutoStartService;
 import cc.sferalabs.sfera.core.services.FilesWatcher;
-import cc.sferalabs.sfera.drivers.Driver;
-import cc.sferalabs.sfera.drivers.Drivers;
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Event;
+import cc.sferalabs.sfera.events.Node;
+import cc.sferalabs.sfera.events.Nodes;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarLexer;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser;
 import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.ParseContext;
@@ -67,8 +67,9 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	private static final String SCRIPT_FILES_EXTENSION = ".ev";
 	private static final String LIBRARY_FILES_EXTENSION = ".js";
 	private static final ScriptEngineManager scriptEngineManager = new ScriptEngineManager();
-	private static final ScriptEngine driverCommandsEngine = getNewEngine();
+	private static final ScriptEngine nodeActionsEngine = getNewNashornEngine();
 	private static final Logger logger = LoggerFactory.getLogger(ScriptsEngine.class);
+	private static final String SFERA_PACKAGE_IMPORTER = "__cc_sferalabs_sfera_import__";
 
 	private static HashMap<String, HashSet<Rule>> triggersRulesMap;
 	private static HashMap<Path, List<String>> errors;
@@ -76,13 +77,41 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 
 	@Override
 	public void init() throws Exception {
-		Bus.register(this);
+		initScope();
 		loadScripts();
 		try {
 			FilesWatcher.register(Paths.get(SCRIPTS_DIR), ScriptsEngine::loadScripts, false);
 		} catch (Exception e) {
 			logger.error("Error registering script files watcher", e);
 		}
+		Bus.register(this);
+	}
+
+	/**
+	 * @throws ScriptException
+	 */
+	private void initScope() throws ScriptException {
+		// TODO
+		
+//		ScriptEngine engine = getNewNashornEngine();
+//		String scr = "load('nashorn:mozilla_compat.js'); importPackage(Packages.cc.sferalabs.sfera.events); print('**** ' + Nodes);";
+//		putObjectInGlobalScope("o", new Object());
+//		engine.eval(scr, scriptEngineManager.getBindings());
+//		engine.eval("importPackage(Packages.cc.sferalabs.sfera.events); print(o); print('**** ' + Nodes);");
+
+//		String script = "var " + SFERA_PACKAGE_IMPORTER
+//				+ " = new JavaImporter(Packages.cc.sferalabs.sfera.events); with (" + SFERA_PACKAGE_IMPORTER + ") { print('**** ' ); }";
+//		Bindings bindings = engine.createBindings();
+//		engine.eval(script, bindings);
+//		Object importer = bindings.get(SFERA_PACKAGE_IMPORTER);
+//		putObjectInGlobalScope(SFERA_PACKAGE_IMPORTER, importer);
+//		ScriptEngine engine2 = getNewNashornEngine();
+//		engine2.eval("with (" + SFERA_PACKAGE_IMPORTER + ") { print('**** ' + Nodes); }");
+
+//		String script = "var " + SFERA_PACKAGE_IMPORTER
+//				+ " = new JavaImporter(Packages.cc.sferalabs.sfera.events);";
+//		engine.eval(script, engine.getBindings(ScriptContext.GLOBAL_SCOPE));
+//		engine.eval("with (" + SFERA_PACKAGE_IMPORTER + ") { print('**** ' + Nodes); }");
 	}
 
 	/**
@@ -107,7 +136,7 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	 * @return a new Nashorn {@code ScriptEngine}
 	 * @see ScriptEngineManager
 	 */
-	private static ScriptEngine getNewEngine() {
+	static ScriptEngine getNewNashornEngine() {
 		return scriptEngineManager.getEngineByName("nashorn");
 	}
 
@@ -147,15 +176,15 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 
 	/**
 	 * <p>
-	 * Executes a single action on a driver instance.
+	 * Executes an action on a node instance.
 	 * </p>
 	 * <p>
-	 * If an action is of the form "driver.action(value)" then this should be
+	 * If an action is of the form "node.action(value)" then this should be
 	 * passed as the {@code action} parameter.
 	 * </p>
-	 * If an action is of the form "driver.action = value" then "driver.action"
-	 * should be passed as the {@code action} parameter and "value" as the
-	 * {@code param} parameter.
+	 * If an action is of the form "node.attribute = value" then
+	 * "node.attribute" should be passed as the {@code action} parameter and
+	 * "value" as the {@code param} parameter.
 	 * 
 	 * @param action
 	 *            the action
@@ -169,7 +198,7 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	 * @throws IllegalArgumentException
 	 *             if {@code action} or {@code param} have syntax errors
 	 */
-	public static Object executeDriverAction(String action, String param, String user)
+	public static Object executeNodeAction(String action, String param, String user)
 			throws ScriptException, IllegalArgumentException {
 		ScriptErrorListener errorListener = new ScriptErrorListener();
 
@@ -180,13 +209,13 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 					"Invalid node syntax: " + errorListener.errors.get(0));
 		}
 
-		String driverName = commandContext.NodeId().getText();
-		Driver driver = Drivers.getDriver(driverName);
-		if (driver == null) {
-			throw new IllegalArgumentException("Driver '" + driverName + "' not found");
+		String nodeId = commandContext.NodeId().getText();
+		Node node = Nodes.get(nodeId);
+		if (node == null) {
+			throw new IllegalArgumentException("Node '" + nodeId + "' not found");
 		}
 
-		String commandScript = action;
+		String actionScript = action;
 		if (param != null) {
 			// Parse the parameters to make sure it is not some executable code
 			parser = getParser(new ANTLRInputStream(param), errorListener);
@@ -195,16 +224,16 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 				throw new IllegalArgumentException(
 						"Invalid param syntax: " + errorListener.errors.get(0));
 			}
-			commandScript += "=" + param;
+			actionScript += "=" + param;
 
-		} else if (!commandScript.endsWith(")")) {
-			commandScript += "()";
+		} else if (!actionScript.endsWith(")")) {
+			actionScript += "()";
 		}
 
-		logger.info("Executing command: {} User: {}", commandScript, user);
+		logger.info("Executing action: {} User: {}", actionScript, user);
 		Bindings bindings = new SimpleBindings();
-		bindings.put(driverName, driver);
-		return driverCommandsEngine.eval(commandScript, bindings);
+		bindings.put(nodeId, node);
+		return nodeActionsEngine.eval(actionScript, bindings);
 	}
 
 	/**
@@ -278,6 +307,8 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	}
 
 	/**
+	 * TODO remove?
+	 * 
 	 * Adds the specified Java type to the global scope of the script engine.
 	 * After this call the type will be accessible from the script using the
 	 * specified key.
@@ -289,19 +320,23 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	 * @throws ScriptException
 	 *             if the method fails
 	 */
-	public synchronized static void putTypeInGlobalScope(String key, Class<?> clazz)
-			throws ScriptException {
-		ScriptEngine engine = getNewEngine();
-		String script = "var " + key + " = Java.type('" + clazz.getName() + "');";
-		Bindings bindings = engine.createBindings();
-		engine.eval(script, bindings);
-		Object type = bindings.get(key);
-		putObjectInGlobalScope(key, type);
-	}
+	// private synchronized static void putTypeInGlobalScope(String key,
+	// Class<?> clazz)
+	// throws ScriptException {
+	// ScriptEngine engine = getNewEngine();
+	// String script = "var " + key + " = Java.type('" + clazz.getName() +
+	// "');";
+	// Bindings bindings = engine.createBindings();
+	// engine.eval(script, bindings);
+	// Object type = bindings.get(key);
+	// putObjectInGlobalScope(key, type);
+	// }
 
 	/**
+	 * TODO remove?
+	 * 
 	 * Adds the specified Java type to the global scope of the script engine.
-	 * After this call the type will be accessible from the script using the
+	 * After this call the type will be accessible from the script using its
 	 * class simple name.
 	 * 
 	 * @param clazz
@@ -310,9 +345,10 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	 *             if the method fails
 	 * @see Class#getSimpleName
 	 */
-	public synchronized static void putTypeInGlobalScope(Class<?> clazz) throws ScriptException {
-		putTypeInGlobalScope(clazz.getSimpleName(), clazz);
-	}
+	// private synchronized static void putTypeInGlobalScope(Class<?> clazz)
+	// throws ScriptException {
+	// putTypeInGlobalScope(clazz.getSimpleName(), clazz);
+	// }
 
 	/**
 	 * Loads the script files
@@ -382,7 +418,7 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	 */
 	private static void getBindings(Path libFile) {
 		try (BufferedReader br = Files.newBufferedReader(libFile, StandardCharsets.UTF_8)) {
-			ScriptEngine engine = getNewEngine();
+			ScriptEngine engine = getNewNashornEngine();
 			engine.eval(br);
 			Bindings bs = engine.getBindings(ScriptContext.ENGINE_SCOPE);
 			libraries.put(libFile, bs);
@@ -410,7 +446,7 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 				return;
 			}
 
-			ScriptEngine scriptEngine = getNewEngine();
+			ScriptEngine scriptEngine = getNewNashornEngine();
 
 			String loggerName = scriptFile.toString();
 			loggerName = loggerName

@@ -36,7 +36,7 @@ public class CommandServlet extends AuthorizedUserServlet {
 		String param = req.getParameter(command);
 		Object res = null;
 		try {
-			res = ScriptsEngine.executeDriverAction(command, param, req.getRemoteUser());
+			res = ScriptsEngine.executeNodeAction(command, param, req.getRemoteUser());
 		} catch (IllegalArgumentException | ScriptException e) {
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Command error: " + e.getMessage());
 		}

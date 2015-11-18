@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.core.services.AutoStartService;
-import cc.sferalabs.sfera.script.ScriptsEngine;
 
 /* TODO remove
  import static org.quartz.JobBuilder.*;
@@ -55,8 +54,6 @@ public class EventsScheduler implements AutoStartService {
 
 	@Override
 	public void init() throws Exception {
-		ScriptsEngine.putTypeInGlobalScope(this.getClass());
-
 		SchedulerFactory schedFact = new StdSchedulerFactory();
 		scheduler = schedFact.getScheduler();
 		scheduler.start();

@@ -176,7 +176,7 @@ public class ApiSocket extends WebSocketAdapter {
 				Object res = null;
 				try {
 					String param = cmd_prm.length == 1 ? null : cmd_prm[1];
-					res = ScriptsEngine.executeDriverAction(cmd_prm[0], param, user);
+					res = ScriptsEngine.executeNodeAction(cmd_prm[0], param, user);
 				} catch (Exception e) {
 					reply.sendError(e.getMessage());
 					return;
