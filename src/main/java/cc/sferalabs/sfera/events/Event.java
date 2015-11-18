@@ -67,10 +67,10 @@ public interface Event {
 	 * {@code content} String, so that the following trigger condition can be
 	 * used:
 	 * 
+	 * </p>
 	 * <pre>
 	 *     node.message == "hello" : { ... }
 	 * </pre>
-	 * </p>
 	 * 
 	 * @return the simple-form value of this event
 	 */
