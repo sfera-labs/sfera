@@ -31,6 +31,8 @@ public abstract class CommPort {
 	public static final int STOPBITS_2 = SerialPort.STOPBITS_2;
 	public static final int STOPBITS_1_5 = SerialPort.STOPBITS_1_5;
 
+	public static final int FLOWCONTROL_NONE = SerialPort.FLOWCONTROL_NONE;
+
 	public static final int FLOWCONTROL_RTSCTS = SerialPort.FLOWCONTROL_RTSCTS_IN
 			| SerialPort.FLOWCONTROL_RTSCTS_OUT;
 
