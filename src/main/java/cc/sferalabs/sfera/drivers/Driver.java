@@ -24,14 +24,115 @@ import cc.sferalabs.sfera.events.Node;
  * @version 1.0.0
  *
  */
-public abstract class Driver extends Task implements Node {
+public abstract class Driver extends Node {
 
-	private final String id;
 	private String configFile;
+	private DriverTask driverExecutor = new DriverTask();
 	private volatile boolean quit = false;
 	private Future<?> future;
 
 	protected final Logger log;
+
+	/**
+	 *
+	 * @author Giampiero Baggiani
+	 *
+	 * @version 1.0.0
+	 *
+	 */
+	private class DriverTask extends Task {
+
+		/**
+		 * @param name
+		 */
+		public DriverTask() {
+			super("driver." + getId());
+		}
+
+		@Override
+		protected void execute() {
+			while (!quit) {
+				Configuration config = null;
+				UUID configWatcherId = null;
+				try {
+					log.info("Starting...");
+					config = new Configuration(configFile);
+					try {
+						configWatcherId = FilesWatcher.register(config.getRealPath(),
+								this::reloadConfiguration, false);
+					} catch (IOException e) {
+						log.error("Error watching config file", e);
+					}
+					if (onInit(config)) {
+						log.info("Started");
+						try {
+							while (!quit) {
+								try {
+									if (!loop()) {
+										break;
+									}
+								} catch (InterruptedException ie) {
+									if (quit) {
+										log.debug("Driver interrupted");
+									} else {
+										log.debug("Driver interrupted but not quitted");
+									}
+								}
+							}
+						} catch (Throwable t) {
+							log.error("Exception in loop()", t);
+						}
+					} else {
+						log.warn("Initialization failed");
+					}
+				} catch (InterruptedException t) {
+					log.debug("Initialization interrupted");
+				} catch (Throwable t) {
+					log.error("Exception in onInit()", t);
+				}
+
+				try {
+					log.info("Quitting...");
+					if (configWatcherId != null) {
+						FilesWatcher.unregister(config.getRealPath(), configWatcherId);
+					}
+					onQuit();
+					log.info("Quitted");
+				} catch (Throwable t) {
+					log.error("Exception in onQuit()", t);
+				}
+
+				if (!quit) {
+					try {
+						Thread.sleep(5000);
+					} catch (InterruptedException e) {
+					}
+				}
+			}
+
+			future = null;
+		}
+		
+		/**
+		 * 
+		 */
+		private void reloadConfiguration() {
+			Configuration config = null;
+			try {
+				try {
+					config = new Configuration(configFile);
+				} catch (NoSuchFileException e) {
+					log.debug("Configuration file deleted");
+					return;
+				}
+				log.info("Configuration changed");
+				onConfigChange(config);
+			} catch (Throwable t) {
+				log.error("Error reloading configuration", t);
+			}
+		}
+
+	}
 
 	/**
 	 * Contruct a Driver
@@ -40,14 +141,8 @@ public abstract class Driver extends Task implements Node {
 	 *            the driver ID
 	 */
 	protected Driver(String id) {
-		super("driver." + id);
-		this.id = id;
+		super(id);
 		this.log = LoggerFactory.getLogger(getClass().getName() + "." + id);
-	}
-
-	@Override
-	public String getId() {
-		return id;
 	}
 
 	/**
@@ -67,6 +162,7 @@ public abstract class Driver extends Task implements Node {
 	public synchronized void quit() {
 		quit = true;
 		if (future != null) {
+			log.debug("Interrupting driver...");
 			future.cancel(true);
 		}
 	}
@@ -77,7 +173,7 @@ public abstract class Driver extends Task implements Node {
 	public synchronized void start() {
 		if (future == null) {
 			quit = false;
-			future = TasksManager.submit(this);
+			future = TasksManager.submit(driverExecutor);
 		} else {
 			throw new IllegalStateException("Running");
 		}
@@ -118,90 +214,6 @@ public abstract class Driver extends Task implements Node {
 			restart();
 		} catch (InterruptedException e) {
 			log.warn("onConfigChange() interrupted");
-		}
-	}
-
-	@Override
-	protected void execute() {
-		while (!quit) {
-			Configuration config = null;
-			UUID configWatcherId = null;
-			try {
-				log.info("Starting...");
-				config = new Configuration(configFile);
-				try {
-					configWatcherId = FilesWatcher.register(config.getRealPath(),
-							this::reloadConfiguration, false);
-				} catch (IOException e) {
-					log.error("Error watching config file", e);
-				}
-				if (onInit(config)) {
-					log.info("Started");
-					try {
-						while (!quit) {
-							try {
-								if (!loop()) {
-									break;
-								}
-							} catch (InterruptedException ie) {
-								if (quit) {
-									log.warn("Driver interrupted");
-								} else {
-									log.debug("Driver interrupted but not quitted");
-								}
-							}
-						}
-					} catch (Throwable t) {
-						log.error("Exception in loop()", t);
-					}
-				} else {
-					log.warn("Initialization failed");
-				}
-			} catch (InterruptedException t) {
-				log.debug("Initialization interrupted");
-			} catch (Throwable t) {
-				log.error("Exception in onInit()", t);
-			}
-
-			try {
-				log.info("Quitting...");
-				if (configWatcherId != null) {
-					FilesWatcher.unregister(config.getRealPath(), configWatcherId);
-				}
-				onQuit();
-				// TODO set to UNKNOWN all driver's datapoints?
-				log.info("Quitted");
-			} catch (Throwable t) {
-				log.error("Exception in onQuit()", t);
-			}
-
-			if (!quit) {
-				try {
-					Thread.sleep(5000);
-				} catch (InterruptedException e) {
-				}
-			}
-		}
-
-		future = null;
-	}
-
-	/**
-	 * 
-	 */
-	private void reloadConfiguration() {
-		Configuration config = null;
-		try {
-			try {
-				config = new Configuration(configFile);
-			} catch (NoSuchFileException e) {
-				log.debug("Configuration file deleted");
-				return;
-			}
-			log.info("Configuration changed");
-			onConfigChange(config);
-		} catch (Throwable t) {
-			log.error("Error reloading configuration", t);
 		}
 	}
 

@@ -283,7 +283,6 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 				throw new IllegalArgumentException("Invalid param syntax: " + errors.get(0));
 			}
 			actionScript += "=" + param;
-
 		}
 
 		return eval(actionScript);

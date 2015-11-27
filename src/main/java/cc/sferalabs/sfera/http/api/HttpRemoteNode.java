@@ -3,12 +3,6 @@
  */
 package cc.sferalabs.sfera.http.api;
 
-import java.util.Objects;
-
-import javax.servlet.http.HttpServletRequest;
-
-import cc.sferalabs.sfera.access.Access;
-import cc.sferalabs.sfera.access.User;
 import cc.sferalabs.sfera.events.Node;
 
 /**
@@ -19,41 +13,21 @@ import cc.sferalabs.sfera.events.Node;
  * @version 1.0.0
  *
  */
-public class HttpRemoteNode implements Node {
+public class HttpRemoteNode extends Node {
 
-	private final HttpServletRequest request;
+	private final static HttpRemoteNode INSTANCE = new HttpRemoteNode();
 
 	/**
 	 * Construct a HttpRemoteNode
-	 * 
-	 * @param request
-	 *            the request associated with this remote
 	 */
-	public HttpRemoteNode(HttpServletRequest request) {
-		this.request = Objects.requireNonNull(request, "request must not be null");
-	}
-
-	@Override
-	public String getId() {
-		return "http";
+	public HttpRemoteNode() {
+		super("http");
 	}
 
 	/**
-	 * Returns the user associated with this remote.
-	 * 
-	 * @return the user
+	 * @return the instance
 	 */
-	public User getUser() {
-		return Access.getUser(request.getRemoteUser());
+	public static HttpRemoteNode getInstance() {
+		return INSTANCE;
 	}
-
-	/**
-	 * Returns the request associated with this remote.
-	 * 
-	 * @return the request
-	 */
-	public HttpServletRequest getHttpRequest() {
-		return request;
-	}
-
 }

@@ -30,7 +30,7 @@ import cc.sferalabs.sfera.events.Node;
  * @version 1.0.0
  *
  */
-public class SystemNode implements Node {
+public class SystemNode extends Node {
 
 	private static final Logger logger = LoggerFactory.getLogger(SystemNode.class);
 	private static final SystemNode INSTANCE = new SystemNode();
@@ -41,11 +41,7 @@ public class SystemNode implements Node {
 	 * Constructor for singleton instance
 	 */
 	private SystemNode() {
-	}
-
-	@Override
-	public String getId() {
-		return "system";
+		super("system");
 	}
 
 	/**

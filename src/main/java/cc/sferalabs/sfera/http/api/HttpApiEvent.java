@@ -4,6 +4,8 @@ import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
 
+import cc.sferalabs.sfera.access.Access;
+import cc.sferalabs.sfera.access.User;
 import cc.sferalabs.sfera.events.StringEvent;
 import cc.sferalabs.sfera.http.api.rest.EventServlet;
 
@@ -17,6 +19,8 @@ import cc.sferalabs.sfera.http.api.rest.EventServlet;
  *
  */
 public class HttpApiEvent extends StringEvent {
+
+	private final HttpServletRequest request;
 
 	/**
 	 * Construct a RemoteEvent
@@ -32,13 +36,27 @@ public class HttpApiEvent extends StringEvent {
 	 */
 	public HttpApiEvent(String id, String value, HttpServletRequest request)
 			throws NullPointerException {
-		super(new HttpRemoteNode(request), Objects.requireNonNull(id, "id must not be null"),
+		super(HttpRemoteNode.getInstance(), Objects.requireNonNull(id, "id must not be null"),
 				value);
+		this.request = Objects.requireNonNull(request, "request must not be null");
 	}
 
-	@Override
-	public HttpRemoteNode getSource() {
-		return (HttpRemoteNode) super.getSource();
+	/**
+	 * Returns the user associated with this event.
+	 * 
+	 * @return the user
+	 */
+	public User getUser() {
+		return Access.getUser(request.getRemoteUser());
+	}
+
+	/**
+	 * Returns the HTTP request associated with this event.
+	 * 
+	 * @return the request
+	 */
+	public HttpServletRequest getHttpRequest() {
+		return request;
 	}
 
 }

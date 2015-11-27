@@ -8,12 +8,31 @@ package cc.sferalabs.sfera.events;
  * @version 1.0.0
  *
  */
-public interface Node {
+public abstract class Node {
+
+	private final String id;
+
+	/**
+	 * 
+	 */
+	public Node(String id) {
+		this.id = id;
+		Nodes.put(this);
+	}
 
 	/**
 	 * Returns the node ID
 	 * 
 	 * @return the node ID
 	 */
-	public String getId();
+	public final String getId() {
+		return id;
+	}
+	
+	/**
+	 * 
+	 */
+	public void destroy() {
+		Nodes.remove(id);
+	}
 }

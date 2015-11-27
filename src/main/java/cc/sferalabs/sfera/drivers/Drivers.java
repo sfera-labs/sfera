@@ -21,7 +21,6 @@ import cc.sferalabs.sfera.core.Sfera;
 import cc.sferalabs.sfera.core.services.FilesWatcher;
 import cc.sferalabs.sfera.core.services.console.Console;
 import cc.sferalabs.sfera.events.Bus;
-import cc.sferalabs.sfera.events.Nodes;
 
 /**
  * Utility class for managing drivers.
@@ -84,7 +83,7 @@ public abstract class Drivers {
 									.getConstructor(new Class[] { String.class });
 							Driver driverInstance = (Driver) constructor.newInstance(driverId);
 							driverInstance.setConfigFile(CONFIG_DIR + "/" + fileName);
-							addDriver(driverId, driverInstance);
+							drivers.put(driverId, driverInstance);
 							if (driverInstance instanceof EventListener) {
 								Bus.register((EventListener) driverInstance);
 							}
@@ -114,27 +113,10 @@ public abstract class Drivers {
 		}
 		
 		for (Driver d : toRemove) {
+			drivers.remove(d.getId());
 			d.quit();
-			removeDriver(d);
+			d.destroy();
 		}
-	}
-
-	/**
-	 * @param d
-	 */
-	private static void removeDriver(Driver d) {
-		String id = d.getId();
-		drivers.remove(id);
-		Nodes.remove(id);
-	}
-
-	/**
-	 * @param driverId
-	 * @param driverInstance
-	 */
-	private static void addDriver(String driverId, Driver driverInstance) {
-		drivers.put(driverId, driverInstance);
-		Nodes.put(driverInstance);
 	}
 
 	/**

@@ -9,6 +9,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cc.sferalabs.sfera.script.ScriptNodeWrapper;
 import cc.sferalabs.sfera.script.ScriptsEngine;
 
 /**
@@ -25,37 +26,21 @@ public abstract class Nodes {
 
 	/**
 	 * Adds the specified node to the collection of nodes accessible via the
-	 * {@link #get(String)} method and to the global scope of the scripts.
-	 * 
-	 * @param node
-	 *            the node to add
-	 * @throws IllegalArgumentException
-	 *             if a node with the same ID has been already added
-	 */
-	public synchronized static void put(Node node) throws IllegalArgumentException {
-		put(node, true);
-	}
-
-	/**
-	 * Adds the specified node to the collection of nodes accessible via the
 	 * {@link #get(String)} method.
 	 * 
 	 * @param node
 	 *            the node to add
-	 * @param addToScripts
-	 *            whether or not to add the node in the global scope of the
-	 *            scripts
+	 * 
 	 * @throws IllegalArgumentException
 	 *             if a node with the same ID has been already added
 	 */
-	public synchronized static void put(Node node, boolean addToScripts)
-			throws IllegalArgumentException {
+	synchronized static void put(Node node) throws IllegalArgumentException {
 		String id = node.getId();
 		if (nodes.containsKey(id)) {
 			throw new IllegalArgumentException("Node with same ID already added");
 		}
 		nodes.put(id, node);
-		if (addToScripts) {
+		if (!(node instanceof ScriptNodeWrapper)) {
 			ScriptsEngine.putObjectInGlobalScope(id, node);
 		}
 		logger.debug("Node '{}' added", id);
@@ -82,7 +67,7 @@ public abstract class Nodes {
 	 * @return the removed node, or {@code null} if there was no node with the
 	 *         specified ID
 	 */
-	public synchronized static Node remove(String id) {
+	synchronized static Node remove(String id) {
 		ScriptsEngine.removeFromGlobalScope(id);
 		Node n = nodes.remove(id);
 		if (n != null) {

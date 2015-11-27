@@ -15,13 +15,16 @@ public class SchedulerEvent extends BaseEvent {
 	/**
 	 * Node used by SchedulerEvents
 	 */
-	private static final Node SCHEDULER_NODE = new Node() {
+	private static final Node SCHEDULER_NODE = new SchedulerNode();
 
-		@Override
-		public String getId() {
-			return "scheduler";
+	/**
+	 *
+	 */
+	private static class SchedulerNode extends Node {
+		public SchedulerNode() {
+			super("scheduler");
 		}
-	};
+	}
 
 	private final String value;
 

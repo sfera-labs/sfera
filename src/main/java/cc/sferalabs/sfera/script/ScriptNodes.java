@@ -6,8 +6,6 @@ package cc.sferalabs.sfera.script;
 import java.util.ArrayList;
 import java.util.List;
 
-import cc.sferalabs.sfera.events.Nodes;
-
 /**
  * TODO delete
  * 
@@ -26,7 +24,6 @@ public abstract class ScriptNodes {
 	 */
 	public synchronized static void put(String id, Object node) {
 		ScriptNodeWrapper wrap = new ScriptNodeWrapper(id, node);
-		Nodes.put(wrap, false);
 		ScriptsEngine.putObjectInGlobalScope(id, node);
 		nodes.add(wrap);
 	}
@@ -36,7 +33,7 @@ public abstract class ScriptNodes {
 	 */
 	public synchronized static void clear() {
 		for (ScriptNodeWrapper wrap : nodes) {
-			Nodes.remove(wrap.getId());
+			wrap.destroy();
 		}
 		nodes.clear();
 	}
