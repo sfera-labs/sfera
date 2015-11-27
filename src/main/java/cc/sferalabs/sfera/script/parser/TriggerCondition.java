@@ -1,22 +1,22 @@
-package cc.sferalabs.sfera.script;
+package cc.sferalabs.sfera.script.parser;
 
 import java.util.List;
 
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Event;
-import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.AndExpressionContext;
-import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.AtomExpressionContext;
-import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.BooleanComparisonContext;
-import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.EventContext;
-import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.NotExpressionContext;
-import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.NumberComparisonContext;
-import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.OrExpressionContext;
-import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.StableEventContext;
-import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.StringComparisonContext;
-import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.TerminalNodeContext;
-import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.TransientEventContext;
-import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.TriggerContext;
-import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.UnknownComparisonContext;
+import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser.AndExpressionContext;
+import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser.AtomExpressionContext;
+import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser.BooleanComparisonContext;
+import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser.EventContext;
+import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser.NotExpressionContext;
+import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser.NumberComparisonContext;
+import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser.OrExpressionContext;
+import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser.StableEventContext;
+import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser.StringComparisonContext;
+import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser.TerminalNodeContext;
+import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser.TransientEventContext;
+import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser.TriggerContext;
+import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser.UnknownComparisonContext;
 
 /**
  * Class representing a script trigger condition

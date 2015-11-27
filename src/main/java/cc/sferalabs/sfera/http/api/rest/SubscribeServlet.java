@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
@@ -30,6 +31,10 @@ public class SubscribeServlet extends AuthorizedUserServlet {
 			throws ServletException, IOException {
 		String id = req.getParameter("id");
 		String nodes = req.getParameter("nodes");
+		if (nodes == null) {
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Nodes not specified");
+			return;
+		}
 
 		HttpSession session = req.getSession(false);
 		String sessionId = session.getId();

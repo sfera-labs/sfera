@@ -8,6 +8,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import cc.sferalabs.sfera.script.ScriptsEngine;
 
 /**
@@ -23,6 +26,8 @@ public class CommandServlet extends AuthorizedUserServlet {
 
 	public static final String PATH = ApiServlet.PATH + "command";
 
+	private static final Logger logger = LoggerFactory.getLogger(CommandServlet.class);
+
 	@Override
 	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
 			throws ServletException, IOException {
@@ -31,14 +36,20 @@ public class CommandServlet extends AuthorizedUserServlet {
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "No command specified");
 			return;
 		}
-		
+
 		String command = params.nextElement();
 		String param = req.getParameter(command);
+		if (param != null && !param.isEmpty()) {
+			command += "=" + param;
+		}
 		Object res = null;
 		try {
-			res = ScriptsEngine.executeNodeAction(command, param, req.getRemoteUser());
+			logger.info("Command: {} User: {}", command, req.getRemoteUser());
+			res = ScriptsEngine.evalNodeAction(command);
 		} catch (IllegalArgumentException | ScriptException e) {
+			logger.debug("Command error", e);
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Command error: " + e.getMessage());
+			return;
 		}
 		resp.sendResult(res);
 	}

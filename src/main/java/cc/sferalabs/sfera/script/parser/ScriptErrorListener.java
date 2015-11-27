@@ -1,19 +1,33 @@
-package cc.sferalabs.sfera.script;
+package cc.sferalabs.sfera.script.parser;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
-class ScriptErrorListener extends BaseErrorListener {
+/**
+ *
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
+public class ScriptErrorListener extends BaseErrorListener {
 
-	final ArrayList<String> errors = new ArrayList<String>();
+	private final List<Object> errors = new ArrayList<>();
 
 	@Override
 	public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 			int charPositionInLine, String msg, RecognitionException e) {
-
 		errors.add("line " + line + " - " + msg);
+	}
+
+	/**
+	 * @return
+	 */
+	public List<Object> getErrors() {
+		return errors;
 	}
 }

@@ -1,4 +1,4 @@
-package cc.sferalabs.sfera.script;
+package cc.sferalabs.sfera.script.parser;
 
 import java.util.Map.Entry;
 

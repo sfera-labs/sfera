@@ -3,8 +3,10 @@
  */
 package cc.sferalabs.sfera.ui;
 
+import cc.sferalabs.sfera.core.services.AutoStartService;
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Node;
+import cc.sferalabs.sfera.events.Nodes;
 
 /**
  *
@@ -13,9 +15,18 @@ import cc.sferalabs.sfera.events.Node;
  * @version 1.0.0
  *
  */
-public class UI implements Node {
+public class UI implements AutoStartService, Node {
 
 	private static final UI INSTANCE = new UI();
+
+	@Override
+	public void init() throws Exception {
+		Nodes.put(INSTANCE);
+	}
+
+	@Override
+	public void quit() throws Exception {
+	}
 
 	/**
 	 * @return
@@ -38,7 +49,7 @@ public class UI implements Node {
 	 * @param value
 	 *            value to assign
 	 */
-	public static void set(String id, String attribute, String value) {
+	public void set(String id, String attribute, Object value) {
 		Bus.post(new UISetEvent(id, attribute, value));
 	}
 

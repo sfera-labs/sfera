@@ -22,7 +22,6 @@ import cc.sferalabs.sfera.core.services.FilesWatcher;
 import cc.sferalabs.sfera.core.services.console.Console;
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Nodes;
-import cc.sferalabs.sfera.script.ScriptsEngine;
 
 /**
  * Utility class for managing drivers.
@@ -86,8 +85,6 @@ public abstract class Drivers {
 							Driver driverInstance = (Driver) constructor.newInstance(driverId);
 							driverInstance.setConfigFile(CONFIG_DIR + "/" + fileName);
 							addDriver(driverId, driverInstance);
-							ScriptsEngine.putObjectInGlobalScope(driverInstance.getId(),
-									driverInstance);
 							if (driverInstance instanceof EventListener) {
 								Bus.register((EventListener) driverInstance);
 							}

@@ -1,4 +1,4 @@
-package cc.sferalabs.sfera.script;
+package cc.sferalabs.sfera.script.parser;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.core.services.TasksManager;
 import cc.sferalabs.sfera.events.Event;
-import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.TriggerContext;
+import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser.TriggerContext;
 
 /**
  * Class representing a script rule.
@@ -24,7 +24,7 @@ import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.TriggerContext;
  * @version 1.0.0
  *
  */
-class Rule {
+public class Rule {
 
 	private static final Logger logger = LoggerFactory.getLogger(Rule.class);
 

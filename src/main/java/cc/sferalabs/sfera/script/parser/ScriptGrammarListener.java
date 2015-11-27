@@ -1,6 +1,7 @@
-package cc.sferalabs.sfera.script;
+package cc.sferalabs.sfera.script.parser;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,13 +16,13 @@ import javax.script.ScriptException;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import cc.sferalabs.sfera.script.parser.SferaScriptGrammarBaseListener;
-import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.ImportLineContext;
-import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.InitContext;
-import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.RuleLineContext;
-import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.StableEventContext;
-import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.TransientEventContext;
-import cc.sferalabs.sfera.script.parser.SferaScriptGrammarParser.TriggerContext;
+import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarBaseListener;
+import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser.ImportLineContext;
+import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser.InitContext;
+import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser.RuleLineContext;
+import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser.StableEventContext;
+import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser.TransientEventContext;
+import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser.TriggerContext;
 
 /**
  *
@@ -35,11 +36,11 @@ class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 	private final Path scriptFile;
 	private final ScriptEngine engine;
 	private final Bindings fileScope;
-	private final Map<Path, Bindings> libraries;
+	private final Map<String, Bindings> libraries;
 
 	private final List<Bindings> imports = new ArrayList<>();
 	final HashMap<String, HashSet<Rule>> triggerRulesMap = new HashMap<String, HashSet<Rule>>();
-	final List<String> errors = new ArrayList<>();
+	private final List<Object> errors = new ArrayList<>();
 
 	private Rule currentRule;
 
@@ -49,25 +50,50 @@ class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 	 * @param libraries
 	 * @param engine
 	 */
-	ScriptGrammarListener(Path scriptFile, Map<Path, Bindings> libraries, ScriptEngine engine) {
+	ScriptGrammarListener(Path scriptFile, Map<String, Bindings> libraries, ScriptEngine engine) {
 		this.scriptFile = scriptFile;
 		this.engine = engine;
 		this.fileScope = engine.getBindings(ScriptContext.ENGINE_SCOPE);
 		this.libraries = libraries;
 	}
 
+	/**
+	 * @return
+	 */
+	public List<Object> getErrors() {
+		return errors;
+	}
+
 	@Override
 	public void enterImportLine(ImportLineContext ctx) {
-		String text = ctx.getText();
-		String path = text.substring(text.indexOf(' ') + 1, text.length() - 1).trim();
+		try {
+			String text = ctx.getText();
+			String importPath = text.substring(text.indexOf(' ') + 1, text.length() - 1).trim();
 
-		Bindings lib = libraries.get(scriptFile.getParent().resolve(path));
-		if (lib == null) {
+			Path libPath;
+			try {
+				if (importPath.startsWith("/")) {
+					libPath = Paths.get(importPath.substring(1));
+				} else {
+					libPath = scriptFile.getParent().resolve(importPath);
+					libPath = libPath.subpath(1, libPath.getNameCount());
+				}
+			} catch (Throwable e) {
+				throw new Exception("Illegal import path: " + importPath, e);
+			}
+
+			Bindings lib = libraries.get(libPath.normalize().toString());
+			if (lib != null) {
+				imports.add(lib);
+			} else {
+				int line = ctx.getStart().getLine();
+				errors.add("line " + line + " - import error: file '" + libPath + "' not found");
+			}
+
+		} catch (Throwable e) {
 			int line = ctx.getStart().getLine();
-			errors.add("line " + line + " - import error: file '" + path + "' not found");
-			return;
+			errors.add(new Exception("line " + line + ": " + e.getMessage(), e));
 		}
-		imports.add(lib);
 	}
 
 	@Override
@@ -103,7 +129,7 @@ class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 					line += ((ScriptException) e).getLineNumber() - 1;
 				}
 			}
-			errors.add("line " + line + " - evaluation error: " + e);
+			errors.add(new Exception("line " + line + ": " + e.getMessage(), e));
 		}
 	}
 
@@ -119,7 +145,7 @@ class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 			if (e.getLineNumber() >= 0) {
 				line += e.getLineNumber() - 1;
 			}
-			errors.add("line " + line + " - " + e);
+			errors.add(new Exception("line " + line + ": " + e.getMessage(), e));
 		}
 	}
 

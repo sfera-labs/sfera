@@ -1,5 +1,5 @@
 // Generated from SferaScriptGrammar.g4 by ANTLR 4.5.1
-package cc.sferalabs.sfera.script.parser;
+package cc.sferalabs.sfera.script.parser.antlr;
 
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
