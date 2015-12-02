@@ -1,7 +1,6 @@
-package cc.sferalabs.sfera.http.api.rest;
+package cc.sferalabs.sfera.http.api.rest.servlets;
 
 import java.io.IOException;
-import java.util.Enumeration;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -11,14 +10,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.events.Bus;
-import cc.sferalabs.sfera.http.api.HttpApiEvent;
+import cc.sferalabs.sfera.http.api.RemoteApiEvent;
+import cc.sferalabs.sfera.http.api.rest.RestResponse;
 
 /**
  * <p>
  * API servlet handling requests for events triggering.
  * </p>
  * <p>
- * The triggered events will be instances of {@link HttpApiEvent} and the source
+ * The triggered events will be instances of {@link RemoteApiEvent} and the source
  * node an {@link cc.sferalabs.sfera.http.api.HttpRemoteNode HttpRemoteNode}
  * instance.
  * </p>
@@ -38,16 +38,17 @@ public class EventServlet extends AuthorizedUserServlet {
 	@Override
 	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
 			throws ServletException, IOException {
-		Enumeration<String> params = req.getParameterNames();
-		if (!params.hasMoreElements()) {
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "No event specified");
+		String id = req.getParameter("id");
+		String value = req.getParameter("value");
+		String cid = req.getParameter("cid");
+		RemoteApiEvent remoteEvent;
+		try {
+			remoteEvent = new RemoteApiEvent(id, value, req, cid);
+		} catch (Exception e) {
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
 			return;
 		}
-
-		String id = params.nextElement();
-		String val = req.getParameter(id);
-		HttpApiEvent remoteEvent = new HttpApiEvent(id, val, req);
-		logger.info("Event: {} = {} User: {}", id, val, req.getRemoteUser());
+		logger.info("Event: {} = {} User: {}", id, value, req.getRemoteUser());
 		Bus.post(remoteEvent);
 		resp.sendResult("ok");
 	}

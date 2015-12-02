@@ -6,7 +6,7 @@ package cc.sferalabs.sfera.http.api;
 import cc.sferalabs.sfera.events.Node;
 
 /**
- * Node used as source for {@link HttpApiEvent} events.
+ * Node used as source for {@link RemoteApiEvent} events.
  * 
  * @author Giampiero Baggiani
  *
@@ -20,7 +20,7 @@ public class HttpRemoteNode extends Node {
 	/**
 	 * Construct a HttpRemoteNode
 	 */
-	public HttpRemoteNode() {
+	private HttpRemoteNode() {
 		super("http");
 	}
 

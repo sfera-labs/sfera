@@ -33,7 +33,7 @@ public class AuthenticationRequestWrapper extends HttpServletRequestWrapper {
 	public AuthenticationRequestWrapper(HttpServletRequest request) {
 		super(request);
 	}
-	
+
 	@Override
 	public String getAuthType() {
 		return "API";

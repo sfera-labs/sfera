@@ -13,9 +13,12 @@ public abstract class Node {
 	private final String id;
 
 	/**
+	 * Constructs a {@code Node} and adds it to the list of existing nodes.
 	 * 
+	 * @throws IllegalArgumentException
+	 *             if a node with the same ID exists
 	 */
-	public Node(String id) {
+	public Node(String id) throws IllegalArgumentException {
 		this.id = id;
 		Nodes.put(this);
 	}
@@ -28,9 +31,9 @@ public abstract class Node {
 	public final String getId() {
 		return id;
 	}
-	
+
 	/**
-	 * 
+	 * Removes the node from the list of existing nodes.
 	 */
 	public void destroy() {
 		Nodes.remove(id);

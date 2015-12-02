@@ -1,4 +1,4 @@
-package cc.sferalabs.sfera.http.api.rest;
+package cc.sferalabs.sfera.http.api.rest.servlets;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -9,9 +9,11 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import cc.sferalabs.sfera.events.Event;
+import cc.sferalabs.sfera.http.api.rest.Connection;
+import cc.sferalabs.sfera.http.api.rest.PollingSubscription;
+import cc.sferalabs.sfera.http.api.rest.RestResponse;
 
 /**
  * <p>
@@ -31,6 +33,11 @@ public class StateServlet extends AuthorizedUserServlet {
 	@Override
 	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
 			throws ServletException, IOException {
+		Connection connection = ConnectServlet.getConnection(req, resp);
+		if (connection == null) {
+			return;
+		}
+
 		long ack;
 		try {
 			ack = Long.parseLong(req.getParameter("ack"));
@@ -48,19 +55,9 @@ public class StateServlet extends AuthorizedUserServlet {
 			timeout = 0;
 		}
 
-		HttpSession session = req.getSession(false);
-		SubscriptionsSet subscriptions = (SubscriptionsSet) session
-				.getAttribute(SubscribeServlet.SESSION_ATTR_SUBSCRIPTIONS);
-		if (subscriptions == null) {
-			resp.sendError(HttpServletResponse.SC_NOT_FOUND, "No subscriptions");
-			return;
-		}
-
-		String uri = req.getRequestURI();
-		String subId = uri.substring(req.getServletPath().length() + 1);
-		PollingSubscription subscription = (subId == null) ? null : subscriptions.get(subId);
+		PollingSubscription subscription = connection.getSubscription();
 		if (subscription == null) {
-			resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Subscription not found");
+			resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Not subscribed");
 			return;
 		}
 

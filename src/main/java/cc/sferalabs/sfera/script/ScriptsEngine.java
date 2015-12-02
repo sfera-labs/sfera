@@ -253,7 +253,7 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	 * @throws IllegalArgumentException
 	 *             if {@code nodeAction} have syntax errors
 	 */
-	public static Object evalNodeAction(String nodeAction)
+	public static Object evalNodeAction(String nodeAction, Map<String, Object> bindings)
 			throws ScriptException, IllegalArgumentException {
 		String[] action_prm = nodeAction.split("=");
 		String action = action_prm[0];
@@ -285,18 +285,23 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 			actionScript += "=" + param;
 		}
 
-		return eval(actionScript);
+		return eval(actionScript, bindings);
 	}
 
 	/**
 	 * 
 	 * @param script
+	 * @param bindings
 	 * @return
 	 * @throws ScriptException
 	 */
-	public static Object eval(String script) throws ScriptException {
+	public static Object eval(String script, Map<String, Object> bindings) throws ScriptException {
+		Bindings b = runtimeEngine.createBindings();
+		if (bindings != null) {
+			b.putAll(bindings);
+		}
 		logger.debug("Executing script '{}'", script);
-		return runtimeEngine.eval(script, runtimeEngine.createBindings());
+		return runtimeEngine.eval(script, b);
 	}
 
 }

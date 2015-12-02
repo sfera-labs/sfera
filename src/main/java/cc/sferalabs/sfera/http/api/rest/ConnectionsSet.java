@@ -14,18 +14,18 @@ import java.util.Map;
  * @version 1.0.0
  *
  */
-public class SubscriptionsSet implements Serializable {
+public class ConnectionsSet implements Serializable {
 
 	private static final long serialVersionUID = 4456127014431500700L;
 
-	private transient Map<String, PollingSubscription> map;
+	private transient Map<String, Connection> map;
 
 	/**
 	 * 
 	 * @param id
 	 * @return
 	 */
-	PollingSubscription get(String id) {
+	public Connection get(String id) {
 		if (map == null) {
 			return null;
 		}
@@ -34,20 +34,20 @@ public class SubscriptionsSet implements Serializable {
 
 	/**
 	 * 
-	 * @param subscription
+	 * @param connection
 	 * @return
 	 */
-	PollingSubscription put(PollingSubscription subscription) {
+	public Connection put(Connection connection) {
 		if (map == null) {
 			map = new HashMap<>();
 		}
-		return map.put(subscription.getId(), subscription);
+		return map.put(connection.getId(), connection);
 	}
 
 	/**
-	 * @return the contained subscriptions
+	 * @return the contained connections
 	 */
-	public Collection<PollingSubscription> values() {
+	public Collection<Connection> values() {
 		if (map == null) {
 			return new ArrayList<>();
 		}
@@ -58,7 +58,7 @@ public class SubscriptionsSet implements Serializable {
 	 * @param id
 	 * @return
 	 */
-	PollingSubscription remove(String id) {
+	Connection remove(String id) {
 		if (map == null) {
 			return null;
 		}

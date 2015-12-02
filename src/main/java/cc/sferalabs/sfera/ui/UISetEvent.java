@@ -16,13 +16,23 @@ public class UISetEvent extends UIEvent {
 
 	/**
 	 * 
-	 * @param id
+	 * @param componentId
 	 * @param attribute
 	 * @param value
+	 * @param connectionId
 	 */
-	UISetEvent(String id, String attribute, Object value) {
-		super("set." + Objects.requireNonNull(id, "id must not be null") + "."
-				+ Objects.requireNonNull(attribute, "attribute must not be null"), value);
+	UISetEvent(String componentId, String attribute, Object value, String connectionId) {
+		// TODO
+		// super("set." + (connectionId == null ? "global" : connectionId)
+		// + Objects.requireNonNull(componentId, "componentId must not be null")
+		// + "."
+		// + Objects.requireNonNull(attribute, "attribute must not be null"),
+		// value,
+		// connectionId);
+
+		super("set." + Objects.requireNonNull(componentId, "componentId must not be null") + "."
+				+ Objects.requireNonNull(attribute, "attribute must not be null"), value,
+				connectionId);
 	}
 
 }

@@ -1,4 +1,4 @@
-package cc.sferalabs.sfera.http.api.rest;
+package cc.sferalabs.sfera.http.api.rest.servlets;
 
 /**
  * Abstract class to be extended by API servlets requiring users with roles of

@@ -1,6 +1,9 @@
 package cc.sferalabs.sfera.http.api.websockets;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -16,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import cc.sferalabs.sfera.core.services.Task;
 import cc.sferalabs.sfera.core.services.TasksManager;
 import cc.sferalabs.sfera.events.Bus;
-import cc.sferalabs.sfera.http.api.HttpApiEvent;
+import cc.sferalabs.sfera.http.api.RemoteApiEvent;
 import cc.sferalabs.sfera.http.api.JsonMessage;
 import cc.sferalabs.sfera.script.ScriptsEngine;
 
@@ -36,6 +39,7 @@ public class ApiSocket extends WebSocketAdapter {
 
 	final String hostname;
 	private final HttpServletRequest originalRequest;
+	private final String connectionId;
 	private final String user;
 	private final boolean isAuthorized;
 
@@ -55,6 +59,8 @@ public class ApiSocket extends WebSocketAdapter {
 		this.originalRequest = ((UpgradeHttpServletRequest) request.getHttpServletRequest())
 				.getHttpServletRequest();
 		this.hostname = request.getRemoteHostName();
+		String connectionId = originalRequest.getParameter("connectionId");
+		this.connectionId = connectionId != null ? connectionId : UUID.randomUUID().toString();
 		this.user = this.originalRequest.getRemoteUser();
 		this.pingInterval = pingInterval;
 		this.respTimeout = respTimeout;
@@ -69,6 +75,7 @@ public class ApiSocket extends WebSocketAdapter {
 		try {
 			if (isAuthorized) {
 				OutgoingWsMessage resp = new OutgoingWsMessage("connection", this);
+				resp.put("connectionId", connectionId);
 				resp.put("pingInterval", pingInterval);
 				resp.put("responseTimeout", respTimeout);
 				resp.send();
@@ -149,7 +156,7 @@ public class ApiSocket extends WebSocketAdapter {
 					if (nodesSubscription != null) {
 						nodesSubscription.destroy();
 					}
-					nodesSubscription = new WsEventListener(this, nodes);
+					nodesSubscription = new WsEventListener(this, nodes, connectionId);
 					ok = true;
 				}
 				if (files != null) {
@@ -175,7 +182,9 @@ public class ApiSocket extends WebSocketAdapter {
 				Object res = null;
 				try {
 					logger.info("Command: {} User: {}", cmd, user);
-					res = ScriptsEngine.evalNodeAction(cmd);
+					Map<String, Object> b = new HashMap<>();
+					b.put("_httpRequest", originalRequest);
+					res = ScriptsEngine.evalNodeAction(cmd, b);
 				} catch (Exception e) {
 					reply.sendError(e.getMessage());
 					return;
@@ -191,7 +200,8 @@ public class ApiSocket extends WebSocketAdapter {
 				}
 				String value = message.get("value");
 				try {
-					HttpApiEvent remoteEvent = new HttpApiEvent(id, value, originalRequest);
+					RemoteApiEvent remoteEvent = new RemoteApiEvent(id, value, originalRequest,
+							connectionId);
 					Bus.post(remoteEvent);
 					reply.sendResult("ok");
 				} catch (Exception e) {

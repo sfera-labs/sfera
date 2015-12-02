@@ -4,7 +4,7 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 
 import cc.sferalabs.sfera.core.SystemNode;
-import cc.sferalabs.sfera.http.api.rest.ApiServlet;
+import cc.sferalabs.sfera.http.api.rest.servlets.ApiServlet;
 
 /**
  * Implementation of {@link WebSocketServlet} for handling of API requests.

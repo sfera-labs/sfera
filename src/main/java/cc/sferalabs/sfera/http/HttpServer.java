@@ -10,9 +10,6 @@ import java.util.List;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionEvent;
-import javax.servlet.http.HttpSessionListener;
 
 import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.server.HttpConfiguration;
@@ -35,16 +32,15 @@ import org.slf4j.LoggerFactory;
 import cc.sferalabs.sfera.core.Configuration;
 import cc.sferalabs.sfera.core.SystemNode;
 import cc.sferalabs.sfera.core.services.AutoStartService;
-import cc.sferalabs.sfera.http.api.rest.CommandServlet;
-import cc.sferalabs.sfera.http.api.rest.EventServlet;
-import cc.sferalabs.sfera.http.api.rest.LoginServlet;
-import cc.sferalabs.sfera.http.api.rest.LogoutServlet;
-import cc.sferalabs.sfera.http.api.rest.PollingSubscription;
-import cc.sferalabs.sfera.http.api.rest.StateServlet;
-import cc.sferalabs.sfera.http.api.rest.SubscribeServlet;
-import cc.sferalabs.sfera.http.api.rest.SubscriptionsSet;
-import cc.sferalabs.sfera.http.api.rest.admin.EditFileServlet;
-import cc.sferalabs.sfera.http.api.rest.admin.GetFileServlet;
+import cc.sferalabs.sfera.http.api.rest.servlets.CommandServlet;
+import cc.sferalabs.sfera.http.api.rest.servlets.ConnectServlet;
+import cc.sferalabs.sfera.http.api.rest.servlets.EventServlet;
+import cc.sferalabs.sfera.http.api.rest.servlets.LoginServlet;
+import cc.sferalabs.sfera.http.api.rest.servlets.LogoutServlet;
+import cc.sferalabs.sfera.http.api.rest.servlets.StateServlet;
+import cc.sferalabs.sfera.http.api.rest.servlets.SubscribeServlet;
+import cc.sferalabs.sfera.http.api.rest.servlets.admin.EditFileServlet;
+import cc.sferalabs.sfera.http.api.rest.servlets.admin.GetFileServlet;
 import cc.sferalabs.sfera.http.api.websockets.ApiWebSocketServlet;
 import cc.sferalabs.sfera.http.auth.AuthenticationFilter;
 
@@ -144,25 +140,7 @@ public class HttpServer implements AutoStartService {
 		int maxInactiveInterval = config.get("http_session_max_inactive", 3600);
 		hsm.setMaxInactiveInterval(maxInactiveInterval);
 		SessionHandler sessionHandler = new SessionHandler(hsm);
-		sessionHandler.addEventListener(new HttpSessionListener() {
-
-			@Override
-			public void sessionCreated(HttpSessionEvent se) {
-				logger.debug("Creted new session: {}", se.getSession().getId());
-			}
-
-			@Override
-			public void sessionDestroyed(HttpSessionEvent se) {
-				HttpSession session = se.getSession();
-				SubscriptionsSet subscriptions = (SubscriptionsSet) session.getAttribute(SubscribeServlet.SESSION_ATTR_SUBSCRIPTIONS);
-				if (subscriptions != null) {
-					for (PollingSubscription ps : subscriptions.values()) {
-						ps.destroy();
-					}
-				}
-				logger.debug("Session '{}' destroyed", se.getSession().getId());
-			}
-		});
+		sessionHandler.addEventListener(new HttpSessionDestroyer());
 
 		contexts = new ServletContextHandler(server, "/", ServletContextHandler.SESSIONS);
 		contexts.setSessionHandler(sessionHandler);
@@ -185,6 +163,7 @@ public class HttpServer implements AutoStartService {
 	private void registerApiServlets() throws HttpServerException {
 		addServlet(LoginServlet.class, LoginServlet.PATH);
 		addServlet(LogoutServlet.class, LogoutServlet.PATH);
+		addServlet(ConnectServlet.class, ConnectServlet.PATH);
 		addServlet(SubscribeServlet.class, SubscribeServlet.PATH);
 		addServlet(StateServlet.class, StateServlet.PATH);
 		addServlet(CommandServlet.class, CommandServlet.PATH);

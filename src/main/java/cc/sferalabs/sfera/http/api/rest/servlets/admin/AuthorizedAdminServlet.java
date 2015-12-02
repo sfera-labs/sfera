@@ -1,7 +1,7 @@
-package cc.sferalabs.sfera.http.api.rest.admin;
+package cc.sferalabs.sfera.http.api.rest.servlets.admin;
 
-import cc.sferalabs.sfera.http.api.rest.ApiServlet;
-import cc.sferalabs.sfera.http.api.rest.AuthorizedApiServlet;
+import cc.sferalabs.sfera.http.api.rest.servlets.ApiServlet;
+import cc.sferalabs.sfera.http.api.rest.servlets.AuthorizedApiServlet;
 
 /**
  * Abstract class to be extended by API servlets requiring users with 'admin'

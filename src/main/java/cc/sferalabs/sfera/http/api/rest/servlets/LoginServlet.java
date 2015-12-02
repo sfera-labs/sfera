@@ -1,4 +1,4 @@
-package cc.sferalabs.sfera.http.api.rest;
+package cc.sferalabs.sfera.http.api.rest.servlets;
 
 import java.io.IOException;
 
@@ -9,6 +9,8 @@ import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import cc.sferalabs.sfera.http.api.rest.RestResponse;
 
 /**
  * <p>

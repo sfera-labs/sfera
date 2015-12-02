@@ -1,4 +1,4 @@
-package cc.sferalabs.sfera.http.api.rest.admin;
+package cc.sferalabs.sfera.http.api.rest.servlets.admin;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

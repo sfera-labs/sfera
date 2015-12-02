@@ -34,7 +34,7 @@ public class RestResponse extends OutgoingMessage {
 	 * @param resp
 	 *            the {@code HttpServletResponse} to send the response to
 	 */
-	RestResponse(HttpServletResponse resp) {
+	public RestResponse(HttpServletResponse resp) {
 		this.resp = resp;
 		resp.setContentType("application/json");
 		resp.setStatus(HttpServletResponse.SC_OK);

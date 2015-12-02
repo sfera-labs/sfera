@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -189,11 +190,14 @@ public class ScriptsLoader implements EventListener {
 
 			ScriptEngine scriptEngine = ScriptsEngine.getNewNashornEngine();
 
-			String loggerName = scriptFile.toString();
-			loggerName = loggerName
-					.substring(0, loggerName.length() - SCRIPT_FILES_EXTENSION.length())
-					.replace('/', '.');
-			scriptEngine.put("log", LoggerFactory.getLogger(loggerName));
+			StringBuilder loggerName = new StringBuilder();
+			Iterator<Path> it = scriptFile.iterator();
+			while (it.hasNext()) {
+				loggerName.append(it.next());
+				loggerName.append('.');
+			}
+			scriptEngine.put("log", LoggerFactory.getLogger(loggerName.substring(0,
+					loggerName.length() - SCRIPT_FILES_EXTENSION.length() - 1)));
 
 			ScriptGrammarListener scriptListener = new ScriptGrammarListener(scriptFile, libraries,
 					scriptEngine);

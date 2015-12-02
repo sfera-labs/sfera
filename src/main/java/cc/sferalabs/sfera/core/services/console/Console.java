@@ -120,7 +120,7 @@ public class Console extends LazyService {
 			String rest;
 			int sep = cmd.indexOf(' ');
 			if (sep < 0) {
-				key =  cmd;
+				key = cmd;
 				rest = "";
 			} else {
 				key = cmd.substring(0, sep);

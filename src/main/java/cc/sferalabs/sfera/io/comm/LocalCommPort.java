@@ -22,8 +22,10 @@ public class LocalCommPort extends CommPort {
 	private final SerialPort serialPort;
 
 	/**
-	 * @param portName local port name
-	 * @throws CommPortException if an error occurs when creating or opening the port
+	 * @param portName
+	 *            local port name
+	 * @throws CommPortException
+	 *             if an error occurs when creating or opening the port
 	 */
 	LocalCommPort(String portName) throws CommPortException {
 		try {

@@ -71,8 +71,10 @@ public class IPCommPort extends CommPort {
 	}
 
 	/**
-	 * @param portName local port name
-	 * @throws CommPortException if an error occurs when creating or opening the port
+	 * @param portName
+	 *            local port name
+	 * @throws CommPortException
+	 *             if an error occurs when creating or opening the port
 	 */
 	IPCommPort(String portName) throws CommPortException {
 		int colon = portName.indexOf(':');

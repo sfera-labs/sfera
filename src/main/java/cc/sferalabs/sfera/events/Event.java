@@ -68,6 +68,7 @@ public interface Event {
 	 * used:
 	 * 
 	 * </p>
+	 * 
 	 * <pre>
 	 *     node.message == "hello" : { ... }
 	 * </pre>

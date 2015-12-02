@@ -3,14 +3,14 @@ package cc.sferalabs.sfera.http.api.rest;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Event;
-import cc.sferalabs.sfera.events.EventIdSpecListener;
+import cc.sferalabs.sfera.http.HttpConnectionEventIdSpecListener;
+import cc.sferalabs.sfera.http.api.rest.servlets.SubscribeServlet;
 
 /**
  * Class handling a polling subscription requested via {@link SubscribeServlet}.
@@ -20,9 +20,8 @@ import cc.sferalabs.sfera.events.EventIdSpecListener;
  * @version 1.0.0
  *
  */
-public class PollingSubscription extends EventIdSpecListener {
+public class PollingSubscription extends HttpConnectionEventIdSpecListener {
 
-	private final String id;
 	private final BlockingQueue<Event> changes = new LinkedBlockingQueue<Event>();
 	private long lastAckTs;
 	private Map<String, Event> lastPolled = new HashMap<String, Event>();
@@ -30,28 +29,17 @@ public class PollingSubscription extends EventIdSpecListener {
 	/**
 	 * Constructs a PollingSubscription.
 	 * 
-	 * @param id
-	 *            subscription ID, if {@code null} a random ID will be generated
 	 * @param spec
 	 *            specification of the event IDs matched by this subscription
-	 * @param session
-	 *            session ID
+	 * 
+	 * @param id
+	 *            connection ID
 	 */
-	PollingSubscription(String id, String spec) {
-		super(spec);
-		this.id = id != null ? id : UUID.randomUUID().toString();
+	PollingSubscription(String spec, String connectionId) {
+		super(spec, connectionId);
 		for (Event e : Bus.getCurrentState().values()) {
 			process(e);
 		}
-	}
-
-	/**
-	 * Returns the subscription ID
-	 * 
-	 * @return the subscription ID
-	 */
-	public String getId() {
-		return id;
 	}
 
 	/**

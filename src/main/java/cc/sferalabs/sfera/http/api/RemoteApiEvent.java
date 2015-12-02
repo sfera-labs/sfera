@@ -7,20 +7,19 @@ import javax.servlet.http.HttpServletRequest;
 import cc.sferalabs.sfera.access.Access;
 import cc.sferalabs.sfera.access.User;
 import cc.sferalabs.sfera.events.StringEvent;
-import cc.sferalabs.sfera.http.api.rest.EventServlet;
 
 /**
- * Event generated when requested via remote API through the
- * {@link EventServlet} servlet.
+ * Event generated when requested via remote API.
  * 
  * @author Giampiero Baggiani
  *
  * @version 1.0.0
  *
  */
-public class HttpApiEvent extends StringEvent {
+public class RemoteApiEvent extends StringEvent {
 
 	private final HttpServletRequest request;
+	private final String connectionId;
 
 	/**
 	 * Construct a RemoteEvent
@@ -31,14 +30,17 @@ public class HttpApiEvent extends StringEvent {
 	 *            the event value
 	 * @param request
 	 *            the request associated with this event
+	 * @param connectionId
+	 *            the connection ID associated with this event
 	 * @throws NullPointerException
 	 *             if any of the parameters are {@code null}
 	 */
-	public HttpApiEvent(String id, String value, HttpServletRequest request)
+	public RemoteApiEvent(String id, String value, HttpServletRequest request, String connectionId)
 			throws NullPointerException {
 		super(HttpRemoteNode.getInstance(), Objects.requireNonNull(id, "id must not be null"),
 				value);
 		this.request = Objects.requireNonNull(request, "request must not be null");
+		this.connectionId = connectionId;
 	}
 
 	/**
@@ -57,6 +59,15 @@ public class HttpApiEvent extends StringEvent {
 	 */
 	public HttpServletRequest getHttpRequest() {
 		return request;
+	}
+
+	/**
+	 * Returns the connection ID associated with this event.
+	 * 
+	 * @return the connection ID associated with this event
+	 */
+	public String getConnectionId() {
+		return connectionId;
 	}
 
 }

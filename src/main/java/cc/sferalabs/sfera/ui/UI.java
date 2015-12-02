@@ -43,15 +43,26 @@ public class UI extends Node implements AutoStartService {
 
 	/**
 	 * 
-	 * @param id
+	 * @param componentId
 	 *            ID of the addressed components
 	 * @param attribute
 	 *            attribute to set
 	 * @param value
 	 *            value to assign
 	 */
-	public void set(String id, String attribute, Object value) {
-		Bus.post(new UISetEvent(id, attribute, value));
+	public void set(String componentId, String attribute, Object value) {
+		Bus.post(new UISetEvent(componentId, attribute, value, null));
+	}
+
+	/**
+	 * 
+	 * @param componentId
+	 * @param attribute
+	 * @param value
+	 * @param connectionId
+	 */
+	public void set(String componentId, String attribute, Object value, String connectionId) {
+		Bus.post(new ConnectionUISetEvent(componentId, attribute, value, connectionId));
 	}
 
 }

@@ -111,7 +111,7 @@ public abstract class Drivers {
 				toRemove.add(d);
 			}
 		}
-		
+
 		for (Driver d : toRemove) {
 			drivers.remove(d.getId());
 			d.quit();

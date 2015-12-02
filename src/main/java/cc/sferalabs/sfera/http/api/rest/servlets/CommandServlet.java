@@ -1,7 +1,9 @@
-package cc.sferalabs.sfera.http.api.rest;
+package cc.sferalabs.sfera.http.api.rest.servlets;
 
 import java.io.IOException;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.script.ScriptException;
 import javax.servlet.ServletException;
@@ -11,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cc.sferalabs.sfera.http.api.rest.RestResponse;
 import cc.sferalabs.sfera.script.ScriptsEngine;
 
 /**
@@ -37,15 +40,15 @@ public class CommandServlet extends AuthorizedUserServlet {
 			return;
 		}
 
-		String command = params.nextElement();
-		String param = req.getParameter(command);
-		if (param != null && !param.isEmpty()) {
-			command += "=" + param;
-		}
+		String cmd = req.getParameter("cmd");
+		String cid = req.getParameter("cid");
 		Object res = null;
 		try {
-			logger.info("Command: {} User: {}", command, req.getRemoteUser());
-			res = ScriptsEngine.evalNodeAction(command);
+			logger.info("Command: {} User: {}", cmd, req.getRemoteUser());
+			Map<String, Object> b = new HashMap<>();
+			b.put("_httpRequest", req);
+			// TODO pass connection ID
+			res = ScriptsEngine.evalNodeAction(cmd, b);
 		} catch (IllegalArgumentException | ScriptException e) {
 			logger.debug("Command error", e);
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Command error: " + e.getMessage());

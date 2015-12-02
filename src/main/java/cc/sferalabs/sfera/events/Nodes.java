@@ -37,7 +37,7 @@ public abstract class Nodes {
 	synchronized static void put(Node node) throws IllegalArgumentException {
 		String id = node.getId();
 		if (nodes.containsKey(id)) {
-			throw new IllegalArgumentException("Node with same ID already added");
+			throw new IllegalArgumentException("Node with ID '" + id + "' already exists");
 		}
 		nodes.put(id, node);
 		if (!(node instanceof ScriptNodeWrapper)) {
