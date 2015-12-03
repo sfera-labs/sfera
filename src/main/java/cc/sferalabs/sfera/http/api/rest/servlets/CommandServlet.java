@@ -1,9 +1,6 @@
 package cc.sferalabs.sfera.http.api.rest.servlets;
 
 import java.io.IOException;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.script.ScriptException;
 import javax.servlet.ServletException;
@@ -13,8 +10,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cc.sferalabs.sfera.http.api.CommandExecutor;
+import cc.sferalabs.sfera.http.api.rest.Connection;
 import cc.sferalabs.sfera.http.api.rest.RestResponse;
-import cc.sferalabs.sfera.script.ScriptsEngine;
 
 /**
  * API servlet handling driver commands.
@@ -34,21 +32,18 @@ public class CommandServlet extends AuthorizedUserServlet {
 	@Override
 	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
 			throws ServletException, IOException {
-		Enumeration<String> params = req.getParameterNames();
-		if (!params.hasMoreElements()) {
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "No command specified");
+		Connection connection = ConnectServlet.getConnection(req, resp);
+		if (connection == null) {
 			return;
 		}
-
 		String cmd = req.getParameter("cmd");
-		String cid = req.getParameter("cid");
+		if (cmd == null) {
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Command not specified");
+			return;
+		}
 		Object res = null;
 		try {
-			logger.info("Command: {} User: {}", cmd, req.getRemoteUser());
-			Map<String, Object> b = new HashMap<>();
-			b.put("_httpRequest", req);
-			// TODO pass connection ID
-			res = ScriptsEngine.evalNodeAction(cmd, b);
+			res = CommandExecutor.exec(cmd, req, connection.getId(), req.getRemoteUser());
 		} catch (IllegalArgumentException | ScriptException e) {
 			logger.debug("Command error", e);
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Command error: " + e.getMessage());

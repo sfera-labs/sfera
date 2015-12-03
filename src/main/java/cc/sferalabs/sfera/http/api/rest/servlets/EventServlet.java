@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.http.api.RemoteApiEvent;
+import cc.sferalabs.sfera.http.api.rest.Connection;
 import cc.sferalabs.sfera.http.api.rest.RestResponse;
 
 /**
@@ -38,12 +39,15 @@ public class EventServlet extends AuthorizedUserServlet {
 	@Override
 	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
 			throws ServletException, IOException {
+		Connection connection = ConnectServlet.getConnection(req, resp);
+		if (connection == null) {
+			return;
+		}
 		String id = req.getParameter("id");
 		String value = req.getParameter("value");
-		String cid = req.getParameter("cid");
 		RemoteApiEvent remoteEvent;
 		try {
-			remoteEvent = new RemoteApiEvent(id, value, req, cid);
+			remoteEvent = new RemoteApiEvent(id, value, req, connection.getId());
 		} catch (Exception e) {
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
 			return;

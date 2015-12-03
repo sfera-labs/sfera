@@ -22,15 +22,8 @@ public class UISetEvent extends UIEvent {
 	 * @param connectionId
 	 */
 	UISetEvent(String componentId, String attribute, Object value, String connectionId) {
-		// TODO
-		// super("set." + (connectionId == null ? "global" : connectionId)
-		// + Objects.requireNonNull(componentId, "componentId must not be null")
-		// + "."
-		// + Objects.requireNonNull(attribute, "attribute must not be null"),
-		// value,
-		// connectionId);
-
-		super("set." + Objects.requireNonNull(componentId, "componentId must not be null") + "."
+		super("set." + (connectionId == null ? "global" : connectionId) + "."
+				+ Objects.requireNonNull(componentId, "componentId must not be null") + "."
 				+ Objects.requireNonNull(attribute, "attribute must not be null"), value,
 				connectionId);
 	}

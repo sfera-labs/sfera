@@ -129,6 +129,7 @@ parameter
 	: NumberLiteral
 	| StringLiteral
 	| BooleanLiteral
+	| NodeId
 	| array
 	;
 	

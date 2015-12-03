@@ -28,7 +28,7 @@ import cc.sferalabs.sfera.http.api.rest.RestResponse;
 @SuppressWarnings("serial")
 public class StateServlet extends AuthorizedUserServlet {
 
-	public static final String PATH = ApiServlet.PATH + "state/*";
+	public static final String PATH = ApiServlet.PATH + "state";
 
 	@Override
 	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)

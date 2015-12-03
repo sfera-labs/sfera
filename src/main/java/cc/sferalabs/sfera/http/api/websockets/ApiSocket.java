@@ -1,9 +1,7 @@
 package cc.sferalabs.sfera.http.api.websockets;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -19,9 +17,9 @@ import org.slf4j.LoggerFactory;
 import cc.sferalabs.sfera.core.services.Task;
 import cc.sferalabs.sfera.core.services.TasksManager;
 import cc.sferalabs.sfera.events.Bus;
-import cc.sferalabs.sfera.http.api.RemoteApiEvent;
+import cc.sferalabs.sfera.http.api.CommandExecutor;
 import cc.sferalabs.sfera.http.api.JsonMessage;
-import cc.sferalabs.sfera.script.ScriptsEngine;
+import cc.sferalabs.sfera.http.api.RemoteApiEvent;
 
 /**
  * {@link WebSocketAdapter} to process API requests
@@ -34,6 +32,7 @@ import cc.sferalabs.sfera.script.ScriptsEngine;
 public class ApiSocket extends WebSocketAdapter {
 
 	private static final Logger logger = LoggerFactory.getLogger(ApiSocket.class);
+	private static final AtomicLong count = new AtomicLong(77);
 
 	private static final String PING_STRING = "&";
 
@@ -60,7 +59,16 @@ public class ApiSocket extends WebSocketAdapter {
 				.getHttpServletRequest();
 		this.hostname = request.getRemoteHostName();
 		String connectionId = originalRequest.getParameter("connectionId");
-		this.connectionId = connectionId != null ? connectionId : UUID.randomUUID().toString();
+		String sessionId = originalRequest.getSession().getId();
+		if (connectionId != null) {
+			if (!sessionId.equals(connectionId.split("-")[0])) {
+				connectionId = null;
+			}
+		}
+		if (connectionId == null) {
+			connectionId = sessionId + "-" + count.getAndIncrement();
+		}
+		this.connectionId = connectionId;
 		this.user = this.originalRequest.getRemoteUser();
 		this.pingInterval = pingInterval;
 		this.respTimeout = respTimeout;
@@ -181,10 +189,7 @@ public class ApiSocket extends WebSocketAdapter {
 				}
 				Object res = null;
 				try {
-					logger.info("Command: {} User: {}", cmd, user);
-					Map<String, Object> b = new HashMap<>();
-					b.put("_httpRequest", originalRequest);
-					res = ScriptsEngine.evalNodeAction(cmd, b);
+					res = CommandExecutor.exec(cmd, originalRequest, connectionId, user);
 				} catch (Exception e) {
 					reply.sendError(e.getMessage());
 					return;

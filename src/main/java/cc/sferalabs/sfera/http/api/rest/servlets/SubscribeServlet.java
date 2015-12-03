@@ -34,7 +34,6 @@ public class SubscribeServlet extends AuthorizedUserServlet {
 		if (connection == null) {
 			return;
 		}
-
 		String nodes = req.getParameter("nodes");
 		if (nodes == null) {
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Nodes not specified");
