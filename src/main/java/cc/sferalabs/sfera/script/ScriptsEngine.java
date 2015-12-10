@@ -255,48 +255,22 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	 */
 	public static Object evalNodeAction(String nodeAction, Map<String, Object> bindings)
 			throws ScriptException, IllegalArgumentException {
-
-		/*
-		 * TODO Maybe here I should allow only things like 'node.method(param)'
-		 * and not 'node.attr=val', cause by allowing setting any parameters on
-		 * a node i can potentially break things from the client
-		 * 
-		 * or maybe it is fine since we can use _attr to make it not visible
-		 * from the API, but I can still override node functions with
-		 * 'node.method=0' which transforms a method in an attribute
-		 */
-
-		String[] action_prm = nodeAction.split("=");
-		String action = action_prm[0];
-		String param = action_prm.length == 1 ? null : action_prm[1];
-
 		ScriptErrorListener errorListener = new ScriptErrorListener();
-		SferaScriptGrammarParser parser = Parser.getParser(action, errorListener);
+		SferaScriptGrammarParser parser = Parser.getParser(nodeAction, errorListener);
 		TerminalNodeContext commandContext = parser.terminalNode();
 		List<Object> errors = errorListener.getErrors();
 		if (!errors.isEmpty()) {
-			throw new IllegalArgumentException("Invalid node syntax: " + errors.get(0));
+			throw new IllegalArgumentException("Invalid node action syntax: " + errors.get(0));
 		}
-
 		String nodeId = commandContext.NodeId().getText();
 		Node node = Nodes.get(nodeId);
 		if (node == null) {
 			throw new IllegalArgumentException("Node '" + nodeId + "' not found");
 		}
-
-		String actionScript = action;
-		if (param != null) {
-			// Parse the parameters to make sure it is not some executable code
-			parser = Parser.getParser(param, errorListener);
-			parser.paramsList();
-			errors = errorListener.getErrors();
-			if (!errors.isEmpty()) {
-				throw new IllegalArgumentException("Invalid param syntax: " + errors.get(0));
-			}
-			actionScript += "=" + param;
+		if (!nodeAction.endsWith(")")) {
+			nodeAction += "()";
 		}
-
-		return eval(actionScript, bindings);
+		return eval(nodeAction, bindings);
 	}
 
 	/**

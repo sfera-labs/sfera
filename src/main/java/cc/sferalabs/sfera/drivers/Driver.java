@@ -135,7 +135,7 @@ public abstract class Driver extends Node {
 	}
 
 	/**
-	 * Contruct a Driver
+	 * Constructs a {@code Driver}
 	 * 
 	 * @param id
 	 *            the driver ID
