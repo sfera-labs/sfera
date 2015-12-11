@@ -60,7 +60,6 @@ public class IPCommPort extends CommPort {
 					if (!closed) {
 						reader.onRead(bytes);
 					}
-
 				} catch (Throwable t) {
 					if (!closed) {
 						reader.onError(t);
@@ -132,6 +131,8 @@ public class IPCommPort extends CommPort {
 		if (readerTask != null) {
 			readerTask.run = false;
 			readerTask = null;
+		} else {
+			throw new CommPortException("No listner added");
 		}
 	}
 
@@ -163,11 +164,9 @@ public class IPCommPort extends CommPort {
 	@Override
 	public void close() throws CommPortException {
 		closed = true;
-		if (readerTask != null) {
-			try {
-				removeListener();
-			} catch (Exception e) {
-			}
+		try {
+			removeListener();
+		} catch (Exception e) {
 		}
 		try {
 			if (socket != null) {
@@ -179,8 +178,9 @@ public class IPCommPort extends CommPort {
 	}
 
 	@Override
-	public int readBytes(byte[] b, int offset, int len) throws CommPortException {
+	public synchronized int readBytes(byte[] b, int offset, int len) throws CommPortException {
 		try {
+			socket.setSoTimeout(0);
 			InputStream in = socket.getInputStream();
 			return in.read(b, offset, len);
 		} catch (IOException e) {
@@ -189,7 +189,7 @@ public class IPCommPort extends CommPort {
 	}
 
 	@Override
-	public int readBytes(byte[] b, int offset, int len, int timeoutMillis)
+	public synchronized int readBytes(byte[] b, int offset, int len, int timeoutMillis)
 			throws CommPortException, CommPortTimeoutException {
 		try {
 			socket.setSoTimeout(timeoutMillis);

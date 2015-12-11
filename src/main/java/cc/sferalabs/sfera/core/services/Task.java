@@ -78,6 +78,16 @@ public abstract class Task implements Runnable {
 	}
 
 	/**
+	 * Returns the thread executing this task, may be {@code null} if
+	 * terminated.
+	 * 
+	 * @return the thread executing this task, may be {@code null} if terminated
+	 */
+	public Thread getThread() {
+		return thread;
+	}
+
+	/**
 	 * This method must be implemented by the classes extending {@code Task}. It
 	 * is called when the task is executed by a thread instantiated by the
 	 * {@link TasksManager}.

@@ -66,7 +66,6 @@ public interface Event {
 	 * {@code content} attribute, might have this method returning the
 	 * {@code content} String, so that the following trigger condition can be
 	 * used:
-	 * 
 	 * </p>
 	 * 
 	 * <pre>

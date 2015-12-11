@@ -65,7 +65,7 @@ public class LocalCommPort extends CommPort {
 	}
 
 	@Override
-	public void setListener(CommPortListener listener) throws CommPortException {
+	public synchronized void setListener(CommPortListener listener) throws CommPortException {
 		SerialPortEventListener spel = new SerialPortEventListener() {
 
 			@Override
@@ -75,7 +75,6 @@ public class LocalCommPort extends CommPort {
 					byte[] bytes = new byte[len];
 					readBytes(bytes, 0, len);
 					listener.onRead(bytes);
-
 				} catch (Throwable t) {
 					listener.onError(t);
 				}
@@ -89,7 +88,7 @@ public class LocalCommPort extends CommPort {
 	}
 
 	@Override
-	public void removeListener() throws CommPortException {
+	public synchronized void removeListener() throws CommPortException {
 		try {
 			serialPort.removeEventListener();
 		} catch (SerialPortException e) {
@@ -148,10 +147,10 @@ public class LocalCommPort extends CommPort {
 	}
 
 	@Override
-	public int readBytes(byte[] b, int offset, int len) throws CommPortException {
+	public synchronized int readBytes(byte[] b, int offset, int len) throws CommPortException {
 		try {
 			if (len < 0) {
-				throw new IndexOutOfBoundsException("len is negative");
+				throw new IndexOutOfBoundsException("parameter 'len' is negative");
 			}
 			byte[] read = serialPort.readBytes(len);
 			for (int i = 0; i < read.length; i++) {
@@ -165,7 +164,7 @@ public class LocalCommPort extends CommPort {
 	}
 
 	@Override
-	public int readBytes(byte[] b, int offset, int len, int timeoutMillis)
+	public synchronized int readBytes(byte[] b, int offset, int len, int timeoutMillis)
 			throws CommPortException, CommPortTimeoutException {
 		try {
 			byte[] read = serialPort.readBytes(len, timeoutMillis);

@@ -121,7 +121,14 @@ public abstract class CommPort {
 	public abstract void setListener(CommPortListener listener) throws CommPortException;
 
 	/**
-	 * Removes the previously set listener
+	 * Removes the previously set listener.
+	 * <p>
+	 * This method should be called from the
+	 * {@link CommPortListener#onRead(byte[])} method implementation to assure
+	 * that subsequent data is not consumed from the listener. Otherwise, after
+	 * calling this method, the listener may still consume some data and call
+	 * {@link CommPortListener#onRead(byte[])} once more.
+	 * </p>
 	 * 
 	 * @throws CommPortException
 	 *             if an error occurs
