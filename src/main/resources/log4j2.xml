@@ -2,8 +2,9 @@
 <Configuration status="WARN" monitorInterval="300">
 	<Appenders>
 		<RollingRandomAccessFile name="SferaLog"
-			fileName="logs/sfera.csv" filePattern="logs/%d{yyyy}/sfera-%d{yyyy-MM-dd}-%i.csv.gz">
-			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS},%level,%thread,%logger,%msg%n" />
+			fileName="logs/sfera.log" filePattern="logs/%d{yyyy}/sfera-%d{yyyy-MM-dd}-%i.log.gz">
+			<PatternLayout
+				pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %level %thread %logger: %msg%n" />
 			<TimeBasedTriggeringPolicy />
 		</RollingRandomAccessFile>
 	</Appenders>
