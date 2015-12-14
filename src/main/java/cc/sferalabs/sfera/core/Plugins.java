@@ -33,7 +33,7 @@ public abstract class Plugins {
 
 	/**
 	 * Loads the installed plugins and registers the plugins directory to be
-	 * monitored for changes
+	 * monitored for changes.
 	 */
 	static void load() {
 		doLoad();
@@ -45,7 +45,7 @@ public abstract class Plugins {
 	}
 
 	/**
-	 * Loads the installed plugins
+	 * Loads the installed plugins.
 	 */
 	private static void doLoad() {
 		plugins = new ConcurrentHashMap<>();
@@ -71,17 +71,19 @@ public abstract class Plugins {
 	}
 
 	/**
+	 * Returns a Map containing all the installed plugins indexed by ID.
 	 * 
-	 * @return a Map containing all the installed plugins indexed by id
+	 * @return a Map containing all the installed plugins indexed by ID
 	 */
 	public static Map<String, Plugin> getAll() {
 		return new HashMap<String, Plugin>(plugins);
 	}
 
 	/**
+	 * Returns the plugin with the specified id.
 	 * 
 	 * @param id
-	 *            the id whose associated plugin is to be returned
+	 *            the ID of the plugin to be returned
 	 * @return the plugin with the specified id
 	 */
 	public static Plugin get(String id) {

@@ -5,7 +5,9 @@ package cc.sferalabs.sfera.script.parser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.URISyntaxException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -13,7 +15,6 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ import java.util.function.Consumer;
 
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
+import javax.script.ScriptException;
 
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.slf4j.Logger;
@@ -54,16 +56,6 @@ public class ScriptsLoader implements EventListener {
 	private static final String LIBRARY_FILES_EXTENSION = ".js";
 
 	private static final Logger logger = LoggerFactory.getLogger(ScriptsLoader.class);
-	private static Path SFERA_LIBRARY;
-
-	static {
-		try {
-			SFERA_LIBRARY = Paths.get(
-					ScriptsLoader.class.getClassLoader().getResource("scripts/sfera.js").toURI());
-		} catch (URISyntaxException e) {
-			logger.error("Error gettig sfera.js", e);
-		}
-	}
 
 	private Map<String, Set<Rule>> triggersRulesMap;
 	private Map<Path, List<Object>> errors;
@@ -88,16 +80,28 @@ public class ScriptsLoader implements EventListener {
 	public synchronized void load() {
 		logger.info("Loading scripts...");
 		try {
-			if (SFERA_LIBRARY != null) {
-				logger.debug("Loading Sfera library");
-				addToLibraries(SFERA_LIBRARY);
-			}
+			loadSferaLib();
 			loadFiles(LIBRARY_FILES_EXTENSION, (Path libFile) -> addToLibraries(libFile));
 			loadFiles(SCRIPT_FILES_EXTENSION, (Path scriptFile) -> parseScriptFile(scriptFile));
-		} catch (IOException e) {
+		} catch (Exception e) {
 			logger.error("Error loading script files", e);
 		}
 		logger.info("Scripts loaded");
+	}
+
+	/**
+	 * 
+	 * @throws ScriptException
+	 * @throws IOException
+	 */
+	private void loadSferaLib() throws ScriptException, IOException {
+		try (InputStream in = this.getClass().getClassLoader()
+				.getResourceAsStream("scripts/sfera.js");
+				BufferedReader br = new BufferedReader(
+						new InputStreamReader(in, StandardCharsets.UTF_8))) {
+			logger.debug("Loading Sfera library");
+			addToLibraries("sfera.js", br);
+		}
 	}
 
 	/**
@@ -121,21 +125,33 @@ public class ScriptsLoader implements EventListener {
 	 */
 	private void addToLibraries(Path libFile) {
 		try (BufferedReader br = Files.newBufferedReader(libFile, StandardCharsets.UTF_8)) {
-			Bindings bs = ScriptsEngine.getBindings(br);
-			String path;
+			String path = null;
 			int count = libFile.getNameCount();
 			for (int i = 0; i < count; i++) {
 				if (libFile.getName(i).toString().equals(SCRIPTS_DIR)) {
 					path = libFile.subpath(i + 1, count).toString();
-					Bindings prev = libraries.put(path, bs);
-					if (prev != null) {
-						logger.warn("Library '{}' is overwriting another file", libFile);
-					}
 					break;
 				}
 			}
+			if (path != null) {
+				addToLibraries(path, br);
+			}
 		} catch (Exception e) {
 			addError(libFile, e);
+		}
+	}
+
+	/**
+	 * 
+	 * @param path
+	 * @param reader
+	 * @throws ScriptException
+	 */
+	private void addToLibraries(String path, Reader reader) throws ScriptException {
+		Bindings bs = ScriptsEngine.getBindings(reader);
+		Bindings prev = libraries.put(path, bs);
+		if (prev != null) {
+			logger.warn("Library '{}' is overwriting another file", path);
 		}
 	}
 

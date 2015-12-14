@@ -94,7 +94,7 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	}
 
 	/**
-	 * Returns a {@link Bindings} instance containing the binding created by
+	 * Returns a {@link Bindings} instance containing the bindings created by
 	 * executing the script provided by the specified reader.
 	 * 
 	 * @param reader

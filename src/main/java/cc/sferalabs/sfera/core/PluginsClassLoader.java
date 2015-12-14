@@ -27,7 +27,7 @@ public abstract class PluginsClassLoader {
 	private static ClassLoader CLASS_LOADER;
 
 	/**
-	 * Adds the installed plugins to the base class loader
+	 * Adds the installed plugins to the base class loader.
 	 */
 	private synchronized static void load() {
 		ClassLoader cl;
@@ -49,7 +49,7 @@ public abstract class PluginsClassLoader {
 
 	/**
 	 * Returns the {@code Class} object associated with the class or interface
-	 * with the given string name
+	 * with the given string name.
 	 * 
 	 * @param className
 	 *            fully qualified name of the desired class
