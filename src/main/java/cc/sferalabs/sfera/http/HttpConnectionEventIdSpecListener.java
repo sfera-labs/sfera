@@ -9,6 +9,8 @@ import cc.sferalabs.sfera.events.Event;
 import cc.sferalabs.sfera.events.EventIdSpecListener;
 
 /**
+ * Extension of {@link EventIdSpecListener} filtering
+ * {@link HttpConnectionEvent} events.
  * 
  * @author Giampiero Baggiani
  *
@@ -20,9 +22,13 @@ public abstract class HttpConnectionEventIdSpecListener extends EventIdSpecListe
 	private final String connectionId;
 
 	/**
+	 * Construct a HttpConnectionEventIdSpecListener.
 	 * 
 	 * @param spec
+	 *            the event ID specification
 	 * @param connectionId
+	 *            the connection ID to be used to filter
+	 *            {@link HttpConnectionEvent} events
 	 */
 	protected HttpConnectionEventIdSpecListener(String spec, String connectionId) {
 		super(spec);

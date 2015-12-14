@@ -36,6 +36,7 @@ public class Rule {
 	final List<Bindings> imports;
 
 	/**
+	 * Constructs a Rule.
 	 * 
 	 * @param condition
 	 * @param action
@@ -56,17 +57,21 @@ public class Rule {
 	}
 
 	/**
+	 * Executes this rule's action using the specified event as trigger.
 	 * 
 	 * @param event
+	 *            the trigger event
 	 */
 	public void executeAction(Event event) {
 		TasksManager.execute(new ActionTask(event, this));
 	}
 
 	/**
+	 * Evaluates this rule's condition using the specified event as trigger.
 	 * 
 	 * @param event
-	 * @return
+	 *            the trigger event
+	 * @return the result of the evaluation
 	 */
 	public boolean evalCondition(Event event) {
 		try {

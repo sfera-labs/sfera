@@ -70,8 +70,12 @@ public class ScriptsLoader implements EventListener {
 	private Map<String, Bindings> libraries = new HashMap<>();
 
 	/**
+	 * Constructs a ScriptsLoader.
+	 * 
 	 * @param triggersRulesMap
+	 *            the triggers-rules map to fill
 	 * @param errors
+	 *            the errors list to fill
 	 */
 	public ScriptsLoader(Map<String, Set<Rule>> triggersRulesMap, Map<Path, List<Object>> errors) {
 		this.triggersRulesMap = triggersRulesMap;

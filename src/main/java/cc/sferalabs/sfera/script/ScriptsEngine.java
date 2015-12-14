@@ -94,10 +94,14 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	}
 
 	/**
+	 * Returns a {@link Bindings} instance containing the binding created by
+	 * executing the script provided by the specified reader.
 	 * 
 	 * @param reader
-	 * @return
+	 *            the source of the script
+	 * @return the created bindings
 	 * @throws ScriptException
+	 *             if an error occurs
 	 */
 	public static Bindings getBindings(Reader reader) throws ScriptException {
 		Bindings b = runtimeEngine.createBindings();
@@ -106,6 +110,7 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	}
 
 	/**
+	 * Returns a new Nashorn {@code ScriptEngine}
 	 * 
 	 * @return a new Nashorn {@code ScriptEngine}
 	 * @see ScriptEngineManager
@@ -228,9 +233,13 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	}
 
 	/**
+	 * Returns the Java type corresponding to the specified class.
+	 * 
 	 * @param clazz
-	 * @return
+	 *            the class
+	 * @return the Java type
 	 * @throws ScriptException
+	 *             if an error occurs
 	 */
 	static Object getJavaType(Class<?> clazz) throws ScriptException {
 		ScriptEngine engine = getNewNashornEngine();
@@ -247,7 +256,7 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	 *            the action
 	 * @param bindings
 	 *            the binding to add to the local scope
-	 * @return
+	 * @return the value returned by the script
 	 * @throws ScriptException
 	 *             if an error occurs executing the action script
 	 * @throws IllegalArgumentException
@@ -274,11 +283,16 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	}
 
 	/**
+	 * Executes the specified script adding the specified bindings to the local
+	 * scope.
 	 * 
 	 * @param script
+	 *            the script to execute
 	 * @param bindings
-	 * @return
+	 *            the bindings to add
+	 * @return the value returned by the script
 	 * @throws ScriptException
+	 *             if an error accurs
 	 */
 	public static Object eval(String script, Map<String, Object> bindings) throws ScriptException {
 		Bindings b = runtimeEngine.createBindings();

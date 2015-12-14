@@ -15,7 +15,9 @@ import cc.sferalabs.sfera.events.Event;
 public interface HttpConnectionEvent extends Event {
 
 	/**
-	 * @return
+	 * Returns the connection ID.
+	 * 
+	 * @return the connection ID
 	 */
 	String getConnectionId();
 

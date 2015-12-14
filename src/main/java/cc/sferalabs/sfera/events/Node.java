@@ -13,10 +13,13 @@ public abstract class Node {
 	private final String id;
 
 	/**
-	 * Constructs a {@code Node} and adds it to the list of existing nodes.
+	 * Constructs a {@code Node} with the specified ID and adds it to the list
+	 * of existing nodes.
 	 * 
+	 * @param id
+	 *            the node ID
 	 * @throws IllegalArgumentException
-	 *             if a node with the same ID exists
+	 *             if a node with the same ID has been already created
 	 */
 	public Node(String id) throws IllegalArgumentException {
 		this.id = id;

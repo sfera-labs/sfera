@@ -20,22 +20,26 @@ public class Connection {
 	private PollingSubscription subscription;
 
 	/**
-	 * 
-	 * @param sessionId
+	 * Constructs a {@code Connection}.
 	 */
 	public Connection() {
 		this.id = "" + count.getAndIncrement();
 	}
 
 	/**
-	 * @return
+	 * Returns the connection ID.
+	 * 
+	 * @return the connection ID
 	 */
 	public String getId() {
 		return id;
 	}
 
 	/**
+	 * Creates a subscription to the specified nodes.
+	 * 
 	 * @param nodes
+	 *            the nodes IDs specification
 	 */
 	public void subscribe(String nodes) {
 		if (subscription != null) {
@@ -45,7 +49,7 @@ public class Connection {
 	}
 
 	/**
-	 * 
+	 * Destroys this connection.
 	 */
 	public void destroy() {
 		if (subscription != null) {
@@ -54,7 +58,9 @@ public class Connection {
 	}
 
 	/**
-	 * @return
+	 * Returns the subscription.
+	 * 
+	 * @return the subscription
 	 */
 	public PollingSubscription getSubscription() {
 		return subscription;

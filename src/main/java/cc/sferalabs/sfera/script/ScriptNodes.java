@@ -18,10 +18,16 @@ public abstract class ScriptNodes {
 	private static List<ScriptNodeWrapper> nodes = new ArrayList<>();
 
 	/**
-	 * Called from sfera.js
+	 * Adds the specified script node to the collection of available nodes,
+	 * wrapped in a {@link ScriptNodeWrapper}.
+	 * <p>
+	 * This method is solely called from sfera.js.
+	 * </p>
 	 * 
 	 * @param id
+	 *            the node ID
 	 * @param node
+	 *            the script node to be added
 	 */
 	public synchronized static void put(String id, Object node) {
 		ScriptNodeWrapper wrap = new ScriptNodeWrapper(id, node);
@@ -30,7 +36,7 @@ public abstract class ScriptNodes {
 	}
 
 	/**
-	 * 
+	 * Destroys all the added nodes and clears the list.
 	 */
 	public synchronized static void clear() {
 		for (ScriptNodeWrapper wrap : nodes) {

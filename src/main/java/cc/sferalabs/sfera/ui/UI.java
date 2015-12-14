@@ -8,7 +8,8 @@ import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Node;
 
 /**
- *
+ * Class representing the UI node.
+ * 
  * @author Giampiero Baggiani
  *
  * @version 1.0.0
@@ -19,7 +20,7 @@ public class UI extends Node implements AutoStartService {
 	private static UI INSTANCE;
 
 	/**
-	 * @param id
+	 * 
 	 */
 	public UI() {
 		super("ui");
@@ -35,16 +36,20 @@ public class UI extends Node implements AutoStartService {
 	}
 
 	/**
-	 * @return
+	 * Returns the UI node instance.
+	 * 
+	 * @return the UI node instance
 	 */
 	static UI getInstance() {
 		return INSTANCE;
 	}
 
 	/**
+	 * Sets the specified attribute of the specified component to the specified
+	 * value.
 	 * 
 	 * @param componentId
-	 *            ID of the addressed components
+	 *            ID of the addressed component
 	 * @param attribute
 	 *            attribute to set
 	 * @param value
@@ -55,11 +60,17 @@ public class UI extends Node implements AutoStartService {
 	}
 
 	/**
+	 * Sets the specified attribute of the specified component to the specified
+	 * value only for the specified connection.
 	 * 
 	 * @param componentId
+	 *            ID of the addressed component
 	 * @param attribute
+	 *            attribute to set
 	 * @param value
+	 *            value to assign
 	 * @param connectionId
+	 *            ID of the addressed connection
 	 */
 	public void set(String componentId, String attribute, Object value, String connectionId) {
 		Bus.post(new ConnectionUISetEvent(componentId, attribute, value, connectionId));

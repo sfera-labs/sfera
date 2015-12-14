@@ -21,9 +21,11 @@ public class ConnectionsSet implements Serializable {
 	private transient Map<String, Connection> map;
 
 	/**
+	 * Returns the connection with the specified ID.
 	 * 
 	 * @param id
-	 * @return
+	 *            the ID of the connection to be returned
+	 * @return the connection with the specified ID
 	 */
 	public Connection get(String id) {
 		if (map == null) {
@@ -33,18 +35,21 @@ public class ConnectionsSet implements Serializable {
 	}
 
 	/**
+	 * Adds the specified connection to this set.
 	 * 
 	 * @param connection
-	 * @return
+	 *            the connection to add
 	 */
-	public Connection put(Connection connection) {
+	public void put(Connection connection) {
 		if (map == null) {
 			map = new HashMap<>();
 		}
-		return map.put(connection.getId(), connection);
+		map.put(connection.getId(), connection);
 	}
 
 	/**
+	 * Returns the contained connections.
+	 * 
 	 * @return the contained connections
 	 */
 	public Collection<Connection> values() {
@@ -55,8 +60,11 @@ public class ConnectionsSet implements Serializable {
 	}
 
 	/**
+	 * Removes the connection with the specified ID.
+	 * 
 	 * @param id
-	 * @return
+	 *            the ID of the connection to be removed
+	 * @return the removed connection
 	 */
 	Connection remove(String id) {
 		if (map == null) {

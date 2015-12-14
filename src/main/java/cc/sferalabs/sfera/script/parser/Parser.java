@@ -15,7 +15,8 @@ import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarLexer;
 import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser;
 
 /**
- *
+ * Utility class for building {@link SferaScriptGrammarParser}s.
+ * 
  * @author Giampiero Baggiani
  *
  * @version 1.0.0
@@ -24,10 +25,14 @@ import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser;
 public abstract class Parser {
 
 	/**
+	 * Builds a {@link SferaScriptGrammarParser} for the specified reader and
+	 * with the specified error listener.
 	 * 
 	 * @param input
+	 *            the input
 	 * @param errorListener
-	 * @return
+	 *            the error listener
+	 * @return the built parser
 	 */
 	public static SferaScriptGrammarParser getParser(String input,
 			ScriptErrorListener errorListener) {
@@ -35,11 +40,16 @@ public abstract class Parser {
 	}
 
 	/**
+	 * Builds a {@link SferaScriptGrammarParser} for the specified reader and
+	 * with the specified error listener.
 	 * 
 	 * @param r
+	 *            the reader
 	 * @param errorListener
-	 * @return
+	 *            the error listener
+	 * @return the built parser
 	 * @throws IOException
+	 *             if an I/O error occurs
 	 */
 	public static SferaScriptGrammarParser getParser(Reader r, ANTLRErrorListener errorListener)
 			throws IOException {
@@ -47,10 +57,14 @@ public abstract class Parser {
 	}
 
 	/**
+	 * Builds a {@link SferaScriptGrammarParser} for the specified input and
+	 * with the specified error listener.
 	 * 
 	 * @param input
+	 *            the input
 	 * @param errorListener
-	 * @return
+	 *            the error listener
+	 * @return the built parser
 	 */
 	private static SferaScriptGrammarParser getParser(CharStream input,
 			ANTLRErrorListener errorListener) {

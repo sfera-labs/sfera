@@ -25,7 +25,9 @@ public class ScriptErrorListener extends BaseErrorListener {
 	}
 
 	/**
-	 * @return
+	 * Returns the list of errors.
+	 * 
+	 * @return the list of errors
 	 */
 	public List<Object> getErrors() {
 		return errors;
