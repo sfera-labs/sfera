@@ -6,6 +6,8 @@ package cc.sferalabs.sfera.script;
 import java.util.ArrayList;
 import java.util.List;
 
+import cc.sferalabs.sfera.events.Bus;
+
 /**
  * 
  * @author Giampiero Baggiani
@@ -43,6 +45,26 @@ public abstract class ScriptNodes {
 			wrap.destroy();
 		}
 		nodes.clear();
+	}
+
+	/**
+	 * Posts a {@link ScriptEvent} to the Bus.
+	 * <p>
+	 * This method is solely called from sfera.js.
+	 * </p>
+	 * 
+	 * @param source
+	 *            the source node
+	 * @param sourceId
+	 *            the source node's ID
+	 * @param id
+	 *            the events ID
+	 * @param value
+	 *            the event value
+	 */
+	public synchronized static void postEvent(Object source, String sourceId, String id,
+			Object value) {
+		Bus.post(new ScriptEvent(source, sourceId, id, value));
 	}
 
 }
