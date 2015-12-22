@@ -26,8 +26,11 @@ class WsEventListener extends HttpConnectionEventIdSpecListener {
 	/**
 	 * 
 	 * @param socket
+	 *            the WS socket
 	 * @param eventIdSpec
+	 *            the event ID specification
 	 * @param connectionId
+	 *            the connection ID to be used as filter
 	 */
 	WsEventListener(ApiSocket socket, String eventIdSpec, String connectionId) {
 		super(eventIdSpec, connectionId);

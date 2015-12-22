@@ -39,12 +39,19 @@ public class Rule {
 	 * Constructs a Rule.
 	 * 
 	 * @param condition
+	 *            the trigger condition context
 	 * @param action
+	 *            the action
 	 * @param scriptFile
+	 *            path of the script file
 	 * @param engine
+	 *            the script engine
 	 * @param fileScope
+	 *            the file-scope bindings
 	 * @param imports
+	 *            the imported bindings
 	 * @throws ScriptException
+	 *             if compilation of the action fails
 	 */
 	Rule(TriggerContext condition, String action, Path scriptFile, ScriptEngine engine,
 			Bindings fileScope, List<Bindings> imports) throws ScriptException {

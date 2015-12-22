@@ -15,11 +15,16 @@ import java.util.Objects;
 public class UISetEvent extends UIEvent {
 
 	/**
+	 * Construct a UISetEvent
 	 * 
 	 * @param componentId
+	 *            the component ID
 	 * @param attribute
+	 *            the attribute to set
 	 * @param value
+	 *            the value to assign
 	 * @param connectionId
+	 *            the connection ID
 	 */
 	UISetEvent(String componentId, String attribute, Object value, String connectionId) {
 		super("set." + (connectionId == null ? "global" : connectionId) + "."

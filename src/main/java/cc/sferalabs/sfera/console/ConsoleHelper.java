@@ -1,7 +1,7 @@
 /**
  * 
  */
-package cc.sferalabs.sfera.core.services.console;
+package cc.sferalabs.sfera.console;
 
 import java.util.Map;
 import java.util.Map.Entry;
@@ -23,7 +23,7 @@ public class ConsoleHelper implements ConsoleCommandHandler {
 	private final Map<String, ConsoleCommandHandler> handlers;
 
 	/**
-	 * @param handlers
+	 * @param handlers the map of existing {@code ConsoleCommandHandlers}
 	 */
 	ConsoleHelper(Map<String, ConsoleCommandHandler> handlers) {
 		this.handlers = handlers;

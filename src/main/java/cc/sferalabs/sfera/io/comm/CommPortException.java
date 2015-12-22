@@ -13,6 +13,7 @@ public class CommPortException extends Exception {
 	/**
 	 * 
 	 * @param message
+	 *            the detail message
 	 */
 	CommPortException(String message) {
 		super(message);
@@ -21,7 +22,9 @@ public class CommPortException extends Exception {
 	/**
 	 * 
 	 * @param message
+	 *            the detail message
 	 * @param cause
+	 *            the cause
 	 */
 	CommPortException(String message, Throwable cause) {
 		super(message, cause);

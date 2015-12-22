@@ -47,8 +47,11 @@ class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 	/**
 	 * 
 	 * @param scriptFile
+	 *            the path of the script file
 	 * @param libraries
+	 *            the map of library-files and respective bindings
 	 * @param engine
+	 *            the script engine
 	 */
 	ScriptGrammarListener(Path scriptFile, Map<String, Bindings> libraries, ScriptEngine engine) {
 		this.scriptFile = scriptFile;
@@ -58,7 +61,7 @@ class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 	}
 
 	/**
-	 * @return
+	 * @return the list of errors
 	 */
 	public List<Object> getErrors() {
 		return errors;

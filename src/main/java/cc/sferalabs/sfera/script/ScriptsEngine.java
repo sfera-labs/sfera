@@ -23,7 +23,6 @@ import com.google.common.eventbus.Subscribe;
 
 import cc.sferalabs.sfera.core.events.PluginsEvent;
 import cc.sferalabs.sfera.core.services.AutoStartService;
-import cc.sferalabs.sfera.core.services.FilesWatcher;
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Event;
 import cc.sferalabs.sfera.events.Node;
@@ -34,6 +33,7 @@ import cc.sferalabs.sfera.script.parser.ScriptErrorListener;
 import cc.sferalabs.sfera.script.parser.ScriptsLoader;
 import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser;
 import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser.TerminalNodeContext;
+import cc.sferalabs.sfera.util.files.FilesWatcher;
 
 /**
  * Service for the processing of scripts.

@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import cc.sferalabs.sfera.core.SystemNode;
 
 /**
- * Interfaces for services to be started only when requested.
+ * Abstract class for services to be started only when requested.
  * 
  * @author Giampiero Baggiani
  *

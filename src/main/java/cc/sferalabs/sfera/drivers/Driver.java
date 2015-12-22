@@ -11,10 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.core.Configuration;
-import cc.sferalabs.sfera.core.services.FilesWatcher;
 import cc.sferalabs.sfera.core.services.Task;
 import cc.sferalabs.sfera.core.services.TasksManager;
 import cc.sferalabs.sfera.events.Node;
+import cc.sferalabs.sfera.util.files.FilesWatcher;
 
 /**
  * Abstract class to be implemented to create drivers.

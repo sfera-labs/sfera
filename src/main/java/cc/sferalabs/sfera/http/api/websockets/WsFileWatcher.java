@@ -11,8 +11,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 
-import cc.sferalabs.sfera.core.services.FilesWatcher;
 import cc.sferalabs.sfera.core.services.Task;
+import cc.sferalabs.sfera.util.files.FilesWatcher;
 
 /**
  *
@@ -29,8 +29,11 @@ public class WsFileWatcher {
 	/**
 	 * 
 	 * @param socket
+	 *            the WS socket
 	 * @param files
+	 *            comma-separated list of file names
 	 * @throws IOException
+	 *             If an I/O error occurs
 	 */
 	WsFileWatcher(ApiSocket socket, String files) throws IOException {
 		this.socket = socket;

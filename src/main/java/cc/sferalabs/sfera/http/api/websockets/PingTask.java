@@ -20,7 +20,9 @@ class PingTask extends Task {
 
 	/**
 	 * @param socket
+	 *            the WS socket
 	 * @param pingInterval
+	 *            the ping messages interval
 	 */
 	PingTask(ApiSocket socket, long pingInterval) {
 		super("WS Ping " + socket.hostname);

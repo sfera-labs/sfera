@@ -1,4 +1,4 @@
-package cc.sferalabs.sfera.core.services.console;
+package cc.sferalabs.sfera.console;
 
 import java.io.BufferedReader;
 import java.io.IOException;

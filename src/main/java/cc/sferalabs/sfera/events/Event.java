@@ -29,7 +29,7 @@ public interface Event {
 	 * 
 	 * @return the source node
 	 */
-	public Node getSource();
+	public Object getSource();
 
 	/**
 	 * Returns the timestamp in milliseconds of the moment this event was

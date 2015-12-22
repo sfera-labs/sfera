@@ -22,7 +22,7 @@ import javax.crypto.spec.PBEKeySpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cc.sferalabs.sfera.core.services.console.Console;
+import cc.sferalabs.sfera.console.Console;
 
 /**
  * Utility class for users authorization and authentication

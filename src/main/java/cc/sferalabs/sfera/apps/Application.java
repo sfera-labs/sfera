@@ -2,6 +2,8 @@ package cc.sferalabs.sfera.apps;
 
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.EventListener;
 import java.util.UUID;
 
@@ -9,10 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.core.Configuration;
-import cc.sferalabs.sfera.core.services.FilesWatcher;
 import cc.sferalabs.sfera.core.services.Task;
 import cc.sferalabs.sfera.core.services.TasksManager;
 import cc.sferalabs.sfera.events.Bus;
+import cc.sferalabs.sfera.util.files.FilesWatcher;
 
 /**
  * Skeleton for the implementation of applications.
@@ -139,14 +141,13 @@ public abstract class Application implements EventListener {
 	}
 
 	/**
-	 * 
 	 * Callback method called when the configuration of this application is
 	 * modified. The default implementation restarts the application.
 	 * 
-	 * @param configuration
+	 * @param config
 	 *            the new configuration
 	 */
-	protected void onConfigChange(Configuration configuration) {
+	protected void onConfigChange(Configuration config) {
 		try {
 			restart();
 		} catch (IOException e) {
@@ -166,5 +167,16 @@ public abstract class Application implements EventListener {
 	 * Callback method called when the application is disabled.
 	 */
 	protected abstract void onDisable();
+
+	/**
+	 * Returns the path to the directory to be used to store data for this
+	 * application.
+	 * 
+	 * @return the path to the directory to be used to store data for this
+	 *         application
+	 */
+	protected Path getAppDataDir() {
+		return Paths.get("data/apps/", getClass().getPackage().getName());
+	}
 
 }

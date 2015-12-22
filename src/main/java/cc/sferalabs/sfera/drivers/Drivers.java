@@ -15,12 +15,12 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cc.sferalabs.sfera.console.Console;
 import cc.sferalabs.sfera.core.Configuration;
 import cc.sferalabs.sfera.core.PluginsClassLoader;
 import cc.sferalabs.sfera.core.Sfera;
-import cc.sferalabs.sfera.core.services.FilesWatcher;
-import cc.sferalabs.sfera.core.services.console.Console;
 import cc.sferalabs.sfera.events.Bus;
+import cc.sferalabs.sfera.util.files.FilesWatcher;
 
 /**
  * Utility class for managing drivers.

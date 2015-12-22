@@ -32,8 +32,8 @@ public class PollingSubscription extends HttpConnectionEventIdSpecListener {
 	 * @param spec
 	 *            specification of the event IDs matched by this subscription
 	 * 
-	 * @param id
-	 *            connection ID
+	 * @param connectionId
+	 *            the connection ID
 	 */
 	PollingSubscription(String spec, String connectionId) {
 		super(spec, connectionId);

@@ -1,4 +1,4 @@
-package cc.sferalabs.sfera.core.services;
+package cc.sferalabs.sfera.util.files;
 
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
@@ -25,6 +25,10 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import cc.sferalabs.sfera.core.services.LazyService;
+import cc.sferalabs.sfera.core.services.Task;
+import cc.sferalabs.sfera.core.services.TasksManager;
 
 /**
  * Utility service for watching files and triggering actions upon files

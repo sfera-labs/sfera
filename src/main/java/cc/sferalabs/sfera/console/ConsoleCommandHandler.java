@@ -1,7 +1,7 @@
 /**
  * 
  */
-package cc.sferalabs.sfera.core.services.console;
+package cc.sferalabs.sfera.console;
 
 /**
  *

@@ -12,12 +12,12 @@ import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.access.Access;
 import cc.sferalabs.sfera.apps.Applications;
+import cc.sferalabs.sfera.console.Console;
 import cc.sferalabs.sfera.core.events.SystemStateEvent;
 import cc.sferalabs.sfera.core.services.AutoStartService;
 import cc.sferalabs.sfera.core.services.Service;
 import cc.sferalabs.sfera.core.services.Task;
 import cc.sferalabs.sfera.core.services.TasksManager;
-import cc.sferalabs.sfera.core.services.console.Console;
 import cc.sferalabs.sfera.drivers.Drivers;
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Node;

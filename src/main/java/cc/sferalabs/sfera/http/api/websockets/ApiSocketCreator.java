@@ -18,7 +18,9 @@ public class ApiSocketCreator implements WebSocketCreator {
 
 	/**
 	 * @param pingInterval
+	 *            the ping messages interval
 	 * @param respTimeout
+	 *            the responses timeout
 	 */
 	ApiSocketCreator(long pingInterval, long respTimeout) {
 		this.pingInterval = pingInterval;

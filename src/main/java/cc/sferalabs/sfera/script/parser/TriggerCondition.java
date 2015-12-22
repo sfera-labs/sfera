@@ -31,18 +31,23 @@ class TriggerCondition {
 	private final TriggerContext condition;
 
 	/**
+	 * Construct a TriggerCondition.
 	 * 
 	 * @param condition
+	 *            the trigger condition context
 	 */
 	TriggerCondition(TriggerContext condition) {
 		this.condition = condition;
 	}
 
 	/**
+	 * Evaluates this condition using the specified event as trigger.
 	 * 
 	 * @param event
-	 * @return
+	 *            the trigger event
+	 * @return the result of the condition evaluation
 	 * @throws Exception
+	 *             if an error occurs
 	 */
 	public boolean eval(Event event) throws Exception {
 		return eval(condition.orExpression(), event);

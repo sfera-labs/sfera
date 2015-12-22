@@ -49,10 +49,14 @@ public class ApiSocket extends WebSocketAdapter {
 	private final long respTimeout;
 
 	/**
+	 * Construct an ApiSocket
 	 * 
 	 * @param request
+	 *            the request details
 	 * @param pingInterval
+	 *            the ping messages interval
 	 * @param respTimeout
+	 *            the responses timeout
 	 */
 	ApiSocket(ServletUpgradeRequest request, long pingInterval, long respTimeout) {
 		this.originalRequest = ((UpgradeHttpServletRequest) request.getHttpServletRequest())
@@ -262,7 +266,9 @@ public class ApiSocket extends WebSocketAdapter {
 
 	/**
 	 * @param text
+	 *            the message to be sent
 	 * @throws IOException
+	 *             if unable to send the text message
 	 */
 	synchronized void send(String text) throws IOException {
 		RemoteEndpoint remote = getRemote();

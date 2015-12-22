@@ -6,7 +6,7 @@ package cc.sferalabs.sfera.drivers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cc.sferalabs.sfera.core.services.console.ConsoleCommandHandler;
+import cc.sferalabs.sfera.console.ConsoleCommandHandler;
 
 /**
  *

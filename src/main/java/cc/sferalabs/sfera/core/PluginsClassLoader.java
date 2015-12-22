@@ -77,7 +77,7 @@ public abstract class PluginsClassLoader {
 	}
 
 	/**
-	 * Listener for reloading plugins when modified
+	 * Listener for reloading plugins when modified.
 	 * 
 	 * @author Giampiero Baggiani
 	 *

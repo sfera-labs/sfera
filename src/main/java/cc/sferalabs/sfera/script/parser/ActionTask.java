@@ -30,8 +30,9 @@ class ActionTask extends Task {
 	/**
 	 * 
 	 * @param triggerEvent
+	 *            the trigger event
 	 * @param rule
-	 * @param localScope
+	 *            the rule
 	 */
 	ActionTask(Event triggerEvent, Rule rule) {
 		super("script:" + rule.scriptFile + ":" + rule.startLine);

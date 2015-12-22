@@ -14,8 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.core.events.PluginsEvent;
-import cc.sferalabs.sfera.core.services.FilesWatcher;
 import cc.sferalabs.sfera.events.Bus;
+import cc.sferalabs.sfera.util.files.FilesWatcher;
 
 /**
  * Utility class for managing plugins

@@ -17,11 +17,16 @@ import cc.sferalabs.sfera.http.HttpConnectionEvent;
 public class ConnectionUISetEvent extends UISetEvent implements HttpConnectionEvent {
 
 	/**
+	 * Construct a ConnectionUISetEvent
 	 * 
 	 * @param componentId
+	 *            the component ID
 	 * @param attribute
+	 *            the attribute to set
 	 * @param value
+	 *            the value to assign
 	 * @param connectionId
+	 *            the connection ID
 	 */
 	ConnectionUISetEvent(String componentId, String attribute, Object value, String connectionId) {
 		super(componentId, attribute, value,

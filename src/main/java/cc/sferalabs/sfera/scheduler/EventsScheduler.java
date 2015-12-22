@@ -70,7 +70,7 @@ public class EventsScheduler implements AutoStartService {
 	 * 
 	 * @param trigger
 	 */
-	private static void sheduleEvent(Trigger trigger) {
+	private static void scheduleEvent(Trigger trigger) {
 		String name = trigger.getKey().getName();
 		String group = trigger.getKey().getGroup();
 		try {
@@ -132,7 +132,7 @@ public class EventsScheduler implements AutoStartService {
 	public static void delay(String id, String value, int delay) {
 		Trigger trigger = newEventTrigger(id, value).startAt(futureDate(delay, IntervalUnit.SECOND))
 				.build();
-		sheduleEvent(trigger);
+		scheduleEvent(trigger);
 	}
 
 	/**
@@ -151,7 +151,7 @@ public class EventsScheduler implements AutoStartService {
 				.startAt(futureDate(initialDelay, IntervalUnit.SECOND))
 				.withSchedule(simpleSchedule().withIntervalInSeconds(interval).repeatForever())
 				.build();
-		sheduleEvent(trigger);
+		scheduleEvent(trigger);
 	}
 
 	/**
@@ -173,7 +173,7 @@ public class EventsScheduler implements AutoStartService {
 				.withSchedule(
 						simpleSchedule().withIntervalInSeconds(interval).withRepeatCount(times - 1))
 				.build();
-		sheduleEvent(trigger);
+		scheduleEvent(trigger);
 	}
 
 }

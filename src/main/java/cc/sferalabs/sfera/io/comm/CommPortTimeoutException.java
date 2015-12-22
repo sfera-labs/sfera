@@ -17,6 +17,7 @@ public class CommPortTimeoutException extends Exception {
 	/**
 	 * 
 	 * @param message
+	 *            the detail message
 	 */
 	CommPortTimeoutException(String message) {
 		super(message);
@@ -25,7 +26,9 @@ public class CommPortTimeoutException extends Exception {
 	/**
 	 * 
 	 * @param message
+	 *            the detail message
 	 * @param cause
+	 *            the cause
 	 */
 	CommPortTimeoutException(String message, Throwable cause) {
 		super(message, cause);
