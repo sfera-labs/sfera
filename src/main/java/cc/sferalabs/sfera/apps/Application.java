@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.core.Configuration;
+import cc.sferalabs.sfera.core.services.AutoStartService;
 import cc.sferalabs.sfera.core.services.Task;
 import cc.sferalabs.sfera.core.services.TasksManager;
 import cc.sferalabs.sfera.events.Bus;
@@ -24,7 +25,7 @@ import cc.sferalabs.sfera.util.files.FilesWatcher;
  * @version 1.0.0
  * 
  */
-public abstract class Application implements EventListener {
+public abstract class Application implements AutoStartService, EventListener {
 
 	protected final Logger log;
 	private String configFile;
@@ -48,13 +49,14 @@ public abstract class Application implements EventListener {
 	}
 
 	/**
-	 * Enables this application in a separate thread. This is the entry point of
-	 * the application life-cycle
+	 * Initializes this application in a separate thread. This is the entry
+	 * point of the application life-cycle.
 	 * 
 	 * @throws IOException
 	 *             if an I/O error occurs loading the configuration
 	 */
-	public synchronized void enable() throws IOException {
+	@Override
+	public synchronized void init() throws IOException {
 		final Configuration config = new Configuration(configFile);
 		final Application thisApp = this;
 		TasksManager.submit(new Task("App " + getClass().getName() + " enable") {
@@ -82,9 +84,10 @@ public abstract class Application implements EventListener {
 	/**
 	 * Disables this application in a separate thread
 	 */
-	public synchronized void disable() {
+	@Override
+	public synchronized void quit() {
 		final Application thisApp = this;
-		TasksManager.submit(new Task("App " + getClass().getName() + " disable") {
+		TasksManager.submit(new Task("App " + getClass().getName() + " quit") {
 
 			@Override
 			protected void execute() {
@@ -118,7 +121,7 @@ public abstract class Application implements EventListener {
 	 */
 	private synchronized void restart() throws IOException {
 		doDisable();
-		enable();
+		init();
 	}
 
 	/**

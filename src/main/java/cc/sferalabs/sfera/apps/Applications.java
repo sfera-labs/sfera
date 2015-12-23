@@ -83,7 +83,7 @@ public abstract class Applications {
 								Bus.register((EventListener) appInstance);
 							}
 							logger.info("App '{}' loaded", appClass);
-							appInstance.enable();
+							appInstance.init();
 						} catch (Throwable e) {
 							logger.error("Error instantiating app: " + appClass, e);
 						}
@@ -102,7 +102,7 @@ public abstract class Applications {
 			String appClass = a.getClass().getName();
 			if (!inConfig.contains(appClass)) {
 				logger.info("Configuration file for app '{}' deleted", appClass);
-				a.disable();
+				a.quit();
 				it.remove();
 			}
 		}
@@ -127,7 +127,7 @@ public abstract class Applications {
 	 */
 	public synchronized static void disable() {
 		for (Application a : applications) {
-			a.disable();
+			a.quit();
 		}
 	}
 
