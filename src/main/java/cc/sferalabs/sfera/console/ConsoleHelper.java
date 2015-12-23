@@ -23,7 +23,8 @@ public class ConsoleHelper implements ConsoleCommandHandler {
 	private final Map<String, ConsoleCommandHandler> handlers;
 
 	/**
-	 * @param handlers the map of existing {@code ConsoleCommandHandlers}
+	 * @param handlers
+	 *            the map of existing {@code ConsoleCommandHandlers}
 	 */
 	ConsoleHelper(Map<String, ConsoleCommandHandler> handlers) {
 		this.handlers = handlers;
@@ -31,12 +32,30 @@ public class ConsoleHelper implements ConsoleCommandHandler {
 
 	@Override
 	public void accept(String cmd) {
-		for (Entry<String, ConsoleCommandHandler> entry : handlers.entrySet()) {
-			String[] lines = entry.getValue().getHelp();
-			if (lines != null) {
-				for (String line : lines) {
-					logger.info("{} {}", entry.getKey(), line);
-				}
+		if (cmd.isEmpty()) {
+			for (Entry<String, ConsoleCommandHandler> entry : handlers.entrySet()) {
+				printHelp(entry.getKey(), entry.getValue());
+			}
+		} else {
+			ConsoleCommandHandler h = handlers.get(cmd);
+			if (h == null) {
+				logger.warn("Handler not found");
+				return;
+			}
+			printHelp(cmd, h);
+		}
+	}
+
+	/**
+	 * 
+	 * @param key
+	 * @param handler
+	 */
+	private void printHelp(String key, ConsoleCommandHandler handler) {
+		String[] lines = handler.getHelp();
+		if (lines != null) {
+			for (String line : lines) {
+				logger.info("{} {}", key, line);
 			}
 		}
 	}

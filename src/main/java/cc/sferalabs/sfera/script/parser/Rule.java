@@ -62,6 +62,20 @@ public class Rule {
 		this.fileScope = fileScope;
 		this.imports = imports;
 	}
+	
+	/**
+	 * @return the scriptFile
+	 */
+	public Path getScriptFile() {
+		return scriptFile;
+	}
+	
+	/**
+	 * @return the startLine
+	 */
+	public int getStartLine() {
+		return startLine;
+	}
 
 	/**
 	 * Executes this rule's action using the specified event as trigger.

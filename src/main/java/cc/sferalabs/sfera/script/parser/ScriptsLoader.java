@@ -231,7 +231,7 @@ public class ScriptsLoader implements EventListener {
 				return;
 			}
 
-			for (Entry<String, HashSet<Rule>> entry : scriptListener.triggerRulesMap.entrySet()) {
+			for (Entry<String, Set<Rule>> entry : scriptListener.triggerRulesMap.entrySet()) {
 				String trigger = entry.getKey();
 				Set<Rule> rules = triggersRulesMap.get(trigger);
 				if (rules == null) {

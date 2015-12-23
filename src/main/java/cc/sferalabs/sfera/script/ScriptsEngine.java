@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
+import cc.sferalabs.sfera.console.Console;
 import cc.sferalabs.sfera.core.events.PluginsEvent;
 import cc.sferalabs.sfera.core.services.AutoStartService;
 import cc.sferalabs.sfera.events.Bus;
@@ -50,8 +51,8 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(ScriptsEngine.class);
 
-	private Map<String, Set<Rule>> triggersRulesMap;
-	private Map<Path, List<Object>> errors;
+	private static Map<String, Set<Rule>> triggersRulesMap;
+	private static Map<Path, List<Object>> errors;
 
 	@Override
 	public void init() throws Exception {
@@ -62,17 +63,30 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 			logger.error("Error registering script files watcher", e);
 		}
 		Bus.register(this);
+		Console.setHandler("script", ScriptsConsoleCommandHandler.INSTANCE);
 	}
 
 	/**
 	 * 
 	 */
-	private void loadScripts() {
+	private synchronized void loadScripts() {
 		triggersRulesMap = new HashMap<>();
 		errors = new HashMap<>();
 		ScriptNodes.clear();
 		ScriptsLoader loader = new ScriptsLoader(triggersRulesMap, errors);
 		loader.load();
+	}
+
+	/**
+	 * 
+	 * @return the set of rules
+	 */
+	static synchronized Set<Rule> getRules() {
+		Set<Rule> rules = new HashSet<>();
+		for (Set<Rule> vals : triggersRulesMap.values()) {
+			rules.addAll(vals);
+		}
+		return rules;
 	}
 
 	/**
@@ -215,8 +229,6 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	}
 
 	/**
-	 * TODO remove?
-	 * 
 	 * Adds the specified Java type to the global scope of the script engine.
 	 * After this call the type will be accessible from the script using its
 	 * class simple name.
@@ -289,7 +301,7 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	 * @param script
 	 *            the script to execute
 	 * @param bindings
-	 *            the bindings to add
+	 *            the bindings to add (can be {@code null})
 	 * @return the value returned by the script
 	 * @throws ScriptException
 	 *             if an error accurs

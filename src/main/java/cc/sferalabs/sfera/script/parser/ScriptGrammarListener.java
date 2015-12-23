@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.script.Bindings;
 import javax.script.ScriptContext;
@@ -39,7 +40,7 @@ class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 	private final Map<String, Bindings> libraries;
 
 	private final List<Bindings> imports = new ArrayList<>();
-	final HashMap<String, HashSet<Rule>> triggerRulesMap = new HashMap<String, HashSet<Rule>>();
+	final HashMap<String, Set<Rule>> triggerRulesMap = new HashMap<String, Set<Rule>>();
 	private final List<Object> errors = new ArrayList<>();
 
 	private Rule currentRule;
@@ -178,12 +179,12 @@ class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 	 */
 	private void addTrigger(String id) {
 		if (currentRule != null) {
-			HashSet<Rule> actions = triggerRulesMap.get(id);
-			if (actions == null) {
-				actions = new HashSet<Rule>();
-				triggerRulesMap.put(id, actions);
+			Set<Rule> rules = triggerRulesMap.get(id);
+			if (rules == null) {
+				rules = new HashSet<Rule>();
+				triggerRulesMap.put(id, rules);
 			}
-			actions.add(currentRule);
+			rules.add(currentRule);
 		}
 	}
 }
