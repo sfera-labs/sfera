@@ -6,9 +6,6 @@ package cc.sferalabs.sfera.access;
 import java.io.IOException;
 import java.util.Arrays;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import cc.sferalabs.sfera.console.ConsoleCommandHandler;
 
 /**
@@ -20,8 +17,6 @@ import cc.sferalabs.sfera.console.ConsoleCommandHandler;
  */
 public class AccessConsoleCommandHandler implements ConsoleCommandHandler {
 
-	private static final Logger logger = LoggerFactory.getLogger(AccessConsoleCommandHandler.class);
-
 	static final AccessConsoleCommandHandler INSTANCE = new AccessConsoleCommandHandler();
 
 	/**
@@ -31,11 +26,10 @@ public class AccessConsoleCommandHandler implements ConsoleCommandHandler {
 	}
 
 	@Override
-	public void accept(String cmd) {
+	public String accept(String cmd) {
 		String[] args = cmd.split("\\s+");
 		if (args.length < 2) {
-			logger.warn("Format error");
-			return;
+			return "Syntax error";
 		}
 
 		String username = args[1];
@@ -47,27 +41,26 @@ public class AccessConsoleCommandHandler implements ConsoleCommandHandler {
 				String[] roles = Arrays.copyOfRange(args, 3, args.length);
 				try {
 					Access.addUser(username, password, roles);
+					return "Added";
 				} catch (IOException e) {
-					logger.warn("Error", e);
+					return "Error: " + e;
 				} catch (UsernameAlreadyUsedException e) {
-					logger.warn("Username already used", e);
+					return "Username already used";
 				}
 			} else {
-				logger.warn("Missing parameters");
+				return "Parameters missing";
 			}
-			break;
 
 		case "remove":
 			try {
 				Access.removeUser(username);
+				return "Removed";
 			} catch (IOException e) {
-				logger.warn("Error", e);
+				return "Error: " + e;
 			}
-			break;
 
 		default:
-			logger.warn("Unkown command");
-			break;
+			return "Unkown command";
 		}
 	}
 

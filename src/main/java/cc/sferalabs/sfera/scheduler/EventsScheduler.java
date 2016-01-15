@@ -40,13 +40,18 @@ import cc.sferalabs.sfera.core.services.AutoStartService;
  */
 
 /**
- *
+ * 
  * @author Giampiero Baggiani
  *
  * @version 1.0.0
  *
  */
 public class EventsScheduler implements AutoStartService {
+
+	/*
+	 * TODO This class should become Timer Implement a Service calles Scheduler
+	 * with chron-like rules
+	 */
 
 	private static final Logger logger = LoggerFactory.getLogger(EventsScheduler.class);
 

@@ -3,9 +3,6 @@
  */
 package cc.sferalabs.sfera.drivers;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import cc.sferalabs.sfera.console.ConsoleCommandHandler;
 
 /**
@@ -17,9 +14,6 @@ import cc.sferalabs.sfera.console.ConsoleCommandHandler;
  */
 public class DriversConsoleCommandHandler implements ConsoleCommandHandler {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(DriversConsoleCommandHandler.class);
-
 	static final DriversConsoleCommandHandler INSTANCE = new DriversConsoleCommandHandler();
 
 	/**
@@ -29,39 +23,36 @@ public class DriversConsoleCommandHandler implements ConsoleCommandHandler {
 	}
 
 	@Override
-	public void accept(String cmd) {
+	public String accept(String cmd) {
 		String[] args = cmd.split("\\s+");
 		if (args.length != 2) {
-			logger.warn("Format error");
-			return;
+			return "Syntax error";
 		}
 
 		Driver d = Drivers.getDriver(args[1]);
 		if (d == null) {
-			logger.warn("Driver '{}' not found", args[1]);
-			return;
+			return "Driver '" + args[1] + "' not found";
 		}
 
 		switch (args[0]) {
 		case "quit":
 			d.quit();
-			break;
+			return "Quitting";
 
 		case "start":
 			d.start();
-			break;
+			return "Started";
 
 		case "restart":
 			try {
 				d.restart();
 			} catch (InterruptedException e) {
-				logger.warn("Command interrupted");
+				return "Interrupted";
 			}
-			break;
+			return "Restarted";
 
 		default:
-			logger.warn("Unkown command");
-			break;
+			return "Unkown command";
 		}
 	}
 

@@ -8,9 +8,6 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import cc.sferalabs.sfera.console.ConsoleCommandHandler;
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Event;
@@ -24,8 +21,6 @@ import cc.sferalabs.sfera.events.Event;
  */
 public class SystemConsoleCommandHandler implements ConsoleCommandHandler {
 
-	private static final Logger logger = LoggerFactory.getLogger(SystemConsoleCommandHandler.class);
-
 	static final SystemConsoleCommandHandler INSTANCE = new SystemConsoleCommandHandler();
 
 	/**
@@ -35,26 +30,27 @@ public class SystemConsoleCommandHandler implements ConsoleCommandHandler {
 	}
 
 	@Override
-	public void accept(String cmd) {
+	public String accept(String cmd) {
 		if (cmd.startsWith("state")) {
-			printState(cmd.substring(5));
+			return getState(cmd.substring(5));
 		} else if (cmd.equals("quit")) {
 			SystemNode.getInstance().quit();
+			return "Quitting...";
 		} else if (cmd.equals("kill")) {
 			System.exit(1);
 		} else {
-			logger.warn("Unkown command");
+			return "Unkown command";
 		}
+		return null;
 	}
 
 	/**
 	 * 
 	 * @param id
 	 */
-	private void printState(String id) {
+	private String getState(String id) {
 		final String finalId = id.trim();
 		Comparator<Event> comparator = new Comparator<Event>() {
-
 			@Override
 			public int compare(Event o1, Event o2) {
 				return o1.getId().compareTo(o2.getId());
@@ -64,7 +60,6 @@ public class SystemConsoleCommandHandler implements ConsoleCommandHandler {
 		Predicate<Event> predicate;
 		if (finalId.isEmpty()) {
 			predicate = new Predicate<Event>() {
-
 				@Override
 				public boolean test(Event e) {
 					return true;
@@ -73,11 +68,9 @@ public class SystemConsoleCommandHandler implements ConsoleCommandHandler {
 		} else if (finalId.contains("*")) {
 			String[] parts = finalId.split("\\*");
 			if (parts.length > 2) {
-				logger.warn("Illegal syntax");
-				return;
+				return "Illegal syntax";
 			}
 			predicate = new Predicate<Event>() {
-
 				@Override
 				public boolean test(Event e) {
 					if (parts.length == 0) { // case "*"
@@ -94,7 +87,6 @@ public class SystemConsoleCommandHandler implements ConsoleCommandHandler {
 			};
 		} else {
 			predicate = new Predicate<Event>() {
-
 				@Override
 				public boolean test(Event e) {
 					return e.getId().equals(finalId);
@@ -105,14 +97,16 @@ public class SystemConsoleCommandHandler implements ConsoleCommandHandler {
 		Map<String, Event> state = Bus.getCurrentState();
 		Collection<Event> events = state.values();
 
+		StringBuilder sb = new StringBuilder();
 		events.stream().filter(predicate).sorted(comparator).forEach(e -> {
-			logger.info("{} = {}", e.getId(), e.getValue());
+			sb.append(e.getId()).append(" = ").append(e.getValue()).append("\n");
 		});
+		return sb.toString();
 	}
 
 	@Override
 	public String[] getHelp() {
-		return new String[] { "state [id] | quit | kill" };
+		return new String[] { "quit | kill | state [id]" };
 	}
 
 }

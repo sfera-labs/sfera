@@ -19,9 +19,9 @@ import cc.sferalabs.sfera.http.api.rest.RestResponse;
  * API servlet handling requests for events triggering.
  * </p>
  * <p>
- * The triggered events will be instances of {@link RemoteApiEvent} and the source
- * node an {@link cc.sferalabs.sfera.http.api.HttpRemoteNode HttpRemoteNode}
- * instance.
+ * The triggered events will be instances of {@link RemoteApiEvent} and the
+ * source node an {@link cc.sferalabs.sfera.http.api.HttpRemoteNode
+ * HttpRemoteNode} instance.
  * </p>
  * 
  * @author Giampiero Baggiani

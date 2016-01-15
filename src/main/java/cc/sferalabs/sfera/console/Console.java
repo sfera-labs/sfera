@@ -1,30 +1,23 @@
 package cc.sferalabs.sfera.console;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cc.sferalabs.sfera.core.services.LazyService;
-import cc.sferalabs.sfera.core.services.TasksManager;
+import cc.sferalabs.sfera.core.SystemNode;
+import cc.sferalabs.sfera.core.services.AutoStartService;
 
-public class Console extends LazyService {
+public class Console implements AutoStartService {
 
 	private static final Logger logger = LoggerFactory.getLogger(Console.class);
 
-	private static final Console INSTANCE = new Console();
+	private static final Map<String, ConsoleCommandHandler> HANDLERS = new HashMap<>();
 
-	private BufferedReader reader;
-	private boolean run;
-	private Map<String, ConsoleCommandHandler> handlers;
-	private Boolean enabled;
+	private StandardConsoleSession scs;
+	private TelnetConsoleServer tcs;
 
 	/**
 	 * Sets the specified handler as the one handling commands starting with the
@@ -35,85 +28,44 @@ public class Console extends LazyService {
 	 * @param handler
 	 *            the handler
 	 */
-	public static synchronized void setHandler(String key, ConsoleCommandHandler handler) {
-		if (INSTANCE.init()) {
-			INSTANCE.handlers.put(key, handler);
-			logger.debug("Added console handler: {}", key);
-		}
+	public static void setHandler(String key, ConsoleCommandHandler handler) {
+		HANDLERS.put(key, handler);
+		logger.debug("Added console handler: {}", key);
 	}
 
-	/**
-	 * @return
-	 */
-	private boolean init() {
-		if (enabled != null) {
-			return enabled;
-		}
+	@Override
+	public void init() {
+		scs = new StandardConsoleSession();
+		scs.start();
 
-		String consoleIn = System.getProperty("sfera.console.in");
-		if (consoleIn == null) {
-			logger.debug("Console disabled");
-			enabled = false;
-		} else {
+		Integer telnetPort = SystemNode.getConfiguration().get("console_telnet_port", null);
+		if (telnetPort != null) {
 			try {
-				handlers = new HashMap<>();
-				if (consoleIn.equalsIgnoreCase("std")) {
-					reader = new BufferedReader(new InputStreamReader(System.in));
-				} else {
-					Path path = Paths.get(consoleIn);
-					Files.deleteIfExists(path);
-					Files.createFile(path);
-					reader = Files.newBufferedReader(path);
-				}
-				logger.info("Console enabled: {}", consoleIn);
-				run = true;
-				TasksManager.executeSystem("Console", this::readInput);
-				handlers.put("help", new ConsoleHelper(handlers));
-				enabled = true;
+				tcs = new TelnetConsoleServer(telnetPort);
 			} catch (IOException e) {
-				logger.error("Initialization error", e);
-				enabled = false;
+				logger.error("Error creating telnet server", e);
 			}
+		} else {
+			logger.info("Telnet console disabled");
 		}
 
-		return enabled;
+		setHandler("help", new ConsoleHelper(HANDLERS));
 	}
 
 	@Override
 	public void quit() throws Exception {
-		run = false;
-	}
-
-	/**
-	 * 
-	 */
-	private void readInput() {
-		try {
-			while (run) {
-				if (reader.ready()) {
-					String cmd = reader.readLine().trim();
-					if (!cmd.isEmpty()) {
-						processCommad(cmd);
-					}
-				}
-				Thread.sleep(500);
-			}
-		} catch (Exception e) {
-			logger.error("Error reading input. Console stopped", e);
-		} finally {
-			if (reader != null) {
-				try {
-					reader.close();
-				} catch (Exception e2) {
-				}
-			}
+		if (scs != null) {
+			scs.quit();
+		}
+		if (tcs != null) {
+			tcs.quit();
 		}
 	}
 
 	/**
 	 * @param cmd
 	 */
-	private synchronized void processCommad(String cmd) {
+	static String processCommad(String cmd) {
 		try {
 			logger.debug("Processing command: {}", cmd);
 			String key;
@@ -126,14 +78,15 @@ public class Console extends LazyService {
 				key = cmd.substring(0, sep);
 				rest = cmd.substring(sep).trim();
 			}
-			ConsoleCommandHandler handler = handlers.get(key);
+			ConsoleCommandHandler handler = HANDLERS.get(key);
 			if (handler != null) {
-				handler.accept(rest);
+				return handler.accept(rest);
 			} else {
-				logger.warn("No command handler for '{}'", key);
+				return "No command handler for '" + key + "'";
 			}
 		} catch (Throwable t) {
-			logger.warn("Error executing command '" + cmd + "'", t);
+			logger.debug("Error executing command '" + cmd + "'", t);
+			return "Error executing command '" + cmd + "': " + t;
 		}
 	}
 

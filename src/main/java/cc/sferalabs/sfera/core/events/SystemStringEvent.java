@@ -17,8 +17,10 @@ abstract class SystemStringEvent extends StringEvent implements SystemEvent {
 
 	/**
 	 * 
-	 * @param id the event ID
-	 * @param value the event value
+	 * @param id
+	 *            the event ID
+	 * @param value
+	 *            the event value
 	 */
 	SystemStringEvent(String id, String value) {
 		super(SystemNode.getInstance(), id, value);

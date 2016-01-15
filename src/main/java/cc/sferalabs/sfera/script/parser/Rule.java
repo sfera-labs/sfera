@@ -62,14 +62,14 @@ public class Rule {
 		this.fileScope = fileScope;
 		this.imports = imports;
 	}
-	
+
 	/**
 	 * @return the scriptFile
 	 */
 	public Path getScriptFile() {
 		return scriptFile;
 	}
-	
+
 	/**
 	 * @return the startLine
 	 */

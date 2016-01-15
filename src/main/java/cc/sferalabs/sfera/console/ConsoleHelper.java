@@ -4,10 +4,6 @@
 package cc.sferalabs.sfera.console;
 
 import java.util.Map;
-import java.util.Map.Entry;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -17,8 +13,6 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class ConsoleHelper implements ConsoleCommandHandler {
-
-	private static final Logger logger = LoggerFactory.getLogger(ConsoleHelper.class);
 
 	private final Map<String, ConsoleCommandHandler> handlers;
 
@@ -31,33 +25,23 @@ public class ConsoleHelper implements ConsoleCommandHandler {
 	}
 
 	@Override
-	public void accept(String cmd) {
-		if (cmd.isEmpty()) {
-			for (Entry<String, ConsoleCommandHandler> entry : handlers.entrySet()) {
-				printHelp(entry.getKey(), entry.getValue());
+	public String accept(String cmd) {
+		ConsoleCommandHandler h = handlers.get(cmd);
+		StringBuilder sb = new StringBuilder();
+		if (h == null) {
+			sb.append("Specify a valid handler:");
+			for (String key : handlers.keySet()) {
+				sb.append("\n").append(key);
 			}
 		} else {
-			ConsoleCommandHandler h = handlers.get(cmd);
-			if (h == null) {
-				logger.warn("Handler not found");
-				return;
-			}
-			printHelp(cmd, h);
-		}
-	}
-
-	/**
-	 * 
-	 * @param key
-	 * @param handler
-	 */
-	private void printHelp(String key, ConsoleCommandHandler handler) {
-		String[] lines = handler.getHelp();
-		if (lines != null) {
-			for (String line : lines) {
-				logger.info("{} {}", key, line);
+			String[] lines = h.getHelp();
+			if (lines != null) {
+				for (String line : lines) {
+					sb.append(cmd).append(" ").append(line).append("\n");
+				}
 			}
 		}
+		return sb.toString();
 	}
 
 	@Override
