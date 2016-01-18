@@ -25,7 +25,7 @@ public class StandardConsoleSession extends ConsoleSession {
 	private int errorCount = 0;
 
 	/**
-	 * 
+	 * Constructor
 	 */
 	StandardConsoleSession() {
 		super("Standard Console");
@@ -65,7 +65,7 @@ public class StandardConsoleSession extends ConsoleSession {
 	}
 
 	@Override
-	protected void clear() {
+	protected void cleanUp() {
 		if (reader != null) {
 			try {
 				reader.close();

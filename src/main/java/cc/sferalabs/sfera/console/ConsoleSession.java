@@ -24,13 +24,14 @@ public abstract class ConsoleSession extends Task {
 
 	/**
 	 * @param name
+	 *            the console name
 	 */
 	ConsoleSession(String name) {
 		super(name);
 	}
 
 	/**
-	 * 
+	 * Starts this console session as a new system task
 	 */
 	void start() {
 		run = true;
@@ -38,7 +39,7 @@ public abstract class ConsoleSession extends Task {
 	}
 
 	/**
-	 * 
+	 * Interrups this console session
 	 */
 	protected void quit() {
 		logger.debug("{} quitting...", getName());
@@ -60,28 +61,36 @@ public abstract class ConsoleSession extends Task {
 				}
 			}
 		}
-		clear();
+		cleanUp();
 		logger.debug("{} quitted", getName());
 	}
 
 	/**
-	 * @return
+	 * Initializes this console session.
+	 * 
+	 * @return {@code true} if initialization is successful, {@code false}
+	 *         otherwise
 	 */
 	protected abstract boolean init();
 
 	/**
-	 * 
+	 * Cleans up the resources used by this console session. Called before
+	 * terminating the task.
 	 */
-	protected abstract void clear();
+	protected abstract void cleanUp();
 
 	/**
-	 * @return
+	 * Waits for a command to be processed.
+	 * 
+	 * @return the received command
 	 */
 	protected abstract String acceptCommand();
 
 	/**
+	 * Outputs the specified text to the console.
 	 * 
 	 * @param text
+	 *            the text to output
 	 */
 	protected abstract void output(String text);
 

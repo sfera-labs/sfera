@@ -32,7 +32,10 @@ public class TelnetConsoleSession extends ConsoleSession {
 	private PrintWriter out;
 
 	/**
+	 * Constructor.
+	 * 
 	 * @param socket
+	 *            the socket associated with this telnet console session
 	 */
 	TelnetConsoleSession(Socket socket) {
 		super("Telnet Console (" + socket.getRemoteSocketAddress() + ")");
@@ -85,7 +88,7 @@ public class TelnetConsoleSession extends ConsoleSession {
 	}
 
 	@Override
-	protected void clear() {
+	protected void cleanUp() {
 		try {
 			out.close();
 		} catch (Exception e) {
