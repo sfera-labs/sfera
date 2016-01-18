@@ -66,9 +66,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
-			<!-- Single jar with dependencies -->
-
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
@@ -90,9 +87,6 @@
 					</descriptorRefs>
 				</configuration>
 			</plugin>
-
-			<!-- External dependencies -->
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
