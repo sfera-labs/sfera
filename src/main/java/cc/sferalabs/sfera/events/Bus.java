@@ -4,6 +4,8 @@ import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.script.ScriptException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +15,7 @@ import com.google.common.eventbus.SubscriberExceptionContext;
 import com.google.common.eventbus.SubscriberExceptionHandler;
 
 import cc.sferalabs.sfera.core.services.TasksManager;
+import cc.sferalabs.sfera.script.ScriptsEngine;
 
 /**
  * Utility class representing the system events bus.
@@ -43,6 +46,14 @@ public abstract class Bus {
 	private static final EventBus EVENT_BUS = new AsyncEventBus(
 			TasksManager.getTasksExecutorService(), SUBSCRIBER_EXCEPTION_HANDLER);
 	private static final Map<String, Event> EVENTS_MAP = new HashMap<String, Event>();
+
+	static {
+		try {
+			ScriptsEngine.putTypeInGlobalScope(Bus.class);
+		} catch (ScriptException e) {
+			logger.error("Error adding Bus to script engine global scope", e);
+		}
+	}
 
 	/**
 	 * Registers the specified listener to the event bus.

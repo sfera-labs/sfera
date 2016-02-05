@@ -1,7 +1,12 @@
 package cc.sferalabs.sfera.core;
 
+import java.net.InetAddress;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
@@ -126,13 +131,19 @@ public class SystemNode extends Node {
 			protected void execute() {
 				logger.warn("System stopped");
 
-				logger.debug("Disabling apps...");
+				logger.info("Disabling apps...");
 				Applications.disable();
 
-				logger.debug("Quitting drivers...");
+				logger.info("Quitting drivers...");
 				Drivers.quit();
 
-				logger.debug("Terminating tasks...");
+				try {
+					Drivers.waitTermination(10000);
+				} catch (InterruptedException e) {
+				}
+				logger.info("Drivers quitted");
+
+				logger.info("Terminating tasks...");
 				TasksManager.shutdownTasksNow();
 				try {
 					if (TasksManager.awaitTasksTermination(15, TimeUnit.SECONDS)) {
@@ -179,6 +190,26 @@ public class SystemNode extends Node {
 	 */
 	public static void addToLifeCycle(Service service) {
 		services.add(service);
+	}
+
+	/**
+	 * Returns the InetAddress of one of the site local interfaces on this
+	 * machine.
+	 * 
+	 * @return the InetAddress of one of the site local interfaces on this
+	 *         machine, or {@code null} if not found.
+	 * @throws SocketException
+	 *             if an error occurs
+	 */
+	public static InetAddress getSiteLocalAddress() throws SocketException {
+		Enumeration<NetworkInterface> nis = NetworkInterface.getNetworkInterfaces();
+		while (nis.hasMoreElements()) {
+			for (InterfaceAddress ni : nis.nextElement().getInterfaceAddresses())
+				if (ni.getAddress().isSiteLocalAddress()) {
+					return ni.getAddress();
+				}
+		}
+		return null;
 	}
 
 }

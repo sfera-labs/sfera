@@ -1,6 +1,5 @@
 package cc.sferalabs.sfera.core;
 
-import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -57,13 +56,13 @@ public abstract class Plugins {
 						plugins.put(p.getId(), p);
 						logger.info("Plugin '{}' loaded", p.getId());
 					}
-				} catch (Exception e) {
+				} catch (Throwable e) {
 					logger.error("Error loading file '" + file + "' in plugins folder", e);
 				}
 			}
 		} catch (NoSuchFileException e) {
 			logger.debug("Plugins directory not found");
-		} catch (IOException e) {
+		} catch (Exception e) {
 			logger.error("Error loading plugins", e);
 			return;
 		}

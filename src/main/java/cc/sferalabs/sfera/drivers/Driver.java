@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -187,14 +188,32 @@ public abstract class Driver extends Node {
 	 */
 	public synchronized void restart() throws InterruptedException {
 		quit();
-		long giveUpTime = System.currentTimeMillis() + 300000;
+		try {
+			waitTermination(30000);
+		} catch (TimeoutException e) {
+		}
+		start();
+	}
+
+	/**
+	 * Waits for the termination of the driver task. If the timeout expires
+	 * before termination a TimeoutException is thrown.
+	 * 
+	 * @param timeout
+	 *            timeout in milliseconds
+	 * @throws InterruptedException
+	 *             if interrupted
+	 * @throws TimeoutException
+	 *             if the timeout expires
+	 */
+	void waitTermination(long timeout) throws InterruptedException, TimeoutException {
+		long giveUpTime = System.currentTimeMillis() + timeout;
 		while (future != null) {
 			if (System.currentTimeMillis() > giveUpTime) {
-				break;
+				throw new TimeoutException();
 			}
 			Thread.sleep(500);
 		}
-		start();
 	}
 
 	/**

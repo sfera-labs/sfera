@@ -222,7 +222,7 @@ public class ApiSocket extends WebSocketAdapter {
 				reply.sendError("Unknown action");
 				break;
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			logger.warn("Error processing WebSocket message", e);
 			reply.sendError("Server error: " + e.getMessage());
 			throw e;

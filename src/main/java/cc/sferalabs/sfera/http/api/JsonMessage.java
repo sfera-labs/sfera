@@ -2,9 +2,7 @@ package cc.sferalabs.sfera.http.api;
 
 import java.util.Set;
 
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.json.JSONObject;
 
 /**
  * Abstract class for API JSON messages.
@@ -15,8 +13,6 @@ import org.json.simple.parser.ParseException;
  *
  */
 public class JsonMessage {
-
-	private static final JSONParser PARSER = new JSONParser();
 
 	private final JSONObject obj;
 
@@ -32,11 +28,9 @@ public class JsonMessage {
 	 * 
 	 * @param json
 	 *            the string to parse
-	 * @throws ParseException
-	 *             if a parsing error occurs
 	 */
-	public JsonMessage(String json) throws ParseException {
-		this((JSONObject) PARSER.parse(json));
+	public JsonMessage(String json) {
+		this(new JSONObject(json));
 	}
 
 	/**
@@ -55,7 +49,6 @@ public class JsonMessage {
 	 * @param value
 	 *            value for the attribute to set
 	 */
-	@SuppressWarnings("unchecked")
 	public void put(String key, Object value) {
 		obj.put(key, value);
 	}
@@ -75,7 +68,7 @@ public class JsonMessage {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T get(String key) {
-		return (T) obj.get(key);
+		return (T) obj.opt(key);
 	}
 
 	/**
@@ -83,7 +76,6 @@ public class JsonMessage {
 	 * 
 	 * @return a set containing the attributes of this message
 	 */
-	@SuppressWarnings("unchecked")
 	public Set<String> getAttributes() {
 		return obj.keySet();
 	}
@@ -94,7 +86,7 @@ public class JsonMessage {
 	 * @return this JSON message in string format
 	 */
 	protected String toJsonString() {
-		return obj.toJSONString();
+		return obj.toString();
 	}
 
 }

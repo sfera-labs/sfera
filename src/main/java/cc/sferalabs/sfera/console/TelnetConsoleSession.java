@@ -38,7 +38,7 @@ public class TelnetConsoleSession extends ConsoleSession {
 	 *            the socket associated with this telnet console session
 	 */
 	TelnetConsoleSession(Socket socket) {
-		super("Telnet Console (" + socket.getRemoteSocketAddress() + ")");
+		super("Telnet console session (" + socket.getRemoteSocketAddress() + ")");
 		this.socket = socket;
 	}
 
@@ -59,7 +59,7 @@ public class TelnetConsoleSession extends ConsoleSession {
 				logger.warn("Attempted telnet console access from {} - user: {}", addr, user);
 				out.println("Nope!");
 			} else {
-				logger.warn("Telnet console access from {} - user: {}", addr, user);
+				logger.info("Telnet console access from {} - user: {}", addr, user);
 				out.println("Granted - Input your commands:");
 				ok = true;
 			}
@@ -102,6 +102,7 @@ public class TelnetConsoleSession extends ConsoleSession {
 		} catch (Exception e) {
 		}
 		TelnetConsoleServer.removeSession(this);
+		logger.info(getName() + " closed");
 	}
 
 }

@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -125,6 +126,29 @@ public abstract class Drivers {
 	public synchronized static void quit() {
 		for (final Driver d : drivers.values()) {
 			d.quit();
+		}
+	}
+
+	/**
+	 * Waits for the termination of all the drivers. If the timeout expires
+	 * before termination a TimeoutException is thrown.
+	 * 
+	 * @param timeout
+	 *            timeout in milliseconds
+	 * @throws InterruptedException
+	 *             if interrupted
+	 */
+	public synchronized static void waitTermination(long timeout) throws InterruptedException {
+		for (final Driver d : drivers.values()) {
+			if (timeout <= 0) {
+				return;
+			}
+			long s = System.currentTimeMillis();
+			try {
+				d.waitTermination(timeout);
+			} catch (TimeoutException e) {
+			}
+			timeout -= System.currentTimeMillis() - s;
 		}
 	}
 

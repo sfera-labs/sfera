@@ -1,5 +1,7 @@
 package cc.sferalabs.sfera.script.parser;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.script.Bindings;
@@ -49,15 +51,23 @@ class ActionTask extends Task {
 				b.putAll(imp);
 			}
 			b.putAll(rule.fileScope);
+			Map<String, Object> preBindings = new HashMap<>(b);
 			b.put("_e", triggerEvent);
+
 			rule.action.eval(b);
+
 			for (Entry<String, Object> e : b.entrySet()) {
 				String key = e.getKey();
-				Object val = e.getValue();
-				if (rule.fileScope.replace(key, val) == null) {
-					for (Bindings imp : rule.imports) {
-						if (imp.replace(key, val) != null) {
-							break;
+				if (preBindings.containsKey(key)) {
+					Object val = e.getValue();
+					Object preVal = preBindings.get(key);
+					if (preVal != val) {
+						if (rule.fileScope.replace(key, val) == null) {
+							for (Bindings imp : rule.imports) {
+								if (imp.replace(key, val) != null) {
+									break;
+								}
+							}
 						}
 					}
 				}
