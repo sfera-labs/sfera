@@ -1,0 +1,41 @@
+Download Sfera
+==============
+
+Below you find a **Sfera jar** to be used in your installation that includes all the needed dependencies or, for developing purposes and to use it with alternate versions of the dependencies, you can download the simple Sfera jar which includes only its own binaries. 
+
+|      | Link | Checksum |
+| ---- | ---- | ---- |
+| **Sfera jar** | [sfera-${latestDeployedVersion}-jar-with-dependencies.jar][jar] | [sfera-${latestDeployedVersion}-jar-with-dependencies.jar.md5][jar-md5]
+| **Sfera jar without dependencies** | [sfera-${latestDeployedVersion}.jar][jar-no-dp] | [sfera-${latestDeployedVersion}.jar.md5][jar-no-dp-md5]
+
+[jar]: http://sfera.sferalabs.cc/mvn-repo/cc/sferalabs/sfera/sfera/${latestDeployedVersion}/sfera-${latestDeployedVersion}-jar-with-dependencies.jar
+[jar-md5]: http://sfera.sferalabs.cc/mvn-repo/cc/sferalabs/sfera/sfera/${latestDeployedVersion}/sfera-${latestDeployedVersion}-jar-with-dependencies.jar.md5
+[jar-no-dp]: http://sfera.sferalabs.cc/mvn-repo/cc/sferalabs/sfera/sfera/${latestDeployedVersion}/sfera-${latestDeployedVersion}.jar
+[jar-no-dp-md5]: http://sfera.sferalabs.cc/mvn-repo/cc/sferalabs/sfera/sfera/${latestDeployedVersion}/sfera-${latestDeployedVersion}.jar.md5
+
+To include Sfera in your Java project using Maven:
+
+```
+<project>
+    ...
+    <repositories>
+        ...
+        <repository>
+            <id>sfera-repo</id>
+            <url>http://sfera.sferalabs.cc/mvn-repo</url>
+        </repository>
+        ...
+    </repositories>
+
+    <dependencies>
+        ...
+        <dependency>
+            <groupId>cc.sferalabs.sfera</groupId>
+            <artifactId>sfera</artifactId>
+            <version>${latestDeployedVersion}</version>
+        </dependency>
+        ...
+    </dependencies>
+    ...
+</project>
+```
