@@ -248,7 +248,7 @@ Response:
 _HTTP:_
 
 ```
-    /api/command?cid=766&cmd=myLights.light(2).setLevel(50)
+/api/command?cid=766&cmd=myLights.light(2).setLevel(50)
 ```
 
 ```

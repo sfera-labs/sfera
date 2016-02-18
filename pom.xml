@@ -22,7 +22,7 @@
 		</repository>
 		<site>
 			<id>sferalabs.cc</id>
-			<url>scp://sferalabs.cc/var/www/sfera.sferalabs/docs/</url>
+			<url>scp://sferalabs.cc/var/www/sfera.sferalabs/docs/sfera/</url>
 		</site>
 	</distributionManagement>
 

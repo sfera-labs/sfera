@@ -4,10 +4,10 @@ The console provides for interacting with Sfera's runtime. You have commands to 
 
 If you ran Sfera from shell, commands will be read from standard input. 
 
-Additionally, you can instantiate a Telnet connection to Sfera's IP address on the port specified by the `console_telnet_port` [configuration parameter](configuration.html#Parameters); after authenticating you'll be able to interact with the console:
+Additionally, you can instantiate a Telnet connection to Sfera's IP address on the port specified by the `console_telnet_port` [configuration parameter](configuration.html#Parameters); after authenticating (you need admin rights) you'll be able to interact with the console:
 
 ```
-$ telnet localhost 7777
+$ telnet 192.168.1.200 7777
 Trying ::1...
 Connected to localhost.
 Escape character is '^]'.
