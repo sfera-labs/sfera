@@ -58,10 +58,9 @@ Follow these steps to create the base project structure using our maven archetyp
 
 Now you should see a new project in Eclipse named as your artifact id (e.g. "mydriver").   
 
-Test that everything is setup correctly by launching Sfera:
-* Go to menu **Run > Run History > Sfera-\<plugin name\>**
+Test that everything is setup correctly by launching Sfera: go to menu **Run > Run History > Sfera-\<plugin name\>**
 
-You should see some logs in your Console window.   
+You should see some logs in your Console window.     
 To stop Sfera type `sys quit` in the console and hit <kbd>Enter</kbd>.
 
         

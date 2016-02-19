@@ -17,6 +17,9 @@
 			</includes>
 		</fileSet>
 		<fileSet filtered="true" encoding="UTF-8">
+			<directory>src/main/javadoc</directory>
+		</fileSet>
+		<fileSet filtered="false" encoding="UTF-8">
 			<directory>src/main/resources</directory>
 		</fileSet>
 		<fileSet filtered="true" packaged="true" encoding="UTF-8">

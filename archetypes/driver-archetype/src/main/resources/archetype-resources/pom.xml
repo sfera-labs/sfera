@@ -11,6 +11,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<sfera-version>0.1.0</sfera-version>
 	</properties>
 
 	<build>
@@ -25,6 +26,7 @@
 				</includes>
 			</resource>
 		</resources>
+
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -51,13 +53,55 @@
 					</descriptorRefs>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.4</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.10.3</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<show>public</show>
+					<links>
+						<link>http://sfera.sferalabs.cc/docs/sfera/apidocs</link>
+					</links>
+					<taglets>
+						<taglet>
+							<tagletClass>cc.sferalabs.sfera.doc.taglets.ConfigParamTaglet</tagletClass>
+							<tagletArtifact>
+								<groupId>cc.sferalabs.sfera</groupId>
+								<artifactId>sfera</artifactId>
+								<version>${sfera-version}</version>
+							</tagletArtifact>
+						</taglet>
+					</taglets>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
-	
+
 	<repositories>
 		<repository>
 			<id>sfera-repo</id>
-			<url>http://wiki.sferalabs.cc/mvn-repo/snapshots</url>
+			<url>http://sfera.sferalabs.cc/mvn-repo</url>
 		</repository>
 	</repositories>
 
@@ -65,7 +109,7 @@
 		<dependency>
 			<groupId>cc.sferalabs.sfera</groupId>
 			<artifactId>sfera</artifactId>
-			<version>0.0.2-SNAPSHOT</version>
+			<version>${sfera-version}</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
