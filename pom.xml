@@ -8,6 +8,19 @@
 	<name>Sfera</name>
 	<description>The Sfera Framework for Home/Building Automation and IoT Integration</description>
 	<url>http://sferalabs.cc</url>
+	
+	<licenses>
+		<license>
+			<name>The GNU Lesser General Public License, Version 2.1</name>
+			<url>http://www.gnu.org/licenses/lgpl-2.1.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<organization>
+		<name>Sfera Labs</name>
+		<url>http://www.sferalabs.cc</url>
+	</organization>
 
 	<properties>
 		<latestDeployedVersion>0.1.0</latestDeployedVersion>

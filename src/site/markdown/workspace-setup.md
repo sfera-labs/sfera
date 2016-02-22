@@ -51,7 +51,7 @@ Follow these steps to create the base project structure using our maven archetyp
 12. Select the "driver-archetype" or the "app-archetype" depending on what you are going to develop and click **Next >**
 13. Set the group id for your plugin. We recommend using the syntax `<your_domain>.sfera.drivers` (e.g. `com.example.sfera.drivers`) for drivers and the syntax `<your_domain>.sfera.apps` (e.g. `com.example.sfera.apps`) for apps
 14. Set the artifact id (e.g. `mydriver` or `myapp`)
-15. For the package use the concatenation of group an artifact id (e.g. `com.example.sfera.driver.mydriver`)
+15. For the package use the concatenation of group and artifact id (e.g. `com.example.sfera.driver.mydriver`)
 16. Set the driver/app name property: this will be the name of your driver/app class too, so use the camel-case notation (e.g. `MyDriver` or `MyApp`)
 17. Add a description of what your plugin does
 18. Click on **Finish**
