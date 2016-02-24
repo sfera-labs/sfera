@@ -26,6 +26,11 @@ public class AccessConsoleCommandHandler implements ConsoleCommandHandler {
 	}
 
 	@Override
+	public String getKey() {
+		return "access";
+	}
+
+	@Override
 	public String accept(String cmd) {
 		String[] args = cmd.split("\\s+");
 		if (args.length < 2) {
@@ -62,12 +67,6 @@ public class AccessConsoleCommandHandler implements ConsoleCommandHandler {
 		default:
 			return "Unkown command";
 		}
-	}
-
-	@Override
-	public String[] getHelp() {
-		return new String[] { "add <username> <password> <role1> [<role2> ... <roleN>]",
-				"remove <username>" };
 	}
 
 }

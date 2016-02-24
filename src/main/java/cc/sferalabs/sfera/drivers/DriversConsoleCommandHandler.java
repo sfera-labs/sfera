@@ -23,6 +23,11 @@ public class DriversConsoleCommandHandler implements ConsoleCommandHandler {
 	}
 
 	@Override
+	public String getKey() {
+		return "drivers";
+	}
+
+	@Override
 	public String accept(String cmd) {
 		String[] args = cmd.split("\\s+");
 		if (args.length != 2) {
@@ -54,11 +59,6 @@ public class DriversConsoleCommandHandler implements ConsoleCommandHandler {
 		default:
 			return "Unkown command";
 		}
-	}
-
-	@Override
-	public String[] getHelp() {
-		return new String[] { "[quit | start | restart] <id>" };
 	}
 
 }

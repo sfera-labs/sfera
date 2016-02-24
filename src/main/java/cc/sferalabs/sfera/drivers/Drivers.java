@@ -50,7 +50,7 @@ public abstract class Drivers {
 		} catch (Exception e) {
 			logger.error("Error watching drivers config directory", e);
 		}
-		Console.setHandler("drivers", DriversConsoleCommandHandler.INSTANCE);
+		Console.addHandler(DriversConsoleCommandHandler.INSTANCE);
 	}
 
 	/**

@@ -1,0 +1,3 @@
+Usage:
+	script eval { <script> }
+	script eval <file> <line_num>

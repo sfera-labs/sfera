@@ -1,4 +1,4 @@
-package cc.sferalabs.sfera.script.parser;
+package cc.sferalabs.sfera.scripts;
 
 import java.util.HashMap;
 import java.util.Map;

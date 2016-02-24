@@ -1,4 +1,4 @@
-package cc.sferalabs.sfera.script.parser;
+package cc.sferalabs.sfera.scripts.parser;
 
 import java.util.ArrayList;
 import java.util.List;

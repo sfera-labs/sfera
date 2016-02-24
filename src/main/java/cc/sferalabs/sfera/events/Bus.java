@@ -15,7 +15,7 @@ import com.google.common.eventbus.SubscriberExceptionContext;
 import com.google.common.eventbus.SubscriberExceptionHandler;
 
 import cc.sferalabs.sfera.core.services.TasksManager;
-import cc.sferalabs.sfera.script.ScriptsEngine;
+import cc.sferalabs.sfera.scripts.ScriptsEngine;
 
 /**
  * Utility class representing the system events bus.

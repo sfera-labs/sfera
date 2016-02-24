@@ -1,13 +1,11 @@
 /**
  * 
  */
-package cc.sferalabs.sfera.script;
+package cc.sferalabs.sfera.scripts;
 
 import javax.script.ScriptException;
 
 import cc.sferalabs.sfera.console.ConsoleCommandHandler;
-import cc.sferalabs.sfera.script.parser.Rule;
-import cc.sferalabs.sfera.script.parser.ScriptsLoader;
 
 /**
  *
@@ -24,6 +22,11 @@ public class ScriptsConsoleCommandHandler implements ConsoleCommandHandler {
 	 * 
 	 */
 	private ScriptsConsoleCommandHandler() {
+	}
+
+	@Override
+	public String getKey() {
+		return "script";
 	}
 
 	@Override
@@ -57,11 +60,6 @@ public class ScriptsConsoleCommandHandler implements ConsoleCommandHandler {
 		} else {
 			return "Unkown command";
 		}
-	}
-
-	@Override
-	public String[] getHelp() {
-		return new String[] { "eval { <script> }", "eval <file> <line_num>" };
 	}
 
 }

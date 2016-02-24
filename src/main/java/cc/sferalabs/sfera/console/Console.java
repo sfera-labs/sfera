@@ -20,16 +20,23 @@ public class Console implements AutoStartService {
 	private TelnetConsoleServer tcs;
 
 	/**
-	 * Sets the specified handler as the one handling commands starting with the
-	 * specified key
+	 * Adds the specified handler.
 	 * 
-	 * @param key
-	 *            the command key
 	 * @param handler
 	 *            the handler
+	 * @throws IllegalArgumentException
+	 *             if an handler with the same key (
+	 *             {@link ConsoleCommandHandler#getKey()}) has already been
+	 *             added
 	 */
-	public static void setHandler(String key, ConsoleCommandHandler handler) {
-		HANDLERS.put(key, handler);
+	public static void addHandler(ConsoleCommandHandler handler) {
+		String key = handler.getKey();
+		synchronized (HANDLERS) {
+			if (HANDLERS.containsKey(key)) {
+				throw new IllegalArgumentException("Handler with same key already existing");
+			}
+			HANDLERS.put(key, handler);
+		}
 		logger.debug("Added console handler: {}", key);
 	}
 
@@ -49,7 +56,7 @@ public class Console implements AutoStartService {
 			logger.info("Telnet console disabled");
 		}
 
-		setHandler("help", new ConsoleHelper(HANDLERS));
+		addHandler(new ConsoleHelper(HANDLERS));
 	}
 
 	@Override
@@ -78,7 +85,10 @@ public class Console implements AutoStartService {
 				key = cmd.substring(0, sep);
 				rest = cmd.substring(sep).trim();
 			}
-			ConsoleCommandHandler handler = HANDLERS.get(key);
+			ConsoleCommandHandler handler;
+			synchronized (HANDLERS) {
+				handler = HANDLERS.get(key);
+			}
 			if (handler != null) {
 				return handler.accept(rest);
 			} else {

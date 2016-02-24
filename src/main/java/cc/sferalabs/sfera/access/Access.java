@@ -50,7 +50,7 @@ public abstract class Access {
 	 *             if an I/O error occurs loading the saved data
 	 */
 	public synchronized static void init() throws IOException {
-		Console.setHandler("access", AccessConsoleCommandHandler.INSTANCE);
+		Console.addHandler(AccessConsoleCommandHandler.INSTANCE);
 		try {
 			List<String> lines = Files.readAllLines(Paths.get(USERS_FILE_PATH),
 					StandardCharsets.UTF_8);

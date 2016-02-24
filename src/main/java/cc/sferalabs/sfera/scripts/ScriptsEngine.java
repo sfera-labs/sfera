@@ -1,4 +1,4 @@
-package cc.sferalabs.sfera.script;
+package cc.sferalabs.sfera.scripts;
 
 import java.io.Reader;
 import java.nio.file.Path;
@@ -28,12 +28,10 @@ import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Event;
 import cc.sferalabs.sfera.events.Node;
 import cc.sferalabs.sfera.events.Nodes;
-import cc.sferalabs.sfera.script.parser.Parser;
-import cc.sferalabs.sfera.script.parser.Rule;
-import cc.sferalabs.sfera.script.parser.ScriptErrorListener;
-import cc.sferalabs.sfera.script.parser.ScriptsLoader;
-import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser;
-import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser.TerminalNodeContext;
+import cc.sferalabs.sfera.scripts.parser.Parser;
+import cc.sferalabs.sfera.scripts.parser.ScriptErrorListener;
+import cc.sferalabs.sfera.scripts.parser.antlr.SferaScriptGrammarParser;
+import cc.sferalabs.sfera.scripts.parser.antlr.SferaScriptGrammarParser.TerminalNodeContext;
 import cc.sferalabs.sfera.util.files.FilesWatcher;
 
 /**
@@ -63,7 +61,7 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 			logger.error("Error registering script files watcher", e);
 		}
 		Bus.register(this);
-		Console.setHandler("script", ScriptsConsoleCommandHandler.INSTANCE);
+		Console.addHandler(ScriptsConsoleCommandHandler.INSTANCE);
 	}
 
 	/**

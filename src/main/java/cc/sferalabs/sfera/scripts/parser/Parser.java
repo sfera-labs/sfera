@@ -1,7 +1,7 @@
 /**
  * 
  */
-package cc.sferalabs.sfera.script.parser;
+package cc.sferalabs.sfera.scripts.parser;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -11,8 +11,8 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 
-import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarLexer;
-import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser;
+import cc.sferalabs.sfera.scripts.parser.antlr.SferaScriptGrammarLexer;
+import cc.sferalabs.sfera.scripts.parser.antlr.SferaScriptGrammarParser;
 
 /**
  * Utility class for building {@link SferaScriptGrammarParser}s.

@@ -23,9 +23,11 @@ public interface ConsoleCommandHandler {
 	public String accept(String cmd);
 
 	/**
-	 * Returns a String array containing a help text for each accepted command.
+	 * Returns the key associated to this handler, i.e. the name of the command
+	 * processed by this handler.
 	 * 
-	 * @return the help text lines
+	 * @return the key associated to this handler
 	 */
-	public String[] getHelp();
+	public String getKey();
+
 }

@@ -3,7 +3,15 @@
  */
 package cc.sferalabs.sfera.console;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -13,6 +21,8 @@ import java.util.Map;
  *
  */
 public class ConsoleHelper implements ConsoleCommandHandler {
+
+	private static final Logger logger = LoggerFactory.getLogger(ConsoleHelper.class);
 
 	private final Map<String, ConsoleCommandHandler> handlers;
 
@@ -25,28 +35,32 @@ public class ConsoleHelper implements ConsoleCommandHandler {
 	}
 
 	@Override
-	public String accept(String cmd) {
-		ConsoleCommandHandler h = handlers.get(cmd);
-		StringBuilder sb = new StringBuilder();
-		if (h == null) {
-			sb.append("Specify a valid handler:");
-			for (String key : handlers.keySet()) {
-				sb.append("\n").append(key);
-			}
-		} else {
-			String[] lines = h.getHelp();
-			if (lines != null) {
-				for (String line : lines) {
-					sb.append(cmd).append(" ").append(line).append("\n");
-				}
-			}
-		}
-		return sb.toString();
+	public String getKey() {
+		return "help";
 	}
 
 	@Override
-	public String[] getHelp() {
-		return null;
+	public String accept(String cmd) {
+		ConsoleCommandHandler h = handlers.get(cmd);
+		if (h == null || h == this) {
+			StringBuilder sb = new StringBuilder("Usage: help <hanler>\nActive handlers:");
+			for (ConsoleCommandHandler handler : handlers.values()) {
+				if (handler != this) {
+					sb.append("\n    ").append(handler.getKey());
+				}
+			}
+			return sb.toString();
+		}
+
+		try (InputStream in = getClass().getResourceAsStream("help/" + h.getKey() + ".txt");
+				BufferedReader br = new BufferedReader(
+						new InputStreamReader(in, StandardCharsets.UTF_8))) {
+			return br.lines().collect(Collectors.joining(System.lineSeparator()));
+		} catch (Exception e) {
+			String err = "Could not load help file for handler '" + h.getKey() + "'";
+			logger.error(err, e);
+			return err + ": " + e;
+		}
 	}
 
 }

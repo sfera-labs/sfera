@@ -30,6 +30,11 @@ public class SystemConsoleCommandHandler implements ConsoleCommandHandler {
 	}
 
 	@Override
+	public String getKey() {
+		return "sys";
+	}
+
+	@Override
 	public String accept(String cmd) {
 		if (cmd.startsWith("state")) {
 			return getState(cmd.substring(5));
@@ -102,11 +107,6 @@ public class SystemConsoleCommandHandler implements ConsoleCommandHandler {
 			sb.append(e.getId()).append(" = ").append(e.getValue()).append("\n");
 		});
 		return sb.toString();
-	}
-
-	@Override
-	public String[] getHelp() {
-		return new String[] { "quit | kill | state [id]" };
 	}
 
 }

@@ -1,4 +1,4 @@
-package cc.sferalabs.sfera.script.parser;
+package cc.sferalabs.sfera.scripts.parser;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,13 +17,14 @@ import javax.script.ScriptException;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarBaseListener;
-import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser.ImportLineContext;
-import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser.InitContext;
-import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser.RuleLineContext;
-import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser.StableEventContext;
-import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser.TransientEventContext;
-import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser.TriggerContext;
+import cc.sferalabs.sfera.scripts.Rule;
+import cc.sferalabs.sfera.scripts.parser.antlr.SferaScriptGrammarBaseListener;
+import cc.sferalabs.sfera.scripts.parser.antlr.SferaScriptGrammarParser.ImportLineContext;
+import cc.sferalabs.sfera.scripts.parser.antlr.SferaScriptGrammarParser.InitContext;
+import cc.sferalabs.sfera.scripts.parser.antlr.SferaScriptGrammarParser.RuleLineContext;
+import cc.sferalabs.sfera.scripts.parser.antlr.SferaScriptGrammarParser.StableEventContext;
+import cc.sferalabs.sfera.scripts.parser.antlr.SferaScriptGrammarParser.TransientEventContext;
+import cc.sferalabs.sfera.scripts.parser.antlr.SferaScriptGrammarParser.TriggerContext;
 
 /**
  *
@@ -32,7 +33,7 @@ import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser.TriggerCo
  * @version 1.0.0
  *
  */
-class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
+public class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 
 	private final Path scriptFile;
 	private final ScriptEngine engine;
@@ -40,7 +41,7 @@ class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 	private final Map<String, Bindings> libraries;
 
 	private final List<Bindings> imports = new ArrayList<>();
-	final HashMap<String, Set<Rule>> triggerRulesMap = new HashMap<String, Set<Rule>>();
+	private final HashMap<String, Set<Rule>> triggerRulesMap = new HashMap<String, Set<Rule>>();
 	private final List<Object> errors = new ArrayList<>();
 
 	private Rule currentRule;
@@ -54,7 +55,8 @@ class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 	 * @param engine
 	 *            the script engine
 	 */
-	ScriptGrammarListener(Path scriptFile, Map<String, Bindings> libraries, ScriptEngine engine) {
+	public ScriptGrammarListener(Path scriptFile, Map<String, Bindings> libraries,
+			ScriptEngine engine) {
 		this.scriptFile = scriptFile;
 		this.engine = engine;
 		this.fileScope = engine.getBindings(ScriptContext.ENGINE_SCOPE);
@@ -66,6 +68,13 @@ class ScriptGrammarListener extends SferaScriptGrammarBaseListener {
 	 */
 	public List<Object> getErrors() {
 		return errors;
+	}
+
+	/**
+	 * @return the trigger-rules map
+	 */
+	public HashMap<String, Set<Rule>> getTriggerRulesMap() {
+		return triggerRulesMap;
 	}
 
 	@Override

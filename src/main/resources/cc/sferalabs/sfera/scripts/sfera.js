@@ -1,6 +1,6 @@
 function ScriptNode(id) {
 	this.id = id;
-	Packages.cc.sferalabs.sfera.script.ScriptNodes.put(id, this);
+	Packages.cc.sferalabs.sfera.scripts.ScriptNodes.put(id, this);
 };
 
 ScriptNode.prototype.getId = function() {
@@ -8,5 +8,5 @@ ScriptNode.prototype.getId = function() {
 };
 
 ScriptNode.prototype.postEvent = function(id, value) {
-	Packages.cc.sferalabs.sfera.script.ScriptNodes.postEvent(this, this.id, id, value);
+	Packages.cc.sferalabs.sfera.scripts.ScriptNodes.postEvent(this, this.id, id, value);
 };

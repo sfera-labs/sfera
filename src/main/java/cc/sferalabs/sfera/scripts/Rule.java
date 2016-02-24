@@ -1,4 +1,4 @@
-package cc.sferalabs.sfera.script.parser;
+package cc.sferalabs.sfera.scripts;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.core.services.TasksManager;
 import cc.sferalabs.sfera.events.Event;
-import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser.TriggerContext;
+import cc.sferalabs.sfera.scripts.parser.antlr.SferaScriptGrammarParser.TriggerContext;
 
 /**
  * Class representing a script rule.
@@ -53,7 +53,7 @@ public class Rule {
 	 * @throws ScriptException
 	 *             if compilation of the action fails
 	 */
-	Rule(TriggerContext condition, String action, Path scriptFile, ScriptEngine engine,
+	public Rule(TriggerContext condition, String action, Path scriptFile, ScriptEngine engine,
 			Bindings fileScope, List<Bindings> imports) throws ScriptException {
 		this.condition = new TriggerCondition(condition);
 		this.action = ((Compilable) engine).compile(action);

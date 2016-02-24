@@ -1,0 +1,4 @@
+Usage:
+	sys quit
+	sys kill
+	sys state [id]

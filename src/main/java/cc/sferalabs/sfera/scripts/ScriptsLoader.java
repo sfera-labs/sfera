@@ -1,7 +1,7 @@
 /**
  * 
  */
-package cc.sferalabs.sfera.script.parser;
+package cc.sferalabs.sfera.scripts;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -38,9 +38,11 @@ import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.core.Plugin;
 import cc.sferalabs.sfera.core.Plugins;
-import cc.sferalabs.sfera.script.ScriptsEngine;
-import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser;
-import cc.sferalabs.sfera.script.parser.antlr.SferaScriptGrammarParser.ParseContext;
+import cc.sferalabs.sfera.scripts.parser.Parser;
+import cc.sferalabs.sfera.scripts.parser.ScriptErrorListener;
+import cc.sferalabs.sfera.scripts.parser.ScriptGrammarListener;
+import cc.sferalabs.sfera.scripts.parser.antlr.SferaScriptGrammarParser;
+import cc.sferalabs.sfera.scripts.parser.antlr.SferaScriptGrammarParser.ParseContext;
 
 /**
  *
@@ -69,7 +71,7 @@ public class ScriptsLoader implements EventListener {
 	 * @param errors
 	 *            the errors list to fill
 	 */
-	public ScriptsLoader(Map<String, Set<Rule>> triggersRulesMap, Map<Path, List<Object>> errors) {
+	ScriptsLoader(Map<String, Set<Rule>> triggersRulesMap, Map<Path, List<Object>> errors) {
 		this.triggersRulesMap = triggersRulesMap;
 		this.errors = errors;
 	}
@@ -77,7 +79,7 @@ public class ScriptsLoader implements EventListener {
 	/**
 	 * Loads the script files
 	 */
-	public synchronized void load() {
+	synchronized void load() {
 		logger.info("Loading scripts...");
 		try {
 			loadSferaLib();
@@ -95,8 +97,7 @@ public class ScriptsLoader implements EventListener {
 	 * @throws IOException
 	 */
 	private void loadSferaLib() throws ScriptException, IOException {
-		try (InputStream in = this.getClass().getClassLoader()
-				.getResourceAsStream("scripts/sfera.js");
+		try (InputStream in = getClass().getResourceAsStream("sfera.js");
 				BufferedReader br = new BufferedReader(
 						new InputStreamReader(in, StandardCharsets.UTF_8))) {
 			logger.debug("Loading Sfera library");
@@ -231,7 +232,7 @@ public class ScriptsLoader implements EventListener {
 				return;
 			}
 
-			for (Entry<String, Set<Rule>> entry : scriptListener.triggerRulesMap.entrySet()) {
+			for (Entry<String, Set<Rule>> entry : scriptListener.getTriggerRulesMap().entrySet()) {
 				String trigger = entry.getKey();
 				Set<Rule> rules = triggersRulesMap.get(trigger);
 				if (rules == null) {

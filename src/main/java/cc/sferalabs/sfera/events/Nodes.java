@@ -9,8 +9,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cc.sferalabs.sfera.script.ScriptNodeWrapper;
-import cc.sferalabs.sfera.script.ScriptsEngine;
+import cc.sferalabs.sfera.scripts.ScriptNodeWrapper;
+import cc.sferalabs.sfera.scripts.ScriptsEngine;
 
 /**
  *

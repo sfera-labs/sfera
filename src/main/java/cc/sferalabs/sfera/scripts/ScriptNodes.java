@@ -1,7 +1,7 @@
 /**
  * 
  */
-package cc.sferalabs.sfera.script;
+package cc.sferalabs.sfera.scripts;
 
 import java.util.ArrayList;
 import java.util.List;

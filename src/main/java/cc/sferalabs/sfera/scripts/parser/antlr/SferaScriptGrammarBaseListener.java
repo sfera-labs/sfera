@@ -1,5 +1,5 @@
 // Generated from SferaScriptGrammar.g4 by ANTLR 4.5.1
-package cc.sferalabs.sfera.script.parser.antlr;
+package cc.sferalabs.sfera.scripts.parser.antlr;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
