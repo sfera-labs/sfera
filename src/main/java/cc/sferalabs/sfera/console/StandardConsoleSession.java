@@ -45,11 +45,10 @@ public class StandardConsoleSession extends ConsoleSession {
 				errorCount = 0;
 				return cmd;
 			} else {
-				try {
-					Thread.sleep(500);
-				} catch (InterruptedException e) {
-				}
+				Thread.sleep(500);
 			}
+		} catch (InterruptedException e) {
+			quit();
 		} catch (IOException e) {
 			logger.error("I/O Exception", e);
 			if (errorCount++ > 5) {

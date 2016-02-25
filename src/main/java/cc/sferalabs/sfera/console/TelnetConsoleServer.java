@@ -8,8 +8,6 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.channels.ServerSocketChannel;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +25,6 @@ public class TelnetConsoleServer {
 
 	private static final Logger logger = LoggerFactory.getLogger(TelnetConsoleServer.class);
 
-	private final static List<TelnetConsoleSession> sessions = new ArrayList<>();
 	private final ServerSocket socket;
 	private boolean run;
 
@@ -59,9 +56,6 @@ public class TelnetConsoleServer {
 			try {
 				s = socket.accept();
 				TelnetConsoleSession tcs = new TelnetConsoleSession(s);
-				synchronized (sessions) {
-					sessions.add(tcs);
-				}
 				tcs.start();
 			} catch (IOException e) {
 				if (socket.isClosed()) {
@@ -78,18 +72,6 @@ public class TelnetConsoleServer {
 	}
 
 	/**
-	 * Removes the specified session from the list of active sessions.
-	 * 
-	 * @param session
-	 *            the session to remove
-	 */
-	static void removeSession(TelnetConsoleSession session) {
-		synchronized (sessions) {
-			sessions.remove(session);
-		}
-	}
-
-	/**
 	 * Stops the telnet server.
 	 * 
 	 * @throws IOException
@@ -97,11 +79,6 @@ public class TelnetConsoleServer {
 	 */
 	public void quit() throws IOException {
 		run = false;
-		synchronized (sessions) {
-			for (TelnetConsoleSession s : sessions) {
-				s.quit();
-			}
-		}
 		socket.close();
 	}
 

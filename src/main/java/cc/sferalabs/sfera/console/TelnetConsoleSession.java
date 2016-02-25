@@ -101,7 +101,6 @@ public class TelnetConsoleSession extends ConsoleSession {
 			socket.close();
 		} catch (Exception e) {
 		}
-		TelnetConsoleServer.removeSession(this);
 		logger.info(getName() + " closed");
 	}
 

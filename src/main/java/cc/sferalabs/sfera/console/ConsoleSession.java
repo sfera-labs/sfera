@@ -26,22 +26,23 @@ public abstract class ConsoleSession extends Task {
 	 * @param name
 	 *            the console name
 	 */
-	ConsoleSession(String name) {
+	protected ConsoleSession(String name) {
 		super(name);
 	}
 
 	/**
-	 * Starts this console session as a new system task
+	 * Starts this console session as a new system task.
 	 */
 	void start() {
 		run = true;
-		TasksManager.executeSystem(this);
+		Console.addSession(this);
+		TasksManager.execute(this);
 	}
 
 	/**
-	 * Interrups this console session
+	 * Interrupts this console session.
 	 */
-	protected void quit() {
+	protected final void quit() {
 		logger.debug("{} quitting...", getName());
 		run = false;
 		interrupt();
@@ -61,6 +62,7 @@ public abstract class ConsoleSession extends Task {
 				}
 			}
 		}
+		Console.removeSession(this);
 		cleanUp();
 		logger.debug("{} quitted", getName());
 	}
@@ -80,7 +82,9 @@ public abstract class ConsoleSession extends Task {
 	protected abstract void cleanUp();
 
 	/**
-	 * Waits for a command to be processed.
+	 * Waits for a command to be processed. The waiting must be interruptible.
+	 * This method shall call {@link #quit()} to terminate the session when
+	 * interrupted or when deliberately wanting to terminate.
 	 * 
 	 * @return the received command
 	 */

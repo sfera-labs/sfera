@@ -1,7 +1,9 @@
 package cc.sferalabs.sfera.console;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -15,8 +17,8 @@ public class Console implements AutoStartService {
 	private static final Logger logger = LoggerFactory.getLogger(Console.class);
 
 	private static final Map<String, ConsoleCommandHandler> HANDLERS = new HashMap<>();
+	private static final List<ConsoleSession> SESSIONS = new ArrayList<>();
 
-	private StandardConsoleSession scs;
 	private TelnetConsoleServer tcs;
 
 	/**
@@ -42,7 +44,7 @@ public class Console implements AutoStartService {
 
 	@Override
 	public void init() {
-		scs = new StandardConsoleSession();
+		StandardConsoleSession scs = new StandardConsoleSession();
 		scs.start();
 
 		Integer telnetPort = SystemNode.getConfiguration().get("console_telnet_port", null);
@@ -61,11 +63,37 @@ public class Console implements AutoStartService {
 
 	@Override
 	public void quit() throws Exception {
-		if (scs != null) {
-			scs.quit();
+		synchronized (SESSIONS) {
+			for (ConsoleSession s : SESSIONS) {
+				s.quit();
+			}
 		}
 		if (tcs != null) {
 			tcs.quit();
+		}
+	}
+
+	/**
+	 * Adds the specified session from the list of active sessions.
+	 * 
+	 * @param session
+	 *            the session to add
+	 */
+	static void addSession(ConsoleSession session) {
+		synchronized (SESSIONS) {
+			SESSIONS.add(session);
+		}
+	}
+
+	/**
+	 * Removes the specified session from the list of active sessions.
+	 * 
+	 * @param session
+	 *            the session to remove
+	 */
+	static void removeSession(ConsoleSession session) {
+		synchronized (SESSIONS) {
+			SESSIONS.remove(session);
 		}
 	}
 
