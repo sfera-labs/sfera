@@ -20,9 +20,9 @@ import org.slf4j.LoggerFactory;
  * @version 1.0.0
  *
  */
-public class ConsoleHelper implements ConsoleCommandHandler {
+public class ConsoleHelpHandler implements ConsoleCommandHandler {
 
-	private static final Logger logger = LoggerFactory.getLogger(ConsoleHelper.class);
+	private static final Logger logger = LoggerFactory.getLogger(ConsoleHelpHandler.class);
 
 	private final Map<String, ConsoleCommandHandler> handlers;
 
@@ -30,7 +30,7 @@ public class ConsoleHelper implements ConsoleCommandHandler {
 	 * @param handlers
 	 *            the map of existing {@code ConsoleCommandHandlers}
 	 */
-	ConsoleHelper(Map<String, ConsoleCommandHandler> handlers) {
+	ConsoleHelpHandler(Map<String, ConsoleCommandHandler> handlers) {
 		this.handlers = handlers;
 	}
 
@@ -40,7 +40,7 @@ public class ConsoleHelper implements ConsoleCommandHandler {
 	}
 
 	@Override
-	public String accept(String cmd) {
+	public String accept(String cmd, ConsoleSession session) {
 		ConsoleCommandHandler h = handlers.get(cmd);
 		if (h == null || h == this) {
 			StringBuilder sb = new StringBuilder("Usage: help <hanler>\nActive handlers:");

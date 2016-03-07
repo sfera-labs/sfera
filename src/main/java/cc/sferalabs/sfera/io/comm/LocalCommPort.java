@@ -110,6 +110,17 @@ public class LocalCommPort extends CommPort {
 	}
 
 	@Override
+	public void writeByte(int b) throws CommPortException {
+		try {
+			if (!serialPort.writeByte((byte) b)) {
+				throw new CommPortException("write failed");
+			}
+		} catch (SerialPortException e) {
+			throw new CommPortException(e.getLocalizedMessage(), e);
+		}
+	}
+
+	@Override
 	public void writeBytes(byte[] bytes) throws CommPortException {
 		try {
 			if (!serialPort.writeBytes(bytes)) {

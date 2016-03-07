@@ -4,6 +4,7 @@
 package cc.sferalabs.sfera.drivers;
 
 import cc.sferalabs.sfera.console.ConsoleCommandHandler;
+import cc.sferalabs.sfera.console.ConsoleSession;
 
 /**
  *
@@ -28,7 +29,7 @@ public class DriversConsoleCommandHandler implements ConsoleCommandHandler {
 	}
 
 	@Override
-	public String accept(String cmd) {
+	public String accept(String cmd, ConsoleSession session) {
 		String[] args = cmd.split("\\s+");
 		if (args.length != 2) {
 			return "Syntax error";

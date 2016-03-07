@@ -145,6 +145,16 @@ public abstract class CommPort {
 	public abstract int getAvailableBytesCount() throws CommPortException;
 
 	/**
+	 * Writes the specified byte to this port.
+	 * 
+	 * @param b
+	 *            the byte to write
+	 * @throws CommPortException
+	 *             if an error occurs
+	 */
+	public abstract void writeByte(int b) throws CommPortException;
+
+	/**
 	 * Writes all the bytes in the specified byte array to this port.
 	 * 
 	 * @param bytes

@@ -22,7 +22,6 @@ public class StandardConsoleSession extends ConsoleSession {
 	private static final Logger logger = LoggerFactory.getLogger(StandardConsoleSession.class);
 
 	private final BufferedReader reader;
-	private int errorCount = 0;
 
 	/**
 	 * Constructor
@@ -38,29 +37,26 @@ public class StandardConsoleSession extends ConsoleSession {
 	}
 
 	@Override
-	protected String acceptCommand() {
+	public String acceptCommand() {
 		try {
-			if (reader.ready()) {
-				String cmd = reader.readLine();
-				errorCount = 0;
-				return cmd;
-			} else {
-				Thread.sleep(500);
+			while (isActive()) {
+				if (reader.ready()) {
+					String cmd = reader.readLine();
+					return cmd;
+				} else {
+					Thread.sleep(500);
+				}
 			}
 		} catch (InterruptedException e) {
-			quit();
 		} catch (IOException e) {
 			logger.error("I/O Exception", e);
-			if (errorCount++ > 5) {
-				quit();
-			}
 		}
 		return null;
 	}
 
 	@Override
-	protected void output(String text) {
-		System.out.println(text);
+	public void doOutput(String text) {
+		System.out.print(text);
 	}
 
 	@Override

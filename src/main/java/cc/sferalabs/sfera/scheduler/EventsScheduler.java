@@ -49,7 +49,7 @@ import cc.sferalabs.sfera.core.services.AutoStartService;
 public class EventsScheduler implements AutoStartService {
 
 	/*
-	 * TODO This class should become Timer Implement a Service calles Scheduler
+	 * TODO This class should become Timer. Implement a Service called Scheduler
 	 * with chron-like rules
 	 */
 

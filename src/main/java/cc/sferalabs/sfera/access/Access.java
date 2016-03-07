@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.security.SecureRandom;
@@ -125,8 +126,11 @@ public abstract class Access {
 		}
 		userLine += "\n";
 
-		Files.write(Paths.get(USERS_FILE_PATH), userLine.getBytes(StandardCharsets.UTF_8),
-				StandardOpenOption.APPEND, StandardOpenOption.CREATE);
+		Path path = Paths.get(USERS_FILE_PATH);
+		System.err.println(path.toAbsolutePath());
+		Files.createDirectories(path.getParent());
+		Files.write(path, userLine.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND,
+				StandardOpenOption.CREATE);
 	}
 
 	/**

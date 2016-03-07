@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 import cc.sferalabs.sfera.console.ConsoleCommandHandler;
+import cc.sferalabs.sfera.console.ConsoleSession;
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Event;
 
@@ -35,7 +36,7 @@ public class SystemConsoleCommandHandler implements ConsoleCommandHandler {
 	}
 
 	@Override
-	public String accept(String cmd) {
+	public String accept(String cmd, ConsoleSession session) {
 		if (cmd.startsWith("state")) {
 			return getState(cmd.substring(5));
 		} else if (cmd.equals("quit")) {

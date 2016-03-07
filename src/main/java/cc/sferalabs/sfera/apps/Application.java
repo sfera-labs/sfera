@@ -30,6 +30,7 @@ public abstract class Application implements AutoStartService, EventListener {
 	protected final Logger log;
 	private String configFile;
 	private UUID configWatcherId;
+	private boolean enabled;
 
 	/**
 	 * Construct an Application
@@ -73,6 +74,7 @@ public abstract class Application implements AutoStartService, EventListener {
 				try {
 					onEnable(config);
 					Bus.register(thisApp);
+					enabled = true;
 					log.info("Enabled");
 				} catch (Throwable t) {
 					log.error("Initialization error", t);
@@ -95,7 +97,7 @@ public abstract class Application implements AutoStartService, EventListener {
 					Bus.unregister(thisApp);
 					doDisable();
 				} catch (Throwable t) {
-					log.error("Error in onDisable()", t);
+					log.error("Error while disabling", t);
 				}
 			}
 		});
@@ -107,12 +109,18 @@ public abstract class Application implements AutoStartService, EventListener {
 	private void doDisable() {
 		log.info("Disabling...");
 		FilesWatcher.unregister(Configuration.getPath(configFile), configWatcherId);
-		try {
-			onDisable();
-			log.info("Disabled");
-		} catch (Throwable t) {
-			log.error("Error while disabling", t);
-		}
+		onDisable();
+		enabled = false;
+		log.info("Disabled");
+	}
+
+	/**
+	 * Returns whether this app is enabled or not.
+	 * 
+	 * @return whether this app is enabled or not
+	 */
+	public boolean isEnabled() {
+		return enabled;
 	}
 
 	/**

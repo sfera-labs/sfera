@@ -4,10 +4,8 @@
 package cc.sferalabs.sfera.console;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.channels.ServerSocketChannel;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,9 +36,7 @@ public class TelnetConsoleServer {
 	 *             if an I/O error occurs
 	 */
 	TelnetConsoleServer(int port) throws IOException {
-		ServerSocketChannel ssc = ServerSocketChannel.open();
-		ssc.bind(new InetSocketAddress(port));
-		this.socket = ssc.socket();
+		this.socket = new ServerSocket(port);
 		run = true;
 		TasksManager.executeSystem("Telnet Console server", this::acceptTelnetConnection);
 	}
@@ -52,9 +48,8 @@ public class TelnetConsoleServer {
 		logger.info("Telnet Console server accepting connections on port {}",
 				socket.getLocalPort());
 		while (run) {
-			Socket s;
 			try {
-				s = socket.accept();
+				Socket s = socket.accept();
 				TelnetConsoleSession tcs = new TelnetConsoleSession(s);
 				tcs.start();
 			} catch (IOException e) {

@@ -6,6 +6,7 @@ package cc.sferalabs.sfera.scripts;
 import javax.script.ScriptException;
 
 import cc.sferalabs.sfera.console.ConsoleCommandHandler;
+import cc.sferalabs.sfera.console.ConsoleSession;
 
 /**
  *
@@ -30,7 +31,7 @@ public class ScriptsConsoleCommandHandler implements ConsoleCommandHandler {
 	}
 
 	@Override
-	public String accept(String cmd) {
+	public String accept(String cmd, ConsoleSession session) {
 		if (cmd.startsWith("eval ")) {
 			String script = cmd.substring(5).trim();
 			if (script.startsWith("{")) {

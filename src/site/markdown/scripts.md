@@ -161,7 +161,7 @@ The log object is an instance of the [Logger](http://www.slf4j.org/api/org/slf4j
     log.warn("Something weird happened...");
     log.error("This is really bad!");
 
-Calls to the above methods will create log entry with the specified level and with a logger name set to `scripts.<script_file_name>`.
+Calls to the above methods will create log entry with the specified level and with a logger name set to `scripts.<path>.<to>.<file>.<file_name>`.
 
 #### Trigger event
 

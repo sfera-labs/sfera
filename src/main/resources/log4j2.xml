@@ -9,8 +9,8 @@
 		</RollingRandomAccessFile>
 	</Appenders>
 	<Loggers>
-		<Root level="info">
-			<AppenderRef ref="SferaLog" />
+		<Root level="trace">
+			<AppenderRef ref="SferaLog" level="info" />
 		</Root>
 	</Loggers>
 </Configuration>

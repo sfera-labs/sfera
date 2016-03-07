@@ -58,7 +58,7 @@ public class Console implements AutoStartService {
 			logger.info("Telnet console disabled");
 		}
 
-		addHandler(new ConsoleHelper(HANDLERS));
+		addHandler(new ConsoleHelpHandler(HANDLERS));
 	}
 
 	@Override
@@ -100,7 +100,7 @@ public class Console implements AutoStartService {
 	/**
 	 * @param cmd
 	 */
-	static String processCommad(String cmd) {
+	static String processCommad(String cmd, ConsoleSession session) {
 		try {
 			logger.debug("Processing command: {}", cmd);
 			String key;
@@ -118,7 +118,7 @@ public class Console implements AutoStartService {
 				handler = HANDLERS.get(key);
 			}
 			if (handler != null) {
-				return handler.accept(rest);
+				return handler.accept(rest, session);
 			} else {
 				return "No command handler for '" + key + "'";
 			}

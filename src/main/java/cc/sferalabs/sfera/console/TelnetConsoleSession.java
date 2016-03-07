@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.net.SocketTimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,7 @@ public class TelnetConsoleSession extends ConsoleSession {
 		logger.info("Accepted telnet connection from {}", addr);
 		boolean ok = false;
 		try {
+			socket.setSoTimeout(30000);
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			out = new PrintWriter(socket.getOutputStream(), true);
 			out.println("User:");
@@ -63,6 +65,10 @@ public class TelnetConsoleSession extends ConsoleSession {
 				out.println("Granted - Input your commands:");
 				ok = true;
 			}
+			socket.setSoTimeout(5000);
+		} catch (SocketTimeoutException e) {
+			logger.debug("Timeout expired", e);
+			out.println("Timeout expired");
 		} catch (Exception e) {
 			logger.error("Connection error", e);
 		}
@@ -70,21 +76,23 @@ public class TelnetConsoleSession extends ConsoleSession {
 	}
 
 	@Override
-	protected String acceptCommand() {
+	public String acceptCommand() {
 		try {
-			String cmd = in.readLine();
-			if (cmd != null) {
-				return cmd;
+			while (isActive()) {
+				try {
+					return in.readLine();
+				} catch (SocketTimeoutException e) {
+				}
 			}
 		} catch (IOException e) {
 		}
-		quit();
 		return null;
 	}
 
 	@Override
-	protected void output(String text) {
-		out.println(text);
+	public void doOutput(String text) {
+		out.print(text);
+		out.flush();
 	}
 
 	@Override

@@ -82,7 +82,7 @@ public abstract class Applications {
 							if (appInstance instanceof EventListener) {
 								Bus.register((EventListener) appInstance);
 							}
-							logger.info("App '{}' loaded", appClass);
+							logger.info("App '{}' instantiated", appClass);
 							appInstance.init();
 						} catch (Throwable e) {
 							logger.error("Error instantiating app: " + appClass, e);
