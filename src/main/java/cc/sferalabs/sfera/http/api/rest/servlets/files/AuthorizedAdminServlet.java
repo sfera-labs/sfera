@@ -1,6 +1,5 @@
-package cc.sferalabs.sfera.http.api.rest.servlets.admin;
+package cc.sferalabs.sfera.http.api.rest.servlets.files;
 
-import cc.sferalabs.sfera.http.api.rest.servlets.ApiServlet;
 import cc.sferalabs.sfera.http.api.rest.servlets.AuthorizedApiServlet;
 
 /**
@@ -14,8 +13,6 @@ import cc.sferalabs.sfera.http.api.rest.servlets.AuthorizedApiServlet;
  */
 @SuppressWarnings("serial")
 public abstract class AuthorizedAdminServlet extends AuthorizedApiServlet {
-
-	public static final String PATH = ApiServlet.PATH + "admin/";
 
 	private static final String[] roles = new String[] { "admin" };
 

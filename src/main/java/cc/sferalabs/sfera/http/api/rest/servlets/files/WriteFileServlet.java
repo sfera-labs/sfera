@@ -1,4 +1,4 @@
-package cc.sferalabs.sfera.http.api.rest.servlets.admin;
+package cc.sferalabs.sfera.http.api.rest.servlets.files;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -18,6 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.http.api.rest.RestResponse;
+import cc.sferalabs.sfera.http.api.rest.servlets.ApiServlet;
+import cc.sferalabs.sfera.util.files.FilesUtil;
 
 /**
  * API admin servlet handling file editing.
@@ -28,11 +30,11 @@ import cc.sferalabs.sfera.http.api.rest.RestResponse;
  *
  */
 @SuppressWarnings("serial")
-public class EditFileServlet extends AuthorizedAdminServlet {
+public class WriteFileServlet extends AuthorizedAdminServlet {
 
-	public static final String PATH = AuthorizedAdminServlet.PATH + "file/edit";
+	public static final String PATH = ApiServlet.PATH + "files/write";
 
-	private final static Logger logger = LoggerFactory.getLogger(EditFileServlet.class);
+	private final static Logger logger = LoggerFactory.getLogger(WriteFileServlet.class);
 
 	@Override
 	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
@@ -50,24 +52,33 @@ public class EditFileServlet extends AuthorizedAdminServlet {
 			return;
 		}
 
+		Path target = Paths.get(".", path);
+		if (!FilesUtil.isInRoot(target)) {
+			resp.sendError(HttpServletResponse.SC_FORBIDDEN, "File outside root dir");
+			return;
+		}
+		if (Files.isHidden(target)) {
+			resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Cannot write hidden files");
+			return;
+		}
+
 		try {
-			writeToFile(content, path, md5);
+			writeToFile(content, target, md5);
 			resp.sendResult("ok");
 		} catch (Exception e) {
-			logger.error("File edit error", e);
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-					"File edit error: " + e.getMessage());
+			logger.error("File write error", e);
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "File write error: " + e);
 		}
 	}
 
 	/**
 	 * 
 	 * @param content
-	 * @param path
+	 * @param target
 	 * @param md5
 	 * @throws Exception
 	 */
-	private void writeToFile(String content, String path, String md5) throws Exception {
+	private void writeToFile(String content, Path target, String md5) throws Exception {
 		Path temp = null;
 		try {
 			byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
@@ -79,7 +90,6 @@ public class EditFileServlet extends AuthorizedAdminServlet {
 			}
 			temp = Files.createTempFile(getClass().getName(), null);
 			Files.write(temp, bytes);
-			Path target = Paths.get(path);
 			Path parent = target.getParent();
 			if (parent != null) {
 				Files.createDirectories(parent);
