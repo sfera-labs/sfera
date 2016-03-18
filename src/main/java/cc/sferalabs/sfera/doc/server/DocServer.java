@@ -101,6 +101,7 @@ public class DocServer implements AutoStartService {
 	 */
 	private static void extractJar(Path jarFile) throws IOException {
 		String jarFileName = jarFile.toString();
+		logger.debug("Extracting doc from {}", jarFileName);
 		Path destDir = Paths.get(jarFileName.substring(0, jarFileName.indexOf('-')) + "/");
 		deleteRecursive(destDir);
 

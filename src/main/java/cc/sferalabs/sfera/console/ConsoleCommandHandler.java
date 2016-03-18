@@ -37,10 +37,15 @@ public interface ConsoleCommandHandler {
 	public String getKey();
 
 	/**
+	 * Parses the arguments part of a command of the form '-arg1 val1 -arg2
+	 * "val with spaces"', returning a Map containing all the arguments mapped
+	 * to the respective values.
 	 * 
 	 * @param arguments
-	 * @return
+	 *            the command arguments string
+	 * @return the Map of the arguments and respective values
 	 * @throws Exception
+	 *             if the passed string has syntax errors
 	 */
 	public static Map<String, String> parseArguments(String arguments) throws Exception {
 		Map<String, String> prms = new HashMap<>();

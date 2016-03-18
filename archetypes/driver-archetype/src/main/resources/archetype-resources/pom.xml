@@ -86,13 +86,16 @@
 					<taglets>
 						<taglet>
 							<tagletClass>cc.sferalabs.sfera.doc.taglets.ConfigParamTaglet</tagletClass>
-							<tagletArtifact>
-								<groupId>cc.sferalabs.sfera</groupId>
-								<artifactId>sfera</artifactId>
-								<version>${sfera-version}</version>
-							</tagletArtifact>
+						</taglet>
+						<taglet>
+							<tagletClass>cc.sferalabs.sfera.doc.taglets.EventIdTaglet</tagletClass>
 						</taglet>
 					</taglets>
+					<tagletArtifact>
+						<groupId>cc.sferalabs.sfera</groupId>
+						<artifactId>sfera</artifactId>
+						<version>${sfera-version}</version>
+					</tagletArtifact>
 				</configuration>
 			</plugin>
 		</plugins>

@@ -36,7 +36,7 @@ public abstract class LoggerUtils {
 	}
 
 	/**
-	 * @return
+	 * @return the logger configuration
 	 */
 	public static org.apache.logging.log4j.core.config.Configuration getConfiguration() {
 		return LoggerContext.getContext(false).getConfiguration();
