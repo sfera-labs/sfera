@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -39,6 +40,10 @@ import cc.sferalabs.sfera.http.api.rest.servlets.LoginServlet;
 import cc.sferalabs.sfera.http.api.rest.servlets.LogoutServlet;
 import cc.sferalabs.sfera.http.api.rest.servlets.StateServlet;
 import cc.sferalabs.sfera.http.api.rest.servlets.SubscribeServlet;
+import cc.sferalabs.sfera.http.api.rest.servlets.access.AddAccessServlet;
+import cc.sferalabs.sfera.http.api.rest.servlets.access.ListUsersServlet;
+import cc.sferalabs.sfera.http.api.rest.servlets.access.RemoveAccessServlet;
+import cc.sferalabs.sfera.http.api.rest.servlets.access.UpdateAccessServlet;
 import cc.sferalabs.sfera.http.api.rest.servlets.files.CopyFileServlet;
 import cc.sferalabs.sfera.http.api.rest.servlets.files.DeleteFileServlet;
 import cc.sferalabs.sfera.http.api.rest.servlets.files.ListFilesServlet;
@@ -46,7 +51,6 @@ import cc.sferalabs.sfera.http.api.rest.servlets.files.MoveFileServlet;
 import cc.sferalabs.sfera.http.api.rest.servlets.files.ReadGetFileServlet;
 import cc.sferalabs.sfera.http.api.rest.servlets.files.WriteFileServlet;
 import cc.sferalabs.sfera.http.api.websockets.ApiWebSocketServlet;
-import cc.sferalabs.sfera.http.auth.AuthenticationFilter;
 
 /**
  * HTTP Server
@@ -174,6 +178,7 @@ public class HttpServer implements AutoStartService {
 		addServlet(EventServlet.class, EventServlet.PATH);
 		addServlet(ApiWebSocketServlet.class, ApiWebSocketServlet.PATH);
 
+		// files
 		addServlet(ListFilesServlet.class, ListFilesServlet.PATH);
 		addServlet(ReadGetFileServlet.class, ReadGetFileServlet.PATH_READ);
 		addServlet(ReadGetFileServlet.class, ReadGetFileServlet.PATH_GET);
@@ -181,6 +186,12 @@ public class HttpServer implements AutoStartService {
 		addServlet(MoveFileServlet.class, MoveFileServlet.PATH);
 		addServlet(CopyFileServlet.class, CopyFileServlet.PATH);
 		addServlet(DeleteFileServlet.class, DeleteFileServlet.PATH);
+
+		// access
+		addServlet(ListUsersServlet.class, ListUsersServlet.PATH);
+		addServlet(AddAccessServlet.class, AddAccessServlet.PATH);
+		addServlet(RemoveAccessServlet.class, RemoveAccessServlet.PATH);
+		addServlet(UpdateAccessServlet.class, UpdateAccessServlet.PATH);
 	}
 
 	/**
@@ -223,6 +234,8 @@ public class HttpServer implements AutoStartService {
 	 */
 	@SuppressWarnings("unchecked")
 	private static void addServlet(Object servlet, String pathSpec) throws HttpServerException {
+		Objects.requireNonNull(servlet, "servlet must not be null");
+		Objects.requireNonNull(pathSpec, "pathSpec must not be null");
 		if (contexts != null) {
 			try {
 				if (servlet instanceof ServletHolder) {

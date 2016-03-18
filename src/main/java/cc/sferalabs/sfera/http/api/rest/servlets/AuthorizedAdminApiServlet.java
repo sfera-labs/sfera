@@ -1,6 +1,4 @@
-package cc.sferalabs.sfera.http.api.rest.servlets.files;
-
-import cc.sferalabs.sfera.http.api.rest.servlets.AuthorizedApiServlet;
+package cc.sferalabs.sfera.http.api.rest.servlets;
 
 /**
  * Abstract class to be extended by API servlets requiring users with 'admin'
@@ -12,7 +10,7 @@ import cc.sferalabs.sfera.http.api.rest.servlets.AuthorizedApiServlet;
  *
  */
 @SuppressWarnings("serial")
-public abstract class AuthorizedAdminServlet extends AuthorizedApiServlet {
+public abstract class AuthorizedAdminApiServlet extends AuthorizedApiServlet {
 
 	private static final String[] roles = new String[] { "admin" };
 

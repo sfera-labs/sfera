@@ -1,12 +1,13 @@
 package cc.sferalabs.sfera.access;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.StandardCopyOption;
 import java.security.SecureRandom;
 import java.security.spec.KeySpec;
 import java.util.Arrays;
@@ -104,33 +105,95 @@ public abstract class Access {
 
 		User u = new User(username, hashedPassword, salt, roles);
 		users.put(username, u);
-		writeUser(u);
+		writeUsers();
 
 		logger.info("User '{}' added {}", username, roles);
 	}
 
 	/**
-	 * @param user
+	 * Updates the credentials of the specified user.
+	 * 
+	 * @param username
+	 *            the username of the user to update
+	 * @param plainPassword
+	 *            the new password or {@code null} if unchanged
+	 * @param roles
+	 *            the new list of roles or {@code null} if unchanged
+	 * @throws IOException
+	 *             if an I/O error occurs saving the access data
+	 * @throws UserNotFoundException
+	 *             if no user with the specified username exists
+	 */
+	public synchronized static void updateUser(String username, String plainPassword,
+			String[] roles) throws IOException, UserNotFoundException {
+		User user = users.get(username);
+		if (user == null) {
+			throw new UserNotFoundException();
+		}
+		byte[] salt;
+		byte[] hashedPassword;
+		if (plainPassword == null) {
+			salt = user.getSalt();
+			hashedPassword = user.getHashedPassword();
+		} else {
+			salt = generateSalt();
+			hashedPassword = getEncryptedPassword(plainPassword, salt);
+		}
+
+		if (roles == null) {
+			roles = user.getRoles();
+		}
+
+		User newUser = new User(username, hashedPassword, salt, roles);
+		users.put(username, newUser);
+		writeUsers();
+
+		logger.info("User '{}' updated {}", username, roles);
+	}
+
+	/**
+	 * 
 	 * @throws IOException
 	 */
-	private static void writeUser(User user) throws IOException {
-		String userLine = user.getUsername() + ":";
-		userLine += Base64.getEncoder().encodeToString(user.getHashedPassword()) + ":";
-		userLine += Base64.getEncoder().encodeToString(user.getSalt()) + ":";
+	private static void writeUsers() throws IOException {
+		Path tmp = Files.createTempFile(Access.class.getName(), null);
+		try {
+			try (BufferedWriter writer = Files.newBufferedWriter(tmp, StandardCharsets.UTF_8)) {
+				for (User u : users.values()) {
+					writer.write(getUserLine(u));
+				}
+			}
+			Path path = Paths.get(USERS_FILE_PATH);
+			Files.createDirectories(path.getParent());
+			Files.move(tmp, path, StandardCopyOption.REPLACE_EXISTING);
+		} finally {
+			try {
+				Files.delete(tmp);
+			} catch (Exception e) {
+			}
+		}
+	}
+
+	/**
+	 * @param user
+	 * @return
+	 */
+	private static String getUserLine(User user) {
+		StringBuilder line = new StringBuilder(user.getUsername());
+		line.append(':');
+		line.append(Base64.getEncoder().encodeToString(user.getHashedPassword()));
+		line.append(':');
+		line.append(Base64.getEncoder().encodeToString(user.getSalt()));
+		line.append(':');
 		String[] roles = user.getRoles();
 		for (int i = 0; i < roles.length; i++) {
 			if (i != 0) {
-				userLine += ",";
+				line.append(',');
 			}
-			userLine += roles[i];
+			line.append(roles[i]);
 		}
-		userLine += "\n";
-
-		Path path = Paths.get(USERS_FILE_PATH);
-		System.err.println(path.toAbsolutePath());
-		Files.createDirectories(path.getParent());
-		Files.write(path, userLine.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND,
-				StandardOpenOption.CREATE);
+		line.append('\n');
+		return line.toString();
 	}
 
 	/**
@@ -141,19 +204,16 @@ public abstract class Access {
 	 * 
 	 * @throws IOException
 	 *             if an I/O error occurs saving the access data
+	 * @throws UserNotFoundException
+	 *             if no user with the specified username exists
 	 */
-	public synchronized static void removeUser(String username) throws IOException {
+	public synchronized static void removeUser(String username)
+			throws IOException, UserNotFoundException {
 		User removed = users.remove(username);
 		if (removed == null) {
-			logger.info("User '{}' not found", username);
-			return;
+			throw new UserNotFoundException();
 		}
-
-		Files.deleteIfExists(Paths.get(USERS_FILE_PATH));
-		for (User u : users.values()) {
-			writeUser(u);
-		}
-
+		writeUsers();
 		logger.info("User '{}' removed", username);
 	}
 
@@ -234,7 +294,6 @@ public abstract class Access {
 		try {
 			KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, 20000, 20 * 8);
 			SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-
 			return f.generateSecret(spec).getEncoded();
 		} catch (Exception e) {
 			throw new RuntimeException(e);

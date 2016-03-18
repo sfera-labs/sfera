@@ -63,6 +63,8 @@ public class AccessConsoleCommandHandler implements ConsoleCommandHandler {
 				return "Removed";
 			} catch (IOException e) {
 				return "Error: " + e;
+			} catch (UserNotFoundException e) {
+				return "User not found";
 			}
 
 		default:

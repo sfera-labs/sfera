@@ -15,8 +15,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cc.sferalabs.sfera.http.api.rest.MissingRequiredParamException;
 import cc.sferalabs.sfera.http.api.rest.RestResponse;
 import cc.sferalabs.sfera.http.api.rest.servlets.ApiServlet;
+import cc.sferalabs.sfera.http.api.rest.servlets.AuthorizedAdminApiServlet;
 import cc.sferalabs.sfera.util.files.FilesUtil;
 
 /**
@@ -27,7 +29,7 @@ import cc.sferalabs.sfera.util.files.FilesUtil;
  *
  */
 @SuppressWarnings("serial")
-public class DeleteFileServlet extends AuthorizedAdminServlet {
+public class DeleteFileServlet extends AuthorizedAdminApiServlet {
 
 	public static final String PATH = ApiServlet.PATH + "files/rm";
 
@@ -36,20 +38,17 @@ public class DeleteFileServlet extends AuthorizedAdminServlet {
 	@Override
 	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
 			throws ServletException, IOException {
-		String path = req.getParameter("path");
-		if (path == null) {
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Param 'path' not specified");
-			return;
-		}
-		Path source = Paths.get(".", path);
-		if (!FilesUtil.isInRoot(source) || !Files.exists(source) || Files.isHidden(source)) {
-			resp.sendError(HttpServletResponse.SC_NOT_FOUND, "File '" + path + "' not found");
-			return;
-		}
-
 		try {
+			String path = getRequiredParam("path", req, resp);
+			Path source = Paths.get(".", path);
+			if (!FilesUtil.isInRoot(source) || !Files.exists(source) || Files.isHidden(source)) {
+				resp.sendError(HttpServletResponse.SC_NOT_FOUND, "File '" + path + "' not found");
+				return;
+			}
 			Files.walkFileTree(source, new FileDeleter());
 			resp.sendResult("ok");
+
+		} catch (MissingRequiredParamException e) {
 		} catch (Exception e) {
 			logger.error("File delete error", e);
 			resp.sendError("File delete error: " + e);

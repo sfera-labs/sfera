@@ -49,7 +49,7 @@ public abstract class AuthorizedApiServlet extends ApiServlet {
 	 * @param req
 	 *            the request to be authorized
 	 * 
-	 * @return {@code true} if the reqast is authorized, {@code false}
+	 * @return {@code true} if the request is authorized, {@code false}
 	 *         otherwise.
 	 */
 	protected boolean isAuthorized(HttpServletRequest req) {

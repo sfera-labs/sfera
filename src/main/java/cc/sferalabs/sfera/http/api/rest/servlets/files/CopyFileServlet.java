@@ -17,8 +17,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cc.sferalabs.sfera.http.api.rest.MissingRequiredParamException;
 import cc.sferalabs.sfera.http.api.rest.RestResponse;
 import cc.sferalabs.sfera.http.api.rest.servlets.ApiServlet;
+import cc.sferalabs.sfera.http.api.rest.servlets.AuthorizedAdminApiServlet;
 import cc.sferalabs.sfera.util.files.FilesUtil;
 
 /**
@@ -29,7 +31,7 @@ import cc.sferalabs.sfera.util.files.FilesUtil;
  *
  */
 @SuppressWarnings("serial")
-public class CopyFileServlet extends AuthorizedAdminServlet {
+public class CopyFileServlet extends AuthorizedAdminApiServlet {
 
 	public static final String PATH = ApiServlet.PATH + "files/cp";
 
@@ -38,40 +40,32 @@ public class CopyFileServlet extends AuthorizedAdminServlet {
 	@Override
 	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
 			throws ServletException, IOException {
-		String source = req.getParameter("source");
-		if (source == null) {
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Param 'source' not specified");
-			return;
-		}
-		String target = req.getParameter("target");
-		if (target == null) {
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Param 'target' not specified");
-			return;
-		}
-		boolean force = "true".equalsIgnoreCase(req.getParameter("force"));
-
-		Path sourcePath = Paths.get(".", source);
-		if (!FilesUtil.isInRoot(sourcePath) || !Files.exists(sourcePath)
-				|| Files.isHidden(sourcePath)) {
-			resp.sendError(HttpServletResponse.SC_NOT_FOUND, "File '" + source + "' not found");
-			return;
-		}
-
-		Path targetPath = Paths.get(".", target);
-		if (!FilesUtil.isInRoot(targetPath)) {
-			resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Target file outside root dir");
-			return;
-		}
-		if (Files.isHidden(targetPath)) {
-			resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Cannot write hidden files");
-			return;
-		}
-		if (!force && Files.exists(targetPath)) {
-			resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Target file already exists");
-			return;
-		}
-
 		try {
+			String source = getRequiredParam("source", req, resp);
+			String target = getRequiredParam("target", req, resp);
+			boolean force = "true".equalsIgnoreCase(req.getParameter("force"));
+
+			Path sourcePath = Paths.get(".", source);
+			if (!FilesUtil.isInRoot(sourcePath) || !Files.exists(sourcePath)
+					|| Files.isHidden(sourcePath)) {
+				resp.sendError(HttpServletResponse.SC_NOT_FOUND, "File '" + source + "' not found");
+				return;
+			}
+
+			Path targetPath = Paths.get(".", target);
+			if (!FilesUtil.isInRoot(targetPath)) {
+				resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Target file outside root dir");
+				return;
+			}
+			if (Files.isHidden(targetPath)) {
+				resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Cannot write hidden files");
+				return;
+			}
+			if (!force && Files.exists(targetPath)) {
+				resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Target file already exists");
+				return;
+			}
+
 			if (Files.isDirectory(sourcePath)) {
 				Files.walkFileTree(sourcePath, new FileCopier(sourcePath, targetPath));
 			} else {
@@ -84,6 +78,8 @@ public class CopyFileServlet extends AuthorizedAdminServlet {
 				}
 			}
 			resp.sendResult("ok");
+
+		} catch (MissingRequiredParamException e) {
 		} catch (Exception e) {
 			logger.error("File copy error", e);
 			resp.sendError("File copy error: " + e);

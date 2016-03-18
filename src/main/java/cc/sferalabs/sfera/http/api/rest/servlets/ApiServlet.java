@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cc.sferalabs.sfera.http.api.rest.MissingRequiredParamException;
 import cc.sferalabs.sfera.http.api.rest.RestResponse;
 
 /**
@@ -49,6 +50,34 @@ public abstract class ApiServlet extends HttpServlet {
 			throws ServletException, IOException;
 
 	/**
+	 * Returns the value of the specified parameter if available in the request.
+	 * If not available, it sends a bad-request-error response and throws a
+	 * {@link MissingRequiredParamException}.
+	 * 
+	 * @param paramName
+	 *            the requested parameter name
+	 * @param req
+	 *            the HTTP request
+	 * @param resp
+	 *            the response object
+	 * @return the value of the specified parameter if available
+	 * @throws MissingRequiredParamException
+	 *             if the requested parameter is not available
+	 * @throws IOException
+	 *             if an I/O error occurs
+	 */
+	protected String getRequiredParam(String paramName, HttpServletRequest req, RestResponse resp)
+			throws MissingRequiredParamException, IOException {
+		String val = req.getParameter(paramName);
+		if (val == null) {
+			MissingRequiredParamException e = new MissingRequiredParamException(paramName);
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+			throw e;
+		}
+		return val;
+	}
+
+	/**
 	 * 
 	 * @param req
 	 * @param resp
@@ -67,7 +96,7 @@ public abstract class ApiServlet extends HttpServlet {
 				error = t.toString();
 			}
 			try {
-				rr.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, error);
+				rr.sendError(error);
 			} catch (Exception e) {
 				logger.error("Error sending response", e);
 			}

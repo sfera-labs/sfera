@@ -12,8 +12,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cc.sferalabs.sfera.http.api.rest.MissingRequiredParamException;
 import cc.sferalabs.sfera.http.api.rest.RestResponse;
 import cc.sferalabs.sfera.http.api.rest.servlets.ApiServlet;
+import cc.sferalabs.sfera.http.api.rest.servlets.AuthorizedAdminApiServlet;
 import cc.sferalabs.sfera.util.files.FilesUtil;
 
 /**
@@ -24,7 +26,7 @@ import cc.sferalabs.sfera.util.files.FilesUtil;
  *
  */
 @SuppressWarnings("serial")
-public class ReadGetFileServlet extends AuthorizedAdminServlet {
+public class ReadGetFileServlet extends AuthorizedAdminApiServlet {
 
 	public static final String PATH_READ = ApiServlet.PATH + "files/read";
 	public static final String PATH_GET = ApiServlet.PATH + "files/get";
@@ -34,19 +36,14 @@ public class ReadGetFileServlet extends AuthorizedAdminServlet {
 	@Override
 	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
 			throws ServletException, IOException {
-		String path = req.getParameter("path");
-		if (path == null) {
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Param 'path' not specified");
-			return;
-		}
-		Path source = Paths.get(".", path);
-		if (!FilesUtil.isInRoot(source) || !Files.exists(source) || !Files.isRegularFile(source)
-				|| Files.isHidden(source)) {
-			resp.sendError(HttpServletResponse.SC_NOT_FOUND, "File '" + path + "' not found");
-			return;
-		}
-
 		try {
+			String path = getRequiredParam("path", req, resp);
+			Path source = Paths.get(".", path);
+			if (!FilesUtil.isInRoot(source) || !Files.exists(source) || !Files.isRegularFile(source)
+					|| Files.isHidden(source)) {
+				resp.sendError(HttpServletResponse.SC_NOT_FOUND, "File '" + path + "' not found");
+				return;
+			}
 			HttpServletResponse httpResp = resp.getHttpServletResponse();
 			httpResp.addHeader("Content-Length", "" + Files.size(source));
 			if (req.getRequestURI().endsWith("get")) {
@@ -55,6 +52,8 @@ public class ReadGetFileServlet extends AuthorizedAdminServlet {
 						"attachment; filename=\"" + source.getFileName().toString() + "\"");
 			}
 			Files.copy(source, httpResp.getOutputStream());
+
+		} catch (MissingRequiredParamException e) {
 		} catch (Exception e) {
 			logger.error("File get error", e);
 			resp.sendError("File get error: " + e);

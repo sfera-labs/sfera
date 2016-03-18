@@ -1,4 +1,4 @@
-package cc.sferalabs.sfera.http.auth;
+package cc.sferalabs.sfera.http;
 
 import java.security.Principal;
 

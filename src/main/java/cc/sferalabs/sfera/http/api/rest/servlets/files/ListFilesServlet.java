@@ -21,8 +21,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cc.sferalabs.sfera.http.api.rest.MissingRequiredParamException;
 import cc.sferalabs.sfera.http.api.rest.RestResponse;
 import cc.sferalabs.sfera.http.api.rest.servlets.ApiServlet;
+import cc.sferalabs.sfera.http.api.rest.servlets.AuthorizedAdminApiServlet;
 import cc.sferalabs.sfera.util.files.FilesUtil;
 
 /**
@@ -33,7 +35,7 @@ import cc.sferalabs.sfera.util.files.FilesUtil;
  *
  */
 @SuppressWarnings("serial")
-public class ListFilesServlet extends AuthorizedAdminServlet {
+public class ListFilesServlet extends AuthorizedAdminApiServlet {
 
 	public static final String PATH = ApiServlet.PATH + "files/ls";
 
@@ -42,31 +44,28 @@ public class ListFilesServlet extends AuthorizedAdminServlet {
 	@Override
 	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
 			throws ServletException, IOException {
-		String path = req.getParameter("path");
-		if (path == null) {
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Param 'path' not specified");
-			return;
-		}
-		int depth;
 		try {
-			depth = Integer.parseInt(req.getParameter("depth"));
-		} catch (Exception e) {
-			depth = -1;
-		}
-		Path dir = Paths.get(".", path).normalize().toAbsolutePath();
-		if (!FilesUtil.isInRoot(dir) || !Files.exists(dir) || !Files.isDirectory(dir)) {
-			resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Directory '" + path + "' not found");
-			return;
-		}
-
-		try {
+			int depth;
+			try {
+				depth = Integer.parseInt(req.getParameter("depth"));
+			} catch (Exception e) {
+				depth = -1;
+			}
+			String path = getRequiredParam("path", req, resp);
+			Path dir = Paths.get(".", path).normalize().toAbsolutePath();
+			if (!FilesUtil.isInRoot(dir) || !Files.exists(dir) || !Files.isDirectory(dir)) {
+				resp.sendError(HttpServletResponse.SC_NOT_FOUND,
+						"Directory '" + path + "' not found");
+				return;
+			}
 			FileLister fl = new FileLister(depth);
 			Files.walkFileTree(dir, fl);
 			resp.sendResult(fl.getTop());
+
+		} catch (MissingRequiredParamException e) {
 		} catch (Exception e) {
 			logger.error("Files listing error", e);
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-					"Files listing error: " + e);
+			resp.sendError("Files listing error: " + e);
 		}
 	}
 
