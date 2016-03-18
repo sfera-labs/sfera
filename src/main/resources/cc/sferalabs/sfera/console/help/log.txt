@@ -1,0 +1,15 @@
+Usage:
+	log start [-l <level>] [-p <pattern>]
+	
+	This command will output the log to the console. Send any command to stop the logging.
+	
+	Options:
+		
+	-l <level>
+		Specifies the logging level: FATAL, ERROR, WARN, INFO (default), DEBUG, TRACE
+			
+	-p <pattern>
+		Specifies the conversion pattern to format the log entries text
+		Default pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} | %-5level | %logger{1.} - %msg%n"
+		More details: https://logging.apache.org/log4j/2.x/manual/layouts.html#PatternLayout
+			

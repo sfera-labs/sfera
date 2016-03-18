@@ -37,33 +37,6 @@ public class LogConsoleCommandHandler implements ConsoleCommandHandler {
 		return "log";
 	}
 
-	// @Override
-	// public String accept(String cmd, ConsoleSession session) {
-	// if (cmd.toLowerCase().startsWith("start")) {
-	// String sId = getId(session);
-	// String pattern;
-	// try {
-	// pattern = cmd.substring(cmd.indexOf(' '));
-	// } catch (Exception e) {
-	// pattern = null;
-	// }
-	// try {
-	// SessionOutputStream out = new SessionOutputStream(session);
-	// session.output("=== Logging started ===\n");
-	// LoggerUtils.addOutputStreamAppender(out, sId, pattern);
-	// String c = session.acceptCommand();
-	// if (c == null) {
-	// session.quit();
-	// }
-	// } catch (Throwable t) {
-	// }
-	// LoggerUtils.removeAppender(sId);
-	// return "=== Logging stopped ===";
-	// }
-	//
-	// return "Unknown command";
-	// }
-
 	@Override
 	public String accept(String cmd, ConsoleSession session) {
 		if (cmd.toLowerCase().startsWith("start")) {
@@ -78,6 +51,9 @@ public class LogConsoleCommandHandler implements ConsoleCommandHandler {
 				}
 				level = args.get("l");
 				pattern = args.get("p");
+			}
+			if (pattern == null) {
+				pattern = "%d{yyyy-MM-dd HH:mm:ss.SSS} | %-5level | %logger{1.} - %msg%n";
 			}
 
 			String sId = getId(session);
