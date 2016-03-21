@@ -26,12 +26,11 @@ import cc.sferalabs.sfera.util.files.FilesUtil;
  *
  */
 @SuppressWarnings("serial")
-public class ReadGetFileServlet extends AuthorizedAdminApiServlet {
+public class ReadFileServlet extends AuthorizedAdminApiServlet {
 
-	public static final String PATH_READ = ApiServlet.PATH + "files/read";
-	public static final String PATH_GET = ApiServlet.PATH + "files/get";
+	public static final String PATH = ApiServlet.PATH + "files/read";
 
-	private final static Logger logger = LoggerFactory.getLogger(ReadGetFileServlet.class);
+	private final static Logger logger = LoggerFactory.getLogger(ReadFileServlet.class);
 
 	@Override
 	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
@@ -46,11 +45,6 @@ public class ReadGetFileServlet extends AuthorizedAdminApiServlet {
 			}
 			HttpServletResponse httpResp = resp.getHttpServletResponse();
 			httpResp.addHeader("Content-Length", "" + Files.size(source));
-			if (req.getRequestURI().endsWith("get")) {
-				httpResp.addHeader("Content-Type", "application/octet-stream");
-				httpResp.addHeader("Content-Disposition",
-						"attachment; filename=\"" + source.getFileName().toString() + "\"");
-			}
 			Files.copy(source, httpResp.getOutputStream());
 
 		} catch (MissingRequiredParamException e) {

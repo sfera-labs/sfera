@@ -46,9 +46,11 @@ import cc.sferalabs.sfera.http.api.rest.servlets.access.RemoveAccessServlet;
 import cc.sferalabs.sfera.http.api.rest.servlets.access.UpdateAccessServlet;
 import cc.sferalabs.sfera.http.api.rest.servlets.files.CopyFileServlet;
 import cc.sferalabs.sfera.http.api.rest.servlets.files.DeleteFileServlet;
+import cc.sferalabs.sfera.http.api.rest.servlets.files.GetFileServlet;
 import cc.sferalabs.sfera.http.api.rest.servlets.files.ListFilesServlet;
+import cc.sferalabs.sfera.http.api.rest.servlets.files.MkdirFileServlet;
 import cc.sferalabs.sfera.http.api.rest.servlets.files.MoveFileServlet;
-import cc.sferalabs.sfera.http.api.rest.servlets.files.ReadGetFileServlet;
+import cc.sferalabs.sfera.http.api.rest.servlets.files.ReadFileServlet;
 import cc.sferalabs.sfera.http.api.rest.servlets.files.WriteFileServlet;
 import cc.sferalabs.sfera.http.api.websockets.ApiWebSocketServlet;
 
@@ -180,12 +182,13 @@ public class HttpServer implements AutoStartService {
 
 		// files
 		addServlet(ListFilesServlet.class, ListFilesServlet.PATH);
-		addServlet(ReadGetFileServlet.class, ReadGetFileServlet.PATH_READ);
-		addServlet(ReadGetFileServlet.class, ReadGetFileServlet.PATH_GET);
+		addServlet(ReadFileServlet.class, ReadFileServlet.PATH);
 		addServlet(WriteFileServlet.class, WriteFileServlet.PATH);
 		addServlet(MoveFileServlet.class, MoveFileServlet.PATH);
 		addServlet(CopyFileServlet.class, CopyFileServlet.PATH);
 		addServlet(DeleteFileServlet.class, DeleteFileServlet.PATH);
+		addServlet(GetFileServlet.class, GetFileServlet.PATH);
+		addServlet(MkdirFileServlet.class, MkdirFileServlet.PATH);
 
 		// access
 		addServlet(ListUsersServlet.class, ListUsersServlet.PATH);
