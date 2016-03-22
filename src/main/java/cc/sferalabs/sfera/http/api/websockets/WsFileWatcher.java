@@ -39,7 +39,7 @@ public class WsFileWatcher {
 		this.socket = socket;
 		for (String file : files.split(",")) {
 			Path path = Paths.get(file);
-			uuids.put(path, FilesWatcher.register(path, new EventsSender(file)));
+			uuids.put(path, FilesWatcher.register(path, new EventsSender(file), false));
 		}
 	}
 
