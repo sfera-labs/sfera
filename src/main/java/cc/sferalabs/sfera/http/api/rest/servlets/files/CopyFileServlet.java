@@ -61,6 +61,9 @@ public class CopyFileServlet extends AuthorizedAdminApiServlet {
 				resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Cannot write hidden files");
 				return;
 			}
+			if (Files.exists(targetPath) && Files.isDirectory(targetPath)) {
+				targetPath = targetPath.resolve(sourcePath.getFileName());
+			}
 			if (!force && Files.exists(targetPath)) {
 				resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Target file already exists");
 				return;
