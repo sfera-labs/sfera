@@ -17,10 +17,8 @@ import javax.xml.bind.DatatypeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cc.sferalabs.sfera.http.api.rest.MissingRequiredParamException;
 import cc.sferalabs.sfera.http.api.rest.RestResponse;
 import cc.sferalabs.sfera.http.api.rest.servlets.ApiServlet;
-import cc.sferalabs.sfera.http.api.rest.servlets.AuthorizedAdminApiServlet;
 import cc.sferalabs.sfera.util.files.FilesUtil;
 
 /**
@@ -32,19 +30,28 @@ import cc.sferalabs.sfera.util.files.FilesUtil;
  *
  */
 @SuppressWarnings("serial")
-public class WriteFileServlet extends AuthorizedAdminApiServlet {
+public class WriteFileServlet extends MultipartServlet {
 
 	public static final String PATH = ApiServlet.PATH + "files/write";
 
 	private final static Logger logger = LoggerFactory.getLogger(WriteFileServlet.class);
 
 	@Override
-	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
+	protected void processMultipartRequest(HttpServletRequest req, RestResponse resp)
 			throws ServletException, IOException {
 		try {
-			String path = getRequiredParam("path", req, resp);
-			String content = getRequiredParam("content", req, resp);
-			String md5 = req.getParameter("md5");
+			String path = getMultipartParameter("path", req);
+			String content = getMultipartParameter("content", req);
+			String md5 = getMultipartParameter("md5", req);
+
+			if (path == null) {
+				resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Param 'path' not specified");
+				return;
+			}
+			if (content == null) {
+				resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Param 'content' not specified");
+				return;
+			}
 
 			Path target = Paths.get(".", path);
 			if (!FilesUtil.isInRoot(target)) {
@@ -58,7 +65,6 @@ public class WriteFileServlet extends AuthorizedAdminApiServlet {
 			writeToFile(content, target, md5);
 			resp.sendResult("ok");
 
-		} catch (MissingRequiredParamException e) {
 		} catch (Exception e) {
 			logger.error("File write error", e);
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "File write error: " + e);

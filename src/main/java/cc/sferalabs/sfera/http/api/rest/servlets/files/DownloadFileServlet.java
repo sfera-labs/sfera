@@ -26,11 +26,11 @@ import cc.sferalabs.sfera.util.files.FilesUtil;
  *
  */
 @SuppressWarnings("serial")
-public class GetFileServlet extends AuthorizedAdminApiServlet {
+public class DownloadFileServlet extends AuthorizedAdminApiServlet {
 
-	public static final String PATH = ApiServlet.PATH + "files/get";
+	public static final String PATH = ApiServlet.PATH + "files/download";
 
-	private final static Logger logger = LoggerFactory.getLogger(GetFileServlet.class);
+	private final static Logger logger = LoggerFactory.getLogger(DownloadFileServlet.class);
 
 	@Override
 	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
@@ -61,8 +61,8 @@ public class GetFileServlet extends AuthorizedAdminApiServlet {
 
 		} catch (MissingRequiredParamException e) {
 		} catch (Exception e) {
-			logger.error("File get error", e);
-			resp.sendError("File get error: " + e);
+			logger.error("File download error", e);
+			resp.sendError("File download error: " + e);
 		} finally {
 			if (tempZipFile != null) {
 				try {
