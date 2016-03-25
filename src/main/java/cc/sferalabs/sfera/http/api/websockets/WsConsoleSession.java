@@ -28,8 +28,9 @@ public class WsConsoleSession extends ConsoleSession {
 	/**
 	 * 
 	 * @param socket
+	 *            the WebSocket linked to this session
 	 */
-	protected WsConsoleSession(ApiSocket socket) {
+	WsConsoleSession(ApiSocket socket) {
 		super("WebSocket Console Session (" + socket.connectionId + ")");
 		this.socket = socket;
 	}
@@ -66,6 +67,7 @@ public class WsConsoleSession extends ConsoleSession {
 
 	/**
 	 * @param command
+	 *            the command to process
 	 */
 	void process(String command) {
 		if (!cmdQ.offer(command)) {

@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
 import org.eclipse.jetty.server.Request;
@@ -62,22 +63,37 @@ public abstract class MultipartServlet extends AuthorizedAdminApiServlet {
 	}
 
 	/**
+	 * Processes the multipart request.
 	 * 
 	 * @param req
+	 *            an {@link HttpServletRequest} object that contains the request
+	 *            the client has made of the servlet
 	 * @param resp
+	 *            an {@link HttpServletResponse} object that contains the
+	 *            response the servlet sends to the client
+	 * 
 	 * @throws ServletException
+	 *             if the request could not be handled
 	 * @throws IOException
+	 *             if an I/O error occurs
 	 */
 	protected abstract void processMultipartRequest(HttpServletRequest req, RestResponse resp)
 			throws ServletException, IOException;
 
 	/**
+	 * Returns the value of the specified parameter in the specified HTTP
+	 * request.
 	 * 
 	 * @param param
+	 *            the parameter name
 	 * @param req
-	 * @return
+	 *            the HTTP request
+	 * @return the value of the specified parameter in the specified HTTP
+	 *         request or {@code null} if not found
 	 * @throws IOException
+	 *             if an I/O error occurs
 	 * @throws ServletException
+	 *             if this request is not of type multipart/form-data
 	 */
 	protected String getMultipartParameter(String param, HttpServletRequest req)
 			throws IOException, ServletException {

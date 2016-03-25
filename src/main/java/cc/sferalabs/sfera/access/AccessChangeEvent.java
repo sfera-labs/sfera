@@ -16,11 +16,10 @@ import cc.sferalabs.sfera.events.ObjectEvent;
 public class AccessChangeEvent extends ObjectEvent {
 
 	/**
-	 * @param source
-	 * @param id
-	 * @param value
+	 * 
+	 * @param source the source node
 	 */
-	public AccessChangeEvent(Node source) {
+	AccessChangeEvent(Node source) {
 		super(source, "change", null);
 	}
 
