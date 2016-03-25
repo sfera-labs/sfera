@@ -264,11 +264,12 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 					reply.sendError("Attribute 'cmd' not found");
 					return;
 				}
-				if ("start".equals(command)) {
-					consoleSession.start();
-				} else if ("exit".equals(command)) {
+				if ("exit".equals(command)) {
 					consoleSession.quit();
 				} else {
+					if (!consoleSession.isActive()) {
+						consoleSession.start();
+					}
 					consoleSession.process(command);
 				}
 				break;
