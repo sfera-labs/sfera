@@ -271,6 +271,7 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 				} else {
 					consoleSession.process(command);
 				}
+				break;
 
 			default:
 				reply.sendError("Unknown action");
