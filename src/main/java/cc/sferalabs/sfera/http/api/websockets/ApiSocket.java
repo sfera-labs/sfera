@@ -1,6 +1,7 @@
 package cc.sferalabs.sfera.http.api.websockets;
 
 import java.io.IOException;
+import java.util.EventListener;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.servlet.http.HttpServletRequest;
@@ -14,6 +15,11 @@ import org.eclipse.jetty.websocket.servlet.UpgradeHttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.eventbus.Subscribe;
+
+import cc.sferalabs.sfera.access.Access;
+import cc.sferalabs.sfera.access.AccessChangeEvent;
+import cc.sferalabs.sfera.access.User;
 import cc.sferalabs.sfera.core.services.Task;
 import cc.sferalabs.sfera.core.services.TasksManager;
 import cc.sferalabs.sfera.events.Bus;
@@ -29,24 +35,24 @@ import cc.sferalabs.sfera.http.api.RemoteApiEvent;
  * @version 1.0.0
  *
  */
-public class ApiSocket extends WebSocketAdapter {
+public class ApiSocket extends WebSocketAdapter implements EventListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(ApiSocket.class);
 	private static final AtomicLong count = new AtomicLong(77);
 
 	private static final String PING_STRING = "&";
 
-	final String hostname;
 	private final HttpServletRequest originalRequest;
-	private final String connectionId;
-	private final String user;
-	private final boolean isAuthorized;
+	final String hostname;
+	final String connectionId;
+	final String user;
 
 	private WsEventListener nodesSubscription;
 	private WsFileWatcher filesSubscription;
 	private final Task pingTask;
 	private final long pingInterval;
 	private final long respTimeout;
+	private WsConsoleSession consoleSession;
 
 	/**
 	 * Construct an ApiSocket
@@ -77,7 +83,7 @@ public class ApiSocket extends WebSocketAdapter {
 		this.pingInterval = pingInterval;
 		this.respTimeout = respTimeout;
 		this.pingTask = new PingTask(this, pingInterval);
-		this.isAuthorized = request.isUserInRole("admin") || request.isUserInRole("user");
+		this.consoleSession = new WsConsoleSession(this);
 		logger.debug("Socket created - Host: {}", request.getRemoteHostName());
 	}
 
@@ -85,13 +91,14 @@ public class ApiSocket extends WebSocketAdapter {
 	public void onWebSocketConnect(Session session) {
 		super.onWebSocketConnect(session);
 		try {
-			if (isAuthorized) {
+			if (isUserInRole("admin", "user")) {
 				OutgoingWsMessage resp = new OutgoingWsMessage("connection", this);
 				resp.put("connectionId", connectionId);
 				resp.put("pingInterval", pingInterval);
 				resp.put("responseTimeout", respTimeout);
 				resp.send();
 				ping();
+				Bus.register(this);
 				logger.debug("Socket connected - Host: {}", hostname);
 			} else {
 				logger.warn("Unauthorized WebSocket connection from {}", hostname);
@@ -103,7 +110,31 @@ public class ApiSocket extends WebSocketAdapter {
 		} catch (Exception e) {
 			onWebSocketError(new Exception("Connection error", e));
 		}
+	}
 
+	@Subscribe
+	public void checkUser(AccessChangeEvent e) {
+		if (!isUserInRole("admin", "user")) {
+			closeSocket(StatusCode.POLICY_VIOLATION, "Unauthorized");
+		}
+	}
+
+	/**
+	 * 
+	 * @param roles
+	 * @return
+	 */
+	private boolean isUserInRole(String... roles) {
+		User u = Access.getUser(user);
+		if (u == null) {
+			return false;
+		}
+		for (String role : roles) {
+			if (u.isInRole(role)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -121,6 +152,11 @@ public class ApiSocket extends WebSocketAdapter {
 	public void onWebSocketText(String message) {
 		super.onWebSocketText(message);
 		logger.debug("Received message: '{}' - Host: {} User: {}", message, hostname, user);
+
+		if (!isUserInRole("admin", "user")) {
+			closeSocket(StatusCode.POLICY_VIOLATION, "Unauthorized");
+			return;
+		}
 
 		if (message.equals(PING_STRING)) {
 			TasksManager.execute(pingTask);
@@ -218,6 +254,24 @@ public class ApiSocket extends WebSocketAdapter {
 				}
 				break;
 
+			case "console":
+				if (!isUserInRole("admin")) {
+					closeSocket(StatusCode.POLICY_VIOLATION, "Unauthorized");
+					return;
+				}
+				String command = message.get("command");
+				if (command == null) {
+					reply.sendError("Attribute 'command' not found");
+					return;
+				}
+				if ("start".equals(command)) {
+					consoleSession.start();
+				} else if ("exit".equals(command)) {
+					consoleSession.quit();
+				} else {
+					consoleSession.process(command);
+				}
+
 			default:
 				reply.sendError("Unknown action");
 				break;
@@ -243,6 +297,8 @@ public class ApiSocket extends WebSocketAdapter {
 		if (pingTask != null) {
 			pingTask.interrupt();
 		}
+		consoleSession.quit();
+		Bus.unregister(this);
 		logger.debug("Socket Closed: [{}] {} - Host: {}", statusCode, reason, hostname);
 	}
 

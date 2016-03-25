@@ -25,6 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.console.Console;
+import cc.sferalabs.sfera.events.Bus;
+import cc.sferalabs.sfera.events.Node;
 
 /**
  * Utility class for users authorization and authentication
@@ -34,7 +36,7 @@ import cc.sferalabs.sfera.console.Console;
  * @version 1.0.0
  * 
  */
-public abstract class Access {
+public class Access extends Node {
 
 	/** Users credentials configuration file */
 	private static final String USERS_FILE_PATH = "data/access/passwd";
@@ -44,6 +46,15 @@ public abstract class Access {
 			String.CASE_INSENSITIVE_ORDER);
 
 	private static final Logger logger = LoggerFactory.getLogger(Access.class);
+	
+	private static final Access INSTANCE = new Access();
+	
+	/**
+	 * 
+	 */
+	private Access() {
+		super("access");
+	}
 
 	/**
 	 * Initialize user credentials reading from the configuration file
@@ -107,7 +118,15 @@ public abstract class Access {
 		users.put(username, u);
 		writeUsers();
 
+		triggerChangeEvent();
 		logger.info("User '{}' added {}", username, roles);
+	}
+
+	/**
+	 * 
+	 */
+	private static void triggerChangeEvent() {
+		Bus.post(new AccessChangeEvent(INSTANCE));
 	}
 
 	/**
@@ -148,6 +167,7 @@ public abstract class Access {
 		users.put(username, newUser);
 		writeUsers();
 
+		triggerChangeEvent();
 		logger.info("User '{}' updated {}", username, roles);
 	}
 
@@ -214,6 +234,8 @@ public abstract class Access {
 			throw new UserNotFoundException();
 		}
 		writeUsers();
+		
+		triggerChangeEvent();
 		logger.info("User '{}' removed", username);
 	}
 

@@ -31,9 +31,12 @@ public abstract class ConsoleSession extends Task {
 	}
 
 	/**
-	 * Starts this console session as a new task.
+	 * Starts this console session as a new task, if not already active.
 	 */
-	public final void start() {
+	public synchronized final void start() {
+		if (isActive()) {
+			return;
+		}
 		run = true;
 		Console.addSession(this);
 		TasksManager.execute(this);
@@ -42,7 +45,7 @@ public abstract class ConsoleSession extends Task {
 	/**
 	 * Interrupts this console session.
 	 */
-	public final void quit() {
+	public synchronized final void quit() {
 		logger.debug("{} quitting...", getName());
 		run = false;
 		interrupt();
@@ -86,7 +89,7 @@ public abstract class ConsoleSession extends Task {
 	 * @return {@code true} if this session is active, {@code false} if it has
 	 *         been interrupted or requested to quit
 	 */
-	public boolean isActive() {
+	public synchronized boolean isActive() {
 		if (!run) {
 			return false;
 		}
