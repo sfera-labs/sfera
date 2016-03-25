@@ -259,9 +259,9 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 					closeSocket(StatusCode.POLICY_VIOLATION, "Unauthorized");
 					return;
 				}
-				String command = message.get("command");
+				String command = message.get("cmd");
 				if (command == null) {
-					reply.sendError("Attribute 'command' not found");
+					reply.sendError("Attribute 'cmd' not found");
 					return;
 				}
 				if ("start".equals(command)) {
