@@ -83,7 +83,6 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 		this.pingInterval = pingInterval;
 		this.respTimeout = respTimeout;
 		this.pingTask = new PingTask(this, pingInterval);
-		this.consoleSession = new WsConsoleSession(this);
 		logger.debug("Socket created - Host: {}", request.getRemoteHostName());
 	}
 
@@ -125,6 +124,9 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 	 * @return
 	 */
 	private boolean isUserInRole(String... roles) {
+		if (user == null) {
+			return false;
+		}
 		User u = Access.getUser(user);
 		if (u == null) {
 			return false;
@@ -264,6 +266,9 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 					reply.sendError("Attribute 'cmd' not found");
 					return;
 				}
+				if (consoleSession == null) {
+					consoleSession = new WsConsoleSession(this);
+				}
 				if ("exit".equals(command)) {
 					consoleSession.quit();
 				} else {
@@ -299,7 +304,9 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 		if (pingTask != null) {
 			pingTask.interrupt();
 		}
-		consoleSession.quit();
+		if (consoleSession != null) {
+			consoleSession.quit();
+		}
 		Bus.unregister(this);
 		logger.debug("Socket Closed: [{}] {} - Host: {}", statusCode, reason, hostname);
 	}

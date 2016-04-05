@@ -37,7 +37,8 @@ public abstract class Plugins {
 	static void load() {
 		doLoad();
 		try {
-			FilesWatcher.register(Paths.get(DIR_PATH), Plugins::doLoad, false);
+			FilesWatcher.register(Paths.get(DIR_PATH), "Plugins loader", Plugins::doLoad, false,
+					false);
 		} catch (Exception e) {
 			logger.error("Error watching plugins directory", e);
 		}

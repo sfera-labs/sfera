@@ -42,8 +42,8 @@ public abstract class Applications {
 	public synchronized static void load() {
 		instantiateApps();
 		try {
-			FilesWatcher.register(Configuration.getConfigDir().resolve(CONFIG_DIR),
-					Applications::instantiateApps, false);
+			FilesWatcher.register(Configuration.getConfigDir().resolve(CONFIG_DIR), "Apps louncher",
+					Applications::instantiateApps, false, false);
 		} catch (Exception e) {
 			logger.error("Error watching drivers config directory", e);
 		}

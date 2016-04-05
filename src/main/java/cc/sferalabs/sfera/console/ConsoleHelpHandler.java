@@ -43,7 +43,7 @@ public class ConsoleHelpHandler implements ConsoleCommandHandler {
 	public String accept(String cmd, ConsoleSession session) {
 		ConsoleCommandHandler h = handlers.get(cmd);
 		if (h == null || h == this) {
-			StringBuilder sb = new StringBuilder("Usage: help <hanler>\nActive handlers:");
+			StringBuilder sb = new StringBuilder("Usage: help <handler>\nActive handlers:");
 			for (ConsoleCommandHandler handler : handlers.values()) {
 				if (handler != this) {
 					sb.append("\n    ").append(handler.getKey());

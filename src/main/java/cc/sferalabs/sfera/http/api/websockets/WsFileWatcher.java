@@ -7,11 +7,11 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 
-import cc.sferalabs.sfera.core.services.Task;
 import cc.sferalabs.sfera.util.files.FilesWatcher;
 
 /**
@@ -24,7 +24,7 @@ import cc.sferalabs.sfera.util.files.FilesWatcher;
 public class WsFileWatcher {
 
 	private final ApiSocket socket;
-	private final Map<Path, UUID> uuids = new HashMap<>();
+	private final Set<UUID> uuids = new HashSet<>();
 
 	/**
 	 * 
@@ -39,7 +39,8 @@ public class WsFileWatcher {
 		this.socket = socket;
 		for (String file : files.split(",")) {
 			Path path = Paths.get(file);
-			uuids.put(path, FilesWatcher.register(path, new EventsSender(file), false));
+			uuids.add(FilesWatcher.register(path, "WebSocket file events sender",
+					new EventsSender(file), false, false));
 		}
 	}
 
@@ -47,8 +48,8 @@ public class WsFileWatcher {
 	 * 
 	 */
 	void destroy() {
-		for (Entry<Path, UUID> e : uuids.entrySet()) {
-			FilesWatcher.unregister(e.getKey(), e.getValue());
+		for (UUID uuid : uuids) {
+			FilesWatcher.unregister(uuid);
 		}
 	}
 
@@ -59,7 +60,7 @@ public class WsFileWatcher {
 	 * @version 1.0.0
 	 *
 	 */
-	private class EventsSender extends Task {
+	private class EventsSender implements Runnable {
 
 		private final String path;
 
@@ -67,12 +68,11 @@ public class WsFileWatcher {
 		 * @param path
 		 */
 		EventsSender(String path) {
-			super("WS file events sender");
 			this.path = path;
 		}
 
 		@Override
-		protected void execute() {
+		public void run() {
 			try {
 				OutgoingWsMessage msg = new OutgoingWsMessage("event", socket);
 				Map<String, Long> eventsMap = new HashMap<>();

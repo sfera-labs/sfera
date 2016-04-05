@@ -67,7 +67,7 @@ public class DocServer implements AutoStartService {
 		}
 
 		try {
-			FilesWatcher.register(ROOT, this::init);
+			FilesWatcher.register(ROOT, "JavaDoc extractor", this::init);
 		} catch (Exception e) {
 			logger.error("Error registering FilesWatcher", e);
 		}

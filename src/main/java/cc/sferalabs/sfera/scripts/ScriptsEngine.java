@@ -56,7 +56,8 @@ public class ScriptsEngine implements AutoStartService, EventListener {
 	public void init() throws Exception {
 		loadScripts();
 		try {
-			FilesWatcher.register(Paths.get(ScriptsLoader.SCRIPTS_DIR), this::loadScripts, false);
+			FilesWatcher.register(Paths.get(ScriptsLoader.SCRIPTS_DIR), "Scripts loader",
+					this::loadScripts, false, true);
 		} catch (Exception e) {
 			logger.error("Error registering script files watcher", e);
 		}

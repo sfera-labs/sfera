@@ -60,7 +60,7 @@ public abstract class Driver extends Node {
 					config = new Configuration(configFile);
 					try {
 						configWatcherId = FilesWatcher.register(config.getRealPath(),
-								this::reloadConfiguration, false);
+								"Driver config reload", this::reloadConfiguration, false, false);
 					} catch (IOException e) {
 						log.error("Error watching config file", e);
 					}
@@ -95,7 +95,7 @@ public abstract class Driver extends Node {
 				try {
 					log.info("Quitting...");
 					if (configWatcherId != null) {
-						FilesWatcher.unregister(config.getRealPath(), configWatcherId);
+						FilesWatcher.unregister(configWatcherId);
 					}
 					onQuit();
 					log.info("Quitted");

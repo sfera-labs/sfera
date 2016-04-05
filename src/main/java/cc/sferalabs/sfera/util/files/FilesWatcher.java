@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -107,7 +108,8 @@ public final class FilesWatcher extends LazyService {
 			Set<WatchKey> keys = new HashSet<WatchKey>();
 			do { // in case there are other events combined
 				keys.add(wkey);
-			} while ((wkey = WATCHER.poll(200, TimeUnit.MILLISECONDS)) != null && keys.size() < 10);
+			} while ((wkey = WATCHER.poll(200, TimeUnit.MILLISECONDS)) != null
+					&& keys.size() < 500);
 
 			Set<WatcherTask> toExecute = new HashSet<>();
 			for (WatchKey key : keys) {
@@ -178,21 +180,23 @@ public final class FilesWatcher extends LazyService {
 	 * Registers the specified {@code task} to be executed when the file located
 	 * at the specified {@code path} is modified.
 	 * <p>
-	 * Equivalent to {@link #register(Path, Runnable, boolean)
-	 * FilesWatcher.register}{@code (path, task, true);}
+	 * Equivalent to {@link #register(Path, String, Runnable, boolean, boolean)
+	 * FilesWatcher.register}{@code (path, taskName, task, true, true);}
 	 * </p>
 	 * 
 	 * @param path
 	 *            the path of the file to be watched
+	 * @param taskName
+	 *            descriptive name of the task
 	 * @param task
 	 *            the task to be executed on file modification
-	 * @return a {@code UUID} that can be used to {@link #unregister(Path, UUID)
+	 * @return a {@code UUID} that can be used to {@link #unregister(UUID)
 	 *         unregister} the task in the future
 	 * @throws IOException
 	 *             If an I/O error occurs
 	 */
-	public static UUID register(Path path, Runnable task) throws IOException {
-		return register(path, task, true);
+	public static UUID register(Path path, String taskName, Runnable task) throws IOException {
+		return register(path, taskName, task, true, true);
 	}
 
 	/**
@@ -201,21 +205,26 @@ public final class FilesWatcher extends LazyService {
 	 * 
 	 * @param path
 	 *            the path of the file to be watched
+	 * @param taskName
+	 *            descriptive name of the task
 	 * @param task
 	 *            the task to be executed on file modification
 	 * @param removeWhenDone
 	 *            if {@code true} the task will be executed once after the first
 	 *            modification and then removed. Otherwise the task will be
-	 *            executed at every modification until
-	 *            {@link #unregister(Path, UUID) unregistered}
-	 * @return a {@code UUID} that can be used to {@link #unregister(Path, UUID)
+	 *            executed at every modification until {@link #unregister(UUID)
+	 *            unregistered}
+	 * @param watchSubDirs
+	 *            if the specified path is a directory, specifies whether or not
+	 *            the sub-directories shod be registered too
+	 * @return a {@code UUID} that can be used to {@link #unregister(UUID)
 	 *         unregister} the task in the future
 	 * @throws IOException
 	 *             If an I/O error occurs
 	 */
-	public static UUID register(Path path, Runnable task, boolean removeWhenDone)
-			throws IOException {
-		return register(new WatcherTask(path, task, removeWhenDone));
+	public static UUID register(Path path, String taskName, Runnable task, boolean removeWhenDone,
+			boolean watchSubDirs) throws IOException {
+		return register(new WatcherTask(path, taskName, task, removeWhenDone, watchSubDirs));
 	}
 
 	/**
@@ -246,15 +255,22 @@ public final class FilesWatcher extends LazyService {
 			registered.add(path);
 
 		} else {
-			Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
-				@Override
-				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
-						throws IOException {
-					dir.register(WATCHER, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
-					registered.add(dir);
-					return FileVisitResult.CONTINUE;
-				}
-			});
+			if (watcherTask.watchSubDirs) {
+				Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+
+					@Override
+					public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
+							throws IOException {
+						System.err.println(dir);
+						dir.register(WATCHER, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
+						registered.add(dir);
+						return FileVisitResult.CONTINUE;
+					}
+				});
+			} else {
+				path.register(WATCHER, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
+				registered.add(path);
+			}
 		}
 
 		synchronized (LOCK) {
@@ -265,39 +281,42 @@ public final class FilesWatcher extends LazyService {
 				}
 				ts.add(watcherTask);
 				PATHS_TASKS_MAP.put(r, ts);
+				logger.debug("Registered '{}' on path '{}'", watcherTask.getName(), r);
 			}
 		}
 
-		logger.debug("Watching '{}'", path);
 		return watcherTask.getId();
 	}
 
 	/**
-	 * Unregisters the previously {@link #register(Path, Runnable, boolean)
-	 * registered} task on the specified {@code path} and with the specified
-	 * {@code UUID} returned by the {@link #register(Path, Runnable, boolean)}
-	 * method.
+	 * Unregisters the previously
+	 * {@link #register(Path, String, Runnable, boolean, boolean) registered}
+	 * task on the specified {@code path} and with the specified {@code UUID}
+	 * returned by the
+	 * {@link #register(Path, String, Runnable, boolean, boolean)} method.
 	 * 
-	 * @param path
-	 *            the path the task was registered on
 	 * @param id
 	 *            the registration {@code UUID}
 	 */
-	public static void unregister(Path path, UUID id) {
+	public static void unregister(UUID id) {
 		synchronized (LOCK) {
-			Set<WatcherTask> ts = PATHS_TASKS_MAP.get(path);
-			if (ts != null) {
-				Iterator<WatcherTask> it = ts.iterator();
+			Iterator<Entry<Path, Set<WatcherTask>>> pathsTasksIterator = PATHS_TASKS_MAP.entrySet()
+					.iterator();
+			while (pathsTasksIterator.hasNext()) {
+				Entry<Path, Set<WatcherTask>> entry = pathsTasksIterator.next();
+				Path path = entry.getKey();
+				Set<WatcherTask> wTasks = entry.getValue();
+				Iterator<WatcherTask> it = wTasks.iterator();
 				while (it.hasNext()) {
-					if (it.next().getId().equals(id)) {
+					WatcherTask wt = it.next();
+					if (wt.getId().equals(id)) {
 						it.remove();
+						logger.debug("Unregistered '{}' on path '{}'", wt.getName(), path);
 					}
 				}
-				if (ts.isEmpty()) {
-					PATHS_TASKS_MAP.remove(path);
-					NON_EXISTING_PATHS.remove(path);
+				if (wTasks.isEmpty()) {
+					pathsTasksIterator.remove();
 				}
-				logger.debug("Unregistered '{}'", path);
 			}
 		}
 	}
@@ -311,6 +330,7 @@ public final class FilesWatcher extends LazyService {
 		private final Path path;
 		private final Task task;
 		private final boolean remove;
+		private final boolean watchSubDirs;
 
 		/**
 		 * 
@@ -318,11 +338,19 @@ public final class FilesWatcher extends LazyService {
 		 * @param task
 		 * @param remove
 		 */
-		WatcherTask(Path path, Runnable task, boolean remove) {
+		WatcherTask(Path path, String name, Runnable task, boolean remove, boolean watchSubDirs) {
 			this.id = UUID.randomUUID();
-			this.path = path;
-			this.task = Task.create("File '" + path + "' watcher", task);
+			this.path = path.toAbsolutePath().normalize();
+			this.task = Task.create(name, task);
 			this.remove = remove;
+			this.watchSubDirs = watchSubDirs;
+		}
+
+		/**
+		 * @return
+		 */
+		public String getName() {
+			return task.getName();
 		}
 
 		/**

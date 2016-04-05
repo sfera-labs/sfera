@@ -46,7 +46,7 @@ public abstract class Drivers {
 		instantiateDrivers();
 		try {
 			FilesWatcher.register(Configuration.getConfigDir().resolve(CONFIG_DIR),
-					Drivers::instantiateDrivers, false);
+					"Drivers loucher", Drivers::instantiateDrivers, false, false);
 		} catch (Exception e) {
 			logger.error("Error watching drivers config directory", e);
 		}

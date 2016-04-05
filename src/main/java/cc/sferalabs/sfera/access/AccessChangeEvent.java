@@ -17,7 +17,8 @@ public class AccessChangeEvent extends ObjectEvent {
 
 	/**
 	 * 
-	 * @param source the source node
+	 * @param source
+	 *            the source node
 	 */
 	AccessChangeEvent(Node source) {
 		super(source, "change", null);

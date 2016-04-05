@@ -46,9 +46,9 @@ public class Access extends Node {
 			String.CASE_INSENSITIVE_ORDER);
 
 	private static final Logger logger = LoggerFactory.getLogger(Access.class);
-	
+
 	private static final Access INSTANCE = new Access();
-	
+
 	/**
 	 * 
 	 */
@@ -234,7 +234,7 @@ public class Access extends Node {
 			throw new UserNotFoundException();
 		}
 		writeUsers();
-		
+
 		triggerChangeEvent();
 		logger.info("User '{}' removed", username);
 	}

@@ -6,7 +6,10 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import javax.servlet.Servlet;
@@ -256,6 +259,49 @@ public class HttpServer implements AutoStartService {
 			}
 		} else {
 			throw new HttpServerException("HTTP server service not available");
+		}
+	}
+
+	/**
+	 * Removes the previously registered servlet from the specified path
+	 * 
+	 * @param pathSpec
+	 *            the path spec to remove
+	 * @throws HttpServerException
+	 *             if an error occurs
+	 */
+	public synchronized static void removeServlet(String pathSpec) throws HttpServerException {
+		if (contexts != null) {
+			try {
+				ServletHandler handler = contexts.getServletHandler();
+
+				List<ServletMapping> mappings = new ArrayList<ServletMapping>();
+				Map<String, ServletHolder> servletsNames = new HashMap<>();
+				for (ServletHolder sh : handler.getServlets()) {
+					servletsNames.put(sh.getName(), sh);
+				}
+
+				for (ServletMapping mapping : handler.getServletMappings()) {
+					List<String> pathSpecs = new ArrayList<>();
+					for (String path : mapping.getPathSpecs()) {
+						if (!pathSpec.equals(path)) {
+							pathSpecs.add(path);
+						}
+					}
+					if (!pathSpecs.isEmpty()) {
+						mapping.setPathSpecs(pathSpecs.toArray(new String[pathSpecs.size()]));
+						mappings.add(mapping);
+					} else {
+						servletsNames.remove(mapping.getServletName());
+					}
+				}
+				Collection<ServletHolder> servlets = servletsNames.values();
+
+				handler.setServletMappings(mappings.toArray(new ServletMapping[mappings.size()]));
+				handler.setServlets(servlets.toArray(new ServletHolder[servlets.size()]));
+			} catch (Exception e) {
+				throw new HttpServerException(e);
+			}
 		}
 	}
 

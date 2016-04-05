@@ -67,7 +67,7 @@ public abstract class Application implements AutoStartService, EventListener {
 				log.info("Enabling...");
 				try {
 					configWatcherId = FilesWatcher.register(config.getRealPath(),
-							thisApp::relaodConfiguration, false);
+							"App config reload", thisApp::relaodConfiguration, false, false);
 				} catch (Exception e) {
 					log.error("Error watching config file", e);
 				}
@@ -108,7 +108,7 @@ public abstract class Application implements AutoStartService, EventListener {
 	 */
 	private void doDisable() {
 		log.info("Disabling...");
-		FilesWatcher.unregister(Configuration.getPath(configFile), configWatcherId);
+		FilesWatcher.unregister(configWatcherId);
 		onDisable();
 		enabled = false;
 		log.info("Disabled");
