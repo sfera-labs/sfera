@@ -1,12 +1,9 @@
 package cc.sferalabs.sfera.http.api.rest.servlets.files;
 
 import java.io.IOException;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -45,37 +42,13 @@ public class DeleteFileServlet extends AuthorizedAdminApiServlet {
 				resp.sendError(HttpServletResponse.SC_NOT_FOUND, "File '" + path + "' not found");
 				return;
 			}
-			Files.walkFileTree(source, new FileDeleter());
+			FilesUtil.delete(source);
 			resp.sendResult("ok");
 
 		} catch (MissingRequiredParamException e) {
 		} catch (Exception e) {
 			logger.error("File delete error", e);
 			resp.sendError("File delete error: " + e);
-		}
-	}
-
-	/**
-	 *
-	 */
-	private static class FileDeleter extends SimpleFileVisitor<Path> {
-
-		@Override
-		public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-			Files.delete(file);
-			return FileVisitResult.CONTINUE;
-		}
-
-		@Override
-		public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-			Files.delete(file);
-			return FileVisitResult.CONTINUE;
-		}
-
-		@Override
-		public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-			Files.delete(dir);
-			return FileVisitResult.CONTINUE;
 		}
 	}
 

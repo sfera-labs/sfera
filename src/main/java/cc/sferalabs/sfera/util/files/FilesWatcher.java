@@ -261,7 +261,6 @@ public final class FilesWatcher extends LazyService {
 					@Override
 					public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
 							throws IOException {
-						System.err.println(dir);
 						dir.register(WATCHER, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
 						registered.add(dir);
 						return FileVisitResult.CONTINUE;

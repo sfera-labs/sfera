@@ -6,7 +6,6 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -274,11 +273,17 @@ public class HttpServer implements AutoStartService {
 		if (contexts != null) {
 			try {
 				ServletHandler handler = contexts.getServletHandler();
+				List<ServletHolder> servlets = new ArrayList<>();
+				List<ServletMapping> mappings = new ArrayList<>();
 
-				List<ServletMapping> mappings = new ArrayList<ServletMapping>();
-				Map<String, ServletHolder> servletsNames = new HashMap<>();
+				Map<String, List<ServletHolder>> servletsMap = new HashMap<>();
 				for (ServletHolder sh : handler.getServlets()) {
-					servletsNames.put(sh.getName(), sh);
+					List<ServletHolder> list = servletsMap.get(sh.getName());
+					if (list == null) {
+						list = new ArrayList<>();
+						servletsMap.put(sh.getName(), list);
+					}
+					list.add(sh);
 				}
 
 				for (ServletMapping mapping : handler.getServletMappings()) {
@@ -292,10 +297,16 @@ public class HttpServer implements AutoStartService {
 						mapping.setPathSpecs(pathSpecs.toArray(new String[pathSpecs.size()]));
 						mappings.add(mapping);
 					} else {
-						servletsNames.remove(mapping.getServletName());
+						List<ServletHolder> list = servletsMap.get(mapping.getServletName());
+						if (list != null && !list.isEmpty()) {
+							list.remove(0);
+						}
 					}
 				}
-				Collection<ServletHolder> servlets = servletsNames.values();
+
+				for (List<ServletHolder> list : servletsMap.values()) {
+					servlets.addAll(list);
+				}
 
 				handler.setServletMappings(mappings.toArray(new ServletMapping[mappings.size()]));
 				handler.setServlets(servlets.toArray(new ServletHolder[servlets.size()]));
@@ -318,8 +329,8 @@ public class HttpServer implements AutoStartService {
 		if (contexts != null) {
 			try {
 				ServletHandler handler = contexts.getServletHandler();
-				List<ServletHolder> servlets = new ArrayList<ServletHolder>();
-				List<ServletMapping> mappings = new ArrayList<ServletMapping>();
+				List<ServletHolder> servlets = new ArrayList<>();
+				List<ServletMapping> mappings = new ArrayList<>();
 
 				for (ServletHolder sh : handler.getServlets()) {
 					if (servlet != sh) {
@@ -339,8 +350,8 @@ public class HttpServer implements AutoStartService {
 					}
 				}
 
-				handler.setServletMappings(mappings.toArray(new ServletMapping[] {}));
-				handler.setServlets(servlets.toArray(new ServletHolder[] {}));
+				handler.setServletMappings(mappings.toArray(new ServletMapping[mappings.size()]));
+				handler.setServlets(servlets.toArray(new ServletHolder[servlets.size()]));
 			} catch (Exception e) {
 				throw new HttpServerException(e);
 			}

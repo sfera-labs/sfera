@@ -5,6 +5,7 @@ package cc.sferalabs.sfera.util.files;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.CopyOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
@@ -89,6 +90,93 @@ public abstract class FilesUtil {
 					return FileVisitResult.CONTINUE;
 				}
 			});
+		}
+	}
+
+	/**
+	 * Deletes the specified file or directory.
+	 * 
+	 * @param path
+	 *            path of the file or directory to compress
+	 * @throws IOException
+	 *             if an I/O error occurs
+	 */
+	public static void delete(Path path) throws IOException {
+		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+
+			@Override
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+					throws IOException {
+				Files.delete(file);
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+				Files.delete(file);
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult postVisitDirectory(Path dir, IOException exc)
+					throws IOException {
+				Files.delete(dir);
+				return FileVisitResult.CONTINUE;
+			}
+		});
+	}
+
+	/**
+	 * Copies the specified file or directory to the specified target path.
+	 * 
+	 * @param source
+	 *            path of the file or directory to copy
+	 * @param target
+	 *            path of the target file or directory
+	 * @param options
+	 *            options specifying how the copy should be done
+	 * @throws IOException
+	 *             if an I/O error occurs
+	 */
+	public static void copy(Path source, Path target, CopyOption... options) throws IOException {
+		Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
+
+			@Override
+			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
+					throws IOException {
+				Path newdir = target.resolve(source.relativize(dir));
+				Files.copy(dir, newdir, options);
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+					throws IOException {
+				Files.copy(file, target.resolve(source.relativize(file)), options);
+				return FileVisitResult.CONTINUE;
+			}
+
+		});
+	}
+
+	/**
+	 * Copies the specified file or directory to the specified target path.
+	 * 
+	 * @param source
+	 *            path of the file or directory to copy
+	 * @param target
+	 *            path of the target file or directory
+	 * @param options
+	 *            options specifying how the copy should be done
+	 * @throws IOException
+	 *             if an I/O error occurs
+	 */
+	public static void move(Path source, Path target, CopyOption... options) throws IOException {
+		try {
+			Files.move(source, target, options);
+		} catch (IOException e) {
+			copy(source, target, options);
+			delete(source);
 		}
 	}
 
