@@ -20,8 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.core.services.AutoStartService;
-import cc.sferalabs.sfera.http.HttpServer;
 import cc.sferalabs.sfera.util.files.FilesWatcher;
+import cc.sferalabs.sfera.web.WebServer;
 
 /**
  * This service looks for documentation available in the 'docs' directory. If
@@ -54,7 +54,7 @@ public class DocServer implements AutoStartService {
 					return jarName.startsWith("sfera-") && jarName.endsWith("-javadoc.jar");
 				});
 				if (!servletAdded) {
-					HttpServer.addServlet(DocServletHolder.INSTANCE, "/docs/*");
+					WebServer.addServlet(DocServletHolder.INSTANCE, "/docs/*");
 					servletAdded = true;
 				}
 				extractJavaDocJarsIn(ROOT.resolve("plugins"), jarName -> {
@@ -164,7 +164,7 @@ public class DocServer implements AutoStartService {
 	@Override
 	public void quit() throws Exception {
 		if (servletAdded) {
-			HttpServer.removeServlet(DocServletHolder.INSTANCE);
+			WebServer.removeServlet(DocServletHolder.INSTANCE);
 		}
 	}
 

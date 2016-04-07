@@ -1,5 +1,5 @@
 cc.sferalabs.sfera.scripts.ScriptsEngine
-cc.sferalabs.sfera.http.HttpServer
+cc.sferalabs.sfera.web.WebServer
 cc.sferalabs.sfera.ui.UI
 #cc.sferalabs.sfera.scheduler.EventsScheduler
 #cc.sferalabs.sfera.data.Database

@@ -5,7 +5,7 @@ package cc.sferalabs.sfera.ui;
 
 import java.util.Objects;
 
-import cc.sferalabs.sfera.http.HttpConnectionEvent;
+import cc.sferalabs.sfera.web.ConnectionEvent;
 
 /**
  *
@@ -14,7 +14,7 @@ import cc.sferalabs.sfera.http.HttpConnectionEvent;
  * @version 1.0.0
  *
  */
-public class ConnectionUISetEvent extends UISetEvent implements HttpConnectionEvent {
+public class ConnectionUISetEvent extends UISetEvent implements ConnectionEvent {
 
 	/**
 	 * Construct a ConnectionUISetEvent
