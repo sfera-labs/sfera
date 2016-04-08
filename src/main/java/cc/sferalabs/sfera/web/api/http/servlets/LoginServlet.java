@@ -10,7 +10,8 @@ import javax.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cc.sferalabs.sfera.web.api.http.RestResponse;
+import cc.sferalabs.sfera.web.api.ErrorMessage;
+import cc.sferalabs.sfera.web.api.http.HttpResponse;
 
 /**
  * <p>
@@ -33,22 +34,23 @@ public class LoginServlet extends ApiServlet {
 	private static final Logger logger = LoggerFactory.getLogger(LoginServlet.class);
 
 	@Override
-	protected void processRequest(HttpServletRequest req, RestResponse resp)
+	protected void processRequest(HttpServletRequest req, HttpResponse resp)
 			throws ServletException, IOException {
 		String user = req.getParameter("user");
 		String password = req.getParameter("password");
 
 		try {
 			req.login(user, password);
-			resp.sendResult("ok");
 			logger.info("Login: {}", user);
+			resp.sendResult("ok");
 		} catch (ServletException e) {
 			logger.warn(e.getMessage());
 			HttpSession session = req.getSession(false);
 			if (session != null) {
 				session.invalidate();
 			}
-			resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
+			resp.sendErrors(HttpServletResponse.SC_UNAUTHORIZED,
+					new ErrorMessage(0, e.getMessage()));
 		}
 	}
 

@@ -6,12 +6,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import cc.sferalabs.sfera.access.Access;
+import cc.sferalabs.sfera.access.UserNotFoundException;
+import cc.sferalabs.sfera.web.api.ErrorMessage;
+import cc.sferalabs.sfera.web.api.http.HttpResponse;
 import cc.sferalabs.sfera.web.api.http.MissingRequiredParamException;
-import cc.sferalabs.sfera.web.api.http.RestResponse;
 import cc.sferalabs.sfera.web.api.http.servlets.ApiServlet;
 
 /**
@@ -26,29 +25,26 @@ public class UpdateAccessServlet extends ApiServlet {
 
 	public static final String PATH = ApiServlet.PATH + "access/update";
 
-	private final static Logger logger = LoggerFactory.getLogger(UpdateAccessServlet.class);
-
 	@Override
-	protected void processRequest(HttpServletRequest req, RestResponse resp)
+	protected void processRequest(HttpServletRequest req, HttpResponse resp)
 			throws ServletException, IOException {
 		try {
-			String username = getRequiredParam("username", req, resp);
+			String username = getRequiredParameter("username", req, resp);
 			String password = req.getParameter("password");
 			String roles = req.getParameter("roles");
 			String[] rs = (roles == null) ? null : roles.split("\\s*,\\s*");
 
 			if (!req.isUserInRole("admin")) {
-				if (!username.equals(req.getRemoteUser())) {
-					resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "User mismatch");
+				if (!username.equals(req.getRemoteUser()) || roles != null) {
+					// non-admins can only update themselves and cannot change
+					// their roles
+					resp.sendErrors(HttpServletResponse.SC_UNAUTHORIZED, ErrorMessage.UNAUTHORIZED);
 					return;
 				}
-				if (roles != null) {
-					resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Cannot modify roles");
-					return;
-				}
-				String oldPassword = getRequiredParam("old_password", req, resp);
+				String oldPassword = getRequiredParameter("old_password", req, resp);
 				if (Access.authenticate(username, oldPassword) == null) {
-					resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Wrong password");
+					// wrong password
+					resp.sendErrors(HttpServletResponse.SC_UNAUTHORIZED, ErrorMessage.UNAUTHORIZED);
 					return;
 				}
 			}
@@ -57,9 +53,9 @@ public class UpdateAccessServlet extends ApiServlet {
 			resp.sendResult("ok");
 
 		} catch (MissingRequiredParamException e) {
-		} catch (Exception e) {
-			logger.error("Access update error", e);
-			resp.sendError("Access update error: " + e);
+		} catch (UserNotFoundException e) {
+			resp.sendErrors(HttpServletResponse.SC_BAD_REQUEST,
+					new ErrorMessage(0, e.getMessage()));
 		}
 	}
 

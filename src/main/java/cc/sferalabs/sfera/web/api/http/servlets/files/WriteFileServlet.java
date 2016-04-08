@@ -14,15 +14,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.DatatypeConverter;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import cc.sferalabs.sfera.util.files.FilesUtil;
-import cc.sferalabs.sfera.web.api.http.RestResponse;
+import cc.sferalabs.sfera.web.api.ErrorMessage;
+import cc.sferalabs.sfera.web.api.http.HttpResponse;
 import cc.sferalabs.sfera.web.api.http.servlets.ApiServlet;
 
 /**
- * API admin servlet handling file editing.
  * 
  * @author Giampiero Baggiani
  *
@@ -34,41 +31,41 @@ public class WriteFileServlet extends MultipartServlet {
 
 	public static final String PATH = ApiServlet.PATH + "files/write";
 
-	private final static Logger logger = LoggerFactory.getLogger(WriteFileServlet.class);
-
 	@Override
-	protected void processMultipartRequest(HttpServletRequest req, RestResponse resp)
+	protected void processMultipartRequest(HttpServletRequest req, HttpResponse resp)
 			throws ServletException, IOException {
-		try {
-			String path = getMultipartParameter("path", req);
-			String content = getMultipartParameter("content", req);
-			String md5 = getMultipartParameter("md5", req);
+		String path = getMultipartParameter("path", req);
+		String content = getMultipartParameter("content", req);
+		String md5 = getMultipartParameter("md5", req);
 
-			if (path == null) {
-				resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Param 'path' not specified");
-				return;
-			}
-			if (content == null) {
-				resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Param 'content' not specified");
-				return;
-			}
-
-			Path target = Paths.get(".", path);
-			if (!FilesUtil.isInRoot(target)) {
-				resp.sendError(HttpServletResponse.SC_FORBIDDEN, "File outside root dir");
-				return;
-			}
-			if (Files.isHidden(target)) {
-				resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Cannot write hidden files");
-				return;
-			}
-			writeToFile(content, target, md5);
-			resp.sendResult("ok");
-
-		} catch (Exception e) {
-			logger.error("File write error", e);
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "File write error: " + e);
+		if (path == null) {
+			resp.sendErrors(HttpServletResponse.SC_BAD_REQUEST,
+					new ErrorMessage(0, "Param 'path' not specified"));
+			return;
 		}
+		if (content == null) {
+			resp.sendErrors(HttpServletResponse.SC_BAD_REQUEST,
+					new ErrorMessage(0, "Param 'content' not specified"));
+			return;
+		}
+
+		Path target = Paths.get(".", path);
+		if (!FilesUtil.isInRoot(target)) {
+			resp.sendErrors(HttpServletResponse.SC_FORBIDDEN,
+					new ErrorMessage(0, "File outside root dir"));
+			return;
+		}
+		if (Files.isHidden(target)) {
+			resp.sendErrors(HttpServletResponse.SC_FORBIDDEN,
+					new ErrorMessage(0, "Cannot write hidden files"));
+			return;
+		}
+		if (!writeToFile(content, target, md5)) {
+			resp.sendErrors(HttpServletResponse.SC_BAD_REQUEST,
+					new ErrorMessage(0, "md5 mismatch"));
+			return;
+		}
+		resp.sendResult("ok");
 	}
 
 	/**
@@ -76,16 +73,17 @@ public class WriteFileServlet extends MultipartServlet {
 	 * @param content
 	 * @param target
 	 * @param md5
-	 * @throws Exception
+	 * @return
+	 * @throws IOException
 	 */
-	private void writeToFile(String content, Path target, String md5) throws Exception {
+	private boolean writeToFile(String content, Path target, String md5) throws IOException {
 		Path temp = null;
 		try {
 			byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
 			if (md5 != null) {
 				String bytesMd5 = getMd5(bytes);
 				if (!bytesMd5.equals(md5)) {
-					throw new Exception("md5 mismatch");
+					return false;
 				}
 			}
 			temp = Files.createTempFile(getClass().getName(), null);
@@ -95,6 +93,7 @@ public class WriteFileServlet extends MultipartServlet {
 				Files.createDirectories(parent);
 			}
 			Files.move(temp, target, StandardCopyOption.REPLACE_EXISTING);
+			return true;
 		} finally {
 			if (temp != null) {
 				try {
@@ -109,11 +108,14 @@ public class WriteFileServlet extends MultipartServlet {
 	 * 
 	 * @param bytes
 	 * @return
-	 * @throws IOException
-	 * @throws NoSuchAlgorithmException
 	 */
-	private String getMd5(byte[] bytes) throws IOException, NoSuchAlgorithmException {
-		MessageDigest md = MessageDigest.getInstance("MD5");
+	private String getMd5(byte[] bytes) {
+		MessageDigest md;
+		try {
+			md = MessageDigest.getInstance("MD5");
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);
+		}
 		byte[] digest = md.digest(bytes);
 		return DatatypeConverter.printHexBinary(digest);
 	}

@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -13,8 +15,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.util.files.FilesUtil;
+import cc.sferalabs.sfera.web.api.ErrorMessage;
+import cc.sferalabs.sfera.web.api.http.HttpResponse;
 import cc.sferalabs.sfera.web.api.http.MissingRequiredParamException;
-import cc.sferalabs.sfera.web.api.http.RestResponse;
 import cc.sferalabs.sfera.web.api.http.servlets.ApiServlet;
 import cc.sferalabs.sfera.web.api.http.servlets.AuthorizedAdminApiServlet;
 
@@ -26,28 +29,44 @@ import cc.sferalabs.sfera.web.api.http.servlets.AuthorizedAdminApiServlet;
  *
  */
 @SuppressWarnings("serial")
-public class DownloadFileServlet extends AuthorizedAdminApiServlet {
+public class DownloadFilesServlet extends AuthorizedAdminApiServlet {
 
 	public static final String PATH = ApiServlet.PATH + "files/download";
 
-	private final static Logger logger = LoggerFactory.getLogger(DownloadFileServlet.class);
+	private final static Logger logger = LoggerFactory.getLogger(DownloadFilesServlet.class);
 
 	@Override
-	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
+	protected void processAuthorizedRequest(HttpServletRequest req, HttpResponse resp)
 			throws ServletException, IOException {
 		Path tempZipFile = null;
 		try {
-			String path = getRequiredParam("path", req, resp);
-			Path source = Paths.get(".", path);
-			if (!FilesUtil.isInRoot(source) || !Files.exists(source) || Files.isHidden(source)) {
-				resp.sendError(HttpServletResponse.SC_NOT_FOUND, "File '" + path + "' not found");
-				return;
+			String[] paths = getRequiredParameterValues("path", req, resp);
+			List<Path> sources = new ArrayList<>();
+			for (String path : paths) {
+				Path source = Paths.get(".", path);
+				if (!FilesUtil.isInRoot(source) || !Files.exists(source)) {
+					resp.sendErrors(HttpServletResponse.SC_NOT_FOUND,
+							new ErrorMessage(0, "File '" + path + "' not found"));
+					return;
+				}
+				sources.add(source);
 			}
-			String fileName = source.getFileName().toString();
-			if (Files.isDirectory(source)) {
+			Path source = sources.get(0);
+			String fileName;
+			boolean zip = false;
+			if (sources.size() > 1) {
+				fileName = "files";
+				zip = true;
+			} else {
+				fileName = source.getFileName().toString();
+				if (Files.isDirectory(source)) {
+					zip = true;
+				}
+			}
+			if (zip) {
 				tempZipFile = Files.createTempFile(getClass().getName(), ".zip");
-				logger.debug("Compressing directory '{}'...", fileName);
-				FilesUtil.zip(source, tempZipFile);
+				logger.debug("Compressing '{}'...", fileName);
+				FilesUtil.zip(sources, tempZipFile);
 				logger.debug("Done compressing '{}'", fileName);
 				source = tempZipFile;
 				fileName += ".zip";
@@ -60,9 +79,6 @@ public class DownloadFileServlet extends AuthorizedAdminApiServlet {
 			Files.copy(source, httpResp.getOutputStream());
 
 		} catch (MissingRequiredParamException e) {
-		} catch (Exception e) {
-			logger.error("File download error", e);
-			resp.sendError("File download error: " + e);
 		} finally {
 			if (tempZipFile != null) {
 				try {

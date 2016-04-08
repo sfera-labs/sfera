@@ -10,9 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.events.Bus;
+import cc.sferalabs.sfera.web.api.ErrorMessage;
 import cc.sferalabs.sfera.web.api.WebApiEvent;
 import cc.sferalabs.sfera.web.api.http.Connection;
-import cc.sferalabs.sfera.web.api.http.RestResponse;
+import cc.sferalabs.sfera.web.api.http.HttpResponse;
 
 /**
  * <p>
@@ -29,30 +30,27 @@ import cc.sferalabs.sfera.web.api.http.RestResponse;
  *
  */
 @SuppressWarnings("serial")
-public class EventServlet extends AuthorizedUserServlet {
+public class EventServlet extends ConnectionRequiredApiServlet {
 
 	public static final String PATH = ApiServlet.PATH + "event";
 
 	private static final Logger logger = LoggerFactory.getLogger(EventServlet.class);
 
 	@Override
-	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
-			throws ServletException, IOException {
-		Connection connection = ConnectServlet.getConnection(req, resp);
-		if (connection == null) {
-			return;
-		}
+	protected void processConnectionRequest(HttpServletRequest req, HttpResponse resp,
+			Connection connection) throws ServletException, IOException {
 		String id = req.getParameter("id");
 		String value = req.getParameter("value");
-		WebApiEvent remoteEvent;
+		WebApiEvent ev;
 		try {
-			remoteEvent = new WebApiEvent(id, value, req, connection.getId());
+			ev = new WebApiEvent(id, value, req, connection.getId());
 		} catch (Exception e) {
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+			resp.sendErrors(HttpServletResponse.SC_BAD_REQUEST,
+					new ErrorMessage(0, e.getMessage()));
 			return;
 		}
 		logger.info("Event: {} = {} User: {}", id, value, req.getRemoteUser());
-		Bus.post(remoteEvent);
+		Bus.post(ev);
 		resp.sendResult("ok");
 	}
 

@@ -13,6 +13,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -53,43 +55,63 @@ public abstract class FilesUtil {
 	 *             if an I/O error occurs
 	 */
 	public static void zip(Path source, Path zipTarget, OpenOption... options) throws IOException {
+		zip(Arrays.asList(source), zipTarget, options);
+	}
+
+	/**
+	 * Creates a zip file containing the specified source files or directories.
+	 * 
+	 * @param sources
+	 *            paths of the files or directories to compress
+	 * @param zipTarget
+	 *            path of the zip file to create
+	 * @param options
+	 *            options specifying how the zip file is opened
+	 * @throws IOException
+	 *             if an I/O error occurs
+	 */
+	public static void zip(Collection<Path> sources, Path zipTarget, OpenOption... options)
+			throws IOException {
 		try (OutputStream fos = Files.newOutputStream(zipTarget, options);
 				ZipOutputStream zos = new ZipOutputStream(fos)) {
+			for (Path source : sources) {
+				Path sourceParent = source.getParent();
 
-			Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
+				Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
 
-				@Override
-				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-						throws IOException {
-					String name;
-					if (file.isAbsolute()) {
-						name = source.getParent().relativize(file).toString();
-					} else {
-						name = file.toString();
+					@Override
+					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+							throws IOException {
+						String name;
+						if (sourceParent != null) {
+							name = sourceParent.relativize(file).toString();
+						} else {
+							name = file.toString();
+						}
+						zos.putNextEntry(new ZipEntry(name));
+						Files.copy(file, zos);
+						zos.closeEntry();
+						return FileVisitResult.CONTINUE;
 					}
-					zos.putNextEntry(new ZipEntry(name));
-					Files.copy(file, zos);
-					zos.closeEntry();
-					return FileVisitResult.CONTINUE;
-				}
 
-				@Override
-				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
-						throws IOException {
-					String name;
-					if (dir.isAbsolute()) {
-						name = source.getParent().relativize(dir).toString();
-					} else {
-						name = dir.toString();
+					@Override
+					public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
+							throws IOException {
+						String name;
+						if (sourceParent != null) {
+							name = sourceParent.relativize(dir).toString();
+						} else {
+							name = dir.toString();
+						}
+						if (!name.endsWith("/")) {
+							name += "/";
+						}
+						zos.putNextEntry(new ZipEntry(name));
+						zos.closeEntry();
+						return FileVisitResult.CONTINUE;
 					}
-					if (!name.endsWith("/")) {
-						name += "/";
-					}
-					zos.putNextEntry(new ZipEntry(name));
-					zos.closeEntry();
-					return FileVisitResult.CONTINUE;
-				}
-			});
+				});
+			}
 		}
 	}
 

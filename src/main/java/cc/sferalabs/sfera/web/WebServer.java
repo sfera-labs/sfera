@@ -46,14 +46,14 @@ import cc.sferalabs.sfera.web.api.http.servlets.access.AddAccessServlet;
 import cc.sferalabs.sfera.web.api.http.servlets.access.ListUsersServlet;
 import cc.sferalabs.sfera.web.api.http.servlets.access.RemoveAccessServlet;
 import cc.sferalabs.sfera.web.api.http.servlets.access.UpdateAccessServlet;
-import cc.sferalabs.sfera.web.api.http.servlets.files.CopyFileServlet;
-import cc.sferalabs.sfera.web.api.http.servlets.files.DeleteFileServlet;
-import cc.sferalabs.sfera.web.api.http.servlets.files.DownloadFileServlet;
+import cc.sferalabs.sfera.web.api.http.servlets.files.CopyFilesServlet;
+import cc.sferalabs.sfera.web.api.http.servlets.files.DeleteFilesServlet;
+import cc.sferalabs.sfera.web.api.http.servlets.files.DownloadFilesServlet;
 import cc.sferalabs.sfera.web.api.http.servlets.files.ListFilesServlet;
 import cc.sferalabs.sfera.web.api.http.servlets.files.MkdirFileServlet;
-import cc.sferalabs.sfera.web.api.http.servlets.files.MoveFileServlet;
+import cc.sferalabs.sfera.web.api.http.servlets.files.MoveFilesServlet;
 import cc.sferalabs.sfera.web.api.http.servlets.files.ReadFileServlet;
-import cc.sferalabs.sfera.web.api.http.servlets.files.UploadFileServlet;
+import cc.sferalabs.sfera.web.api.http.servlets.files.UploadFilesServlet;
 import cc.sferalabs.sfera.web.api.http.servlets.files.WriteFileServlet;
 import cc.sferalabs.sfera.web.api.websockets.ApiWebSocketServlet;
 
@@ -187,12 +187,12 @@ public class WebServer implements AutoStartService {
 		addServlet(ListFilesServlet.class, ListFilesServlet.PATH);
 		addServlet(ReadFileServlet.class, ReadFileServlet.PATH);
 		addServlet(WriteFileServlet.class, WriteFileServlet.PATH);
-		addServlet(MoveFileServlet.class, MoveFileServlet.PATH);
-		addServlet(CopyFileServlet.class, CopyFileServlet.PATH);
-		addServlet(DeleteFileServlet.class, DeleteFileServlet.PATH);
+		addServlet(MoveFilesServlet.class, MoveFilesServlet.PATH);
+		addServlet(CopyFilesServlet.class, CopyFilesServlet.PATH);
+		addServlet(DeleteFilesServlet.class, DeleteFilesServlet.PATH);
 		addServlet(MkdirFileServlet.class, MkdirFileServlet.PATH);
-		addServlet(DownloadFileServlet.class, DownloadFileServlet.PATH);
-		addServlet(UploadFileServlet.class, UploadFileServlet.PATH);
+		addServlet(DownloadFilesServlet.class, DownloadFilesServlet.PATH);
+		addServlet(UploadFilesServlet.class, UploadFilesServlet.PATH);
 
 		// access
 		addServlet(ListUsersServlet.class, ListUsersServlet.PATH);

@@ -1,6 +1,7 @@
 package cc.sferalabs.sfera.web.api;
 
 import java.io.IOException;
+import java.util.Collection;
 
 /**
  * Abstract class for API messages to be sent to the remote API client.
@@ -46,18 +47,34 @@ public abstract class OutgoingMessage extends JsonMessage {
 	}
 
 	/**
-	 * Sets the 'error' attribute of this message to the specified message and
-	 * sends it.
+	 * Sets the 'errors' attribute of this message to an array containing the
+	 * specified error objects and sends it.
 	 * 
-	 * @param message
-	 *            the error message
+	 * @param errors
+	 *            the error objects to send
 	 * @throws IOException
 	 *             if an I/O error occurs
 	 * @throws IllegalStateException
 	 *             if this message has already been sent
 	 */
-	public void sendError(String message) throws IOException, IllegalStateException {
-		send("error", message);
+	public void sendErrors(ErrorMessage... errors) throws IOException, IllegalStateException {
+		send("errors", errors);
+	}
+
+	/**
+	 * Sets the 'errors' attribute of this message to an array containing the
+	 * specified error objects and sends it.
+	 * 
+	 * @param errors
+	 *            the error objects to send
+	 * @throws IOException
+	 *             if an I/O error occurs
+	 * @throws IllegalStateException
+	 *             if this message has already been sent
+	 */
+	public void sendErrors(Collection<ErrorMessage> errors)
+			throws IOException, IllegalStateException {
+		send("errors", errors);
 	}
 
 	/**

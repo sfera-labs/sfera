@@ -11,12 +11,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import cc.sferalabs.sfera.util.files.FilesUtil;
+import cc.sferalabs.sfera.web.api.ErrorMessage;
+import cc.sferalabs.sfera.web.api.http.HttpResponse;
 import cc.sferalabs.sfera.web.api.http.MissingRequiredParamException;
-import cc.sferalabs.sfera.web.api.http.RestResponse;
 import cc.sferalabs.sfera.web.api.http.servlets.ApiServlet;
 import cc.sferalabs.sfera.web.api.http.servlets.AuthorizedAdminApiServlet;
 
@@ -33,34 +31,32 @@ public class MkdirFileServlet extends AuthorizedAdminApiServlet {
 
 	public static final String PATH = ApiServlet.PATH + "files/mkdir";
 
-	private final static Logger logger = LoggerFactory.getLogger(MkdirFileServlet.class);
-
 	@Override
-	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
+	protected void processAuthorizedRequest(HttpServletRequest req, HttpResponse resp)
 			throws ServletException, IOException {
 		try {
-			String path = getRequiredParam("path", req, resp);
+			String path = getRequiredParameter("path", req, resp);
 			Path target = Paths.get(".", path);
 			if (!FilesUtil.isInRoot(target)) {
-				resp.sendError(HttpServletResponse.SC_FORBIDDEN, "File outside root dir");
+				resp.sendErrors(HttpServletResponse.SC_FORBIDDEN,
+						new ErrorMessage(0, "File outside root dir"));
 				return;
 			}
 			if (Files.isHidden(target)) {
-				resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Cannot write hidden files");
+				resp.sendErrors(HttpServletResponse.SC_FORBIDDEN,
+						new ErrorMessage(0, "Cannot write hidden files"));
 				return;
 			}
 			try {
 				Files.createDirectory(target);
 			} catch (NoSuchFileException | FileAlreadyExistsException e) {
-				resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.toString());
+				resp.sendErrors(HttpServletResponse.SC_FORBIDDEN,
+						new ErrorMessage(0, e.toString()));
 				return;
 			}
 			resp.sendResult("ok");
 
 		} catch (MissingRequiredParamException e) {
-		} catch (Exception e) {
-			logger.error("File write error", e);
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "File write error: " + e);
 		}
 	}
 

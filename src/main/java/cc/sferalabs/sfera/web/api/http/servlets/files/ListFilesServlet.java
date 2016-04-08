@@ -18,12 +18,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import cc.sferalabs.sfera.util.files.FilesUtil;
+import cc.sferalabs.sfera.web.api.ErrorMessage;
+import cc.sferalabs.sfera.web.api.http.HttpResponse;
 import cc.sferalabs.sfera.web.api.http.MissingRequiredParamException;
-import cc.sferalabs.sfera.web.api.http.RestResponse;
 import cc.sferalabs.sfera.web.api.http.servlets.ApiServlet;
 import cc.sferalabs.sfera.web.api.http.servlets.AuthorizedAdminApiServlet;
 
@@ -39,10 +37,8 @@ public class ListFilesServlet extends AuthorizedAdminApiServlet {
 
 	public static final String PATH = ApiServlet.PATH + "files/ls";
 
-	private final static Logger logger = LoggerFactory.getLogger(ListFilesServlet.class);
-
 	@Override
-	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
+	protected void processAuthorizedRequest(HttpServletRequest req, HttpResponse resp)
 			throws ServletException, IOException {
 		try {
 			int depth;
@@ -51,21 +47,19 @@ public class ListFilesServlet extends AuthorizedAdminApiServlet {
 			} catch (Exception e) {
 				depth = -1;
 			}
-			String path = getRequiredParam("path", req, resp);
+			boolean includeHidden = "true".equalsIgnoreCase(req.getParameter("hidden"));
+			String path = getRequiredParameter("path", req, resp);
 			Path dir = Paths.get(".", path).normalize().toAbsolutePath();
 			if (!FilesUtil.isInRoot(dir) || !Files.exists(dir) || !Files.isDirectory(dir)) {
-				resp.sendError(HttpServletResponse.SC_NOT_FOUND,
-						"Directory '" + path + "' not found");
+				resp.sendErrors(HttpServletResponse.SC_NOT_FOUND,
+						new ErrorMessage(0, "Directory '" + path + "' not found"));
 				return;
 			}
-			FileLister fl = new FileLister(depth);
+			FileLister fl = new FileLister(depth, includeHidden);
 			Files.walkFileTree(dir, fl);
 			resp.sendResult(fl.getTop());
 
 		} catch (MissingRequiredParamException e) {
-		} catch (Exception e) {
-			logger.error("Files listing error", e);
-			resp.sendError("Files listing error: " + e);
 		}
 	}
 
@@ -75,15 +69,20 @@ public class ListFilesServlet extends AuthorizedAdminApiServlet {
 	private static class FileLister extends SimpleFileVisitor<Path> {
 
 		private final int maxDepth;
+		private final boolean includeHidden;
+
 		private int depth = -1;
 
 		Deque<Map<String, Object>> stack;
 
 		/**
-		 * @param depth
+		 * 
+		 * @param maxDepth
+		 * @param includeHidden
 		 */
-		public FileLister(int maxDepth) {
+		public FileLister(int maxDepth, boolean includeHidden) {
 			this.maxDepth = maxDepth;
+			this.includeHidden = includeHidden;
 			this.stack = new ArrayDeque<>();
 			Map<String, Object> top = new HashMap<>();
 			top.put("sub", new ArrayList<>());
@@ -101,7 +100,7 @@ public class ListFilesServlet extends AuthorizedAdminApiServlet {
 		@Override
 		public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
 				throws IOException {
-			if (Files.isHidden(dir)) {
+			if (!includeHidden && Files.isHidden(dir)) {
 				return FileVisitResult.SKIP_SUBTREE;
 			}
 
@@ -118,7 +117,7 @@ public class ListFilesServlet extends AuthorizedAdminApiServlet {
 
 		@Override
 		public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-			if (Files.isRegularFile(file) && !Files.isHidden(file)) {
+			if (includeHidden || !Files.isHidden(file)) {
 				add(file);
 			}
 			return FileVisitResult.CONTINUE;

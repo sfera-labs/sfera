@@ -4,13 +4,13 @@ import java.io.IOException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.web.api.http.Connection;
-import cc.sferalabs.sfera.web.api.http.RestResponse;
+import cc.sferalabs.sfera.web.api.http.HttpResponse;
+import cc.sferalabs.sfera.web.api.http.MissingRequiredParamException;
 
 /**
  * API servlet handlig subscription requests.
@@ -21,28 +21,23 @@ import cc.sferalabs.sfera.web.api.http.RestResponse;
  *
  */
 @SuppressWarnings("serial")
-public class SubscribeServlet extends AuthorizedUserServlet {
+public class SubscribeServlet extends ConnectionRequiredApiServlet {
 
 	public static final String PATH = ApiServlet.PATH + "subscribe";
 
 	private static final Logger logger = LoggerFactory.getLogger(SubscribeServlet.class);
 
 	@Override
-	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
-			throws ServletException, IOException {
-		Connection connection = ConnectServlet.getConnection(req, resp);
-		if (connection == null) {
-			return;
+	protected void processConnectionRequest(HttpServletRequest req, HttpResponse resp,
+			Connection connection) throws ServletException, IOException {
+		try {
+			String nodes = getRequiredParameter("nodes", req, resp);
+			connection.subscribe(nodes);
+			logger.debug("Subscribed - session '{}' connection '{}' nodes: {}",
+					req.getSession(false).getId(), connection.getId(), nodes);
+			resp.sendResult("ok");
+		} catch (MissingRequiredParamException e) {
 		}
-		String nodes = req.getParameter("nodes");
-		if (nodes == null) {
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Nodes not specified");
-			return;
-		}
-		connection.subscribe(nodes);
-		logger.debug("Subscribed - session '{}' connection '{}' nodes: {}",
-				req.getSession(false).getId(), connection.getId(), nodes);
-		resp.sendResult("ok");
 	}
 
 }

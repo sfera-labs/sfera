@@ -11,9 +11,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import cc.sferalabs.sfera.events.Event;
+import cc.sferalabs.sfera.web.api.ErrorMessage;
 import cc.sferalabs.sfera.web.api.http.Connection;
+import cc.sferalabs.sfera.web.api.http.HttpResponse;
 import cc.sferalabs.sfera.web.api.http.PollingSubscription;
-import cc.sferalabs.sfera.web.api.http.RestResponse;
 
 /**
  * <p>
@@ -26,23 +27,19 @@ import cc.sferalabs.sfera.web.api.http.RestResponse;
  *
  */
 @SuppressWarnings("serial")
-public class StateServlet extends AuthorizedUserServlet {
+public class StateServlet extends ConnectionRequiredApiServlet {
 
 	public static final String PATH = ApiServlet.PATH + "state";
 
 	@Override
-	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
-			throws ServletException, IOException {
-		Connection connection = ConnectServlet.getConnection(req, resp);
-		if (connection == null) {
-			return;
-		}
-
+	protected void processConnectionRequest(HttpServletRequest req, HttpResponse resp,
+			Connection connection) throws ServletException, IOException {
 		long ack;
 		try {
 			ack = Long.parseLong(req.getParameter("ack"));
 		} catch (NumberFormatException nfe) {
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "'ack' not provided");
+			resp.sendErrors(HttpServletResponse.SC_BAD_REQUEST,
+					new ErrorMessage(0, "Parameter 'ack' not provided"));
 			return;
 		}
 		long timeout;
@@ -57,7 +54,8 @@ public class StateServlet extends AuthorizedUserServlet {
 
 		PollingSubscription subscription = connection.getSubscription();
 		if (subscription == null) {
-			resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Not subscribed");
+			resp.sendErrors(HttpServletResponse.SC_BAD_REQUEST,
+					new ErrorMessage(0, "Not subscribed"));
 			return;
 		}
 
@@ -69,7 +67,7 @@ public class StateServlet extends AuthorizedUserServlet {
 			}
 			resp.sendResult(nodes);
 		} catch (InterruptedException e) {
-			resp.sendError("Interrupted");
+			resp.sendServerError("Interrupted");
 		}
 	}
 

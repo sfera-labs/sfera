@@ -10,8 +10,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cc.sferalabs.sfera.web.api.ErrorMessage;
+import cc.sferalabs.sfera.web.api.http.HttpResponse;
 import cc.sferalabs.sfera.web.api.http.MissingRequiredParamException;
-import cc.sferalabs.sfera.web.api.http.RestResponse;
 
 /**
  * Abstract class to be extended by all servlets handling REST API requests.
@@ -46,7 +47,7 @@ public abstract class ApiServlet extends HttpServlet {
 	 * @throws IOException
 	 *             if an I/O error occurs
 	 */
-	abstract protected void processRequest(HttpServletRequest req, RestResponse resp)
+	abstract protected void processRequest(HttpServletRequest req, HttpResponse resp)
 			throws ServletException, IOException;
 
 	/**
@@ -66,12 +67,42 @@ public abstract class ApiServlet extends HttpServlet {
 	 * @throws IOException
 	 *             if an I/O error occurs
 	 */
-	protected String getRequiredParam(String paramName, HttpServletRequest req, RestResponse resp)
-			throws MissingRequiredParamException, IOException {
+	protected String getRequiredParameter(String paramName, HttpServletRequest req,
+			HttpResponse resp) throws MissingRequiredParamException, IOException {
 		String val = req.getParameter(paramName);
 		if (val == null) {
 			MissingRequiredParamException e = new MissingRequiredParamException(paramName);
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+			resp.sendErrors(HttpServletResponse.SC_BAD_REQUEST,
+					new ErrorMessage(0, e.getMessage()));
+			throw e;
+		}
+		return val;
+	}
+
+	/**
+	 * Returns an array of String objects containing all of the values the given
+	 * request parameter has. If not available, it sends a bad-request-error
+	 * response and throws a {@link MissingRequiredParamException}.
+	 * 
+	 * @param paramName
+	 *            the requested parameter name
+	 * @param req
+	 *            the HTTP request
+	 * @param resp
+	 *            the response object
+	 * @return the value of the specified parameter if available
+	 * @throws MissingRequiredParamException
+	 *             if the requested parameter is not available
+	 * @throws IOException
+	 *             if an I/O error occurs
+	 */
+	protected String[] getRequiredParameterValues(String paramName, HttpServletRequest req,
+			HttpResponse resp) throws MissingRequiredParamException, IOException {
+		String[] val = req.getParameterValues(paramName);
+		if (val == null || val.length == 0) {
+			MissingRequiredParamException e = new MissingRequiredParamException(paramName);
+			resp.sendErrors(HttpServletResponse.SC_BAD_REQUEST,
+					new ErrorMessage(0, e.getMessage()));
 			throw e;
 		}
 		return val;
@@ -83,7 +114,7 @@ public abstract class ApiServlet extends HttpServlet {
 	 * @param resp
 	 */
 	private void doRequest(HttpServletRequest req, HttpServletResponse resp) {
-		RestResponse rr = new RestResponse(resp);
+		HttpResponse rr = new HttpResponse(resp);
 		try {
 			resp.setHeader("Cache-Control",
 					"private, max-age=0, no-cache, no-store, must-revalidate");
@@ -91,12 +122,8 @@ public abstract class ApiServlet extends HttpServlet {
 			processRequest(req, rr);
 		} catch (Throwable t) {
 			logger.error("Exception processing HTTP API request: " + req.getRequestURI(), t);
-			String error = t.getMessage();
-			if (error == null) {
-				error = t.toString();
-			}
 			try {
-				rr.sendError(error);
+				rr.sendServerError(t.toString());
 			} catch (Exception e) {
 				logger.error("Error sending response", e);
 			}

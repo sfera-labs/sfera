@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.EventListener;
 import java.util.concurrent.atomic.AtomicLong;
 
+import javax.script.ScriptException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.jetty.websocket.api.RemoteEndpoint;
@@ -24,6 +25,7 @@ import cc.sferalabs.sfera.core.services.Task;
 import cc.sferalabs.sfera.core.services.TasksManager;
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.web.api.CommandExecutor;
+import cc.sferalabs.sfera.web.api.ErrorMessage;
 import cc.sferalabs.sfera.web.api.JsonMessage;
 import cc.sferalabs.sfera.web.api.WebApiEvent;
 
@@ -102,7 +104,7 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 			} else {
 				logger.warn("Unauthorized WebSocket connection from {}", hostname);
 				OutgoingWsMessage resp = new OutgoingWsMessage("connection", this);
-				resp.sendError("Unauthorized");
+				resp.sendErrors(ErrorMessage.UNAUTHORIZED);
 				Thread.sleep(respTimeout);
 				closeSocket(StatusCode.POLICY_VIOLATION, "Unauthorized");
 			}
@@ -186,12 +188,12 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 		try {
 			Object tag = message.get("tag");
 			if (tag == null) {
-				reply.sendError("Attribute 'tag' not found");
+				reply.sendErrors(new ErrorMessage(0, "Attribute 'tag' not found"));
 				return;
 			}
 			String action = message.get("action");
 			if (action == null) {
-				reply.sendError("Attribute 'action' not found");
+				reply.sendErrors(new ErrorMessage(0, "Attribute 'action' not found"));
 				return;
 			}
 			reply.put("tag", tag);
@@ -219,21 +221,21 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 				if (ok) {
 					reply.sendResult("ok");
 				} else {
-					reply.sendError("Missing attributes");
+					reply.sendErrors(new ErrorMessage(0, "Missing attributes"));
 				}
 				break;
 
 			case "command":
 				String cmd = message.get("cmd");
 				if (cmd == null) {
-					reply.sendError("Attribute 'cmd' not found");
+					reply.sendErrors(new ErrorMessage(0, "Attribute 'cmd' not found"));
 					return;
 				}
 				Object res = null;
 				try {
 					res = CommandExecutor.exec(cmd, originalRequest, connectionId, user);
-				} catch (Exception e) {
-					reply.sendError(e.getMessage());
+				} catch (IllegalArgumentException | ScriptException e) {
+					reply.sendErrors(new ErrorMessage(0, e.getMessage()));
 					return;
 				}
 				reply.sendResult(res);
@@ -242,7 +244,7 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 			case "event":
 				String id = message.get("id");
 				if (id == null) {
-					reply.sendError("Attribute 'id' not found");
+					reply.sendErrors(new ErrorMessage(0, "Attribute 'id' not found"));
 					return;
 				}
 				String value = message.get("value");
@@ -252,7 +254,7 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 					Bus.post(remoteEvent);
 					reply.sendResult("ok");
 				} catch (Exception e) {
-					reply.sendError(e.getMessage());
+					reply.sendErrors(new ErrorMessage(0, e.getMessage()));
 				}
 				break;
 
@@ -263,7 +265,7 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 				}
 				String command = message.get("cmd");
 				if (command == null) {
-					reply.sendError("Attribute 'cmd' not found");
+					reply.sendErrors(new ErrorMessage(0, "Attribute 'cmd' not found"));
 					return;
 				}
 				if (consoleSession == null) {
@@ -280,12 +282,12 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 				break;
 
 			default:
-				reply.sendError("Unknown action");
+				reply.sendErrors(new ErrorMessage(0, "Unknown action"));
 				break;
 			}
 		} catch (Exception e) {
 			logger.warn("Error processing WebSocket message", e);
-			reply.sendError("Server error: " + e.getMessage());
+			reply.sendErrors(new ErrorMessage(0, "Server error: " + e.getMessage()));
 			throw e;
 		}
 	}

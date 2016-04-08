@@ -1,6 +1,7 @@
 package cc.sferalabs.sfera.web.api.http;
 
 import java.io.IOException;
+import java.util.Collection;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
@@ -10,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cc.sferalabs.sfera.web.api.ErrorMessage;
 import cc.sferalabs.sfera.web.api.OutgoingMessage;
 
 /**
@@ -20,10 +22,10 @@ import cc.sferalabs.sfera.web.api.OutgoingMessage;
  * @version 1.0.0
  *
  */
-public class RestResponse extends OutgoingMessage {
+public class HttpResponse extends OutgoingMessage {
 
 	private static final long ASYNC_RESP_TIMEOUT = 30000;
-	private static final Logger logger = LoggerFactory.getLogger(RestResponse.class);
+	private static final Logger logger = LoggerFactory.getLogger(HttpResponse.class);
 
 	private final HttpServletResponse resp;
 	private AsyncContext asyncContext;
@@ -34,7 +36,7 @@ public class RestResponse extends OutgoingMessage {
 	 * @param resp
 	 *            the {@code HttpServletResponse} to send the response to
 	 */
-	public RestResponse(HttpServletResponse resp) {
+	public HttpResponse(HttpServletResponse resp) {
 		this.resp = resp;
 		resp.setContentType("application/json");
 		resp.setStatus(HttpServletResponse.SC_OK);
@@ -69,17 +71,10 @@ public class RestResponse extends OutgoingMessage {
 		}
 	}
 
-	@Override
-	public void sendError(String message) throws IOException, IllegalStateException {
-		sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message);
-	}
-
 	/**
-	 * Sets the status code for this HTTP response to the specified one, sets
-	 * the 'error' attribute of this message to the specified message and sends.
+	 * Sends an internal-server-error HTTP response with the 'errors' attribute
+	 * containing an error object with the specified message.
 	 * 
-	 * @param sc
-	 *            the status code
 	 * @param message
 	 *            the error message
 	 * @throws IOException
@@ -87,9 +82,48 @@ public class RestResponse extends OutgoingMessage {
 	 * @throws IllegalStateException
 	 *             if this message has already been sent
 	 */
-	public void sendError(int sc, String message) throws IOException, IllegalStateException {
+	public void sendServerError(String message) throws IOException, IllegalStateException {
+		sendErrors(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, new ErrorMessage(0, message));
+	}
+
+	/**
+	 * Sets the status code for this HTTP response to the specified one, sets
+	 * the 'errors' attribute of this message to an array containing the
+	 * specified error objects and sends it.
+	 * 
+	 * @param sc
+	 *            the HTTP status code
+	 * @param errors
+	 *            the error objects to send
+	 * @throws IOException
+	 *             if an I/O error occurs
+	 * @throws IllegalStateException
+	 *             if this message has already been sent
+	 */
+	public void sendErrors(int sc, ErrorMessage... errors)
+			throws IOException, IllegalStateException {
 		resp.setStatus(sc);
-		super.sendError(message);
+		super.sendErrors(errors);
+	}
+
+	/**
+	 * Sets the status code for this HTTP response to the specified one, sets
+	 * the 'errors' attribute of this message to an array containing the
+	 * specified error objects and sends it.
+	 * 
+	 * @param sc
+	 *            the HTTP status code
+	 * @param errors
+	 *            the error objects to send
+	 * @throws IOException
+	 *             if an I/O error occurs
+	 * @throws IllegalStateException
+	 *             if this message has already been sent
+	 */
+	public void sendErrors(int sc, Collection<ErrorMessage> errors)
+			throws IOException, IllegalStateException {
+		resp.setStatus(sc);
+		super.sendErrors(errors);
 	}
 
 	/**
@@ -104,7 +138,7 @@ public class RestResponse extends OutgoingMessage {
 		@Override
 		public void onTimeout(AsyncEvent event) throws IOException {
 			logger.warn("Async response timed out");
-			sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Timeout");
+			sendServerError("Timeout");
 			asyncContext.complete();
 		}
 
@@ -112,7 +146,7 @@ public class RestResponse extends OutgoingMessage {
 		public void onError(AsyncEvent event) throws IOException {
 			Throwable t = event.getThrowable();
 			logger.error("Async response error", t);
-			sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, t.getMessage());
+			sendServerError(t.getMessage());
 			asyncContext.complete();
 		}
 

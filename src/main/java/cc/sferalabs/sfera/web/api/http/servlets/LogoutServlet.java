@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cc.sferalabs.sfera.web.api.http.RestResponse;
+import cc.sferalabs.sfera.web.api.http.HttpResponse;
 
 /**
  * <p>
@@ -28,7 +28,7 @@ public class LogoutServlet extends ApiServlet {
 	private static final Logger logger = LoggerFactory.getLogger(LogoutServlet.class);
 
 	@Override
-	protected void processRequest(HttpServletRequest req, RestResponse resp)
+	protected void processRequest(HttpServletRequest req, HttpResponse resp)
 			throws ServletException, IOException {
 		String user = req.getRemoteUser();
 		req.logout();

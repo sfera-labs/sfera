@@ -11,8 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.web.api.CommandExecutor;
+import cc.sferalabs.sfera.web.api.ErrorMessage;
 import cc.sferalabs.sfera.web.api.http.Connection;
-import cc.sferalabs.sfera.web.api.http.RestResponse;
+import cc.sferalabs.sfera.web.api.http.HttpResponse;
+import cc.sferalabs.sfera.web.api.http.MissingRequiredParamException;
 
 /**
  * API servlet handling driver commands.
@@ -23,33 +25,30 @@ import cc.sferalabs.sfera.web.api.http.RestResponse;
  *
  */
 @SuppressWarnings("serial")
-public class CommandServlet extends AuthorizedUserServlet {
+public class CommandServlet extends ConnectionRequiredApiServlet {
 
 	public static final String PATH = ApiServlet.PATH + "command";
 
 	private static final Logger logger = LoggerFactory.getLogger(CommandServlet.class);
 
 	@Override
-	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
-			throws ServletException, IOException {
-		Connection connection = ConnectServlet.getConnection(req, resp);
-		if (connection == null) {
-			return;
-		}
-		String cmd = req.getParameter("cmd");
-		if (cmd == null) {
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Command not specified");
-			return;
-		}
-		Object res = null;
+	protected void processConnectionRequest(HttpServletRequest req, HttpResponse resp,
+			Connection connection) throws ServletException, IOException {
 		try {
-			res = CommandExecutor.exec(cmd, req, connection.getId(), req.getRemoteUser());
-		} catch (IllegalArgumentException | ScriptException e) {
-			logger.debug("Command error", e);
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Command error: " + e.getMessage());
-			return;
+			String cmd = getRequiredParameter("cmd", req, resp);
+			Object res = null;
+			try {
+				res = CommandExecutor.exec(cmd, req, connection.getId(), req.getRemoteUser());
+			} catch (IllegalArgumentException | ScriptException e) {
+				logger.debug("Command error", e);
+				resp.sendErrors(HttpServletResponse.SC_BAD_REQUEST,
+						new ErrorMessage(0, "Command error: " + e.getMessage()));
+				return;
+			}
+			resp.sendResult(res);
+		} catch (MissingRequiredParamException e) {
 		}
-		resp.sendResult(res);
+
 	}
 
 }

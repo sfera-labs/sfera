@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
@@ -12,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.web.api.http.Connection;
 import cc.sferalabs.sfera.web.api.http.ConnectionsSet;
-import cc.sferalabs.sfera.web.api.http.RestResponse;
+import cc.sferalabs.sfera.web.api.http.HttpResponse;
 
 /**
  * API servlet handlig connection requests.
@@ -31,7 +30,7 @@ public class ConnectServlet extends AuthorizedUserServlet {
 	private static final Logger logger = LoggerFactory.getLogger(ConnectServlet.class);
 
 	@Override
-	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
+	protected void processAuthorizedRequest(HttpServletRequest req, HttpResponse resp)
 			throws ServletException, IOException {
 		HttpSession session = req.getSession(false);
 		String sessionId = session.getId();
@@ -47,36 +46,6 @@ public class ConnectServlet extends AuthorizedUserServlet {
 		String cid = connection.getId();
 		logger.debug("Connected - session '{}' connection '{}'", sessionId, cid);
 		resp.send("cid", cid);
-	}
-
-	/**
-	 * @param req
-	 * @param resp
-	 * @return
-	 * @throws IOException
-	 * @throws IllegalStateException
-	 */
-	static Connection getConnection(HttpServletRequest req, RestResponse resp)
-			throws IllegalStateException, IOException {
-		String cid = req.getParameter("cid");
-		if (cid == null) {
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Connection ID not specified");
-			return null;
-		}
-		HttpSession session = req.getSession(false);
-		ConnectionsSet connections = (ConnectionsSet) session
-				.getAttribute(SESSION_ATTR_CONNECTIONS);
-		if (connections == null) {
-			resp.sendError(HttpServletResponse.SC_NOT_FOUND, "No connections instantiated");
-			return null;
-		}
-		Connection connection = connections.get(cid);
-		if (connection == null) {
-			resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Connection '" + cid + "' not found");
-			return null;
-		}
-
-		return connection;
 	}
 
 }

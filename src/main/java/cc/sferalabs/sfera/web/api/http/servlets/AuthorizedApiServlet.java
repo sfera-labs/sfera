@@ -9,7 +9,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cc.sferalabs.sfera.web.api.http.RestResponse;
+import cc.sferalabs.sfera.web.api.ErrorMessage;
+import cc.sferalabs.sfera.web.api.http.HttpResponse;
 
 /**
  * Abstract {@link ApiServlet} class extension to be extended by servlets
@@ -32,14 +33,14 @@ public abstract class AuthorizedApiServlet extends ApiServlet {
 	public abstract String[] getRoles();
 
 	@Override
-	protected void processRequest(HttpServletRequest req, RestResponse resp)
+	protected void processRequest(HttpServletRequest req, HttpResponse resp)
 			throws ServletException, IOException {
 		if (isAuthorized(req)) {
 			processAuthorizedRequest(req, resp);
 		} else {
 			logger.warn("Unauthorized API request from {}: {}", req.getRemoteHost(),
 					req.getRequestURI());
-			resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+			resp.sendErrors(HttpServletResponse.SC_UNAUTHORIZED, ErrorMessage.UNAUTHORIZED);
 		}
 	}
 
@@ -77,7 +78,7 @@ public abstract class AuthorizedApiServlet extends ApiServlet {
 	 * @throws IOException
 	 *             if an I/O error occurs
 	 */
-	abstract protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
+	abstract protected void processAuthorizedRequest(HttpServletRequest req, HttpResponse resp)
 			throws ServletException, IOException;
 
 }

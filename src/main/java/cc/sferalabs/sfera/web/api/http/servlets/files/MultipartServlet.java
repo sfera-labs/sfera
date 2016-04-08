@@ -15,7 +15,7 @@ import javax.servlet.http.Part;
 
 import org.eclipse.jetty.server.Request;
 
-import cc.sferalabs.sfera.web.api.http.RestResponse;
+import cc.sferalabs.sfera.web.api.http.HttpResponse;
 import cc.sferalabs.sfera.web.api.http.servlets.AuthorizedAdminApiServlet;
 
 /**
@@ -44,7 +44,7 @@ public abstract class MultipartServlet extends AuthorizedAdminApiServlet {
 	}
 
 	@Override
-	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
+	protected void processAuthorizedRequest(HttpServletRequest req, HttpResponse resp)
 			throws ServletException, IOException {
 		try {
 			req.setAttribute(Request.__MULTIPART_CONFIG_ELEMENT, MULTIPART_CONFIG);
@@ -77,7 +77,7 @@ public abstract class MultipartServlet extends AuthorizedAdminApiServlet {
 	 * @throws IOException
 	 *             if an I/O error occurs
 	 */
-	protected abstract void processMultipartRequest(HttpServletRequest req, RestResponse resp)
+	protected abstract void processMultipartRequest(HttpServletRequest req, HttpResponse resp)
 			throws ServletException, IOException;
 
 	/**

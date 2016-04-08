@@ -12,7 +12,7 @@ import org.json.JSONObject;
 
 import cc.sferalabs.sfera.access.Access;
 import cc.sferalabs.sfera.access.User;
-import cc.sferalabs.sfera.web.api.http.RestResponse;
+import cc.sferalabs.sfera.web.api.http.HttpResponse;
 import cc.sferalabs.sfera.web.api.http.servlets.ApiServlet;
 import cc.sferalabs.sfera.web.api.http.servlets.AuthorizedAdminApiServlet;
 
@@ -29,7 +29,7 @@ public class ListUsersServlet extends AuthorizedAdminApiServlet {
 	public static final String PATH = ApiServlet.PATH + "access/users";
 
 	@Override
-	protected void processAuthorizedRequest(HttpServletRequest req, RestResponse resp)
+	protected void processAuthorizedRequest(HttpServletRequest req, HttpResponse resp)
 			throws ServletException, IOException {
 		Set<User> users = Access.getUsers();
 		List<JSONObject> array = new ArrayList<>();
