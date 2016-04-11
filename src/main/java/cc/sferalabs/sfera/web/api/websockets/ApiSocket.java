@@ -103,9 +103,6 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 				logger.debug("Socket connected - Host: {}", hostname);
 			} else {
 				logger.warn("Unauthorized WebSocket connection from {}", hostname);
-				OutgoingWsMessage resp = new OutgoingWsMessage("connection", this);
-				resp.sendErrors(ErrorMessage.UNAUTHORIZED);
-				Thread.sleep(respTimeout);
 				closeSocket(StatusCode.POLICY_VIOLATION, "Unauthorized");
 			}
 		} catch (Exception e) {
