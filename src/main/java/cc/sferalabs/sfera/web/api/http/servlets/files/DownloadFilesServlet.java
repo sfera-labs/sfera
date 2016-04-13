@@ -58,7 +58,7 @@ public class DownloadFilesServlet extends AuthorizedAdminApiServlet {
 				fileName = "files";
 				zip = true;
 			} else {
-				fileName = source.getFileName().toString();
+				fileName = source.toAbsolutePath().normalize().getFileName().toString();
 				if (Files.isDirectory(source)) {
 					zip = true;
 				}

@@ -38,8 +38,7 @@ public abstract class FilesUtil {
 	 */
 	public static boolean isInRoot(Path path) {
 		Path root = Paths.get(".").toAbsolutePath().normalize();
-		path = path.toAbsolutePath().normalize();
-		return path.startsWith(root);
+		return path.toAbsolutePath().normalize().startsWith(root);
 	}
 
 	/**

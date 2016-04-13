@@ -2,7 +2,6 @@ package cc.sferalabs.sfera.web.api.http.servlets.files;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -66,8 +65,7 @@ public class MoveFilesServlet extends AuthorizedAdminApiServlet {
 				if (!force && Files.exists(targetPath)) {
 					errs.add(new ErrorMessage(0, "File '" + targetPath + "' already exists"));
 				}
-				FilesUtil.move(sourcePath, targetPath, StandardCopyOption.COPY_ATTRIBUTES,
-						StandardCopyOption.REPLACE_EXISTING, LinkOption.NOFOLLOW_LINKS);
+				FilesUtil.move(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
 			}
 
 			if (errs.isEmpty()) {
