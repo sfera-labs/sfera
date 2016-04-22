@@ -1,8 +1,7 @@
-package cc.sferalabs.sfera.scheduler;
+package cc.sferalabs.sfera.time;
 
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
-import org.quartz.TriggerKey;
 
 import cc.sferalabs.sfera.events.Bus;
 
@@ -17,7 +16,8 @@ public class TriggerEventJob implements Job {
 
 	@Override
 	public void execute(JobExecutionContext context) {
-		TriggerKey key = context.getTrigger().getKey();
-		Bus.post(new SchedulerEvent(key.getGroup(), key.getName()));
+		String id = context.getTrigger().getJobDataMap().getString("id");
+		String val = context.getTrigger().getJobDataMap().getString("val");
+		Bus.post(new SchedulerEvent(id, val));
 	}
 }

@@ -1,9 +1,8 @@
 package cc.sferalabs.sfera.events;
 
-import java.util.Arrays;
 import java.util.EventListener;
-import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 import com.google.common.eventbus.Subscribe;
 
@@ -18,7 +17,7 @@ import com.google.common.eventbus.Subscribe;
  */
 public abstract class EventIdSpecListener implements EventListener {
 
-	private final String spec;
+	private final Predicate<Event> predicate;
 
 	/**
 	 * Construct an EventIdSpecListener with the specified specification and
@@ -29,7 +28,8 @@ public abstract class EventIdSpecListener implements EventListener {
 	 */
 	public EventIdSpecListener(String spec) {
 		Bus.register(this);
-		this.spec = Objects.requireNonNull(spec, "spec must not be null");
+		this.predicate = EventsUtil.getEventIdSpecMatchingPredicate(
+				Objects.requireNonNull(spec, "spec must not be null"));
 	}
 
 	@Subscribe
@@ -40,25 +40,16 @@ public abstract class EventIdSpecListener implements EventListener {
 	}
 
 	/**
-	 * Returns a boolean representing whether the specified event matches the
-	 * specification.
+	 * Returns a boolean representing whether the specified event has an ID
+	 * matching the specification.
 	 * 
 	 * @param event
-	 *            the event to match
-	 * @return {@code true} if the event matches the specification,
+	 *            the event to test
+	 * @return {@code true} if the event's ID matches the specification,
 	 *         {@code false} otherwise.
 	 */
 	protected boolean matches(Event event) {
-		String eventId = event.getId();
-		if (spec.equals("*")) {
-			return true;
-		}
-
-		// TODO implement spec matching
-
-		String[] ns = spec.split(",");
-		List<String> nodes = Arrays.asList(ns);
-		return nodes.contains(eventId);
+		return predicate.test(event);
 	}
 
 	/**

@@ -12,6 +12,7 @@ import cc.sferalabs.sfera.console.ConsoleCommandHandler;
 import cc.sferalabs.sfera.console.ConsoleSession;
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Event;
+import cc.sferalabs.sfera.events.EventsUtil;
 
 /**
  *
@@ -63,42 +64,7 @@ public class SystemConsoleCommandHandler implements ConsoleCommandHandler {
 			}
 		};
 
-		Predicate<Event> predicate;
-		if (finalId.isEmpty()) {
-			predicate = new Predicate<Event>() {
-				@Override
-				public boolean test(Event e) {
-					return true;
-				}
-			};
-		} else if (finalId.contains("*")) {
-			String[] parts = finalId.split("\\*");
-			if (parts.length > 2) {
-				return "Illegal syntax";
-			}
-			predicate = new Predicate<Event>() {
-				@Override
-				public boolean test(Event e) {
-					if (parts.length == 0) { // case "*"
-						return true;
-					}
-					if (!e.getId().startsWith(parts[0])) {
-						return false;
-					}
-					if (parts.length == 2 && !e.getId().endsWith(parts[1])) {
-						return false;
-					}
-					return true;
-				}
-			};
-		} else {
-			predicate = new Predicate<Event>() {
-				@Override
-				public boolean test(Event e) {
-					return e.getId().equals(finalId);
-				}
-			};
-		}
+		Predicate<Event> predicate = EventsUtil.getEventIdSpecMatchingPredicate(finalId);
 
 		Map<String, Event> state = Bus.getCurrentState();
 		Collection<Event> events = state.values();

@@ -7,12 +7,12 @@
 
 	<name>Sfera</name>
 	<description>The Sfera Framework for Home/Building Automation and IoT Integration</description>
-	<url>http://sferalabs.cc</url>
-	
+	<url>http://www.sferalabs.cc/sfera</url>
+
 	<licenses>
 		<license>
-			<name>The GNU Lesser General Public License, Version 2.1</name>
-			<url>http://www.gnu.org/licenses/lgpl-2.1.txt</url>
+			<name>The GNU Lesser General Public License, Version 3</name>
+			<url>http://www.gnu.org/licenses/lgpl-3.0.txt</url>
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
@@ -53,6 +53,20 @@
 						<id>default</id>
 						<reports>
 							<report>javadoc</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>2.9</version>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>dependencies</report>
+							<report>license</report>
+							<report>summary</report>
 						</reports>
 					</reportSet>
 				</reportSets>

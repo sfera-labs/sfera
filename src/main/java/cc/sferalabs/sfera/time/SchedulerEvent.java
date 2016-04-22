@@ -1,7 +1,6 @@
-package cc.sferalabs.sfera.scheduler;
+package cc.sferalabs.sfera.time;
 
 import cc.sferalabs.sfera.events.BaseEvent;
-import cc.sferalabs.sfera.events.Node;
 
 /**
  *
@@ -12,20 +11,6 @@ import cc.sferalabs.sfera.events.Node;
  */
 public class SchedulerEvent extends BaseEvent {
 
-	/**
-	 * Node used by SchedulerEvents
-	 */
-	private static final Node SCHEDULER_NODE = new SchedulerNode();
-
-	/**
-	 *
-	 */
-	private static class SchedulerNode extends Node {
-		public SchedulerNode() {
-			super("scheduler");
-		}
-	}
-
 	private final String value;
 
 	/**
@@ -33,7 +18,7 @@ public class SchedulerEvent extends BaseEvent {
 	 * @param value
 	 */
 	SchedulerEvent(String id, String value) {
-		super(SCHEDULER_NODE, id);
+		super(Scheduler.getInstance(), id);
 		this.value = value;
 	}
 
