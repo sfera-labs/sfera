@@ -2,6 +2,6 @@ cc.sferalabs.sfera.scripts.ScriptsEngine
 cc.sferalabs.sfera.web.WebServer
 cc.sferalabs.sfera.ui.UI
 cc.sferalabs.sfera.time.Scheduler
-#cc.sferalabs.sfera.data.Database
+cc.sferalabs.sfera.data.Database
 cc.sferalabs.sfera.console.Console
 cc.sferalabs.sfera.doc.server.DocServer
