@@ -99,16 +99,11 @@ public class Scheduler extends Node implements AutoStartService {
 	/**
 	 * 
 	 * @param trigger
+	 * @throws SchedulerException
 	 */
-	private static void scheduleEvent(Trigger trigger) {
-		try {
-			JobDetail eventJob = newJob(TriggerEventJob.class).build();
-			getScheduler().scheduleJob(eventJob, trigger);
-		} catch (SchedulerException e) {
-			String id = trigger.getJobDataMap().getString("id");
-			String val = trigger.getJobDataMap().getString("val");
-			logger.error("Error scheduling event job: " + id + " = " + val, e);
-		}
+	private static void scheduleEvent(Trigger trigger) throws SchedulerException {
+		JobDetail eventJob = newJob(TriggerEventJob.class).build();
+		getScheduler().scheduleJob(eventJob, trigger);
 	}
 
 	/**
@@ -145,8 +140,10 @@ public class Scheduler extends Node implements AutoStartService {
 	 *            value of the event to trigger
 	 * @param delay
 	 *            delay in milliseconds after which the event will be triggered
+	 * @throws SchedulerException
+	 *             if an error occurs
 	 */
-	public void delay(String id, String value, int delay) {
+	public void delay(String id, String value, int delay) throws SchedulerException {
 		Trigger trigger = newEventTrigger(id, value)
 				.startAt(futureDate(delay, IntervalUnit.MILLISECOND)).build();
 		scheduleEvent(trigger);
@@ -163,8 +160,11 @@ public class Scheduler extends Node implements AutoStartService {
 	 *            triggered
 	 * @param interval
 	 *            interval in milliseconds of the subsequent events
+	 * @throws SchedulerException
+	 *             if an error occurs
 	 */
-	public void repeat(String id, String value, int initialDelay, int interval) {
+	public void repeat(String id, String value, int initialDelay, int interval)
+			throws SchedulerException {
 		Trigger trigger = newEventTrigger(id, value)
 				.startAt(futureDate(initialDelay, IntervalUnit.MILLISECOND))
 				.withSchedule(simpleSchedule().withIntervalInMilliseconds(interval).repeatForever())
@@ -185,8 +185,11 @@ public class Scheduler extends Node implements AutoStartService {
 	 *            interval in milliseconds of the subsequent events
 	 * @param times
 	 *            number of triggered events
+	 * @throws SchedulerException
+	 *             if an error occurs
 	 */
-	public void repeat(String id, String value, int initialDelay, int interval, int times) {
+	public void repeat(String id, String value, int initialDelay, int interval, int times)
+			throws SchedulerException {
 		Trigger trigger = newEventTrigger(id, value)
 				.startAt(futureDate(initialDelay, IntervalUnit.MILLISECOND))
 				.withSchedule(simpleSchedule().withIntervalInMilliseconds(interval)
@@ -202,8 +205,11 @@ public class Scheduler extends Node implements AutoStartService {
 	 *            ID of the event to trigger
 	 * @param value
 	 *            value of the event to trigger
+	 * @throws SchedulerException
+	 *             if an error occurs
 	 */
-	public void addCronRule(String cronExpression, String id, String value) {
+	public void addCronRule(String cronExpression, String id, String value)
+			throws SchedulerException {
 		Trigger trigger = newEventTrigger(id, value).withSchedule(cronSchedule(cronExpression))
 				.build();
 		scheduleEvent(trigger);

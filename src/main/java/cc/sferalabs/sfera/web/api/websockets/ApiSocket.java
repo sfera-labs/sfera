@@ -2,6 +2,7 @@ package cc.sferalabs.sfera.web.api.websockets;
 
 import java.io.IOException;
 import java.util.EventListener;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.script.ScriptException;
@@ -52,6 +53,7 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 	private WsEventListener nodesSubscription;
 	private WsFileWatcher filesSubscription;
 	private final Task pingTask;
+	private Future<?> pingTaskFuture;
 	private final long pingInterval;
 	private final long respTimeout;
 	private WsConsoleSession consoleSession;
@@ -160,7 +162,7 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 		}
 
 		if (message.equals(PING_STRING)) {
-			TasksManager.execute(pingTask);
+			pingTaskFuture = TasksManager.submit(pingTask);
 			return;
 		}
 
@@ -300,8 +302,8 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 			filesSubscription.destroy();
 			filesSubscription = null;
 		}
-		if (pingTask != null) {
-			pingTask.interrupt();
+		if (pingTaskFuture != null) {
+			pingTaskFuture.cancel(true);
 		}
 		if (consoleSession != null) {
 			consoleSession.quit();

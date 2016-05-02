@@ -28,6 +28,13 @@ import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Node;
 import cc.sferalabs.sfera.util.files.FilesUtil;
 
+/**
+ *
+ * @author Giampiero Baggiani
+ *
+ * @version 1.0.0
+ *
+ */
 public class Database extends Node implements AutoStartService, EventListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(Database.class);
@@ -108,9 +115,15 @@ public class Database extends Node implements AutoStartService, EventListener {
 	}
 
 	/**
+	 * Set the specified key to the specified value. if value is {@code null}
+	 * the entry is deleted.
+	 * 
 	 * @param key
+	 *            the key
 	 * @param value
+	 *            the value
 	 * @throws SQLException
+	 *             if a database access error occurs
 	 */
 	public void set(String key, String value) throws SQLException {
 		Objects.requireNonNull(key, "key must not be null");
@@ -122,10 +135,13 @@ public class Database extends Node implements AutoStartService, EventListener {
 	}
 
 	/**
+	 * Returns the value set to the specified key or {@code null} if not found.
 	 * 
 	 * @param key
-	 * @return
+	 *            the key
+	 * @return the value set to the specified key or {@code null} if not found
 	 * @throws SQLException
+	 *             if a database access error occurs
 	 */
 	public String get(String key) throws SQLException {
 		Objects.requireNonNull(key, "key must not be null");
@@ -215,7 +231,9 @@ public class Database extends Node implements AutoStartService, EventListener {
 				synchronized (dbLock) {
 					if (dbConnection != null) {
 						try {
+							logger.debug("Running database checkpoint...");
 							dbConnection.createStatement().execute("CHECKPOINT");
+							logger.debug("Database checkpoint completed");
 						} catch (Exception e) {
 							logger.error("Database checkpoint failed", e);
 						}
@@ -261,19 +279,21 @@ public class Database extends Node implements AutoStartService, EventListener {
 		protected void execute() {
 			if (dbConnection != null) {
 				try {
+					logger.debug("Running database defrag...");
 					dbConnection.createStatement().execute("CHECKPOINT DEFRAG");
 				} catch (Exception e) {
 					logger.error("Database defrag failed", e);
 				}
 
 				try {
+					logger.debug("Creating database backup...");
 					Path tmp = Paths.get(DB_DIR, "._backup").toAbsolutePath();
 					try {
 						FilesUtil.delete(tmp);
 					} catch (NoSuchFileException e) {
 					}
 					dbConnection.createStatement().execute(
-							"backup database to '" + tmp.toString() + "' not blocking as files");
+							"backup database to '" + tmp.toString() + "/' not blocking as files");
 					Path backup = Paths.get(DB_DIR, "backup");
 					try {
 						FilesUtil.delete(backup);
@@ -284,6 +304,7 @@ public class Database extends Node implements AutoStartService, EventListener {
 					logger.error("Database backup failed", e);
 				}
 			}
+			logger.debug("Database housekeeping terminated");
 			TasksManager.execute(DatabaseCheckPointTask.INSTANCE);
 		}
 

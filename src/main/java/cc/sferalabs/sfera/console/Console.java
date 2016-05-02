@@ -74,7 +74,7 @@ public class Console implements AutoStartService {
 	}
 
 	/**
-	 * Adds the specified session from the list of active sessions.
+	 * Adds the specified session to the list of active sessions.
 	 * 
 	 * @param session
 	 *            the session to add

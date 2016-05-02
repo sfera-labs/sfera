@@ -14,7 +14,6 @@ package cc.sferalabs.sfera.core.services;
 public abstract class Task implements Runnable {
 
 	private final String name;
-	private Thread thread;
 
 	/**
 	 * Construct a {@code Task} with the specified name to be assigned to the
@@ -58,33 +57,13 @@ public abstract class Task implements Runnable {
 
 	@Override
 	public void run() {
-		thread = Thread.currentThread();
+		Thread thread = Thread.currentThread();
 		try {
 			thread.setName(name);
 			execute();
 		} finally {
-			Thread.currentThread().setName("TERMINATED-" + thread.getName());
-			thread = null;
+			thread.setName("TERMINATED-" + name);
 		}
-	}
-
-	/**
-	 * Interrupts the thread executing this task, if any.
-	 */
-	public void interrupt() {
-		if (thread != null) {
-			thread.interrupt();
-		}
-	}
-
-	/**
-	 * Returns the thread executing this task, may be {@code null} if
-	 * terminated.
-	 * 
-	 * @return the thread executing this task, may be {@code null} if terminated
-	 */
-	public Thread getThread() {
-		return thread;
 	}
 
 	/**

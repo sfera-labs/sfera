@@ -3,6 +3,8 @@
  */
 package cc.sferalabs.sfera.console;
 
+import java.util.concurrent.Future;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +23,7 @@ public abstract class ConsoleSession extends Task {
 	private static final Logger logger = LoggerFactory.getLogger(ConsoleSession.class);
 
 	private boolean run;
+	private Future<?> future;
 
 	/**
 	 * @param name
@@ -39,7 +42,7 @@ public abstract class ConsoleSession extends Task {
 		}
 		run = true;
 		Console.addSession(this);
-		TasksManager.execute(this);
+		future = TasksManager.submit(this);
 	}
 
 	/**
@@ -48,7 +51,9 @@ public abstract class ConsoleSession extends Task {
 	public synchronized final void quit() {
 		logger.debug("{} quitting...", getName());
 		run = false;
-		interrupt();
+		if (future != null) {
+			future.cancel(true);
+		}
 	}
 
 	@Override
@@ -93,11 +98,11 @@ public abstract class ConsoleSession extends Task {
 		if (!run) {
 			return false;
 		}
-		Thread t = getThread();
-		if (t == null) {
+		if (future == null) {
 			return false;
+		} else {
+			return !future.isDone();
 		}
-		return !t.isInterrupted();
 	}
 
 	/**
