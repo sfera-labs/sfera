@@ -15,7 +15,7 @@ The communication flow follows these steps:
 * [Commands](#Commands): the client can perform commands on nodes
 * [Logout](#Logout): the client ends the session
 
-**N.B.** The query parameters in the following HTTP requests will be URL decoded when received from the server.
+**N.B.** The following HTTP requests include parameters as query strings for GET requests; you can equally POST those parameters. Don't forget to URL-encode when needed.
 
 ### Login
 
