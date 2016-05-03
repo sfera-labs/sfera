@@ -6,6 +6,8 @@ package cc.sferalabs.sfera.util.files;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.CopyOption;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
@@ -111,6 +113,48 @@ public abstract class FilesUtil {
 					}
 				});
 			}
+		}
+	}
+
+	/**
+	 * Unzips the specified source file into the specified directory.
+	 * 
+	 * @param source
+	 *            path of the zip file to extract
+	 * @param dir
+	 *            path of the directory to extract to
+	 * @param options
+	 *            options specifying how the files contained in the zip file are
+	 *            copied
+	 * @throws IOException
+	 *             if an I/O error occurs
+	 */
+	public static void unzip(Path source, Path dir, CopyOption... options) throws IOException {
+		try (FileSystem zipFs = FileSystems.newFileSystem(source, null)) {
+			Files.walkFileTree(zipFs.getPath("/"), new SimpleFileVisitor<Path>() {
+
+				/**
+				 * @param file
+				 * @return
+				 */
+				private Path getDestination(Path file) {
+					return dir.resolve("." + file.toString()).normalize();
+				}
+
+				@Override
+				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
+						throws IOException {
+					Files.createDirectories(getDestination(dir));
+					return FileVisitResult.CONTINUE;
+				}
+
+				@Override
+				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+						throws IOException {
+					Files.copy(file, getDestination(file), options);
+					return FileVisitResult.CONTINUE;
+				}
+			});
 		}
 	}
 

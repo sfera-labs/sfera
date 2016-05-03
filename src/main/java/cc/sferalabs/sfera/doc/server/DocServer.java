@@ -3,33 +3,27 @@
  */
 package cc.sferalabs.sfera.doc.server;
 
-import java.io.IOException;
 import java.nio.file.DirectoryStream;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.function.Predicate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cc.sferalabs.sfera.core.services.AutoStartService;
+import cc.sferalabs.sfera.util.files.FilesUtil;
 import cc.sferalabs.sfera.util.files.FilesWatcher;
 import cc.sferalabs.sfera.web.WebServer;
 
 /**
  * This service looks for documentation available in the 'docs' directory. If
- * found, it adds the path "/docs" to the HTTP server where it serves the
+ * found, it adds the path '/docs' to the HTTP server where it serves the
  * available documentation.
  * <p>
- * If JavaDoc jars are found inside the directory 'docs/plugins' they are
- * automatically extracted. The jar's name must be of the form
+ * If plugins JavaDoc jars are found inside this directory they are
+ * automatically extracted in 'docs/plugins'. The jar's name must be of the form
  * '&lt;plugin_name&gt;-&lt;version&gt;-javadoc.jar'; it will be extracted to a
  * directory named '&lt;plugin_name&gt;' overwriting its content if already
  * existing.
@@ -43,121 +37,51 @@ public class DocServer implements AutoStartService {
 
 	private static final Logger logger = LoggerFactory.getLogger(DocServer.class);
 
-	static final Path ROOT = Paths.get("docs/");
 	private boolean servletAdded = false;
 
 	@Override
 	public void init() {
+		Path docsPath = Paths.get("docs/");
 		try {
-			try {
-				extractJavaDocJarsIn(ROOT, jarName -> {
-					return jarName.startsWith("sfera-") && jarName.endsWith("-javadoc.jar");
-				});
-				if (!servletAdded) {
-					WebServer.addServlet(DocServletHolder.INSTANCE, "/docs/*");
-					servletAdded = true;
+			try (DirectoryStream<Path> stream = Files.newDirectoryStream(docsPath)) {
+				for (Path javaDocFile : stream) {
+					if (Files.isRegularFile(javaDocFile)) {
+						String fileName = javaDocFile.getFileName().toString();
+						if (fileName.endsWith("-javadoc.jar")) {
+							try {
+								logger.info("Extracting doc from {}", javaDocFile);
+								Path destDir = docsPath.resolve("plugins")
+										.resolve(fileName.substring(0, fileName.indexOf('-')));
+								try {
+									FilesUtil.delete(destDir);
+								} catch (NoSuchFileException e) {
+								}
+								FilesUtil.unzip(javaDocFile, destDir);
+								Files.delete(javaDocFile);
+								try {
+									FilesUtil.delete(destDir.resolve("META-INF"));
+								} catch (NoSuchFileException e) {
+								}
+							} catch (Exception e) {
+								logger.error("Error extracting docs in " + javaDocFile, e);
+							}
+						}
+					}
 				}
-				extractJavaDocJarsIn(ROOT.resolve("plugins"), jarName -> {
-					return jarName.endsWith("-javadoc.jar");
-				});
-			} catch (NoSuchFileException e) {
 			}
+
+			if (!servletAdded) {
+				WebServer.addServlet(DocServletHolder.INSTANCE, "/docs/*");
+				servletAdded = true;
+			}
+		} catch (NoSuchFileException e) {
 		} catch (Exception e) {
 			logger.error("Error extracting documentation", e);
 		}
-
 		try {
-			FilesWatcher.register(ROOT, "JavaDoc extractor", this::init);
+			FilesWatcher.register(docsPath, "JavaDoc extractor", this::init, true, false);
 		} catch (Exception e) {
 			logger.error("Error registering FilesWatcher", e);
-		}
-	}
-
-	/**
-	 * 
-	 * @param dir
-	 * @param jarNamePredicate
-	 * @throws IOException
-	 */
-	private static void extractJavaDocJarsIn(Path dir, Predicate<String> jarNamePredicate)
-			throws IOException {
-		try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
-			for (Path file : stream) {
-				if (Files.isRegularFile(file)
-						&& jarNamePredicate.test(file.getFileName().toString())) {
-					try {
-						extractJar(file);
-					} catch (Exception e) {
-						logger.error("Error extracting docs in " + file, e);
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * @param jarFile
-	 * @throws IOException
-	 */
-	private static void extractJar(Path jarFile) throws IOException {
-		String jarFileName = jarFile.toString();
-		logger.debug("Extracting doc from {}", jarFileName);
-		Path destDir = Paths.get(jarFileName.substring(0, jarFileName.indexOf('-')) + "/");
-		deleteRecursive(destDir);
-
-		try (FileSystem jarFs = FileSystems.newFileSystem(jarFile, null)) {
-			Files.walkFileTree(jarFs.getPath("/"), new SimpleFileVisitor<Path>() {
-
-				private Path getLocalDest(Path dir) {
-					return destDir.resolve("." + dir.toString());
-				}
-
-				@Override
-				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
-						throws IOException {
-					if (!dir.toString().startsWith("/META-INF")) {
-						Files.createDirectories(getLocalDest(dir));
-					}
-					return super.preVisitDirectory(dir, attrs);
-				}
-
-				@Override
-				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-						throws IOException {
-					super.visitFile(file, attrs);
-					if (!file.toString().startsWith("/META-INF")) {
-						Files.copy(file, getLocalDest(file));
-					}
-					return FileVisitResult.CONTINUE;
-				}
-			});
-		}
-
-		Files.delete(jarFile);
-	}
-
-	/**
-	 * @param dir
-	 * @throws IOException
-	 */
-	private static void deleteRecursive(Path dir) throws IOException {
-		try {
-			Files.walkFileTree(dir, new SimpleFileVisitor<Path>() {
-				@Override
-				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-						throws IOException {
-					Files.delete(file);
-					return FileVisitResult.CONTINUE;
-				}
-
-				@Override
-				public FileVisitResult postVisitDirectory(Path dir, IOException exc)
-						throws IOException {
-					Files.delete(dir);
-					return FileVisitResult.CONTINUE;
-				}
-			});
-		} catch (NoSuchFileException e) {
 		}
 	}
 
@@ -165,6 +89,7 @@ public class DocServer implements AutoStartService {
 	public void quit() throws Exception {
 		if (servletAdded) {
 			WebServer.removeServlet(DocServletHolder.INSTANCE);
+			servletAdded = false;
 		}
 	}
 
