@@ -74,6 +74,6 @@ public interface Event {
 	 * 
 	 * @return the simple-form value of this event
 	 */
-	public Object getScriptConditionValue();
+	public Object getSimpleValue();
 
 }

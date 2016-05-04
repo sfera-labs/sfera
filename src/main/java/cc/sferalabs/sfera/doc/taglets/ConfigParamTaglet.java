@@ -14,7 +14,7 @@ import java.util.Map;
  * @version 1.0.0
  *
  */
-public class ConfigParamTaglet extends SimpleTaglet {
+public class ConfigParamTaglet extends BaseTaglet {
 
 	@Override
 	public String getName() {

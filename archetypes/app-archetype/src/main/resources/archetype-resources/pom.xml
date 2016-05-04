@@ -90,6 +90,12 @@
 						<taglet>
 							<tagletClass>cc.sferalabs.sfera.doc.taglets.EventIdTaglet</tagletClass>
 						</taglet>
+						<taglet>
+							<tagletClass>cc.sferalabs.sfera.doc.taglets.EventValueTaglet</tagletClass>
+						</taglet>
+						<taglet>
+							<tagletClass>cc.sferalabs.sfera.doc.taglets.EventSimpleValueTaglet</tagletClass>
+						</taglet>
 					</taglets>
 					<tagletArtifact>
 						<groupId>cc.sferalabs.sfera</groupId>

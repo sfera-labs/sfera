@@ -188,7 +188,7 @@ class TriggerCondition {
 			return null;
 		}
 
-		return event.getScriptConditionValue();
+		return event.getSimpleValue();
 	}
 
 	/**

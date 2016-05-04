@@ -11,7 +11,7 @@ import com.sun.tools.doclets.Taglet;
  * @version 1.0.0
  *
  */
-public abstract class SimpleTaglet implements Taglet {
+public abstract class BaseTaglet implements Taglet {
 
 	/**
 	 * @return the header for this taglet

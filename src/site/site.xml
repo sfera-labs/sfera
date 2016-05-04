@@ -22,15 +22,17 @@
 
 		<menu name="Sfera">
 			<item name="Introduction" href="index.html" />
-			<item name="Downloads" href="downloads.html" />
+			<item name="Quick start" href="quick-start.html" />
 			<item name="Installation" href="installation.html" />
+			<item name="Downloads" href="downloads.html" />
 			<item name="Configuration" href="configuration.html" />
 			<item name="Console" href="console.html" />
 			<item name="Plugins" href="sfera-plugins.html" />
 			<item name="Control logic" href="control-logic.html" />
 			<item name="Scripts" href="scripts.html" />
 			<item name="System events" href="system-events.html" />
-			<item name="FAQ" href="faq.html" />
+			<item name="Web App" href="/apps/webapp" />
+			<!-- <item name="FAQ" href="faq.html" /> -->
 		</menu>
 
 		<menu name="Developing">

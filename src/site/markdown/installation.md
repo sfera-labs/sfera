@@ -1,6 +1,8 @@
 # Install Sfera
 
-The installation simply consists of downloading [Sfera's jar file](downloads.html) and adding the needed configuration files and plugins.
+The installation of Sfera simply consists of downloading [Sfera's jar file](downloads.html) and adding the needed configuration files and plugins.
+
+## Requirements
 
 Sfera requires Java Runtime Environment (JRE) 8. If you don't have it already, download it from http://www.oracle.com/technetwork/java/javase/downloads/index.html and install it on your platform. Make sure the `JAVA_HOME` environment variable is properly set.
 

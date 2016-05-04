@@ -52,7 +52,7 @@ public abstract class BaseEvent implements Event {
 	}
 
 	@Override
-	public Object getScriptConditionValue() {
+	public Object getSimpleValue() {
 		return getValue();
 	}
 }

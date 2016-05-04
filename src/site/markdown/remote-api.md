@@ -31,7 +31,7 @@ and the HTTP response will contain a "Set-Cookie" header with a "session" attrib
 
 If the login fails an error will be returned:
 
-    { "error": <error_message> }
+    { "errors": [{ "code": <error_code>, "message": <error_message> }] }
 
 ### Logout
 To invalidate the current session send a request to:

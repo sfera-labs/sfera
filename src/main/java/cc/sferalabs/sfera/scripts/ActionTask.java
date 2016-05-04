@@ -72,7 +72,7 @@ class ActionTask extends Task {
 					}
 				}
 			}
-			logger.info("Action executed. File '{}' line {}", rule.scriptFile, rule.startLine);
+			logger.debug("Action executed. File '{}' line {}", rule.scriptFile, rule.startLine);
 		} catch (Throwable e) {
 			int line = rule.startLine;
 			if (e instanceof ScriptException) {

@@ -67,7 +67,7 @@ public class ScriptEvent implements Event {
 	}
 
 	@Override
-	public Object getScriptConditionValue() {
+	public Object getSimpleValue() {
 		return getValue();
 	}
 
