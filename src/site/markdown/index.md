@@ -15,4 +15,4 @@ The core of Sfera is a modular, highly scalable Java framework. It can be instal
 
 Sfera can be expanded to integrate any device, protocol or service and you can install or create apps for customized, vertical solutions.    
 It embeds a script engine (based on the JavaScript language) which allows to rapidly create your control logic and to modify it during runtime.
-Sfera also exposes a REST API and a WebSockets protocol for remote control and configuration through custom apps, Web apps or ad-hoc interfaces.
+Sfera also exposes an HTTP API and a WebSockets protocol for remote control and configuration through custom apps, Web apps or ad-hoc interfaces.

@@ -31,7 +31,7 @@
 			<item name="Control logic" href="control-logic.html" />
 			<item name="Scripts" href="scripts.html" />
 			<item name="System events" href="system-events.html" />
-			<item name="Web App" href="/apps/webapp" />
+			<item name="Web App" href="../apps/webapp" />
 			<!-- <item name="FAQ" href="faq.html" /> -->
 		</menu>
 
