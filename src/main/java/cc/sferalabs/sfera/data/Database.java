@@ -75,7 +75,6 @@ public class Database extends Node implements AutoStartService, EventListener {
 				Configuration config = SystemNode.getConfiguration();
 				String user = config.get("db_user", "sfera");
 				String password = config.get("db_password", "sfera");
-				System.setProperty("hsqldb.reconfig_logging", "false");
 				Class.forName("org.hsqldb.jdbc.JDBCDriver");
 				logger.debug("Connecting to database...");
 
