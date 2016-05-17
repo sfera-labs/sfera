@@ -1,6 +1,7 @@
 package cc.sferalabs.sfera.apps;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -185,9 +186,13 @@ public abstract class Application implements AutoStartService, EventListener {
 	 * 
 	 * @return the path to the directory to be used to store data for this
 	 *         application
+	 * @throws IOException
+	 *             if an I/O error occurs creating the directory
 	 */
-	protected Path getAppDataDir() {
-		return Paths.get("data/apps/", getClass().getPackage().getName());
+	protected Path getAppDataDir() throws IOException {
+		Path path = Paths.get("data/apps/", getClass().getPackage().getName());
+		Files.createDirectories(path);
+		return path;
 	}
 
 }

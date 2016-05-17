@@ -1,6 +1,7 @@
 package cc.sferalabs.sfera.drivers;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -270,9 +271,13 @@ public abstract class Driver extends Node {
 	 * 
 	 * @return the path to the directory to be used to store data for all
 	 *         instances of this driver
+	 * @throws IOException
+	 *             if an I/O error occurs creating the directory
 	 */
-	protected Path getDriverGlobalDataDir() {
-		return Paths.get("data/drivers/", getClass().getPackage().getName());
+	protected Path getDriverGlobalDataDir() throws IOException {
+		Path path = Paths.get("data/drivers/", getClass().getPackage().getName());
+		Files.createDirectories(path);
+		return path;
 	}
 
 	/**
@@ -281,9 +286,13 @@ public abstract class Driver extends Node {
 	 * 
 	 * @return the path to the directory to be used to store data this driver
 	 *         instance
+	 * @throws IOException
+	 *             if an I/O error occurs creating the directory
 	 */
-	protected Path getDriverInstanceDataDir() {
-		return getDriverGlobalDataDir().resolve(getId());
+	protected Path getDriverInstanceDataDir() throws IOException {
+		Path path = getDriverGlobalDataDir().resolve(getId());
+		Files.createDirectories(path);
+		return path;
 	}
 
 }
