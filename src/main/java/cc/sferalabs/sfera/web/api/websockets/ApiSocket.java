@@ -246,7 +246,7 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 					reply.sendErrors(new ErrorMessage(0, "Attribute 'id' not found"));
 					return;
 				}
-				String value = message.get("value");
+				String value = message.get("value").toString();
 				try {
 					WebApiEvent remoteEvent = new WebApiEvent(id, value, originalRequest,
 							connectionId);

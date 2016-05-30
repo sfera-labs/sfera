@@ -201,7 +201,7 @@ public class Database extends Node implements AutoStartService, EventListener {
 				try {
 					dbConnection.createStatement().execute("SHUTDOWN");
 					dbConnection.close();
-				} catch (SQLException e) {
+				} catch (Throwable e) {
 				}
 				dbConnection = null;
 			}
@@ -233,7 +233,7 @@ public class Database extends Node implements AutoStartService, EventListener {
 							logger.debug("Running database checkpoint...");
 							dbConnection.createStatement().execute("CHECKPOINT");
 							logger.debug("Database checkpoint completed");
-						} catch (Exception e) {
+						} catch (Throwable e) {
 							logger.error("Database checkpoint failed", e);
 						}
 
@@ -280,7 +280,7 @@ public class Database extends Node implements AutoStartService, EventListener {
 				try {
 					logger.debug("Running database defrag...");
 					dbConnection.createStatement().execute("CHECKPOINT DEFRAG");
-				} catch (Exception e) {
+				} catch (Throwable e) {
 					logger.error("Database defrag failed", e);
 				}
 
@@ -299,7 +299,7 @@ public class Database extends Node implements AutoStartService, EventListener {
 					} catch (NoSuchFileException e) {
 					}
 					FilesUtil.move(tmp, backup);
-				} catch (Exception e) {
+				} catch (Throwable e) {
 					logger.error("Database backup failed", e);
 				}
 			}

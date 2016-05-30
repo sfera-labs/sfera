@@ -115,8 +115,8 @@ public class SystemNode extends Node {
 			}
 		}
 
-		Drivers.load();
 		Applications.load();
+		Drivers.load();
 
 		Console.addHandler(SystemConsoleCommandHandler.INSTANCE);
 	}
