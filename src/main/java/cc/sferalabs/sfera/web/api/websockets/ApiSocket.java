@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.script.ScriptException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.eclipse.jetty.websocket.api.Session;
@@ -46,6 +47,7 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 	private static final String PING_STRING = "&";
 
 	private final HttpServletRequest originalRequest;
+	private final HttpSession session;
 	final String hostname;
 	final String connectionId;
 	final String user;
@@ -73,7 +75,8 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 				.getHttpServletRequest();
 		this.hostname = request.getRemoteHostName();
 		String connectionId = originalRequest.getParameter("connectionId");
-		String sessionId = originalRequest.getSession().getId();
+		session = originalRequest.getSession();
+		String sessionId = session.getId();
 		if (connectionId != null) {
 			if (!sessionId.equals(connectionId.split("-")[0])) {
 				connectionId = null;
@@ -94,7 +97,7 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 	public void onWebSocketConnect(Session session) {
 		super.onWebSocketConnect(session);
 		try {
-			if (isUserInRole("admin", "user")) {
+			if (isAuthorized("admin", "user")) {
 				OutgoingWsMessage resp = new OutgoingWsMessage("connection", this);
 				resp.put("connectionId", connectionId);
 				resp.put("pingInterval", pingInterval);
@@ -114,17 +117,22 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 
 	@Subscribe
 	public void checkUser(AccessChangeEvent e) {
-		if (!isUserInRole("admin", "user")) {
+		if (!isAuthorized("admin", "user")) {
 			closeSocket(StatusCode.POLICY_VIOLATION, "Unauthorized");
 		}
 	}
 
 	/**
-	 * 
-	 * @param roles
 	 * @return
 	 */
-	private boolean isUserInRole(String... roles) {
+	private boolean isAuthorized(String... roles) {
+		try {
+			// Try to get an attribute from session to check if it is still
+			// valid
+			session.getAttribute("");
+		} catch (IllegalStateException e) {
+			return false;
+		}
 		if (user == null) {
 			return false;
 		}
@@ -132,11 +140,13 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 		if (u == null) {
 			return false;
 		}
+		
 		for (String role : roles) {
 			if (u.isInRole(role)) {
 				return true;
 			}
 		}
+
 		return false;
 	}
 
@@ -156,7 +166,7 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 		super.onWebSocketText(message);
 		logger.debug("Received message: '{}' - Host: {} User: {}", message, hostname, user);
 
-		if (!isUserInRole("admin", "user")) {
+		if (!isAuthorized("admin", "user")) {
 			closeSocket(StatusCode.POLICY_VIOLATION, "Unauthorized");
 			return;
 		}
@@ -258,7 +268,7 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 				break;
 
 			case "console":
-				if (!isUserInRole("admin")) {
+				if (!isAuthorized("admin")) {
 					closeSocket(StatusCode.POLICY_VIOLATION, "Unauthorized");
 					return;
 				}
