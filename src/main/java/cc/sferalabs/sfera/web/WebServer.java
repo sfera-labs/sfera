@@ -38,6 +38,7 @@ import cc.sferalabs.sfera.core.services.AutoStartService;
 import cc.sferalabs.sfera.web.api.http.servlets.CommandServlet;
 import cc.sferalabs.sfera.web.api.http.servlets.ConnectServlet;
 import cc.sferalabs.sfera.web.api.http.servlets.EventServlet;
+import cc.sferalabs.sfera.web.api.http.servlets.InfoServlet;
 import cc.sferalabs.sfera.web.api.http.servlets.LoginServlet;
 import cc.sferalabs.sfera.web.api.http.servlets.LogoutServlet;
 import cc.sferalabs.sfera.web.api.http.servlets.StateServlet;
@@ -182,6 +183,7 @@ public class WebServer implements AutoStartService {
 		addServlet(CommandServlet.class, CommandServlet.PATH);
 		addServlet(EventServlet.class, EventServlet.PATH);
 		addServlet(ApiWebSocketServlet.class, ApiWebSocketServlet.PATH);
+		addServlet(InfoServlet.class, InfoServlet.PATH);
 
 		// files
 		addServlet(ListFilesServlet.class, ListFilesServlet.PATH);

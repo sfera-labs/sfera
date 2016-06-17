@@ -39,6 +39,7 @@ public class SystemNode extends Node {
 
 	private static final Logger logger = LoggerFactory.getLogger(SystemNode.class);
 	private static final SystemNode INSTANCE = new SystemNode();
+	private static final String VERSION = SystemNode.class.getPackage().getImplementationVersion();
 	private static final List<Service> services = new ArrayList<>();
 	private Configuration config;
 
@@ -47,6 +48,13 @@ public class SystemNode extends Node {
 	 */
 	private SystemNode() {
 		super("system");
+	}
+
+	/**
+	 * @return Sfera's version
+	 */
+	public static String getVersion() {
+		return VERSION;
 	}
 
 	/**
@@ -69,10 +77,26 @@ public class SystemNode extends Node {
 	 * Starts the process
 	 */
 	void start() {
-		logger.info("======== Started ========");
+		logger.info("Starting...");
+		logSystemInfo();
 		Bus.post(SystemStateEvent.START);
 		init();
 		Bus.post(SystemStateEvent.READY);
+	}
+
+	/**
+	 * 
+	 */
+	private void logSystemInfo() {
+		String osName = System.getProperty("os.name");
+		String osArch = System.getProperty("os.arch");
+		String osVersion = System.getProperty("os.version");
+		String javaVersion = System.getProperty("java.version");
+		String javaVmName = System.getProperty("java.vm.name");
+
+		logger.info("Sfera version: {}", VERSION);
+		logger.info("OS: {} {} {}", osName, osArch, osVersion);
+		logger.info("Java: {} {}", javaVersion, javaVmName);
 	}
 
 	/**

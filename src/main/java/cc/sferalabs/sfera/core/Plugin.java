@@ -28,6 +28,7 @@ public class Plugin {
 	private final String id;
 	private final String name;
 	private final String description;
+	private final String version;
 
 	/**
 	 * Creates a plugin object from the specified jar file
@@ -51,6 +52,7 @@ public class Plugin {
 		String artifactId = null;
 		String name = null;
 		String description = null;
+		String version = null;
 		try (FileSystem pluginFileSystem = FileSystems.newFileSystem(jarFile, null)) {
 			XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 			XMLEventReader eventReader = null;
@@ -89,6 +91,11 @@ public class Plugin {
 								if (event.isCharacters()) {
 									description = event.asCharacters().getData();
 								}
+							} else if (description == null && elName.equals("version")) {
+								event = eventReader.nextEvent();
+								if (event.isCharacters()) {
+									version = event.asCharacters().getData();
+								}
 							}
 						}
 
@@ -107,6 +114,7 @@ public class Plugin {
 				this.id = groupId + "." + artifactId;
 				this.name = name;
 				this.description = description;
+				this.version = version;
 
 			} finally {
 				try {
@@ -149,5 +157,13 @@ public class Plugin {
 	 */
 	public String getDescription() {
 		return description;
+	}
+
+	/**
+	 * 
+	 * @return the version of the plugin
+	 */
+	public String getVersion() {
+		return version;
 	}
 }

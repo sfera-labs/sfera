@@ -55,7 +55,7 @@ public abstract class Plugins {
 					if (!Files.isHidden(file)) {
 						Plugin p = new Plugin(file);
 						plugins.put(p.getId(), p);
-						logger.info("Plugin '{}' loaded", p.getId());
+						logger.info("Plugin '{}' version '{}' loaded", p.getId(), p.getVersion());
 					}
 				} catch (Throwable e) {
 					logger.error("Error loading file '" + file + "' in plugins folder", e);
