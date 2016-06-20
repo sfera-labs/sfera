@@ -1,9 +1,8 @@
 # Apps development
 
-After [setting up your workspace](Workspace setup) for the development of an app, you will have a project with the following structure (with names of packages and files set to your choices):
+After [setting up your workspace](workspace-setup.html) for the development of an app, you will have a project with the following structure (with names of packages and files set to your choices):
 
 ![app-proj-structure](images/app-proj-structure.png)
-
 
 ## Lifecycle
 

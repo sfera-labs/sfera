@@ -27,11 +27,12 @@
 			<item name="Downloads" href="downloads.html" />
 			<item name="Configuration" href="configuration.html" />
 			<item name="Console" href="console.html" />
-			<item name="Plugins" href="sfera-plugins.html" />
 			<item name="Control logic" href="control-logic.html" />
 			<item name="Scripts" href="scripts.html" />
-			<item name="System events" href="system-events.html" />
-			<item name="Web App" href="../apps/webapp" />
+			<item name="Utility nodes" href="utility-nodes.html" />
+			<item name="Web App" href="../apps/cc.sferalabs.sfera.apps.webapp/" />
+			<item name="Drivers" href="drivers.html" />
+			<item name="Apps" href="apps.html" />
 			<!-- <item name="FAQ" href="faq.html" /> -->
 		</menu>
 

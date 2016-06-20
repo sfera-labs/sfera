@@ -18,7 +18,7 @@ Password:
 Granted - Input your commands:
 ```
 
-Installed apps/drivers may add additional ways to interact with the console.
+Installed plugins may add additional ways to interact with the console. For instance, the [Web App](../apps/cc.sferalabs.sfera.apps.webapp/) provides a Web-based console.
 
 Following is a list of some of the available console commands to control Sfera's lifecycle; other commands are described in other sections of this documentation relatively to the command purpose.
 

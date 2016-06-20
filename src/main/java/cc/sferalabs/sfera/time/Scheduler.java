@@ -118,21 +118,8 @@ public class Scheduler extends Node implements AutoStartService {
 	}
 
 	/**
-	 * 
-	 * @param id
-	 *            ID of the event(s) to cancel
-	 */
-	public void cancel(String id) {
-		try {
-			org.quartz.Scheduler sched = getScheduler();
-			Set<TriggerKey> keys = sched.getTriggerKeys(GroupMatcher.groupEquals(id));
-			sched.unscheduleJobs(new ArrayList<TriggerKey>(keys));
-		} catch (SchedulerException e) {
-			logger.error("Error canceling event jobs: " + id, e);
-		}
-	}
-
-	/**
+	 * Schedules an event to be triggered with the specified delay after this
+	 * method has been called.
 	 * 
 	 * @param id
 	 *            ID of the event to trigger
@@ -150,6 +137,9 @@ public class Scheduler extends Node implements AutoStartService {
 	}
 
 	/**
+	 * Schedules a set of events to be triggered with an initial delay from this
+	 * method call and a regular interval between events. Events will continue
+	 * until explicitly {@link #cancel(String) cancelled}.
 	 * 
 	 * @param id
 	 *            ID of the event to trigger
@@ -173,6 +163,10 @@ public class Scheduler extends Node implements AutoStartService {
 	}
 
 	/**
+	 * Schedules a fixed number of events to be triggered with an initial delay
+	 * from this method call and a regular interval between events. Events will
+	 * continue until the specified number of events have been triggered or
+	 * explicitly {@link #cancel(String) cancelled}.
 	 * 
 	 * @param id
 	 *            ID of the event to trigger
@@ -199,6 +193,25 @@ public class Scheduler extends Node implements AutoStartService {
 	}
 
 	/**
+	 * Schedules events to be triggered following a cron expression.
+	 * <p>
+	 * The {@code cronExpression} String shall have the following format: <br>
+	 * {@code 
+	 * "<seconds> <minutes> <hours> <day-of-month> <month> <day-of-week> <year>"
+	 * }
+	 * <p>
+	 * The fields are separated by spaces, the {@code <year>} field is optional.
+	 * <p>
+	 * Examples:<br>
+	 * 
+	 * Every 5 minutes: {@code "0 0/5 * * * ?"}<br>
+	 * Every 5 minutes, at 10 seconds after the minute (e.g. 10:00:10 am,
+	 * 10:05:10 am, etc.): {@code "10 0/5 * * * ?"}<br>
+	 * At 10:30, 11:30, 12:30, and 13:30, on every Wednesday and Friday:
+	 * {@code "0 30 10-13 ? * WED,FRI"}<br>
+	 * Every half hour between the hours of 8 am and 10 am on the 5th and 20th
+	 * of every month: {@code "0 0/30 8-9 5,20 * ?"}<br>
+	 * 
 	 * @param cronExpression
 	 *            cron expression
 	 * @param id
@@ -207,12 +220,30 @@ public class Scheduler extends Node implements AutoStartService {
 	 *            value of the event to trigger
 	 * @throws SchedulerException
 	 *             if an error occurs
+	 * @see <a href="https://en.wikipedia.org/wiki/Cron">https://en.wikipedia.
+	 *      org/wiki/Cron</a>
 	 */
 	public void addCronRule(String cronExpression, String id, String value)
 			throws SchedulerException {
 		Trigger trigger = newEventTrigger(id, value).withSchedule(cronSchedule(cronExpression))
 				.build();
 		scheduleEvent(trigger);
+	}
+
+	/**
+	 * Cancel the previously scheduled events with the specified ID.
+	 * 
+	 * @param id
+	 *            ID of the event(s) to cancel
+	 */
+	public void cancel(String id) {
+		try {
+			org.quartz.Scheduler sched = getScheduler();
+			Set<TriggerKey> keys = sched.getTriggerKeys(GroupMatcher.groupEquals(id));
+			sched.unscheduleJobs(new ArrayList<TriggerKey>(keys));
+		} catch (SchedulerException e) {
+			logger.error("Error canceling event jobs: " + id, e);
+		}
 	}
 
 }
