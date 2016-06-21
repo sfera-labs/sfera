@@ -1,6 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
 	<groupId>cc.sferalabs.sfera</groupId>
 	<artifactId>sfera</artifactId>
 	<version>0.1.0</version>
@@ -9,6 +10,13 @@
 	<description>The Sfera Framework for Home/Building Automation and IoT Integration</description>
 	<url>http://www.sferalabs.cc/sfera</url>
 
+	<organization>
+		<name>Sfera Labs S.r.l.</name>
+		<url>http://www.sferalabs.cc</url>
+	</organization>
+
+	<inceptionYear>2015</inceptionYear>
+
 	<licenses>
 		<license>
 			<name>The GNU Lesser General Public License, Version 3</name>
@@ -16,11 +24,6 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
-
-	<organization>
-		<name>Sfera Labs</name>
-		<url>http://www.sferalabs.cc</url>
-	</organization>
 
 	<properties>
 		<latestDeployedVersion>0.1.0</latestDeployedVersion>
@@ -187,6 +190,24 @@
 							<mainClass>cc.sferalabs.sfera.core.Sfera</mainClass>
 						</manifest>
 					</archive>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>license-maven-plugin</artifactId>
+				<version>1.9</version>
+				<configuration>
+					<licenseName>lgpl_v3</licenseName>
+					<addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
+					<emptyLineAfterHeader>true</emptyLineAfterHeader>
+					 <sectionDelimiter>---</sectionDelimiter>
+					 <processStartTag>+======================================================================+</processStartTag>
+					 <processEndTag>-======================================================================-</processEndTag>
+					<roots>
+						<root>src/main/java</root>
+						<root>src/test/java</root>
+					</roots>
 				</configuration>
 			</plugin>
 		</plugins>
