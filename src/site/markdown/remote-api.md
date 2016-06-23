@@ -157,9 +157,9 @@ After subscribing, the server will send asynchronous messages every time there a
 
 ### Events
 To trigger general events to be handled by your control logic, perform an event request.
-This will result in an event being posted on the system bus with ID `http.<event_id>` and a `String` value corresponding to the specified one.
+This will result in an event being posted on the system bus with ID `web.<event_id>` and a `String` value corresponding to the specified one.
 
-The generated event will be an instance of the `RemoteApiEvent` class holding a reference to the request that generated the event.
+The generated event will be an instance of the <a href="apidocs/cc/sferalabs/sfera/web/api/WebApiEvent.html">WebApiEvent</a> class holding a reference to the request that generated the event.
 
 ##### HTTP
 
@@ -206,7 +206,7 @@ _WebSocket Request:_
 
 _Script:_
 
-    http.foo == "200" : {
+    web.foo == "200" : {
         if (_e.user.isInRole("admin")) {
             // do something...
         }
