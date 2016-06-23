@@ -1,6 +1,6 @@
 # Quick start
 
-If you can't wait to try Sfera, here is how to get a ready-to-use installation that includes the [Web App](../apps/cc.sferalabs.sfera.apps.webapp/), some drivers and some example control logic:
+If you can't wait to try Sfera, here is how to get a ready-to-use installation that includes the [Web App](../apps/cc.sferalabs.sfera.apps.webapp/latest), some drivers and some example control logic:
 
     ~ $ bash <(curl -s http://sfera.sferalabs.cc/setup/install.sh)
     ~ $ cd sfera

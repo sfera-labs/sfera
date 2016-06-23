@@ -61,25 +61,64 @@ public class AccessConsoleCommandHandler implements ConsoleCommandHandler {
 
 		switch (args[0]) {
 		case "add":
-			if (args.length > 3) {
-				String password = args[2];
-				String[] roles = Arrays.copyOfRange(args, 3, args.length);
-				try {
-					Access.addUser(username, password, roles);
-					return "Added";
-				} catch (IOException e) {
-					return "Error: " + e;
-				} catch (UsernameAlreadyUsedException e) {
-					return "Username already used";
-				}
-			} else {
+			if (args.length < 3) {
 				return "Parameters missing";
 			}
+
+			try {
+				String password = args[2];
+				String[] roles = Arrays.copyOfRange(args, 3, args.length);
+				Access.addUser(username, password, roles);
+				return "Added '" + username + "' password '" + password + "' roles "
+						+ Arrays.asList(roles);
+			} catch (IOException e) {
+				return "Error: " + e;
+			} catch (UsernameAlreadyUsedException e) {
+				return "Username already used";
+			}
+
+		case "get":
+			User u = Access.getUser(username);
+			if (u == null) {
+				return "User not found";
+			}
+			return "Added '" + u.getUsername() + "' roles " + Arrays.asList(u.getRoles());
 
 		case "remove":
 			try {
 				Access.removeUser(username);
 				return "Removed";
+			} catch (IOException e) {
+				return "Error: " + e;
+			} catch (UserNotFoundException e) {
+				return "User not found";
+			}
+
+		case "update":
+			if (args.length < 3) {
+				return "Parameters missing";
+			}
+			String password = null;
+			String[] roles = null;
+			switch (args[2]) {
+			case "password":
+				if (args.length < 4) {
+					return "Parameters missing";
+				}
+				password = args[3];
+				break;
+
+			case "roles":
+				roles = Arrays.copyOfRange(args, 3, args.length);
+				break;
+
+			default:
+				return "Unkown update parameter";
+			}
+
+			try {
+				Access.updateUser(username, password, roles);
+				return "Updated '" + username + "'";
 			} catch (IOException e) {
 				return "Error: " + e;
 			} catch (UserNotFoundException e) {

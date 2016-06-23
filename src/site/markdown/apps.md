@@ -4,7 +4,7 @@ Apps are Java applications distributed as .jar files. To install an app, just dr
 
 They extend Sfera's core functionalities in many possible ways, for instance:
 
-* providing vertical solutions (e.g. an access control application)
+* providing vertical solutions (e.g. an access control application, a product-specific toolbox, ...)
 * providing a user interface to Sfera (e.g. the Web app)
 * extending other apps
 * implementing a custom control logic for specific drivers

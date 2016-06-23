@@ -44,7 +44,7 @@ import cc.sferalabs.sfera.web.api.http.HttpResponse;
  *
  */
 @SuppressWarnings("serial")
-public class ConnectServlet extends AuthorizedUserServlet {
+public class ConnectServlet extends AuthenticatedUserServlet {
 
 	public static final String PATH = ApiServlet.PATH + "connect";
 

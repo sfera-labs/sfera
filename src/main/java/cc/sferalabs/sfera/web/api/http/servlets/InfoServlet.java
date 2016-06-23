@@ -43,7 +43,7 @@ import cc.sferalabs.sfera.web.api.http.HttpResponse;
  *
  */
 @SuppressWarnings("serial")
-public class InfoServlet extends AuthorizedUserServlet {
+public class InfoServlet extends AuthenticatedUserServlet {
 
 	public static final String PATH = ApiServlet.PATH + "info";
 

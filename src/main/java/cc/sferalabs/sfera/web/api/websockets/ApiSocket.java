@@ -119,7 +119,7 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 	public void onWebSocketConnect(Session session) {
 		super.onWebSocketConnect(session);
 		try {
-			if (isAuthorized("admin", "user")) {
+			if (isAuthorized(false)) {
 				OutgoingWsMessage resp = new OutgoingWsMessage("connection", this);
 				resp.put("connectionId", connectionId);
 				resp.put("pingInterval", pingInterval);
@@ -139,22 +139,17 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 
 	@Subscribe
 	public void checkUser(AccessChangeEvent e) {
-		if (!isAuthorized("admin", "user")) {
+		if (!isAuthorized(false)) {
 			closeSocket(StatusCode.POLICY_VIOLATION, "Unauthorized");
 		}
 	}
 
 	/**
+	 * 
+	 * @param needAdmin
 	 * @return
 	 */
-	private boolean isAuthorized(String... roles) {
-		try {
-			// Try to get an attribute from session to check if it is still
-			// valid
-			session.getAttribute("");
-		} catch (IllegalStateException e) {
-			return false;
-		}
+	private boolean isAuthorized(boolean needAdmin) {
 		if (user == null) {
 			return false;
 		}
@@ -162,14 +157,17 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 		if (u == null) {
 			return false;
 		}
-		
-		for (String role : roles) {
-			if (u.isInRole(role)) {
-				return true;
-			}
+		try {
+			// Try to get an attribute from session to check if it is still
+			// valid
+			session.getAttribute("");
+		} catch (IllegalStateException e) {
+			return false;
 		}
-
-		return false;
+		if (needAdmin && !u.isInRole("admin")) {
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -188,7 +186,7 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 		super.onWebSocketText(message);
 		logger.debug("Received message: '{}' - Host: {} User: {}", message, hostname, user);
 
-		if (!isAuthorized("admin", "user")) {
+		if (!isAuthorized(false)) {
 			closeSocket(StatusCode.POLICY_VIOLATION, "Unauthorized");
 			return;
 		}
@@ -290,7 +288,7 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 				break;
 
 			case "console":
-				if (!isAuthorized("admin")) {
+				if (!isAuthorized(true)) {
 					closeSocket(StatusCode.POLICY_VIOLATION, "Unauthorized");
 					return;
 				}

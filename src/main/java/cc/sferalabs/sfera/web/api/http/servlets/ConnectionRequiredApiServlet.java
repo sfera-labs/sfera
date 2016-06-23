@@ -36,7 +36,7 @@ import cc.sferalabs.sfera.web.api.http.HttpResponse;
 import cc.sferalabs.sfera.web.api.http.MissingRequiredParamException;
 
 /**
- * Abstract {@link AuthorizedUserServlet} class extension to be extended by
+ * Abstract {@link AuthenticatedUserServlet} class extension to be extended by
  * servlets handling requests that need a previously instantiated connection.
  * 
  * @author Giampiero Baggiani
@@ -45,7 +45,7 @@ import cc.sferalabs.sfera.web.api.http.MissingRequiredParamException;
  *
  */
 @SuppressWarnings("serial")
-public abstract class ConnectionRequiredApiServlet extends AuthorizedUserServlet {
+public abstract class ConnectionRequiredApiServlet extends AuthenticatedUserServlet {
 
 	@Override
 	protected void processAuthorizedRequest(HttpServletRequest req, HttpResponse resp)

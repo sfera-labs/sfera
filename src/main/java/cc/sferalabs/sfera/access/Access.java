@@ -95,10 +95,18 @@ public class Access extends Node {
 				if (line.length() > 0) {
 					try {
 						String[] splitted = line.split(":");
-						User u = new User(splitted[0], splitted[1], splitted[2],
-								splitted[3].split(","));
+						String username = splitted[0];
+						String hashedPassword = splitted[1];
+						String salt = splitted[2];
+						String[] roles;
+						if (splitted.length > 3) {
+							roles = splitted[3].split(",");
+						} else {
+							roles = new String[0];
+						}
+						User u = new User(username, hashedPassword, salt, roles);
 						users.put(u.getUsername(), u);
-						logger.debug("User '{}' created", u.getUsername());
+						logger.debug("User '{}' loaded. Roles: {}", u.getUsername(), u.getRoles());
 					} catch (Exception e) {
 						logger.error(
 								"Error reading file '" + USERS_FILE_PATH + "' on line " + lineNum,
@@ -141,7 +149,7 @@ public class Access extends Node {
 		writeUsers();
 
 		triggerChangeEvent();
-		logger.info("User '{}' added {}", username, roles);
+		logger.info("User '{}' added. Roles: {}", username, roles);
 	}
 
 	/**
@@ -190,7 +198,7 @@ public class Access extends Node {
 		writeUsers();
 
 		triggerChangeEvent();
-		logger.info("User '{}' updated {}", username, roles);
+		logger.info("User '{}' updated. Roles: {}", username, roles);
 	}
 
 	/**

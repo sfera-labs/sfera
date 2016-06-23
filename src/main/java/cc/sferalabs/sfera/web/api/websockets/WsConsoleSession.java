@@ -20,9 +20,6 @@
  * -======================================================================-
  */
 
-/**
- * 
- */
 package cc.sferalabs.sfera.web.api.websockets;
 
 import java.util.concurrent.ArrayBlockingQueue;

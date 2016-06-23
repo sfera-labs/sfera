@@ -29,7 +29,8 @@ import java.util.Map;
  * <p>
  * Usage:
  * <p>
- * <b>&#64;sfera.event_val_simple</b> &lt;event_simple_value&gt; &lt;description&gt;
+ * <b>&#64;sfera.event_val_simple</b> &lt;event_simple_value&gt;
+ * &lt;description&gt;
  * 
  * @author Giampiero Baggiani
  *

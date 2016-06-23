@@ -1,3 +1,6 @@
 Usage:
-	access add <username> <password> <role1> [<role2> ... <roleN>]
+	access add <username> <password> [<role1> <role2> ... <roleN>]
+	access get <username>
+	access update <username> password <password>
+	access update <username> roles [<role1> <role2> ... <roleN>]
 	access remove <username>

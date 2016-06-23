@@ -21,19 +21,16 @@ The system configuration file is `config/sfera.yml`
 | `ws_response_timeout` | Integer | 5000 | Max waiting time in milliseconds for WebSocket responses after which the connection is closed by the server |
 | `console_telnet_port` | Integer |  | If set the [Telnet console](console.html) will be enabled on the specified port. The value must be an available number port on the server |
 
-## Remote access
-To access the system via remote API it is necessary to get authenticated as a user. Each user is identified by a **username** and has a **password** and one or more **roles**.
+## Users and access control
+Sfera defines access rules based on user authentication and roles-based authorization. Each user is identified by a **username**, has a **password** and optional **roles**.
 
-There are currently the following roles available:
+Sfera requires the user to have the role "admin" for some services, such as console access and some restricted remote API.
 
-* `admin`: have full access to the system
-* `user`: have access to a subset of remote API (see [Remote API](remote-api.html) for details)
-
-Installed apps can introduce custom roles for authorization purpose.
+Installed apps can introduce custom roles for authorization purpose; for instance, the [Web App](../apps/cc.sferalabs.sfera.apps.webapp/latest) adds roles for restricting access to interfaces.
 
 To add a user use the [console command](console.html) `access add`:
 
-    access add <username> <password> <role1> [<role2> ... <roleN>]
+    access add <username> <password> [<role1> <role2> ... <roleN>]
 
 for instance:
 
@@ -42,6 +39,10 @@ for instance:
 To remove an existing user use the [console command](console.html) `access remove`:
 
     access remove <username>
+    
+For other commands:
+
+    help access
 
 ## Drivers
 

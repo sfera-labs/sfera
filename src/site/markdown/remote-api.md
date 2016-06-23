@@ -3,7 +3,7 @@
 Sfera exposes a remote HTTP and WebSocket API to monitor and control the system state and its nodes.
 The API is available at the "/api" path of the Web server on the HTTP/HTTPS ports defined in the [system configuration](configuration.html#System).
 
-Before using the remote API make sure to [configure the remote access](configuration.html#Remote_access).
+Before using the remote API make sure to [configure user access](configuration.html).
 
 The communication flow follows these steps:
 
