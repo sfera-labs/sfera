@@ -29,12 +29,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -161,7 +163,8 @@ public class ListFilesServlet extends AuthorizedAdminApiServlet {
 			String name = path.getFileName().toString();
 			String lastModified;
 			try {
-				lastModified = Files.getLastModifiedTime(path).toString();
+				lastModified = FileTime.from(Files.getLastModifiedTime(path).to(TimeUnit.SECONDS),
+						TimeUnit.SECONDS).toString();
 			} catch (Exception e) {
 				lastModified = null;
 			}
