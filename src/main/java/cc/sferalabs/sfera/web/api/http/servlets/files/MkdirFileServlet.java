@@ -64,10 +64,13 @@ public class MkdirFileServlet extends AuthorizedAdminApiServlet {
 						new ErrorMessage(0, "File outside root dir"));
 				return;
 			}
-			if (Files.isHidden(target)) {
-				resp.sendErrors(HttpServletResponse.SC_FORBIDDEN,
-						new ErrorMessage(0, "Cannot write hidden files"));
-				return;
+			try {
+				if (Files.isHidden(target)) {
+					resp.sendErrors(HttpServletResponse.SC_FORBIDDEN,
+							new ErrorMessage(0, "Cannot write hidden files"));
+					return;
+				}
+			} catch (Exception e) {
 			}
 			try {
 				Files.createDirectory(target);

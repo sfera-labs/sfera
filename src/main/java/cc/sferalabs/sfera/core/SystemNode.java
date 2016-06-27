@@ -175,55 +175,59 @@ public class SystemNode extends Node {
 
 			@Override
 			protected void execute() {
-				logger.warn("System stopped");
-
-				logger.info("Disabling apps...");
-				Applications.disable();
-
-				logger.info("Quitting drivers...");
-				Drivers.quit();
-
 				try {
-					Drivers.waitTermination(10000);
-				} catch (InterruptedException e) {
-				}
-				logger.info("Drivers quitted");
+					logger.warn("System stopped");
 
-				logger.info("Terminating tasks...");
-				TasksManager.shutdownTasksNow();
-				try {
-					if (TasksManager.awaitTasksTermination(15, TimeUnit.SECONDS)) {
-						logger.debug("Tasks terminated");
-					} else {
-						logger.debug(
-								"Some tasks are taking too long to terminate. We gave them a chance...");
-					}
-				} catch (InterruptedException e) {
-				}
+					logger.info("Disabling apps...");
+					Applications.disable();
 
-				for (Service service : services) {
+					logger.info("Quitting drivers...");
+					Drivers.quit();
+
 					try {
-						String name = service.getClass().getSimpleName();
-						logger.debug("Quitting service {}...", name);
-						service.quit();
-						logger.debug("Service {} quitted", name);
-					} catch (Exception e) {
-						logger.error("Error quitting service '" + service.getClass() + "'", e);
+						Drivers.waitTermination(10000);
+					} catch (InterruptedException e) {
 					}
-				}
+					logger.info("Drivers quitted");
 
-				// just in case something interrupted this thread
-				// Thread.interrupted() clears the interrupted status
-				Thread.interrupted();
-				logger.debug("Waiting 5 seconds for services to quit...");
-				try {
-					Thread.sleep(5000);
-				} catch (InterruptedException e) {
-				}
+					logger.info("Terminating tasks...");
+					TasksManager.shutdownTasksNow();
+					try {
+						if (TasksManager.awaitTasksTermination(15, TimeUnit.SECONDS)) {
+							logger.debug("Tasks terminated");
+						} else {
+							logger.debug(
+									"Some tasks are taking too long to terminate. We gave them a chance...");
+						}
+					} catch (InterruptedException e) {
+					}
 
-				logger.info("Quitted");
-				System.exit(0);
-				logger.error("If you are reding this in the logs run as fast as you can!");
+					for (Service service : services) {
+						try {
+							String name = service.getClass().getSimpleName();
+							logger.debug("Quitting service {}...", name);
+							service.quit();
+							logger.debug("Service {} quitted", name);
+						} catch (Exception e) {
+							logger.error("Error quitting service '" + service.getClass() + "'", e);
+						}
+					}
+
+					// just in case something interrupted this thread
+					// Thread.interrupted() clears the interrupted status
+					Thread.interrupted();
+					logger.debug("Waiting 5 seconds for services to quit...");
+					try {
+						Thread.sleep(5000);
+					} catch (InterruptedException e) {
+					}
+
+					logger.info("Quitted");
+
+				} finally {
+					System.exit(0);
+					logger.error("If you are reding this in the logs run as fast as you can!");
+				}
 			}
 		});
 	}

@@ -60,6 +60,7 @@
 					</reportSet>
 				</reportSets>
 			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
@@ -201,9 +202,9 @@
 					<licenseName>lgpl_v3</licenseName>
 					<addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
 					<emptyLineAfterHeader>true</emptyLineAfterHeader>
-					 <sectionDelimiter>---</sectionDelimiter>
-					 <processStartTag>+======================================================================+</processStartTag>
-					 <processEndTag>-======================================================================-</processEndTag>
+					<sectionDelimiter>---</sectionDelimiter>
+					<processStartTag>+======================================================================+</processStartTag>
+					<processEndTag>-======================================================================-</processEndTag>
 					<roots>
 						<root>src/main/java</root>
 						<root>src/test/java</root>
