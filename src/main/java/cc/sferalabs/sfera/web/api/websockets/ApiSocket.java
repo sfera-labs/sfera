@@ -366,9 +366,11 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 	 * @throws IOException
 	 *             if unable to send the text message
 	 */
-	synchronized void send(String text) throws IOException {
+	void send(String text) throws IOException {
 		RemoteEndpoint remote = getRemote();
 		if (remote != null) {
+			// FIXME this log creates a recursion when using
+			// the "log start -l debug" console command via WebSockets
 			logger.debug("Sending: '{}' - Host: {}", text, hostname);
 			remote.sendString(text);
 		}
