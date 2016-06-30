@@ -1,6 +1,6 @@
 # Workspace setup
 
-## Install Java 8
+## Install JDK 8
 * Download and install the latest version of the Java SE Development Kit 8 (JDK) from http://www.oracle.com/technetwork/java/javase/downloads/index.html
 
 ## Install Eclipse
@@ -12,25 +12,20 @@ If you prefer using Maven via command line, install it:
 
 * Download Maven 3 from https://maven.apache.org/download.cgi
 * Extract the archive (e.g. apache-maven-3.3.3-bin.tar.gz) in the directory you want to install it (e.g. /usr/local/apache-maven)
-* Set the JAVA_HOME, M2_HOME, M2 and PATH environment variables
-    * For instance:
-    ```
-    JAVA_HOME=$(/usr/libexec/java_home -v 1.8)
-    M2_HOME=/usr/local/apache-maven/apache-maven-3.3.3
-    M2=$M2_HOME/bin
-    PATH=$M2:$PATH
-    ```
-    * On OS X:
+* Set the JAVA_HOME, M2_HOME, M2 and PATH environment variables, for instance:    
+  `JAVA_HOME=$(/usr/libexec/java_home -v 1.8)`    
+  `M2_HOME=/usr/local/apache-maven/apache-maven-3.3.3`    
+  `M2=$M2_HOME/bin`    
+  `PATH=$M2:$PATH`    
+    * On Mac:
         * open Terminal
         * `cd ~`
         * `nano .bash_profile`
-        * paste in:
-        ```
-        export M2_HOME=/usr/local/apache-maven/apache-maven-3.3.3
-        export M2=$M2_HOME/bin
-        export PATH=$M2:$PATH
-        export JAVA_HOME=$(/usr/libexec/java_home -v 1.8)
-        ```
+        * paste in:    
+          `export M2_HOME=/usr/local/apache-maven/apache-maven-3.3.3`    
+          `export M2=$M2_HOME/bin`    
+          `export PATH=$M2:$PATH`    
+          `export JAVA_HOME=$(/usr/libexec/java_home -v 1.8)`    
         * exit and save: <kbd>Ctrl</kbd>+<kbd>X</kbd> then <kbd>Y</kbd>
         * quit and reopen Terminal
 
@@ -57,6 +52,30 @@ Follow these steps to create the base project structure using our maven archetyp
 18. Click on **Finish**
 
 Now you should see a new project in Eclipse named as your artifact id (e.g. "mydriver").   
+
+If at this point you get the error "Missing artifact com.sun:tools:jar:1.4.2" in your project, try this:
+
+* Open Eclipse preferences
+    * On Mac: **Eclipse > Preferences...**
+    * On Windows: **Window > Preferences**
+* From the side panel select **Java > Installed JREs** and make sure the selected JRE points at the installed JDK 8
+* Then go to the sub-menu **Java > Installed JREs > Execution Environments** and mark this JDK as compatible with JavaSE-1.8
+* Close the preferences clicking on **OK**
+* Right-click on your project and select **Maven > Update Project...**
+
+If the problem is still there, you need to update Eclipse launch configuration:
+
+* Close Eclipse
+* Open your Eclipse installation directory
+* Locate and open the file `eclipse.ini`
+* Add the `-vm` option **before the `-vmargs` option** specifying the path to your JDK, for instance:    
+  `...`    
+  `-vm`    
+  `E:\Program Files\Java\jdk1.8.0_92\bin`    
+  `-vmargs`    
+  `...`    
+* Open Eclipse
+* Right-click on your project and select **Maven > Update Project...**
 
 Test that everything is setup correctly by launching Sfera: go to menu **Run > Run History > Sfera-\<plugin name\>**
 
