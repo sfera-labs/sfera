@@ -190,6 +190,19 @@ public class IPCommPort extends CommPort {
 	}
 
 	@Override
+	public void writeBytes(int[] bytes) throws CommPortException {
+		try {
+			OutputStream out = socket.getOutputStream();
+			for (int b : bytes) {
+				out.write(b);
+			}
+			out.flush();
+		} catch (IOException e) {
+			throw new CommPortException(e.getLocalizedMessage(), e);
+		}
+	}
+
+	@Override
 	public void writeString(String string, Charset charset) throws CommPortException {
 		writeBytes(string.getBytes(charset));
 	}

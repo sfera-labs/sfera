@@ -187,6 +187,17 @@ public abstract class CommPort {
 	public abstract void writeBytes(byte[] bytes) throws CommPortException;
 
 	/**
+	 * Writes all the bytes in the specified array to this port. For each value
+	 * in the array the byte sent corresponds to its eight low-order bits.
+	 * 
+	 * @param bytes
+	 *            the data to write
+	 * @throws CommPortException
+	 *             if an error occurs
+	 */
+	public abstract void writeBytes(int[] bytes) throws CommPortException;
+
+	/**
 	 * Writes the bytes resulting from encoding the specified {@code string}
 	 * using the specified {@link Charset} to this port.
 	 * 
