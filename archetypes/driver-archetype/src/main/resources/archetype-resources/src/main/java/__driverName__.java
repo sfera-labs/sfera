@@ -7,7 +7,6 @@ public class ${driverName} extends Driver {
 
 	public ${driverName}(String id) {
 		super(id);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
