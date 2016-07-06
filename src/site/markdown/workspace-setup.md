@@ -53,7 +53,24 @@ Follow these steps to create the base project structure using our maven archetyp
 
 Now you should see a new project in Eclipse named as your artifact id (e.g. "mydriver").   
 
-If at this point you get the error "Missing artifact com.sun:tools:jar:1.4.2" in your project, try this:
+Open the `pom.xml` file in the root of the project and make sure you are using the latest release of Sfera:
+
+    ...
+    <properties>
+        ...
+        <sfera-version>1.0.0</sfera-version>
+        ...
+    </properties>
+    ...
+
+Now right-click on your project and select **Maven > Update Project...** and wait for the update to finish.
+    
+If you get no errors, test that everything is setup correctly by launching Sfera: go to menu **Run > Run History > Sfera-\<plugin name\>**
+
+You should see some logs in your Console window.     
+To stop Sfera type `sys quit` in the console and hit <kbd>Enter</kbd>.
+
+If you get the error "Missing artifact com.sun:tools:jar:1.4.2" in your project, try this:
 
 * Open Eclipse preferences
     * On Mac: **Eclipse > Preferences...**
@@ -63,7 +80,7 @@ If at this point you get the error "Missing artifact com.sun:tools:jar:1.4.2" in
 * Close the preferences clicking on **OK**
 * Right-click on your project and select **Maven > Update Project...**
 
-If the problem is still there, you need to update Eclipse launch configuration:
+If the problem is still there, you need to update the Eclipse launch configuration:
 
 * Close Eclipse
 * Open your Eclipse installation directory
@@ -71,15 +88,8 @@ If the problem is still there, you need to update Eclipse launch configuration:
 * Add the `-vm` option **before the `-vmargs` option** specifying the path to your JDK, for instance:    
   `...`    
   `-vm`    
-  `E:\Program Files\Java\jdk1.8.0_92\bin`    
+  `C:\Program Files\Java\jdk1.8.0_92\bin`    
   `-vmargs`    
   `...`    
 * Open Eclipse
 * Right-click on your project and select **Maven > Update Project...**
-
-Test that everything is setup correctly by launching Sfera: go to menu **Run > Run History > Sfera-\<plugin name\>**
-
-You should see some logs in your Console window.     
-To stop Sfera type `sys quit` in the console and hit <kbd>Enter</kbd>.
-
-        
