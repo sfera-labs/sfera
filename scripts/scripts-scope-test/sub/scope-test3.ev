@@ -1,4 +1,0 @@
-// scheduler.event == "3" : {
-// 	log.info("31 " + localVar); // error
-// 	log.info("31 " + globVar); // error
-// }
