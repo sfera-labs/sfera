@@ -22,15 +22,15 @@
 
 package jssc;
 
-import static org.junit.Assert.*;
-import jssc.SerialPort;
-import jssc.SerialPortException;
-import jssc.SerialPortList;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class SerialPortTest {
 
+	@Ignore
 	@Test
 	public void testSerialPortWithSierraGsmModem() {
 		for (String portName : SerialPortList.getPortNames()) {
