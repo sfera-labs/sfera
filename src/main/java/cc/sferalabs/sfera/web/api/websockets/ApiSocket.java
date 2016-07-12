@@ -372,7 +372,7 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 			// FIXME this log creates a recursion when using
 			// the "log start -l debug" console command via WebSockets
 			logger.debug("Sending: '{}' - Host: {}", text, hostname);
-			remote.sendString(text);
+			remote.sendStringByFuture(text);
 		}
 	}
 
