@@ -75,7 +75,7 @@ public class LogConsoleCommandHandler implements ConsoleCommandHandler {
 				pattern = args.get("p");
 			}
 			if (pattern == null) {
-				pattern = "%d{yyyy-MM-dd HH:mm:ss.SSS} | %-5level | %logger{1.} - %msg%n";
+				pattern = "%d{yyyy-MM-dd HH:mm:ss.SSS} | %-5level | %logger{1.} - %msg%n%throwable";
 			}
 
 			String sId = getId(session);
