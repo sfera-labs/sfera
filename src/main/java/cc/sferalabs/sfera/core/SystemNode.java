@@ -115,10 +115,15 @@ public class SystemNode extends Node {
 		String osVersion = System.getProperty("os.version");
 		String javaVersion = System.getProperty("java.version");
 		String javaVmName = System.getProperty("java.vm.name");
+		long maxMem = Runtime.getRuntime().maxMemory();
 
 		logger.info("Sfera version: {}", VERSION);
 		logger.info("OS: {} {} {}", osName, osArch, osVersion);
 		logger.info("Java: {} {}", javaVersion, javaVmName);
+		if (maxMem != Long.MAX_VALUE) {
+			maxMem = maxMem / 1024 / 1024;
+			logger.info("JVM Max memory: {} MB", maxMem);
+		}
 	}
 
 	/**
