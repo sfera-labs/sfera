@@ -38,15 +38,11 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.eventbus.Subscribe;
-
 import cc.sferalabs.sfera.core.Configuration;
 import cc.sferalabs.sfera.core.SystemNode;
-import cc.sferalabs.sfera.core.events.SystemStateEvent;
 import cc.sferalabs.sfera.core.services.AutoStartService;
 import cc.sferalabs.sfera.core.services.Task;
 import cc.sferalabs.sfera.core.services.TasksManager;
-import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Node;
 import cc.sferalabs.sfera.util.files.FilesUtil;
 
@@ -121,17 +117,7 @@ public class Database extends Node implements AutoStartService, EventListener {
 						.prepareStatement("SELECT val FROM " + TABLE_NAME + " WHERE key = ?");
 
 				logger.info("Database initialized");
-
-				Bus.register(this);
 			}
-		}
-	}
-
-	@Subscribe
-	public void startCheckPointTask(SystemStateEvent event) {
-		if (event.getValue().equals("ready")) {
-			Bus.unregister(this);
-			TasksManager.execute(DatabaseCheckPointTask.INSTANCE);
 		}
 	}
 
@@ -152,6 +138,12 @@ public class Database extends Node implements AutoStartService, EventListener {
 			delete(key);
 		} else {
 			update(key, value);
+		}
+		synchronized (DatabaseCheckPointTask.INSTANCE) {
+			if (!DatabaseCheckPointTask.INSTANCE.started) {
+				TasksManager.execute(DatabaseCheckPointTask.INSTANCE);
+				DatabaseCheckPointTask.INSTANCE.started = true;
+			}
 		}
 	}
 
@@ -237,6 +229,7 @@ public class Database extends Node implements AutoStartService, EventListener {
 
 		private static final DatabaseCheckPointTask INSTANCE = new DatabaseCheckPointTask();
 		private long lastHouseKeeping;
+		private boolean started = false;
 
 		/**
 		 * 
