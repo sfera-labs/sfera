@@ -105,8 +105,8 @@ public class ScriptsLoader implements EventListener {
 		logger.info("Loading scripts...");
 		try {
 			loadSferaLib();
-			loadFiles(LIBRARY_FILES_EXTENSION, (Path libFile) -> addToLibraries(libFile));
-			loadFiles(SCRIPT_FILES_EXTENSION, (Path scriptFile) -> parseScriptFile(scriptFile));
+			loadFiles(LIBRARY_FILES_EXTENSION, libFile -> addToLibraries(libFile));
+			loadFiles(SCRIPT_FILES_EXTENSION, scriptFile -> parseScriptFile(scriptFile));
 		} catch (Exception e) {
 			logger.error("Error loading script files", e);
 		}
