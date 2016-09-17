@@ -259,7 +259,7 @@ To this end, you can add an `init` block at the beginning of the script file:
         var x = 10;
     
         function add(p1, p2) {
-	    return p1 + p2;
+            return p1 + p2;
         }
     }
     
@@ -285,7 +285,7 @@ _scripts/myLib.js_
 
 _scripts/myRules.ev_
 
-    import myLib.js
+    import myLib.js;
     
     some.event : {
         log.info("3 + 5 = " + add(3, 5));

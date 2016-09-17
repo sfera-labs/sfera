@@ -5,8 +5,10 @@ If you can't wait to try Sfera, here is how to get a ready-to-use installation:
 * Download and unzip [this file](http://sfera.sferalabs.cc/docs/resources/sfera-quick-start.zip) 
 * Open your shell/terminal/cmd application, `cd` into the sfera directory and launch Sfera:
 
-    ~ $ cd sfera
-    ~/sfera $ sudo java -jar sfera.jar
+```
+~ $ cd sfera
+~/sfera $ sudo java -jar sfera.jar
+```
 
 If you're running into problems, ensure you have all the [requirements installed](installation.html).
 
