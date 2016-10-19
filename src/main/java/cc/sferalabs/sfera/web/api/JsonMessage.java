@@ -72,6 +72,9 @@ public class JsonMessage {
 	 *            value for the attribute to set
 	 */
 	public void put(String key, Object value) {
+		if (value == null) {
+			value = JSONObject.NULL;
+		}
 		obj.put(key, value);
 	}
 
