@@ -35,4 +35,77 @@ Type `sys quit` to interrupt Sfera.
 
 ### Auto-start
 
-TODO
+#### systemd
+
+[systemd](https://freedesktop.org/wiki/Software/systemd/) is an init system used in most Linux distributions to bootstrap the user space and manage all processes subsequently. On your Raspberry Pi, you might want to use this method.
+
+Create a start-up script in your sfera installation directory:
+
+    cd <sfera_installation_dir>
+    nano start-up.sh
+    
+and paste in the following content:
+
+    #!/bin/bash
+    STDOUT_LOG_DIR=logs/
+    STDOUT_LOG_FILE=out.log
+    
+    STDOUT_LOG_PATH=$STDOUT_LOG_DIR$STDOUT_LOG_FILE
+    
+    cd "$( dirname "$0" )"
+    mkdir -p $STDOUT_LOG_DIR
+    echo "=======================================" >> $STDOUT_LOG_PATH
+    date >> $STDOUT_LOG_PATH
+    echo "---------------------------------------" >> $STDOUT_LOG_PATH
+    cp sfera.jar .sfera.jar
+    java -jar .sfera.jar >> $STDOUT_LOG_PATH 2>&1
+    
+When this script is run it will:
+
+* create a log record in `logs/out.log` with the current date and time
+* make a copy of sfera's jar and run the new copy. This is useful in case a new version of the jar is uploaded while sfera is running (e.g. using the WebApp file manager); the current version will continue running until restarted, which is when the new jar will be run.
+* redirect any eventual output (standard output and standard error) to `logs/out.log`
+
+Make this script executable:
+
+    sudo chmod +x start-up.sh
+    
+Now create a new systemd service called `sfera`:
+
+    sudo nano /etc/systemd/system/sfera.service
+    
+and paste in this:
+
+    [Unit]
+    Description=Sfera
+    
+    [Service]
+    Type=simple
+    ExecStart=/home/pi/sfera/start-up.sh
+    Restart=always
+    
+    [Install]
+    WantedBy=multi-user.target
+    
+Make sure to replace `/home/pi/sfera/start-up.sh` with the path of your start-up script previously created.
+
+Enable the service:
+
+    sudo systemctl enable sfera.service
+    
+On reboot sfera will be automatically started and it will be restated any time the process quits.
+
+You can use:
+
+    sudo systemctl start sfera
+    sudo systemctl stop sfera
+    
+to respectively start and stop sfera manually, and:
+
+    sudo systemctl status sfera
+    
+to check the service state.
+
+In case you want to disable sfera's service:
+
+    sudo systemctl disable sfera
