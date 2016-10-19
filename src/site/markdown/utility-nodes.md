@@ -54,11 +54,11 @@ scheduler.hello : {
 	// ...
 }
 
-scheduler.hello = "world" : {
+scheduler.hello == "world" : {
 	// ...
 }
 
-scheduler.hello = "moon" : {
+scheduler.hello == "moon" : {
 	// ...
 }
 ```

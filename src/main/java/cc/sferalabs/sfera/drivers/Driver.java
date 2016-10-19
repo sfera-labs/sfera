@@ -23,6 +23,8 @@
 package cc.sferalabs.sfera.drivers;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -37,7 +39,10 @@ import org.slf4j.LoggerFactory;
 import cc.sferalabs.sfera.core.Configuration;
 import cc.sferalabs.sfera.core.services.Task;
 import cc.sferalabs.sfera.core.services.TasksManager;
+import cc.sferalabs.sfera.events.Bus;
+import cc.sferalabs.sfera.events.Event;
 import cc.sferalabs.sfera.events.Node;
+import cc.sferalabs.sfera.events.StringEvent;
 import cc.sferalabs.sfera.util.files.FilesWatcher;
 
 /**
@@ -54,6 +59,7 @@ public abstract class Driver extends Node {
 	private DriverTask driverExecutor = new DriverTask();
 	private volatile boolean quit = false;
 	private Future<?> future;
+	private Class<? extends Event>[] driverEventsInterfaces = getDriverEventsInterfaces();
 
 	protected final Logger log;
 
@@ -87,8 +93,10 @@ public abstract class Driver extends Node {
 					} catch (IOException e) {
 						log.error("Error watching config file", e);
 					}
+					postDriverStateEvent("init");
 					if (onInit(config)) {
 						log.info("Started");
+						postDriverStateEvent("running");
 						try {
 							while (!quit) {
 								try {
@@ -117,6 +125,7 @@ public abstract class Driver extends Node {
 
 				try {
 					log.info("Quitting...");
+					postDriverStateEvent("quit");
 					if (configWatcherId != null) {
 						FilesWatcher.unregister(configWatcherId);
 					}
@@ -167,6 +176,47 @@ public abstract class Driver extends Node {
 	protected Driver(String id) {
 		super(id);
 		this.log = LoggerFactory.getLogger(getClass().getName() + "." + id);
+	}
+
+	/**
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	private Class<? extends Event>[] getDriverEventsInterfaces() {
+		Class<? extends Event> driverEventsInterface;
+		try {
+			Class<? extends Driver> clazz = getClass();
+			String packageName = clazz.getPackage().getName() + ".events";
+			String className = clazz.getSimpleName() + "Event";
+			driverEventsInterface = (Class<? extends Event>) Class
+					.forName(packageName + "." + className);
+		} catch (Exception e) {
+			driverEventsInterface = null;
+		}
+
+		return driverEventsInterface == null ? new Class[] { DriverStateEvent.class }
+				: new Class[] { driverEventsInterface, DriverStateEvent.class };
+	}
+
+	/**
+	 * 
+	 * @param state
+	 */
+	private void postDriverStateEvent(String state) {
+		StringEvent wrappedEvent = new StringEvent(this, "driverState", state) {
+		};
+		Event ev = (Event) java.lang.reflect.Proxy.newProxyInstance(getClass().getClassLoader(),
+				driverEventsInterfaces, new InvocationHandler() {
+
+					@Override
+					public Object invoke(Object proxy, java.lang.reflect.Method method,
+							Object[] args) throws java.lang.Throwable {
+						Method wrappedMethod = wrappedEvent.getClass().getMethod(method.getName(),
+								method.getParameterTypes());
+						return wrappedMethod.invoke(wrappedEvent, args);
+					}
+				});
+		Bus.post(ev);
 	}
 
 	/**

@@ -247,14 +247,14 @@ public abstract class FilesUtil {
 	}
 
 	/**
-	 * Copies the specified file or directory to the specified target path.
+	 * Moves the specified file or directory to the specified target path.
 	 * 
 	 * @param source
-	 *            path of the file or directory to copy
+	 *            path of the file or directory to move
 	 * @param target
 	 *            path of the target file or directory
 	 * @param options
-	 *            options specifying how the copy should be done
+	 *            options specifying how the move should be done
 	 * @throws IOException
 	 *             if an I/O error occurs
 	 */
