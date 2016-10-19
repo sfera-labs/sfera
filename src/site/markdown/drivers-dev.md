@@ -119,24 +119,29 @@ To stop Sfera type `sys quit` in the console and hit <kbd>Enter</kbd>; you will 
 
 ## Events
 
-To generate events from your driver you should instantiate `Event` objects and post them to the system `Bus`.
+To generate events from your driver you should instantiate [Event](apidocs/cc/sferalabs/sfera/events/Event.html) objects and post them to the system [Bus](apidocs/cc/sferalabs/sfera/events/Bus.html).
 
-As you can see in the above project structure, it includes a `MyDriverEvent` interface that extends the `Event` interface.   
+As you can see in the above project structure, in the sub-package `.events` there is a `MyDriverEvent` interface that extends the `Event` interface.   
 This is a simple tag interface that should be implemented by all your event classes so that applications can easily register to all of your driver events.
 
 Create a different class for any type of event your driver is going to generate and let them extend the standard event classes provided:
 
-* `BooleanEvent`: for events that can be represented by a boolean value (`true` or `false`); for instance, the "on" state of a light.
-* `NumberEvent`: for events with numerical value, e.g. a temperature read by a thermostat.
-* `StringEvent`: for events whose value needs a textual representation, e.g. the name of the currently playing track of an audio system
+* [BooleanEvent](apidocs/cc/sferalabs/sfera/events/BooleanEvent.html): for events that can be represented by a boolean value (`true` or `false`); for instance, the "on" state of a light.
+* [NumberEvent](apidocs/cc/sferalabs/sfera/events/NumberEvent.html): for events with numerical value, e.g. a temperature read by a thermostat.
+* [StringEvent](apidocs/cc/sferalabs/sfera/events/StringEvent.html): for events whose value needs a textual representation, e.g. the name of the currently playing track of an audio system
 
-If none of the above classes fits your event, extend the `BaseEvent` which is the simplest implementation of the `Event` interface.
+If none of the above classes fits your event, extend the [BaseEvent](apidocs/cc/sferalabs/sfera/events/BaseEvent.html) class which is the simplest implementation of the `Event` interface.
 
 Events are uniquely identified by an ID, this means that you could virtually have a single event class and instantiate it with different IDs. It is anyhow recommended to have several classes (or even interfaces) to group your events into different categories so that applications can more easily register to a subset of your driver's events.
 
 Here are some examples of event classes for your driver:
 
 ```Java
+package com.example.sfera.drivers.mydriver.events;
+
+import cc.sferalabs.sfera.events.Node;
+import cc.sferalabs.sfera.events.NumberEvent;
+
 public class MyNumberEvent extends NumberEvent 
 		implements MyDriverEvent {
 
@@ -149,6 +154,11 @@ public class MyNumberEvent extends NumberEvent
 ```
 
 ```Java
+package com.example.sfera.drivers.mydriver.events;
+
+import cc.sferalabs.sfera.events.Node;
+import cc.sferalabs.sfera.events.BooleanEvent;
+
 public class MyLightEvent extends BooleanEvent 
 		implements MyDriverEvent {
 
@@ -178,7 +188,19 @@ If you want your event to be posted only if its value changed from the last time
 Bus.postIfChanged(new MyNumberEvent(this, 7.8));
 ```
 
-As you can see you should always pass a reference to your driver instance (`this`) as the source node of the events so that applications handling them can get this reference and possibly call methods to issue commands for your driver.
+As you can see, you shall always pass a reference to your driver instance (`this`) as the source node of the events so that applications handling them can get this reference and possibly call methods to issue commands for your driver.
+
+### State events
+
+Sfera will take care of generating some events for your driver that represent the current state in the life-cycle of the driver.
+
+These events will have ID `<driver_id>.driverState` and the following String values:
+
+* `init`: when the driver is being initialized, i.e. just before `onInit()` is called
+* `running`: when the driver has been successfully initialized and the `loop()` cycle is starting
+* `quit`: when the driver is about to get quitted, i.e. just before `onQuit()` is called
+
+These events objects will implement the [DriverStateEvent](apidocs/cc/sferalabs/sfera/drivers/DriverStateEvent.html) tag interface and, if the driver includes a general interface for the driver's events using the name convention `<driver_package>.events.<driver_class>Event` described above (e.g. the interface `com.example.sfera.drivers.mydriver.events.MyDriverEvent`), they will dynamically implement this interface too.
 
 ## Commands
 
