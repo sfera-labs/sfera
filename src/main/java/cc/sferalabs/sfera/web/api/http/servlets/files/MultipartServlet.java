@@ -26,7 +26,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.stream.Collectors;
 
 import javax.servlet.MultipartConfigElement;
@@ -37,6 +36,7 @@ import javax.servlet.http.Part;
 
 import org.eclipse.jetty.server.Request;
 
+import cc.sferalabs.sfera.util.files.FilesUtil;
 import cc.sferalabs.sfera.web.api.http.HttpResponse;
 import cc.sferalabs.sfera.web.api.http.servlets.AuthorizedAdminApiServlet;
 
@@ -53,15 +53,8 @@ public abstract class MultipartServlet extends AuthorizedAdminApiServlet {
 	private static final MultipartConfigElement MULTIPART_CONFIG;
 
 	static {
-		String tmp;
-		try {
-			tmp = Files.createTempDirectory(MultipartServlet.class.getName()).toString();
-		} catch (Exception e) {
-			tmp = System.getProperty("java.io.tmpdir");
-			if (tmp == null) {
-				tmp = "/tmp";
-			}
-		}
+		String tmp = FilesUtil.getTempDirectory().resolve(MultipartServlet.class.getName())
+				.toAbsolutePath().toString();
 		MULTIPART_CONFIG = new MultipartConfigElement(tmp, -1L, -1L, 1024 * 1024);
 	}
 

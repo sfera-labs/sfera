@@ -267,4 +267,14 @@ public abstract class FilesUtil {
 		}
 	}
 
+	/**
+	 * Returns the temporary directory's path
+	 * 
+	 * @return the temporary directory's path
+	 */
+	public static Path getTempDirectory() {
+		// TODO check system property and/or add config param
+		return Paths.get("data/tmp/");
+	}
+
 }
