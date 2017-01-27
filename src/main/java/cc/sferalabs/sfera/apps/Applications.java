@@ -82,11 +82,11 @@ public abstract class Applications {
 				for (Path file : stream) {
 					if (Files.isRegularFile(file) && !Files.isHidden(file)) {
 						String fileName = file.getFileName().toString();
-						String appClass = fileName;
-						if (appClass.endsWith(Configuration.FILE_EXTENSION)) {
-							appClass = appClass.substring(0,
-									appClass.length() - Configuration.FILE_EXTENSION.length());
+						if (!fileName.endsWith(Configuration.FILE_EXTENSION)) {
+							continue;
 						}
+						String appClass = fileName.substring(0,
+								fileName.length() - Configuration.FILE_EXTENSION.length());
 						if (!appClass.contains(".")) {
 							appClass = DEFAULT_APPS_PACKAGE + "." + appClass.toLowerCase() + "."
 									+ appClass;
