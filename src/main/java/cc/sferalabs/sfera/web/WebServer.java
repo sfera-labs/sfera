@@ -23,8 +23,8 @@
 package cc.sferalabs.sfera.web;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -97,6 +97,7 @@ public class WebServer implements AutoStartService {
 	private static final String[] EXCLUDED_PROTOCOLS = { "SSL", "SSLv2", "SSLv2Hello", "SSLv3" };
 	private static final String[] EXCLUDED_CIPHER_SUITES = { ".*NULL.*", ".*RC4.*", ".*MD5.*",
 			".*DES.*", ".*DSS.*" };
+	private static final String DEFAULT_KEY_STORE_PASSWORD = "sferapass";
 
 	private static Server server;
 	private static ServletContextHandler contexts;
@@ -134,39 +135,44 @@ public class WebServer implements AutoStartService {
 		}
 
 		if (https_port != null) {
-			String keyStorePassword = config.get("keystore_password", null);
-			if (keyStorePassword == null) {
-				throw new Exception("'keystore_password' not specified in configuration");
+			try {
+				String keyStorePassword = config.get("keystore_password", null);
+				if (keyStorePassword == null) {
+					keyStorePassword = DEFAULT_KEY_STORE_PASSWORD;
+				}
+				Path keystorePath = Paths.get(KEYSTORE_PATH);
+				if (!Files.exists(keystorePath)) {
+					generateKeyStoreFile();
+				}
+
+				SslContextFactory sslContextFactory = new SslContextFactory();
+				sslContextFactory.setKeyStorePath(KEYSTORE_PATH);
+				sslContextFactory.setKeyStorePassword(keyStorePassword);
+				String keyManagerPassword = config.get("keymanager_password", null);
+				if (keyManagerPassword != null) {
+					sslContextFactory.setKeyManagerPassword(keyManagerPassword);
+				}
+				sslContextFactory.addExcludeProtocols(EXCLUDED_PROTOCOLS);
+				sslContextFactory.setExcludeCipherSuites(EXCLUDED_CIPHER_SUITES);
+				sslContextFactory.setRenegotiationAllowed(false);
+				sslContextFactory.setUseCipherSuitesOrder(false);
+
+				HttpConfiguration https_config = new HttpConfiguration();
+				https_config.setSecurePort(https_port);
+				https_config.addCustomizer(new SecureRequestCustomizer());
+
+				ServerConnector https = new ServerConnector(server,
+						new SslConnectionFactory(sslContextFactory,
+								HttpVersion.HTTP_1_1.asString()),
+						new HttpConnectionFactory(https_config));
+				https.setName("https");
+				https.setPort(https_port);
+
+				server.addConnector(https);
+				logger.info("Starting HTTPS server on port {}", https_port);
+			} catch (Exception e) {
+				logger.error("Error enabling HTTPS", e);
 			}
-			Path keystorePath = Paths.get(KEYSTORE_PATH);
-			if (!Files.exists(keystorePath)) {
-				throw new NoSuchFileException(KEYSTORE_PATH);
-			}
-
-			SslContextFactory sslContextFactory = new SslContextFactory();
-			sslContextFactory.setKeyStorePath(KEYSTORE_PATH);
-			sslContextFactory.setKeyStorePassword(keyStorePassword);
-			String keyManagerPassword = config.get("keymanager_password", null);
-			if (keyManagerPassword != null) {
-				sslContextFactory.setKeyManagerPassword(keyManagerPassword);
-			}
-			sslContextFactory.addExcludeProtocols(EXCLUDED_PROTOCOLS);
-			sslContextFactory.setExcludeCipherSuites(EXCLUDED_CIPHER_SUITES);
-			sslContextFactory.setRenegotiationAllowed(false);
-			sslContextFactory.setUseCipherSuitesOrder(false);
-
-			HttpConfiguration https_config = new HttpConfiguration();
-			https_config.setSecurePort(https_port);
-			https_config.addCustomizer(new SecureRequestCustomizer());
-
-			ServerConnector https = new ServerConnector(server,
-					new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString()),
-					new HttpConnectionFactory(https_config));
-			https.setName("https");
-			https.setPort(https_port);
-
-			server.addConnector(https);
-			logger.info("Starting HTTPS server on port {}", https_port);
 		}
 
 		HashSessionManager hsm = new HashSessionManager();
@@ -189,6 +195,23 @@ public class WebServer implements AutoStartService {
 			server.start();
 		} catch (Exception e) {
 			throw new Exception("Error starting server: " + e.getLocalizedMessage(), e);
+		}
+	}
+
+	/**
+	 * 
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	private void generateKeyStoreFile() throws IOException, InterruptedException {
+		logger.debug("Generating self-signed certificate");
+		String[] cmd = { "keytool", "-genkeypair", "-dname", "cn=Sfera Server generated", "-alias",
+				"sferaservergen", "-keystore", KEYSTORE_PATH, "-keypass",
+				DEFAULT_KEY_STORE_PASSWORD, "-storepass", DEFAULT_KEY_STORE_PASSWORD, "-validity",
+				"73000", "-keyalg", "RSA", "-keysize", "2048" };
+		Process p = new ProcessBuilder(cmd).start();
+		if (p.waitFor() != 0) {
+			throw new IOException("keytool termination error");
 		}
 	}
 
