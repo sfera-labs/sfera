@@ -24,9 +24,15 @@ package cc.sferalabs.sfera.web;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchProviderException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,6 +55,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.servlet.ServletMapping;
+import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.slf4j.Logger;
@@ -95,8 +102,7 @@ public class WebServer implements AutoStartService {
 
 	private static final Logger logger = LoggerFactory.getLogger(WebServer.class);
 	private static final String[] EXCLUDED_PROTOCOLS = { "SSL", "SSLv2", "SSLv2Hello", "SSLv3" };
-	private static final String[] EXCLUDED_CIPHER_SUITES = { ".*NULL.*", ".*RC4.*", ".*MD5.*",
-			".*DES.*", ".*DSS.*" };
+	private static final String[] EXCLUDED_CIPHER_SUITES = { ".*NULL.*", ".*RC4.*", ".*MD5.*", ".*DES.*", ".*DSS.*" };
 	private static final String DEFAULT_KEY_STORE_PASSWORD = "sferapass";
 
 	private static Server server;
@@ -117,8 +123,7 @@ public class WebServer implements AutoStartService {
 			return;
 		}
 
-		int maxThreads = config.get("http_max_threads",
-				Runtime.getRuntime().availableProcessors() * 128);
+		int maxThreads = config.get("http_max_threads", Runtime.getRuntime().availableProcessors() * 128);
 		int minThreads = config.get("http_min_threads", 8);
 		int idleTimeout = config.get("http_threads_idle_timeout", 60000);
 
@@ -136,22 +141,19 @@ public class WebServer implements AutoStartService {
 
 		if (https_port != null) {
 			try {
-				String keyStorePassword = config.get("keystore_password", null);
-				if (keyStorePassword == null) {
-					keyStorePassword = DEFAULT_KEY_STORE_PASSWORD;
-				}
-				Path keystorePath = Paths.get(KEYSTORE_PATH);
-				if (!Files.exists(keystorePath)) {
-					generateKeyStoreFile();
-				}
-
 				SslContextFactory sslContextFactory = new SslContextFactory();
 				sslContextFactory.setKeyStorePath(KEYSTORE_PATH);
+				String keyStorePassword = config.get("keystore_password", DEFAULT_KEY_STORE_PASSWORD);
 				sslContextFactory.setKeyStorePassword(keyStorePassword);
 				String keyManagerPassword = config.get("keymanager_password", null);
 				if (keyManagerPassword != null) {
 					sslContextFactory.setKeyManagerPassword(keyManagerPassword);
 				}
+
+				if (!checkKeyStoreFile(sslContextFactory, keyStorePassword)) {
+					generateKeyStoreFile();
+				}
+
 				sslContextFactory.addExcludeProtocols(EXCLUDED_PROTOCOLS);
 				sslContextFactory.setExcludeCipherSuites(EXCLUDED_CIPHER_SUITES);
 				sslContextFactory.setRenegotiationAllowed(false);
@@ -162,8 +164,7 @@ public class WebServer implements AutoStartService {
 				https_config.addCustomizer(new SecureRequestCustomizer());
 
 				ServerConnector https = new ServerConnector(server,
-						new SslConnectionFactory(sslContextFactory,
-								HttpVersion.HTTP_1_1.asString()),
+						new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString()),
 						new HttpConnectionFactory(https_config));
 				https.setName("https");
 				https.setPort(https_port);
@@ -200,15 +201,58 @@ public class WebServer implements AutoStartService {
 
 	/**
 	 * 
+	 * @param sslContextFactory
+	 * @param keyStorePassword
+	 * @return
+	 * @throws KeyStoreException
+	 * @throws NoSuchProviderException
+	 */
+	private boolean checkKeyStoreFile(SslContextFactory sslContextFactory, String keyStorePassword) {
+		try {
+			Path keystorePath = Paths.get(KEYSTORE_PATH);
+			if (!Files.exists(keystorePath)) {
+				logger.warn("SSL key store file not found");
+				return false;
+			}
+
+			String storeProvider = sslContextFactory.getKeyStoreProvider();
+			String storeType = sslContextFactory.getKeyStoreType();
+			KeyStore keystore;
+			if (storeProvider != null) {
+				keystore = KeyStore.getInstance(storeType, storeProvider);
+			} else {
+				keystore = KeyStore.getInstance(storeType);
+			}
+			Resource store = sslContextFactory.getKeyStoreResource();
+			try (InputStream inStream = store.getInputStream()) {
+				keystore.load(inStream, keyStorePassword == null ? null : keyStorePassword.toCharArray());
+			} catch (CertificateException | IOException e) {
+				logger.warn("SSL key store file corrupted");
+				try {
+					Files.move(keystorePath,
+							keystorePath.resolveSibling(keystorePath.getFileName().toString() + "-corrupted"));
+				} catch (FileAlreadyExistsException e1) {
+					Files.delete(keystorePath);
+				}
+				return false;
+			}
+		} catch (Exception e) {
+			logger.error("Error checking key store file", e);
+		}
+
+		return true;
+	}
+
+	/**
+	 * 
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
 	private void generateKeyStoreFile() throws IOException, InterruptedException {
-		logger.debug("Generating self-signed certificate");
-		String[] cmd = { "keytool", "-genkeypair", "-dname", "cn=Sfera Server generated", "-alias",
-				"sferaservergen", "-keystore", KEYSTORE_PATH, "-keypass",
-				DEFAULT_KEY_STORE_PASSWORD, "-storepass", DEFAULT_KEY_STORE_PASSWORD, "-validity",
-				"73000", "-keyalg", "RSA", "-keysize", "2048" };
+		logger.info("Generating self-signed certificate");
+		String[] cmd = { "keytool", "-genkeypair", "-dname", "cn=Sfera Server generated", "-alias", "sferaservergen",
+				"-keystore", KEYSTORE_PATH, "-keypass", DEFAULT_KEY_STORE_PASSWORD, "-storepass",
+				DEFAULT_KEY_STORE_PASSWORD, "-validity", "73000", "-keyalg", "RSA", "-keysize", "2048" };
 		Process p = new ProcessBuilder(cmd).start();
 		if (p.waitFor() != 0) {
 			throw new IOException("keytool termination error");
@@ -275,8 +319,7 @@ public class WebServer implements AutoStartService {
 	 * @throws WebServerException
 	 *             if an error occurs
 	 */
-	public synchronized static void addServlet(ServletHolder servlet, String pathSpec)
-			throws WebServerException {
+	public synchronized static void addServlet(ServletHolder servlet, String pathSpec) throws WebServerException {
 		addServlet((Object) servlet, pathSpec);
 	}
 
@@ -412,8 +455,7 @@ public class WebServer implements AutoStartService {
 	 * @throws WebServerException
 	 *             if an error occurs
 	 */
-	public synchronized static void removeServlet(Class<? extends Servlet> servlet)
-			throws WebServerException {
+	public synchronized static void removeServlet(Class<? extends Servlet> servlet) throws WebServerException {
 		if (contexts != null) {
 			ServletHandler handler = contexts.getServletHandler();
 			if (handler != null) {
