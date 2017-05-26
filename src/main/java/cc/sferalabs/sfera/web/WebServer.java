@@ -263,6 +263,8 @@ public class WebServer implements AutoStartService {
 	 */
 	private void generateKeyStoreFile() throws IOException, InterruptedException {
 		logger.info("Generating self-signed certificate");
+		Path keystorePath = Paths.get(KEYSTORE_PATH);
+		Files.createDirectories(keystorePath.getParent());
 		String[] cmd = { "keytool", "-genkeypair", "-dname", "cn=Sfera Server generated", "-alias", "sferaservergen",
 				"-keystore", KEYSTORE_PATH, "-keypass", DEFAULT_KEY_STORE_PASSWORD, "-storepass",
 				DEFAULT_KEY_STORE_PASSWORD, "-validity", "73000", "-keyalg", "RSA", "-keysize", "2048" };
