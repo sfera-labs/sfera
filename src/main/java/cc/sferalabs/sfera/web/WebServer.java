@@ -49,7 +49,11 @@ import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
-import org.eclipse.jetty.server.session.HashSessionManager;
+import org.eclipse.jetty.server.session.DefaultSessionCache;
+import org.eclipse.jetty.server.session.FileSessionDataStoreFactory;
+import org.eclipse.jetty.server.session.SessionCache;
+import org.eclipse.jetty.server.session.SessionDataStore;
+//import org.eclipse.jetty.server.session.HashSessionManager;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHandler;
@@ -176,14 +180,23 @@ public class WebServer implements AutoStartService {
 			}
 		}
 
-		HashSessionManager hsm = new HashSessionManager();
-		hsm.setStoreDirectory(new File(SESSIONS_STORE_DIR));
-		// TODO try to make session restorable when server not stopped properly
-		hsm.setSessionCookie("session");
+		SessionHandler sessionHandler = new SessionHandler();
+		sessionHandler.setSessionCookie("session");
 		int maxInactiveInterval = config.get("http_session_max_inactive", 3600);
-		hsm.setMaxInactiveInterval(maxInactiveInterval);
-		SessionHandler sessionHandler = new SessionHandler(hsm);
+		sessionHandler.setMaxInactiveInterval(maxInactiveInterval);
 		sessionHandler.addEventListener(new HttpSessionDestroyer());
+		boolean persistSessions = config.get("http_session_persist", false);
+		if (persistSessions) {
+			SessionCache sessionCache = new DefaultSessionCache(sessionHandler);
+			sessionHandler.setSessionCache(sessionCache);
+			sessionCache.setRemoveUnloadableSessions(true);
+			FileSessionDataStoreFactory dataStoreFactory = new FileSessionDataStoreFactory();
+			dataStoreFactory.setStoreDir(new File(SESSIONS_STORE_DIR));
+			dataStoreFactory.setDeleteUnrestorableFiles(true);
+			dataStoreFactory.setSavePeriodSec(maxInactiveInterval / 2);
+			SessionDataStore dataStore = dataStoreFactory.getSessionDataStore(sessionHandler);
+			sessionCache.setSessionDataStore(dataStore);
+		}
 
 		contexts = new ServletContextHandler(server, "/", ServletContextHandler.SESSIONS);
 		contexts.setSessionHandler(sessionHandler);
