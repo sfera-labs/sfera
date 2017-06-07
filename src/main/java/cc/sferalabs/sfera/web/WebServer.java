@@ -23,10 +23,16 @@
 package cc.sferalabs.sfera.web;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchProviderException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,12 +49,17 @@ import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
-import org.eclipse.jetty.server.session.HashSessionManager;
+import org.eclipse.jetty.server.session.DefaultSessionCache;
+import org.eclipse.jetty.server.session.FileSessionDataStoreFactory;
+import org.eclipse.jetty.server.session.SessionCache;
+import org.eclipse.jetty.server.session.SessionDataStore;
+//import org.eclipse.jetty.server.session.HashSessionManager;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.servlet.ServletMapping;
+import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.slf4j.Logger;
@@ -95,8 +106,8 @@ public class WebServer implements AutoStartService {
 
 	private static final Logger logger = LoggerFactory.getLogger(WebServer.class);
 	private static final String[] EXCLUDED_PROTOCOLS = { "SSL", "SSLv2", "SSLv2Hello", "SSLv3" };
-	private static final String[] EXCLUDED_CIPHER_SUITES = { ".*NULL.*", ".*RC4.*", ".*MD5.*",
-			".*DES.*", ".*DSS.*" };
+	private static final String[] EXCLUDED_CIPHER_SUITES = { ".*NULL.*", ".*RC4.*", ".*MD5.*", ".*DES.*", ".*DSS.*" };
+	private static final String DEFAULT_KEY_STORE_PASSWORD = "sferapass";
 
 	private static Server server;
 	private static ServletContextHandler contexts;
@@ -116,8 +127,7 @@ public class WebServer implements AutoStartService {
 			return;
 		}
 
-		int maxThreads = config.get("http_max_threads",
-				Runtime.getRuntime().availableProcessors() * 128);
+		int maxThreads = config.get("http_max_threads", Runtime.getRuntime().availableProcessors() * 128);
 		int minThreads = config.get("http_min_threads", 8);
 		int idleTimeout = config.get("http_threads_idle_timeout", 60000);
 
@@ -134,49 +144,59 @@ public class WebServer implements AutoStartService {
 		}
 
 		if (https_port != null) {
-			String keyStorePassword = config.get("keystore_password", null);
-			if (keyStorePassword == null) {
-				throw new Exception("'keystore_password' not specified in configuration");
+			try {
+				SslContextFactory sslContextFactory = new SslContextFactory();
+				sslContextFactory.setKeyStorePath(KEYSTORE_PATH);
+				String keyStorePassword = config.get("keystore_password", DEFAULT_KEY_STORE_PASSWORD);
+				sslContextFactory.setKeyStorePassword(keyStorePassword);
+				String keyManagerPassword = config.get("keymanager_password", null);
+				if (keyManagerPassword != null) {
+					sslContextFactory.setKeyManagerPassword(keyManagerPassword);
+				}
+
+				if (!checkKeyStoreFile(sslContextFactory, keyStorePassword)) {
+					generateKeyStoreFile();
+				}
+
+				sslContextFactory.addExcludeProtocols(EXCLUDED_PROTOCOLS);
+				sslContextFactory.setExcludeCipherSuites(EXCLUDED_CIPHER_SUITES);
+				sslContextFactory.setRenegotiationAllowed(false);
+				sslContextFactory.setUseCipherSuitesOrder(false);
+
+				HttpConfiguration https_config = new HttpConfiguration();
+				https_config.setSecurePort(https_port);
+				https_config.addCustomizer(new SecureRequestCustomizer());
+
+				ServerConnector https = new ServerConnector(server,
+						new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString()),
+						new HttpConnectionFactory(https_config));
+				https.setName("https");
+				https.setPort(https_port);
+
+				server.addConnector(https);
+				logger.info("Starting HTTPS server on port {}", https_port);
+			} catch (Exception e) {
+				logger.error("Error enabling HTTPS", e);
 			}
-			Path keystorePath = Paths.get(KEYSTORE_PATH);
-			if (!Files.exists(keystorePath)) {
-				throw new NoSuchFileException(KEYSTORE_PATH);
-			}
-
-			SslContextFactory sslContextFactory = new SslContextFactory();
-			sslContextFactory.setKeyStorePath(KEYSTORE_PATH);
-			sslContextFactory.setKeyStorePassword(keyStorePassword);
-			String keyManagerPassword = config.get("keymanager_password", null);
-			if (keyManagerPassword != null) {
-				sslContextFactory.setKeyManagerPassword(keyManagerPassword);
-			}
-			sslContextFactory.addExcludeProtocols(EXCLUDED_PROTOCOLS);
-			sslContextFactory.setExcludeCipherSuites(EXCLUDED_CIPHER_SUITES);
-			sslContextFactory.setRenegotiationAllowed(false);
-			sslContextFactory.setUseCipherSuitesOrder(false);
-
-			HttpConfiguration https_config = new HttpConfiguration();
-			https_config.setSecurePort(https_port);
-			https_config.addCustomizer(new SecureRequestCustomizer());
-
-			ServerConnector https = new ServerConnector(server,
-					new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString()),
-					new HttpConnectionFactory(https_config));
-			https.setName("https");
-			https.setPort(https_port);
-
-			server.addConnector(https);
-			logger.info("Starting HTTPS server on port {}", https_port);
 		}
 
-		HashSessionManager hsm = new HashSessionManager();
-		hsm.setStoreDirectory(new File(SESSIONS_STORE_DIR));
-		// TODO try to make session restorable when server not stopped properly
-		hsm.setSessionCookie("session");
+		SessionHandler sessionHandler = new SessionHandler();
+		sessionHandler.setSessionCookie("session");
 		int maxInactiveInterval = config.get("http_session_max_inactive", 3600);
-		hsm.setMaxInactiveInterval(maxInactiveInterval);
-		SessionHandler sessionHandler = new SessionHandler(hsm);
+		sessionHandler.setMaxInactiveInterval(maxInactiveInterval);
 		sessionHandler.addEventListener(new HttpSessionDestroyer());
+		boolean persistSessions = config.get("http_session_persist", false);
+		if (persistSessions) {
+			SessionCache sessionCache = new DefaultSessionCache(sessionHandler);
+			sessionHandler.setSessionCache(sessionCache);
+			sessionCache.setRemoveUnloadableSessions(true);
+			FileSessionDataStoreFactory dataStoreFactory = new FileSessionDataStoreFactory();
+			dataStoreFactory.setStoreDir(new File(SESSIONS_STORE_DIR));
+			dataStoreFactory.setDeleteUnrestorableFiles(true);
+			dataStoreFactory.setSavePeriodSec(maxInactiveInterval / 2);
+			SessionDataStore dataStore = dataStoreFactory.getSessionDataStore(sessionHandler);
+			sessionCache.setSessionDataStore(dataStore);
+		}
 
 		contexts = new ServletContextHandler(server, "/", ServletContextHandler.SESSIONS);
 		contexts.setSessionHandler(sessionHandler);
@@ -189,6 +209,68 @@ public class WebServer implements AutoStartService {
 			server.start();
 		} catch (Exception e) {
 			throw new Exception("Error starting server: " + e.getLocalizedMessage(), e);
+		}
+	}
+
+	/**
+	 * 
+	 * @param sslContextFactory
+	 * @param keyStorePassword
+	 * @return
+	 * @throws KeyStoreException
+	 * @throws NoSuchProviderException
+	 */
+	private boolean checkKeyStoreFile(SslContextFactory sslContextFactory, String keyStorePassword) {
+		try {
+			Path keystorePath = Paths.get(KEYSTORE_PATH);
+			if (!Files.exists(keystorePath)) {
+				logger.warn("SSL key store file not found");
+				return false;
+			}
+
+			String storeProvider = sslContextFactory.getKeyStoreProvider();
+			String storeType = sslContextFactory.getKeyStoreType();
+			KeyStore keystore;
+			if (storeProvider != null) {
+				keystore = KeyStore.getInstance(storeType, storeProvider);
+			} else {
+				keystore = KeyStore.getInstance(storeType);
+			}
+			Resource store = sslContextFactory.getKeyStoreResource();
+			try (InputStream inStream = store.getInputStream()) {
+				keystore.load(inStream, keyStorePassword == null ? null : keyStorePassword.toCharArray());
+			} catch (CertificateException | IOException e) {
+				logger.warn("SSL key store file corrupted");
+				try {
+					Files.move(keystorePath,
+							keystorePath.resolveSibling(keystorePath.getFileName().toString() + "-corrupted"));
+				} catch (FileAlreadyExistsException e1) {
+					Files.delete(keystorePath);
+				}
+				return false;
+			}
+		} catch (Exception e) {
+			logger.error("Error checking key store file", e);
+		}
+
+		return true;
+	}
+
+	/**
+	 * 
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	private void generateKeyStoreFile() throws IOException, InterruptedException {
+		logger.info("Generating self-signed certificate");
+		Path keystorePath = Paths.get(KEYSTORE_PATH);
+		Files.createDirectories(keystorePath.getParent());
+		String[] cmd = { "keytool", "-genkeypair", "-dname", "cn=Sfera Server generated", "-alias", "sferaservergen",
+				"-keystore", KEYSTORE_PATH, "-keypass", DEFAULT_KEY_STORE_PASSWORD, "-storepass",
+				DEFAULT_KEY_STORE_PASSWORD, "-validity", "73000", "-keyalg", "RSA", "-keysize", "2048" };
+		Process p = new ProcessBuilder(cmd).start();
+		if (p.waitFor() != 0) {
+			throw new IOException("keytool termination error");
 		}
 	}
 
@@ -252,8 +334,7 @@ public class WebServer implements AutoStartService {
 	 * @throws WebServerException
 	 *             if an error occurs
 	 */
-	public synchronized static void addServlet(ServletHolder servlet, String pathSpec)
-			throws WebServerException {
+	public synchronized static void addServlet(ServletHolder servlet, String pathSpec) throws WebServerException {
 		addServlet((Object) servlet, pathSpec);
 	}
 
@@ -389,8 +470,7 @@ public class WebServer implements AutoStartService {
 	 * @throws WebServerException
 	 *             if an error occurs
 	 */
-	public synchronized static void removeServlet(Class<? extends Servlet> servlet)
-			throws WebServerException {
+	public synchronized static void removeServlet(Class<? extends Servlet> servlet) throws WebServerException {
 		if (contexts != null) {
 			ServletHandler handler = contexts.getServletHandler();
 			if (handler != null) {

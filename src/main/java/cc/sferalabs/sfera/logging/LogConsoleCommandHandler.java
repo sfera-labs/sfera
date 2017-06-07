@@ -90,7 +90,7 @@ public class LogConsoleCommandHandler implements ConsoleCommandHandler {
 			} catch (Throwable t) {
 			}
 			if (appender != null) {
-				LoggerUtils.removeApender(appender);
+				LoggerUtils.removeRootApender(appender);
 			}
 			return "=== Logging stopped ===";
 		}
@@ -115,7 +115,7 @@ public class LogConsoleCommandHandler implements ConsoleCommandHandler {
 		Appender appender = OutputStreamAppender.createAppender(layout, null, out, name, false,
 				true);
 
-		LoggerUtils.addApender(appender, level);
+		LoggerUtils.addRootApender(appender, level);
 
 		return appender;
 	}

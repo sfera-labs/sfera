@@ -24,26 +24,32 @@ package cc.sferalabs.sfera.logging;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Iterator;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.AppenderRef;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.LoggerConfig;
 
 import cc.sferalabs.sfera.console.Console;
 
 /**
- * 
+ *
+ * @author Giampiero Baggiani
+ *
  */
 public abstract class LoggerUtils {
+
+	private static Level originalRootLevel;
+	private static int addedAppenders = 0;
 
 	/**
 	 * 
 	 */
 	public static void init() {
-		Path log4j2Config = cc.sferalabs.sfera.core.Configuration.getConfigDir()
-				.resolve("log4j2.xml");
+		Path log4j2Config = cc.sferalabs.sfera.core.Configuration.getConfigDir().resolve("log4j2.xml");
 		if (Files.exists(log4j2Config)) {
 			System.setProperty("log4j.configurationFile", log4j2Config.toString());
 		}
@@ -51,54 +57,70 @@ public abstract class LoggerUtils {
 	}
 
 	/**
-	 * Reloads the logger configuration.
+	 * @return the logger context
 	 */
-	public static void reloadConfig() {
-		LoggerContext.getContext(false).reconfigure();
+	static LoggerContext getContext() {
+		return LoggerContext.getContext(false);
 	}
 
 	/**
 	 * @return the logger configuration
 	 */
-	public static org.apache.logging.log4j.core.config.Configuration getConfiguration() {
-		return LoggerContext.getContext(false).getConfiguration();
+	static org.apache.logging.log4j.core.config.Configuration getConfiguration() {
+		return getContext().getConfiguration();
 	}
 
 	/**
-	 * Adds the specified appender to all configured non-additive loggers.
+	 * Adds the specified appender to the root logger.
 	 * 
 	 * @param appender
 	 *            the appender
 	 * @param level
 	 *            the logging level to assign to the appender. Default is INFO
 	 */
-	public static void addApender(Appender appender, String level) {
-		Configuration config = LoggerUtils.getConfiguration();
+	public static synchronized void addRootApender(Appender appender, String level) {
+		Configuration config = getConfiguration();
 		appender.start();
 		config.addAppender(appender);
 		Level l = Level.toLevel(level, Level.INFO);
-		for (final LoggerConfig loggerConfig : config.getLoggers().values()) {
-			if (!loggerConfig.isAdditive()) {
-				loggerConfig.addAppender(appender, l, null);
+
+		LoggerConfig root = config.getRootLogger();
+		if (!root.getLevel().isLessSpecificThan(l)) {
+			if (originalRootLevel == null) {
+				originalRootLevel = root.getLevel();
+				Iterator<AppenderRef> it = root.getAppenderRefs().iterator();
+				while (it.hasNext()) {
+					AppenderRef ar = it.next();
+					if (ar.getLevel() == null) {
+						Appender a = root.getAppenders().get(ar.getRef());
+						root.removeAppender(a.getName());
+						root.addAppender(a, originalRootLevel, ar.getFilter());
+					}
+				}
 			}
+			root.setLevel(l);
 		}
-		config.getRootLogger().addAppender(appender, l, null);
+		root.addAppender(appender, l, null);
+		addedAppenders++;
+		getContext().updateLoggers();
 	}
 
 	/**
-	 * Removes the specified appender from all configured loggers.
+	 * Removes the specified appender from the root logger.
 	 * 
 	 * @param appender
 	 *            the appender
 	 */
-	public static void removeApender(Appender appender) {
-		Configuration config = LoggerUtils.getConfiguration();
+	public static synchronized void removeRootApender(Appender appender) {
+		Configuration config = getConfiguration();
 		String name = appender.getName();
-		for (final LoggerConfig loggerConfig : config.getLoggers().values()) {
-			loggerConfig.removeAppender(name);
-		}
-		config.getRootLogger().removeAppender(name);
+		LoggerConfig root = config.getRootLogger();
+		root.removeAppender(name);
 		appender.stop();
+		if (addedAppenders > 0 && --addedAppenders == 0) {
+			root.setLevel(originalRootLevel);
+		}
+		getContext().updateLoggers();
 	}
 
 }

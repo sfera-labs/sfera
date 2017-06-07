@@ -30,6 +30,7 @@ import java.nio.file.Paths;
 import java.util.Map;
 
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.CustomClassLoaderConstructor;
 
 /**
  *
@@ -100,7 +101,9 @@ public class Configuration {
 	 *             if an I/O error occurs opening the configuration file
 	 */
 	public <T> T loadAs(Class<T> clazz) throws IOException {
-		Yaml yaml = new Yaml();
+		CustomClassLoaderConstructor constr = new CustomClassLoaderConstructor(
+				clazz.getClassLoader());
+		Yaml yaml = new Yaml(constr);
 		try (BufferedReader r = Files.newBufferedReader(path)) {
 			return yaml.loadAs(r, clazz);
 		}

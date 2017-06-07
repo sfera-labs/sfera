@@ -86,7 +86,11 @@ public abstract class Drivers {
 				for (Path file : stream) {
 					if (Files.isRegularFile(file) && !Files.isHidden(file)) {
 						String fileName = file.getFileName().toString();
-						String driverId = fileName.replace(Configuration.FILE_EXTENSION, "");
+						if (!fileName.endsWith(Configuration.FILE_EXTENSION)) {
+							continue;
+						}
+						String driverId = fileName.substring(0,
+								fileName.length() - Configuration.FILE_EXTENSION.length());
 						inConfig.add(driverId);
 						try {
 							if (drivers.containsKey(driverId)) {

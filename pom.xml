@@ -4,7 +4,7 @@
 
 	<groupId>cc.sferalabs.sfera</groupId>
 	<artifactId>sfera</artifactId>
-	<version>1.1.0</version>
+	<version>1.2.0</version>
 
 	<name>Sfera</name>
 	<description>The Sfera Framework for Home/Building Automation and IoT Integration</description>
@@ -26,8 +26,8 @@
 	</licenses>
 
 	<properties>
-		<latestDeployedVersion>1.1.0</latestDeployedVersion>
-		<jetty-version>9.3.1.v20150714</jetty-version>
+		<latestDeployedVersion>1.2.0</latestDeployedVersion>
+		<jetty-version>9.4.5.v20170502</jetty-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 

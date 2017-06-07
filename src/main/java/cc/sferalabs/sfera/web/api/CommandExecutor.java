@@ -53,7 +53,13 @@ public abstract class CommandExecutor {
 		Map<String, Object> b = new HashMap<>();
 		b.put("httpRequest", httpRequest);
 		b.put("connectionId", connectionId);
-		return ScriptsEngine.evalNodeAction(cmd, b);
+		try {
+			return ScriptsEngine.evalNodeAction(cmd, b);
+		} catch (IllegalArgumentException | ScriptException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ScriptException(e);
+		}
 	}
 
 }

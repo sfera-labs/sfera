@@ -196,12 +196,8 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 			return;
 		}
 
-		try {
-			JsonMessage m = new JsonMessage(message);
-			process(m);
-		} catch (Exception e) {
-			logger.warn("Error processing message '" + message + "'", e);
-		}
+		JsonMessage m = new JsonMessage(message);
+		process(m);
 	}
 
 	/**
@@ -209,10 +205,8 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 	 * 
 	 * @param message
 	 *            the message to process
-	 * @throws IOException
-	 *             if an I/O error occurs
 	 */
-	private void process(JsonMessage message) throws IOException {
+	private void process(JsonMessage message) {
 		OutgoingWsMessage reply = new OutgoingWsMessage("reply", this);
 		try {
 			Object tag = message.get("tag");
@@ -314,10 +308,12 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 				reply.sendErrors(new ErrorMessage(0, "Unknown action"));
 				break;
 			}
-		} catch (Exception e) {
-			logger.warn("Error processing WebSocket message", e);
-			reply.sendErrors(new ErrorMessage(0, "Server error: " + e.getMessage()));
-			throw e;
+		} catch (Throwable e) {
+			logger.warn("Error processing WebSocket message '" + message + "'", e);
+			try {
+				reply.sendErrors(new ErrorMessage(0, "Server error: " + e.getMessage()));
+			} catch (Exception e1) {
+			}
 		}
 	}
 
