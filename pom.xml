@@ -26,7 +26,7 @@
 	</licenses>
 
 	<properties>
-		<latestDeployedVersion>1.1.0</latestDeployedVersion>
+		<latestDeployedVersion>1.2.0</latestDeployedVersion>
 		<jetty-version>9.4.5.v20170502</jetty-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
