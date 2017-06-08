@@ -34,9 +34,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import javax.servlet.Servlet;
@@ -378,18 +376,7 @@ public class WebServer implements AutoStartService {
 		if (contexts != null) {
 			try {
 				ServletHandler handler = contexts.getServletHandler();
-				List<ServletHolder> servlets = new ArrayList<>();
 				List<ServletMapping> mappings = new ArrayList<>();
-
-				Map<String, List<ServletHolder>> servletsMap = new HashMap<>();
-				for (ServletHolder sh : handler.getServlets()) {
-					List<ServletHolder> list = servletsMap.get(sh.getName());
-					if (list == null) {
-						list = new ArrayList<>();
-						servletsMap.put(sh.getName(), list);
-					}
-					list.add(sh);
-				}
 
 				for (ServletMapping mapping : handler.getServletMappings()) {
 					List<String> pathSpecs = new ArrayList<>();
@@ -401,20 +388,10 @@ public class WebServer implements AutoStartService {
 					if (!pathSpecs.isEmpty()) {
 						mapping.setPathSpecs(pathSpecs.toArray(new String[pathSpecs.size()]));
 						mappings.add(mapping);
-					} else {
-						List<ServletHolder> list = servletsMap.get(mapping.getServletName());
-						if (list != null && !list.isEmpty()) {
-							list.remove(0);
-						}
 					}
 				}
 
-				for (List<ServletHolder> list : servletsMap.values()) {
-					servlets.addAll(list);
-				}
-
 				handler.setServletMappings(mappings.toArray(new ServletMapping[mappings.size()]));
-				handler.setServlets(servlets.toArray(new ServletHolder[servlets.size()]));
 			} catch (Exception e) {
 				throw new WebServerException(e);
 			}
