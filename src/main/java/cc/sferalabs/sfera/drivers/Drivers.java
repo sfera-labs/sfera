@@ -28,6 +28,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -67,8 +68,8 @@ public abstract class Drivers {
 	public synchronized static void load() {
 		instantiateDrivers();
 		try {
-			FilesWatcher.register(Configuration.getConfigDir().resolve(CONFIG_DIR),
-					"Drivers loucher", Drivers::instantiateDrivers, false, false);
+			FilesWatcher.register(Configuration.getConfigDir().resolve(CONFIG_DIR), "Drivers loucher",
+					Drivers::instantiateDrivers, false, false);
 		} catch (Exception e) {
 			logger.error("Error watching drivers config directory", e);
 		}
@@ -102,20 +103,18 @@ public abstract class Drivers {
 								throw new Exception("type not specified in configuration");
 							}
 							if (!driverClass.contains(".")) {
-								driverClass = DEFAULT_DRIVERS_PACKAGE + "."
-										+ driverClass.toLowerCase() + "." + driverClass;
+								driverClass = DEFAULT_DRIVERS_PACKAGE + "." + driverClass.toLowerCase() + "."
+										+ driverClass;
 							}
 							Class<?> clazz = PluginsClassLoader.getClass(driverClass);
-							Constructor<?> constructor = clazz
-									.getConstructor(new Class[] { String.class });
+							Constructor<?> constructor = clazz.getConstructor(new Class[] { String.class });
 							Driver driverInstance = (Driver) constructor.newInstance(driverId);
 							driverInstance.setConfigFile(CONFIG_DIR + "/" + fileName);
 							drivers.put(driverId, driverInstance);
 							if (driverInstance instanceof EventListener) {
 								Bus.register((EventListener) driverInstance);
 							}
-							logger.info("Driver '{}' of type '{}' instantiated", driverId,
-									driverClass);
+							logger.info("Driver '{}' of type '{}' instantiated", driverId, driverClass);
 							driverInstance.start();
 						} catch (Throwable e) {
 							logger.error("Error instantiating driver '" + driverId + "'", e);
@@ -188,6 +187,15 @@ public abstract class Drivers {
 	 */
 	public synchronized static Driver getDriver(String id) {
 		return drivers.get(id);
+	}
+
+	/**
+	 * Returns a collection of all the driver instances.
+	 * 
+	 * @return a collection of all the driver instances
+	 */
+	public synchronized static Collection<Driver> getAll() {
+		return new ArrayList<>(drivers.values());
 	}
 
 }

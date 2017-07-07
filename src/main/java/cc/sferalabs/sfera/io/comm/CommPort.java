@@ -55,11 +55,28 @@ public abstract class CommPort {
 
 	public static final int FLOWCONTROL_NONE = SerialPort.FLOWCONTROL_NONE;
 
-	public static final int FLOWCONTROL_RTSCTS = SerialPort.FLOWCONTROL_RTSCTS_IN
-			| SerialPort.FLOWCONTROL_RTSCTS_OUT;
+	public static final int FLOWCONTROL_RTSCTS = SerialPort.FLOWCONTROL_RTSCTS_IN | SerialPort.FLOWCONTROL_RTSCTS_OUT;
 
 	public static final int FLOWCONTROL_XONXOFF = SerialPort.FLOWCONTROL_XONXOFF_IN
 			| SerialPort.FLOWCONTROL_XONXOFF_OUT;
+
+	private final String portName;
+
+	/**
+	 * @param portName
+	 */
+	protected CommPort(String portName) {
+		this.portName = portName;
+	}
+
+	/**
+	 * Returns the port name
+	 * 
+	 * @return the port name
+	 */
+	public String getPortName() {
+		return portName;
+	}
 
 	/**
 	 * Creates a {@code CommPort} and opens the connection. It first tries
@@ -120,8 +137,8 @@ public abstract class CommPort {
 	 * @throws CommPortException
 	 *             if an error occurs
 	 */
-	public abstract void setParams(int baudRate, int dataBits, int stopBits, int parity,
-			int flowControl) throws CommPortException;
+	public abstract void setParams(int baudRate, int dataBits, int stopBits, int parity, int flowControl)
+			throws CommPortException;
 
 	/**
 	 * Clears the input buffer, if supported by the underlying device
