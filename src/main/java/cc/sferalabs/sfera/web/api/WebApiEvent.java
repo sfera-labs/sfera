@@ -42,6 +42,7 @@ public class WebApiEvent extends StringEvent {
 
 	private final HttpServletRequest request;
 	private final String connectionId;
+	private final User user;
 
 	/**
 	 * Construct a RemoteEvent
@@ -62,6 +63,7 @@ public class WebApiEvent extends StringEvent {
 		super(WebNode.getInstance(), Objects.requireNonNull(id, "id must not be null"), value);
 		this.request = Objects.requireNonNull(request, "request must not be null");
 		this.connectionId = connectionId;
+		this.user = Access.getUser(request.getRemoteUser());
 	}
 
 	/**
@@ -70,7 +72,7 @@ public class WebApiEvent extends StringEvent {
 	 * @return the user
 	 */
 	public User getUser() {
-		return Access.getUser(request.getRemoteUser());
+		return user;
 	}
 
 	/**
