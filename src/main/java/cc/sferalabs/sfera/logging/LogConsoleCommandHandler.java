@@ -88,6 +88,10 @@ public class LogConsoleCommandHandler implements ConsoleCommandHandler {
 					session.quit();
 				}
 			} catch (Throwable t) {
+				try {
+					session.output("*** Error: " + t.toString() + "\n");
+				} catch (Throwable t1) {
+				}
 			}
 			if (appender != null) {
 				LoggerUtils.removeRootApender(appender);
@@ -105,15 +109,13 @@ public class LogConsoleCommandHandler implements ConsoleCommandHandler {
 	 * @param session
 	 * @return
 	 */
-	private static Appender addAppender(String name, String level, String pattern,
-			ConsoleSession session) {
+	private static Appender addAppender(String name, String level, String pattern, ConsoleSession session) {
 		SessionOutputStream out = new SessionOutputStream(session);
 
 		org.apache.logging.log4j.core.config.Configuration config = LoggerUtils.getConfiguration();
-		PatternLayout layout = PatternLayout.createLayout(pattern, null, config, null,
-				StandardCharsets.UTF_8, false, false, null, null);
-		Appender appender = OutputStreamAppender.createAppender(layout, null, out, name, false,
-				true);
+		PatternLayout layout = PatternLayout.createLayout(pattern, null, config, null, StandardCharsets.UTF_8, false,
+				false, null, null);
+		Appender appender = OutputStreamAppender.createAppender(layout, null, out, name, false, true);
 
 		LoggerUtils.addRootApender(appender, level);
 

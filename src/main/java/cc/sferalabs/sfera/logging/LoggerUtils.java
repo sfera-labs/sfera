@@ -106,21 +106,23 @@ public abstract class LoggerUtils {
 	}
 
 	/**
-	 * Removes the specified appender from the root logger.
+	 * Removes the specified previously added appender from the root logger.
 	 * 
 	 * @param appender
-	 *            the appender
+	 *            the appender to remove
 	 */
 	public static synchronized void removeRootApender(Appender appender) {
-		Configuration config = getConfiguration();
-		String name = appender.getName();
-		LoggerConfig root = config.getRootLogger();
-		root.removeAppender(name);
-		appender.stop();
-		if (addedAppenders > 0 && --addedAppenders == 0) {
-			root.setLevel(originalRootLevel);
+		if (addedAppenders > 0) {
+			Configuration config = getConfiguration();
+			String name = appender.getName();
+			LoggerConfig root = config.getRootLogger();
+			root.removeAppender(name);
+			appender.stop();
+			if (--addedAppenders == 0 && originalRootLevel != null) {
+				root.setLevel(originalRootLevel);
+			}
+			getContext().updateLoggers();
 		}
-		getContext().updateLoggers();
 	}
 
 }

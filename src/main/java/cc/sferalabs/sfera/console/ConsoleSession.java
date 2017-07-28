@@ -140,7 +140,7 @@ public abstract class ConsoleSession extends Task {
 
 	/**
 	 * Waits for a command to be received. If {@code null} is returned the
-	 * session in terminated.
+	 * session is terminated.
 	 * <p>
 	 * The waiting must be interruptible and {@code null} shall be returned when
 	 * interrupted.
