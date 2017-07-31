@@ -63,7 +63,7 @@ public abstract class CommPort {
 	private final String portName;
 
 	/**
-	 * @param portName
+	 * @param portName the port name
 	 */
 	protected CommPort(String portName) {
 		this.portName = portName;
