@@ -50,6 +50,7 @@ public class LocalCommPort extends CommPort {
 	 *             if an error occurs when creating or opening the port
 	 */
 	LocalCommPort(String portName) throws CommPortException {
+		super(portName);
 		try {
 			this.serialPort = new SerialPort(portName);
 			if (!serialPort.openPort()) {

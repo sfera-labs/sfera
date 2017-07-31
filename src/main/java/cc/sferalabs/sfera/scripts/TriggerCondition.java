@@ -150,7 +150,7 @@ class TriggerCondition {
 	 */
 	private boolean eval(EventContext ctx, Event event) throws Exception {
 		if (ctx.stableEvent() != null) {
-			return eval(ctx.stableEvent());
+			return eval(ctx.stableEvent(), event);
 		} else {
 			return eval(ctx.transientEvent(), event);
 		}
@@ -170,8 +170,7 @@ class TriggerCondition {
 				return true;
 			}
 
-			if (eventId.charAt(condition.length()) == '.'
-					|| eventId.charAt(condition.length()) == '(') {
+			if (eventId.charAt(condition.length()) == '.' || eventId.charAt(condition.length()) == '(') {
 				/*
 				 * meaning: eventId.startsWith(condition + ".") ||
 				 * eventId.startsWith(condition + "(")
@@ -186,41 +185,49 @@ class TriggerCondition {
 	/**
 	 * 
 	 * @param ctx
+	 * @param event
 	 * @return
 	 * @throws Exception
 	 */
-	private boolean eval(StableEventContext ctx) throws Exception {
+	private boolean eval(StableEventContext ctx, Event event) throws Exception {
 		if (ctx.stringComparison() != null) {
-			return eval(ctx.stringComparison());
+			return eval(ctx.stringComparison(), event);
 		} else if (ctx.numberComparison() != null) {
-			return eval(ctx.numberComparison());
+			return eval(ctx.numberComparison(), event);
 		} else if (ctx.booleanComparison() != null) {
-			return eval(ctx.booleanComparison());
+			return eval(ctx.booleanComparison(), event);
 		} else { // 'unknown' comparison
-			return eval(ctx.unknownComparison());
+			return eval(ctx.unknownComparison(), event);
 		}
-	}
-
-	/**
-	 * @return
-	 */
-	private Object getEventValue(TerminalNodeContext ctx) {
-		Event event = Bus.getEvent(ctx.getText());
-		if (event == null) {
-			return null;
-		}
-
-		return event.getSimpleValue();
 	}
 
 	/**
 	 * 
 	 * @param ctx
+	 * @param event
+	 * @return
+	 */
+	private Object getEventValue(TerminalNodeContext ctx, Event event) {
+		String id = ctx.getText();
+		if (id.equals(event.getId())) {
+			return event.getSimpleValue();
+		}
+		Event e = Bus.getEvent(id);
+		if (e == null) {
+			return null;
+		}
+		return e.getSimpleValue();
+	}
+
+	/**
+	 * 
+	 * @param ctx
+	 * @param event
 	 * @return
 	 * @throws Exception
 	 */
-	private boolean eval(StringComparisonContext ctx) throws Exception {
-		Object value = getEventValue(ctx.terminalNode());
+	private boolean eval(StringComparisonContext ctx, Event event) throws Exception {
+		Object value = getEventValue(ctx.terminalNode(), event);
 
 		if (value == null) {
 			return false;
@@ -228,8 +235,7 @@ class TriggerCondition {
 
 		if (!(value instanceof String)) {
 			int line = ctx.getStart().getLine();
-			throw new Exception("line " + line + ": Type error: " + ctx.terminalNode().getText()
-					+ " not a String");
+			throw new Exception("line " + line + ": Type error: " + ctx.terminalNode().getText() + " not a String");
 		}
 
 		String literal = ctx.StringLiteral().getText();
@@ -255,11 +261,12 @@ class TriggerCondition {
 	/**
 	 * 
 	 * @param ctx
+	 * @param event
 	 * @return
 	 * @throws Exception
 	 */
-	private boolean eval(NumberComparisonContext ctx) throws Exception {
-		Object value = getEventValue(ctx.terminalNode());
+	private boolean eval(NumberComparisonContext ctx, Event event) throws Exception {
+		Object value = getEventValue(ctx.terminalNode(), event);
 
 		if (value == null) {
 			return false;
@@ -267,8 +274,7 @@ class TriggerCondition {
 
 		if (!(value instanceof Number)) {
 			int line = ctx.getStart().getLine();
-			throw new Exception("line " + line + ": Type error: " + ctx.terminalNode().getText()
-					+ " not a number");
+			throw new Exception("line " + line + ": Type error: " + ctx.terminalNode().getText() + " not a number");
 		}
 
 		double literal = Double.parseDouble(ctx.NumberLiteral().getText());
@@ -292,11 +298,12 @@ class TriggerCondition {
 	/**
 	 * 
 	 * @param ctx
+	 * @param event
 	 * @return
 	 * @throws Exception
 	 */
-	private boolean eval(BooleanComparisonContext ctx) throws Exception {
-		Object value = getEventValue(ctx.terminalNode());
+	private boolean eval(BooleanComparisonContext ctx, Event event) throws Exception {
+		Object value = getEventValue(ctx.terminalNode(), event);
 
 		if (value == null) {
 			return false;
@@ -304,8 +311,7 @@ class TriggerCondition {
 
 		if (!(value instanceof Boolean)) {
 			int line = ctx.getStart().getLine();
-			throw new Exception("line " + line + ": Type error: " + ctx.terminalNode().getText()
-					+ " not a boolean");
+			throw new Exception("line " + line + ": Type error: " + ctx.terminalNode().getText() + " not a boolean");
 		}
 
 		boolean literal = Boolean.parseBoolean(ctx.BooleanLiteral().getText());
@@ -323,8 +329,8 @@ class TriggerCondition {
 	 * @param ctx
 	 * @return
 	 */
-	private boolean eval(UnknownComparisonContext ctx) {
-		Object value = getEventValue(ctx.terminalNode());
+	private boolean eval(UnknownComparisonContext ctx, Event event) {
+		Object value = getEventValue(ctx.terminalNode(), event);
 
 		if (ctx.ET() != null) {
 			return value == null;

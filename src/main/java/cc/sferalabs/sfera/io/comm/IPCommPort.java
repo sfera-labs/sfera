@@ -98,6 +98,7 @@ public class IPCommPort extends CommPort {
 	 *             if an error occurs when creating or opening the port
 	 */
 	IPCommPort(String portName) throws CommPortException {
+		super(portName);
 		int colon = portName.indexOf(':');
 		if (colon < 0) {
 			throw new CommPortException("port name format error");

@@ -135,8 +135,8 @@ public class Scheduler extends Node implements AutoStartService {
 	 * @return
 	 */
 	private static TriggerBuilder<Trigger> newEventTrigger(String id, String value) {
-		return newTrigger().withIdentity(Long.toString(counter.getAndIncrement()), id)
-				.usingJobData("id", id).usingJobData("val", value);
+		return newTrigger().withIdentity(Long.toString(counter.getAndIncrement()), id).usingJobData("id", id)
+				.usingJobData("val", value);
 	}
 
 	/**
@@ -153,8 +153,7 @@ public class Scheduler extends Node implements AutoStartService {
 	 *             if an error occurs
 	 */
 	public void delay(String id, String value, int delay) throws SchedulerException {
-		Trigger trigger = newEventTrigger(id, value)
-				.startAt(futureDate(delay, IntervalUnit.MILLISECOND)).build();
+		Trigger trigger = newEventTrigger(id, value).startAt(futureDate(delay, IntervalUnit.MILLISECOND)).build();
 		scheduleEvent(trigger);
 	}
 
@@ -175,12 +174,9 @@ public class Scheduler extends Node implements AutoStartService {
 	 * @throws SchedulerException
 	 *             if an error occurs
 	 */
-	public void repeat(String id, String value, int initialDelay, int interval)
-			throws SchedulerException {
-		Trigger trigger = newEventTrigger(id, value)
-				.startAt(futureDate(initialDelay, IntervalUnit.MILLISECOND))
-				.withSchedule(simpleSchedule().withIntervalInMilliseconds(interval).repeatForever())
-				.build();
+	public void repeat(String id, String value, int initialDelay, int interval) throws SchedulerException {
+		Trigger trigger = newEventTrigger(id, value).startAt(futureDate(initialDelay, IntervalUnit.MILLISECOND))
+				.withSchedule(simpleSchedule().withIntervalInMilliseconds(interval).repeatForever()).build();
 		scheduleEvent(trigger);
 	}
 
@@ -204,13 +200,9 @@ public class Scheduler extends Node implements AutoStartService {
 	 * @throws SchedulerException
 	 *             if an error occurs
 	 */
-	public void repeat(String id, String value, int initialDelay, int interval, int times)
-			throws SchedulerException {
-		Trigger trigger = newEventTrigger(id, value)
-				.startAt(futureDate(initialDelay, IntervalUnit.MILLISECOND))
-				.withSchedule(simpleSchedule().withIntervalInMilliseconds(interval)
-						.withRepeatCount(times - 1))
-				.build();
+	public void repeat(String id, String value, int initialDelay, int interval, int times) throws SchedulerException {
+		Trigger trigger = newEventTrigger(id, value).startAt(futureDate(initialDelay, IntervalUnit.MILLISECOND))
+				.withSchedule(simpleSchedule().withIntervalInMilliseconds(interval).withRepeatCount(times - 1)).build();
 		scheduleEvent(trigger);
 	}
 
@@ -242,13 +234,11 @@ public class Scheduler extends Node implements AutoStartService {
 	 *            value of the event to trigger
 	 * @throws SchedulerException
 	 *             if an error occurs
-	 * @see <a href="https://en.wikipedia.org/wiki/Cron">https://en.wikipedia.
-	 *      org/wiki/Cron</a>
+	 * @see <a href=
+	 *      "http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/crontrigger.html">http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/crontrigger.html</a>
 	 */
-	public void addCronRule(String cronExpression, String id, String value)
-			throws SchedulerException {
-		Trigger trigger = newEventTrigger(id, value).withSchedule(cronSchedule(cronExpression))
-				.build();
+	public void addCronRule(String cronExpression, String id, String value) throws SchedulerException {
+		Trigger trigger = newEventTrigger(id, value).withSchedule(cronSchedule(cronExpression)).build();
 		scheduleEvent(trigger);
 	}
 

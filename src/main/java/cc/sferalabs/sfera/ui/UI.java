@@ -62,7 +62,7 @@ public class UI extends Node implements AutoStartService {
 	 * 
 	 * @return the UI node instance
 	 */
-	static UI getInstance() {
+	public static UI getInstance() {
 		return INSTANCE;
 	}
 
