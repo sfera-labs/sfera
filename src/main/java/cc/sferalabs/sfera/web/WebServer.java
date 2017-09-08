@@ -197,6 +197,7 @@ public class WebServer implements AutoStartService {
 		}
 
 		contexts = new ServletContextHandler(server, "/", ServletContextHandler.SESSIONS);
+		contexts.setInitParameter(SessionHandler.__MaxAgeProperty, config.get("http_session_max_age", -1).toString());
 		contexts.setSessionHandler(sessionHandler);
 		contexts.addFilter(AuthenticationFilter.class, "/*", null);
 		contexts.addServlet(DefaultErrorServlet.class, "/*");

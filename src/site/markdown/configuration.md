@@ -17,6 +17,7 @@ The system configuration file is `config/sfera.yml`
 | `http_min_threads` | Integer | 8 | Min number of threads kept ready by the thread pool used by the Web server to process requests |
 | `http_threads_idle_timeout` | Integer | 60000 | Max thread idle time in milliseconds. Threads that are idle for longer than this period may be stopped |
 | `http_session_max_inactive` | Integer | 3600 | Max period of inactivity, after which a session is invalidated, in seconds |
+| `http_session_max_age` | Integer | -1 | Max age value used for the session cookie, in seconds. If a negative value is set, the cookie will expire at the end of the session (client dependent) |
 | `http_session_persist` | Boolean | false | If set to `true` the active HTTP sessions are persisted and restored in case of restart |
 | `ws_ping_interval` | Integer | 10000 | Time interval in milliseconds for ping messages in WebSocket connections |
 | `ws_response_timeout` | Integer | 5000 | Max waiting time in milliseconds for WebSocket responses after which the connection is closed by the server |
