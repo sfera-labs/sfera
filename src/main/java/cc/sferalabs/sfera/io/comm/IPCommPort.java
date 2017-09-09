@@ -69,26 +69,52 @@ public class IPCommPort extends CommPort {
 
 		@Override
 		protected void execute() {
+			InputStream in;
+			try {
+				in = socket.getInputStream();
+				socket.setSoTimeout(5000);
+			} catch (Throwable t) {
+				onError(t);
+				return;
+			}
 			while (run) {
 				try {
-					InputStream in = socket.getInputStream();
-					byte b = (byte) in.read();
+					int b = in.read();
+					if (b < 0) {
+						throw new IOException("End of stream is reached");
+					}
 					int len = in.available();
 					byte[] bytes = new byte[len + 1];
-					bytes[0] = b;
+					bytes[0] = (byte) b;
 					if (len > 0) {
-						readBytes(bytes, 1, len);
+						in.read(bytes, 1, len);
 					}
-					if (!closed) {
-						reader.onRead(bytes);
-					}
+					onRead(bytes);
+				} catch (SocketTimeoutException e) {
 				} catch (Throwable t) {
-					if (!closed) {
-						reader.onError(t);
-					}
+					onError(t);
 				}
 			}
 		}
+
+		/**
+		 * @param bytes
+		 */
+		private void onRead(byte[] bytes) {
+			if (!closed && run) {
+				reader.onRead(bytes);
+			}
+		}
+
+		/**
+		 * @param t
+		 */
+		private void onError(Throwable t) {
+			if (!closed && run) {
+				reader.onError(t);
+			}
+		}
+
 	}
 
 	/**
@@ -114,8 +140,7 @@ public class IPCommPort extends CommPort {
 		try {
 			address = new InetSocketAddress(host, port);
 		} catch (Exception e) {
-			throw new CommPortException("error instantiating socket: " + e.getLocalizedMessage(),
-					e);
+			throw new CommPortException("error instantiating socket: " + e.getLocalizedMessage(), e);
 		}
 		try {
 			socket = new Socket();
