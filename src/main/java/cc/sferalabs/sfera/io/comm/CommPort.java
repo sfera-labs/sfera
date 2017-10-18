@@ -23,6 +23,8 @@
 package cc.sferalabs.sfera.io.comm;
 
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,10 +62,14 @@ public abstract class CommPort {
 	public static final int FLOWCONTROL_XONXOFF = SerialPort.FLOWCONTROL_XONXOFF_IN
 			| SerialPort.FLOWCONTROL_XONXOFF_OUT;
 
+	public static final Map<String, CommPort> openPorts = new HashMap<>();
+
 	private final String portName;
+	private int openCount = 1;
 
 	/**
-	 * @param portName the port name
+	 * @param portName
+	 *            the port name
 	 */
 	protected CommPort(String portName) {
 		this.portName = portName;
@@ -79,9 +85,11 @@ public abstract class CommPort {
 	}
 
 	/**
-	 * Creates a {@code CommPort} and opens the connection. It first tries
-	 * opening a local port with the specified {@code portName}, if it fails,
-	 * tries to use {@code portName} as a {@literal <}hostname{@literal >}:
+	 * If a {@code CommPort} with the specified {@code portName} has been
+	 * previously opened, it is returned, otherwise it creates a
+	 * {@code CommPort} and opens the connection. It first tries opening a local
+	 * port with the specified {@code portName}, if it fails, tries to use
+	 * {@code portName} as a {@literal <}hostname{@literal >}:
 	 * {@literal <}port{@literal >} pair for an IP/serial gateway and connects
 	 * to it.
 	 * 
@@ -91,13 +99,19 @@ public abstract class CommPort {
 	 *            the format {@literal <}hostname{@literal >}:{@literal <}port
 	 *            {@literal >} (e.g. "192.168.1.150:4040" or
 	 *            "port.example.com:5001").
-	 * @return the created {@code CommPort}
+	 * @return the {@code CommPort} corresponding to the specified name
 	 * @throws CommPortException
 	 *             if an error occurs when creating or opening the port
 	 */
-	public static CommPort open(String portName) throws CommPortException {
+	public static synchronized CommPort open(String portName) throws CommPortException {
+		CommPort commPort = openPorts.get(portName);
+		if (commPort != null) {
+			logger.debug("Returning already open port '{}'", portName);
+			commPort.openCount++;
+			return commPort;
+		}
+
 		logger.debug("Trying getting local port '{}'", portName);
-		CommPort commPort = null;
 		try {
 			commPort = new LocalCommPort(portName);
 		} catch (CommPortException e) {
@@ -113,7 +127,24 @@ public abstract class CommPort {
 			throw new CommPortException("could not open port " + portName);
 		}
 		logger.debug("Comm port '{}' open", portName);
+		openPorts.put(portName, commPort);
 		return commPort;
+	}
+
+	/**
+	 * Decreases the count of the {@link CommPort#open(String)} callers that
+	 * have been returned this {@code CommPort}. If zero is reached, the port is
+	 * {@link CommPort#close() closed}.
+	 * 
+	 * @throws CommPortException
+	 *             if an error occurs when closing the port
+	 */
+	public synchronized void release() throws CommPortException {
+		openCount--;
+		if (openCount <= 0) {
+			close();
+			openPorts.remove(portName);
+		}
 	}
 
 	/**
