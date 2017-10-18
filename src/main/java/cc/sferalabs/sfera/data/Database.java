@@ -59,7 +59,7 @@ public class Database extends Node implements AutoStartService, EventListener {
 
 	private static final String DB_DIR = "data/db/";
 	private static final String DB_FILE = DB_DIR + "db";
-	private static final String DB_PROPERTIES = ";hsqldb.write_delay_millis=100";
+	private static final String DB_PROPERTIES = ";hsqldb.write_delay_millis=100;hsqldb.lock_file=false";
 	private static final String TABLE_NAME = "key_value";
 
 	private static Database instance;
@@ -86,6 +86,13 @@ public class Database extends Node implements AutoStartService, EventListener {
 		return instance;
 	}
 
+	/**
+	 * @return a connection to the system database
+	 */
+	public static Connection getConnection() {
+		return dbConnection;
+	}
+
 	@Override
 	public void init() throws Exception {
 		synchronized (dbLock) {
@@ -96,8 +103,8 @@ public class Database extends Node implements AutoStartService, EventListener {
 				Class.forName("org.hsqldb.jdbc.JDBCDriver");
 				logger.debug("Connecting to database...");
 
-				dbConnection = DriverManager.getConnection(
-						"jdbc:hsqldb:file:" + DB_FILE + DB_PROPERTIES, user, password);
+				dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:" + DB_FILE + DB_PROPERTIES, user,
+						password);
 
 				logger.debug("Initializing database...");
 
@@ -107,14 +114,10 @@ public class Database extends Node implements AutoStartService, EventListener {
 				create_table_stmt.execute("CREATE CACHED TABLE IF NOT EXISTS " + TABLE_NAME
 						+ " (key VARCHAR(512) PRIMARY KEY, val VARCHAR(1024) NOT NULL)");
 
-				insert_stmt = dbConnection.prepareStatement(
-						"INSERT INTO " + TABLE_NAME + " (key, val) values (?, ?)");
-				update_stmt = dbConnection
-						.prepareStatement("UPDATE " + TABLE_NAME + " SET val = ? WHERE key = ?");
-				delete_stmt = dbConnection
-						.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE key = ?");
-				select_stmt = dbConnection
-						.prepareStatement("SELECT val FROM " + TABLE_NAME + " WHERE key = ?");
+				insert_stmt = dbConnection.prepareStatement("INSERT INTO " + TABLE_NAME + " (key, val) values (?, ?)");
+				update_stmt = dbConnection.prepareStatement("UPDATE " + TABLE_NAME + " SET val = ? WHERE key = ?");
+				delete_stmt = dbConnection.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE key = ?");
+				select_stmt = dbConnection.prepareStatement("SELECT val FROM " + TABLE_NAME + " WHERE key = ?");
 
 				logger.info("Database initialized");
 			}
@@ -306,8 +309,8 @@ public class Database extends Node implements AutoStartService, EventListener {
 						FilesUtil.delete(tmp);
 					} catch (NoSuchFileException e) {
 					}
-					dbConnection.createStatement().execute(
-							"backup database to '" + tmp.toString() + "/' not blocking as files");
+					dbConnection.createStatement()
+							.execute("backup database to '" + tmp.toString() + "/' not blocking as files");
 					Path backup = Paths.get(DB_DIR, "backup");
 					try {
 						FilesUtil.delete(backup);
