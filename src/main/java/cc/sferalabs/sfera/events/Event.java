@@ -97,5 +97,12 @@ public interface Event {
 	 * @return the simple-form value of this event
 	 */
 	public Object getSimpleValue();
+	
+	/**
+	 * Returns whether this event is local only (i.e. not reported by the Web API).
+	 *  
+	 * @return {@code true} if this event is local, {@code false} otherwise
+	 */
+	public boolean isLoacal();
 
 }
