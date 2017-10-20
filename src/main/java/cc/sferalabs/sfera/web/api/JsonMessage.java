@@ -24,6 +24,7 @@ package cc.sferalabs.sfera.web.api;
 
 import java.util.Set;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -109,9 +110,11 @@ public class JsonMessage {
 	 * Returns this JSON message in string format.
 	 * 
 	 * @return this JSON message in string format
+	 * @throws JSONException
+	 *             If the object contains an invalid number
 	 */
-	protected String toJsonString() {
-		return obj.toString();
+	protected String toJsonString() throws JSONException {
+		return obj.toString(0);
 	}
 
 }

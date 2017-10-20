@@ -254,7 +254,7 @@
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-			<version>20151123</version>
+			<version>20170516</version>
 		</dependency>
 		<dependency>
 			<groupId>org.yaml</groupId>

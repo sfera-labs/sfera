@@ -93,8 +93,7 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 	 *            the responses timeout
 	 */
 	ApiSocket(ServletUpgradeRequest request, long pingInterval, long respTimeout) {
-		this.originalRequest = ((UpgradeHttpServletRequest) request.getHttpServletRequest())
-				.getHttpServletRequest();
+		this.originalRequest = ((UpgradeHttpServletRequest) request.getHttpServletRequest()).getHttpServletRequest();
 		this.hostname = request.getRemoteHostName();
 		String connectionId = originalRequest.getParameter("connectionId");
 		session = originalRequest.getSession();
@@ -232,6 +231,7 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 						nodesSubscription.destroy();
 					}
 					nodesSubscription = new WsEventListener(this, nodes, connectionId);
+					nodesSubscription.sendCurrentSate();
 					ok = true;
 				}
 				if (files != null) {
@@ -272,8 +272,7 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 				}
 				String value = message.get("value").toString();
 				try {
-					WebApiEvent remoteEvent = new WebApiEvent(id, value, originalRequest,
-							connectionId);
+					WebApiEvent remoteEvent = new WebApiEvent(id, value, originalRequest, connectionId);
 					Bus.post(remoteEvent);
 					reply.sendResult("ok");
 				} catch (Exception e) {
@@ -363,6 +362,9 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 	 *             if unable to send the text message
 	 */
 	void send(String text) throws IOException {
+		if (text == null) {
+			throw new NullPointerException("null text");
+		}
 		RemoteEndpoint remote = getRemote();
 		if (remote != null) {
 			// FIXME this log creates a recursion when using

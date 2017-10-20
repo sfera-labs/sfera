@@ -57,7 +57,12 @@ class WsEventListener extends ConnectionEventIdSpecListener {
 	WsEventListener(ApiSocket socket, String eventIdSpec, String connectionId) {
 		super(eventIdSpec, connectionId);
 		this.socket = socket;
+	}
 
+	/**
+	 * 
+	 */
+	void sendCurrentSate() {
 		List<Event> evs = new ArrayList<>();
 		for (Event e : Bus.getCurrentState().values()) {
 			if (matches(e)) {
