@@ -235,6 +235,7 @@ public class IPCommPort extends CommPort {
 
 	@Override
 	public void close() throws CommPortException {
+		super.close();
 		closed = true;
 		try {
 			removeListener();

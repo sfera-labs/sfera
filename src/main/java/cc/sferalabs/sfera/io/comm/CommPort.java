@@ -143,7 +143,6 @@ public abstract class CommPort {
 		openCount--;
 		if (openCount <= 0) {
 			close();
-			openPorts.remove(portName);
 		}
 	}
 
@@ -265,7 +264,10 @@ public abstract class CommPort {
 	 * @throws CommPortException
 	 *             if an error occurs
 	 */
-	public abstract void close() throws CommPortException;
+	public void close() throws CommPortException {
+		openPorts.remove(portName);
+		openCount = 0;
+	}
 
 	/**
 	 * <p>

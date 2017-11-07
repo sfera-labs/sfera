@@ -178,6 +178,7 @@ public class LocalCommPort extends CommPort {
 
 	@Override
 	public void close() throws CommPortException {
+		super.close();
 		try {
 			removeListener();
 		} catch (Exception e) {
