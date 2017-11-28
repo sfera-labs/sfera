@@ -103,32 +103,34 @@ public abstract class CommPort {
 	 * @throws CommPortException
 	 *             if an error occurs when creating or opening the port
 	 */
-	public static synchronized CommPort open(String portName) throws CommPortException {
-		CommPort commPort = openPorts.get(portName);
-		if (commPort != null) {
-			logger.debug("Returning already open port '{}'", portName);
-			commPort.openCount++;
+	public static CommPort open(String portName) throws CommPortException {
+		synchronized (openPorts) {
+			CommPort commPort = openPorts.get(portName);
+			if (commPort != null) {
+				logger.debug("Returning already open port '{}'", portName);
+				commPort.openCount++;
+				return commPort;
+			}
+
+			logger.debug("Trying getting local port '{}'", portName);
+			try {
+				commPort = new LocalCommPort(portName);
+			} catch (CommPortException e) {
+				logger.debug("Error getting local port '{}': {}", portName, e.getLocalizedMessage());
+				try {
+					logger.debug("Trying getting IP port '{}'", portName);
+					commPort = new IPCommPort(portName);
+				} catch (CommPortException e1) {
+					logger.debug("Error getting IP port '{}': {}", portName, e.getLocalizedMessage());
+				}
+			}
+			if (commPort == null) {
+				throw new CommPortException("could not open port " + portName);
+			}
+			logger.debug("Comm port '{}' open", portName);
+			openPorts.put(portName, commPort);
 			return commPort;
 		}
-
-		logger.debug("Trying getting local port '{}'", portName);
-		try {
-			commPort = new LocalCommPort(portName);
-		} catch (CommPortException e) {
-			logger.debug("Error getting local port '{}': {}", portName, e.getLocalizedMessage());
-			try {
-				logger.debug("Trying getting IP port '{}'", portName);
-				commPort = new IPCommPort(portName);
-			} catch (CommPortException e1) {
-				logger.debug("Error getting IP port '{}': {}", portName, e.getLocalizedMessage());
-			}
-		}
-		if (commPort == null) {
-			throw new CommPortException("could not open port " + portName);
-		}
-		logger.debug("Comm port '{}' open", portName);
-		openPorts.put(portName, commPort);
-		return commPort;
 	}
 
 	/**
@@ -264,8 +266,10 @@ public abstract class CommPort {
 	 * @throws CommPortException
 	 *             if an error occurs
 	 */
-	public void close() throws CommPortException {
-		openPorts.remove(portName);
+	public synchronized void close() throws CommPortException {
+		synchronized (openPorts) {
+			openPorts.remove(portName);
+		}
 		openCount = 0;
 	}
 
