@@ -32,7 +32,6 @@ import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchProviderException;
-import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -152,8 +151,9 @@ public class WebServer implements AutoStartService {
 					sslContextFactory.setKeyManagerPassword(keyManagerPassword);
 				}
 
-				if (!checkKeyStoreFile(sslContextFactory, keyStorePassword)) {
-					generateKeyStoreFile();
+				if (!checkKeyStoreFile(sslContextFactory, keyStorePassword, keyManagerPassword)) {
+					generateKeyStoreFile(keyStorePassword,
+							keyManagerPassword != null ? keyManagerPassword : DEFAULT_KEY_STORE_PASSWORD);
 				}
 
 				sslContextFactory.addExcludeProtocols(EXCLUDED_PROTOCOLS);
@@ -215,41 +215,46 @@ public class WebServer implements AutoStartService {
 	 * 
 	 * @param sslContextFactory
 	 * @param keyStorePassword
+	 * @param keyManagerPassword
 	 * @return
 	 * @throws KeyStoreException
 	 * @throws NoSuchProviderException
 	 */
-	private boolean checkKeyStoreFile(SslContextFactory sslContextFactory, String keyStorePassword) {
-		try {
-			Path keystorePath = Paths.get(KEYSTORE_PATH);
-			if (!Files.exists(keystorePath)) {
-				logger.warn("SSL key store file not found");
-				return false;
-			}
+	private boolean checkKeyStoreFile(SslContextFactory sslContextFactory, String keyStorePassword,
+			String keyManagerPassword) throws KeyStoreException, NoSuchProviderException {
+		Path keystorePath = Paths.get(KEYSTORE_PATH);
+		if (!Files.exists(keystorePath)) {
+			logger.warn("SSL keystore file not found");
+			return false;
+		}
 
-			String storeProvider = sslContextFactory.getKeyStoreProvider();
-			String storeType = sslContextFactory.getKeyStoreType();
-			KeyStore keystore;
-			if (storeProvider != null) {
-				keystore = KeyStore.getInstance(storeType, storeProvider);
-			} else {
-				keystore = KeyStore.getInstance(storeType);
+		String storeProvider = sslContextFactory.getKeyStoreProvider();
+		String storeType = sslContextFactory.getKeyStoreType();
+		KeyStore keystore;
+		if (storeProvider != null) {
+			keystore = KeyStore.getInstance(storeType, storeProvider);
+		} else {
+			keystore = KeyStore.getInstance(storeType);
+		}
+		Resource store = sslContextFactory.getKeyStoreResource();
+		try (InputStream inStream = store.getInputStream()) {
+			keystore.load(inStream, keyStorePassword.toCharArray());
+			if (keyManagerPassword != null) {
+				keystore.getKey(keystore.aliases().nextElement(), keyManagerPassword.toCharArray());
 			}
-			Resource store = sslContextFactory.getKeyStoreResource();
-			try (InputStream inStream = store.getInputStream()) {
-				keystore.load(inStream, keyStorePassword == null ? null : keyStorePassword.toCharArray());
-			} catch (CertificateException | IOException e) {
-				logger.warn("SSL key store file corrupted");
+		} catch (Exception e) {
+			logger.warn("SSL keystore file tampered with, or incorrect password", e);
+			try {
 				try {
 					Files.move(keystorePath,
 							keystorePath.resolveSibling(keystorePath.getFileName().toString() + "-corrupted"));
 				} catch (FileAlreadyExistsException e1) {
+					// preserve the old corrupted file
 					Files.delete(keystorePath);
 				}
-				return false;
+			} catch (Exception e2) {
 			}
-		} catch (Exception e) {
-			logger.error("Error checking key store file", e);
+			return false;
 		}
 
 		return true;
@@ -257,16 +262,19 @@ public class WebServer implements AutoStartService {
 
 	/**
 	 * 
+	 * @param keyStorePassword
+	 * @param keyManagerPassword
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	private void generateKeyStoreFile() throws IOException, InterruptedException {
+	private void generateKeyStoreFile(String keyStorePassword, String keyManagerPassword)
+			throws IOException, InterruptedException {
 		logger.info("Generating self-signed certificate");
 		Path keystorePath = Paths.get(KEYSTORE_PATH);
 		Files.createDirectories(keystorePath.getParent());
 		String[] cmd = { "keytool", "-genkeypair", "-dname", "cn=Sfera Server generated", "-alias", "sferaservergen",
-				"-keystore", KEYSTORE_PATH, "-keypass", DEFAULT_KEY_STORE_PASSWORD, "-storepass",
-				DEFAULT_KEY_STORE_PASSWORD, "-validity", "73000", "-keyalg", "RSA", "-keysize", "2048" };
+				"-keystore", KEYSTORE_PATH, "-keypass", keyManagerPassword, "-storepass", keyStorePassword, "-validity",
+				"73000", "-keyalg", "RSA", "-keysize", "2048" };
 		Process p = new ProcessBuilder(cmd).start();
 		if (p.waitFor() != 0) {
 			throw new IOException("keytool termination error");
