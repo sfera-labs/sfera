@@ -88,8 +88,8 @@ public abstract class Driver extends Node {
 					log.info("Starting...");
 					config = new Configuration(configFile);
 					try {
-						configWatcherId = FilesWatcher.register(config.getRealPath(),
-								"Driver config reload", this::reloadConfiguration, false, false);
+						configWatcherId = FilesWatcher.register(config.getRealPath(), "Driver config reload",
+								this::reloadConfiguration, false, false);
 					} catch (IOException e) {
 						log.error("Error watching config file", e);
 					}
@@ -188,8 +188,8 @@ public abstract class Driver extends Node {
 			Class<? extends Driver> clazz = getClass();
 			String packageName = clazz.getPackage().getName() + ".events";
 			String className = clazz.getSimpleName() + "Event";
-			driverEventsInterface = (Class<? extends Event>) Class
-					.forName(packageName + "." + className);
+			driverEventsInterface = (Class<? extends Event>) Class.forName(packageName + "." + className, true,
+					getClass().getClassLoader());
 		} catch (Exception e) {
 			driverEventsInterface = null;
 		}
@@ -205,12 +205,12 @@ public abstract class Driver extends Node {
 	private void postDriverStateEvent(String state) {
 		StringEvent wrappedEvent = new StringEvent(this, "driverState", state) {
 		};
-		Event ev = (Event) java.lang.reflect.Proxy.newProxyInstance(getClass().getClassLoader(),
-				driverEventsInterfaces, new InvocationHandler() {
+		Event ev = (Event) java.lang.reflect.Proxy.newProxyInstance(getClass().getClassLoader(), driverEventsInterfaces,
+				new InvocationHandler() {
 
 					@Override
-					public Object invoke(Object proxy, java.lang.reflect.Method method,
-							Object[] args) throws java.lang.Throwable {
+					public Object invoke(Object proxy, java.lang.reflect.Method method, Object[] args)
+							throws java.lang.Throwable {
 						Method wrappedMethod = wrappedEvent.getClass().getMethod(method.getName(),
 								method.getParameterTypes());
 						return wrappedMethod.invoke(wrappedEvent, args);
