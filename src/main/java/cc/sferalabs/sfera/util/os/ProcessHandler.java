@@ -48,6 +48,15 @@ public class ProcessHandler {
 	}
 
 	/**
+	 * Returns the handled process.
+	 * 
+	 * @return the handled process
+	 */
+	public Process getProcess() {
+		return process;
+	}
+
+	/**
 	 * Set the listener for this process. To be called before
 	 * {@link ProcessHandler#start() start()}.
 	 * 
