@@ -116,15 +116,16 @@ public class IPCommPort extends CommPort {
 		}
 
 	}
-
+	
 	/**
 	 * @param portName
-	 *            local port name
-	 * @throws CommPortException
-	 *             if an error occurs when creating or opening the port
 	 */
-	IPCommPort(String portName) throws CommPortException {
+	protected IPCommPort(String portName) {
 		super(portName);
+	}
+
+	@Override
+	protected void doOpen() throws CommPortException {
 		int colon = portName.indexOf(':');
 		if (colon < 0) {
 			throw new CommPortException("port name format error");
@@ -234,8 +235,7 @@ public class IPCommPort extends CommPort {
 	}
 
 	@Override
-	public void close() throws CommPortException {
-		super.close();
+	protected void doClose() throws CommPortException {
 		closed = true;
 		try {
 			removeListener();

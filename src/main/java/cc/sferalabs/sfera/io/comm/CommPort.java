@@ -62,10 +62,10 @@ public abstract class CommPort {
 	public static final int FLOWCONTROL_XONXOFF = SerialPort.FLOWCONTROL_XONXOFF_IN
 			| SerialPort.FLOWCONTROL_XONXOFF_OUT;
 
-	public static final Map<String, CommPort> openPorts = new HashMap<>();
+	private static final Map<String, CommPort> openLocalPorts = new HashMap<>();
 
-	private final String portName;
-	private int openCount = 1;
+	protected final String portName;
+	private int openCount = 0;
 
 	/**
 	 * @param portName
@@ -85,57 +85,88 @@ public abstract class CommPort {
 	}
 
 	/**
-	 * If a {@code CommPort} with the specified {@code portName} has been
-	 * previously opened, it is returned, otherwise it creates a
-	 * {@code CommPort} and opens the connection. It first tries opening a local
-	 * port with the specified {@code portName}, if it fails, tries to use
-	 * {@code portName} as a {@literal <}hostname{@literal >}:
-	 * {@literal <}port{@literal >} pair for an IP/serial gateway and connects
-	 * to it.
+	 * Opens a connection to the specified port. If the specified {@code portName}
+	 * has the format {@literal <}hostname{@literal >}:
+	 * {@literal <}port{@literal >}, it is considered to be an IP/serial gateway.
+	 * Otherwise tries opening a local port with the specified {@code portName}. In
+	 * case of a local port, if one with the specified {@code portName} has been
+	 * previously open, the same object is returned.
 	 * 
 	 * @param portName
-	 *            the port to connect to. It can be the name of a local serial
-	 *            port (e.g. "/dev/ttyS0") or the address of a remote gateway in
-	 *            the format {@literal <}hostname{@literal >}:{@literal <}port
+	 *            the port to connect to. It can be the name of a local serial port
+	 *            (e.g. "/dev/ttyS0") or the address of a remote gateway in the
+	 *            format {@literal <}hostname{@literal >}:{@literal <}port
 	 *            {@literal >} (e.g. "192.168.1.150:4040" or
 	 *            "port.example.com:5001").
-	 * @return the {@code CommPort} corresponding to the specified name
+	 * @return the open {@code CommPort}
 	 * @throws CommPortException
-	 *             if an error occurs when creating or opening the port
+	 *             if an error occurs when opening the port
 	 */
 	public static CommPort open(String portName) throws CommPortException {
-		synchronized (openPorts) {
-			CommPort commPort = openPorts.get(portName);
-			if (commPort != null) {
-				logger.debug("Returning already open port '{}'", portName);
-				commPort.openCount++;
+		portName = portName.trim();
+		CommPort commPort = null;
+
+		if (isIpPort(portName)) {
+			commPort = new IPCommPort(portName);
+			logger.debug("Created IP comm port '{}'", portName);
+		} else {
+			synchronized (openLocalPorts) {
+				commPort = openLocalPorts.get(portName);
+				if (commPort == null) {
+					commPort = new LocalCommPort(portName);
+					logger.debug("Created local comm port '{}'", portName);
+				}
+				openLocalPorts.put(portName, commPort);
+			}
+		}
+
+		synchronized (commPort) {
+			if (commPort.openCount > 0) {
 				return commPort;
 			}
-
-			logger.debug("Trying getting local port '{}'", portName);
 			try {
-				commPort = new LocalCommPort(portName);
+				commPort.doOpen();
+				commPort.openCount++;
+				logger.debug("Comm port '{}' open", portName);
 			} catch (CommPortException e) {
-				logger.debug("Error getting local port '{}': {}", portName, e.getLocalizedMessage());
-				try {
-					logger.debug("Trying getting IP port '{}'", portName);
-					commPort = new IPCommPort(portName);
-				} catch (CommPortException e1) {
-					logger.debug("Error getting IP port '{}': {}", portName, e.getLocalizedMessage());
+				logger.debug("Error opening comm port '{}': {}", portName, e.getLocalizedMessage());
+				if (commPort instanceof LocalCommPort) {
+					synchronized (openLocalPorts) {
+						openLocalPorts.remove(portName);
+					}
 				}
+				throw e;
 			}
-			if (commPort == null) {
-				throw new CommPortException("could not open port " + portName);
-			}
-			logger.debug("Comm port '{}' open", portName);
-			openPorts.put(portName, commPort);
 			return commPort;
 		}
 	}
 
 	/**
-	 * Decreases the count of the {@link CommPort#open(String)} callers that
-	 * have been returned this {@code CommPort}. If zero is reached, the port is
+	 * 
+	 */
+	protected abstract void doOpen() throws CommPortException;
+
+	/**
+	 * @param portName
+	 * @return
+	 */
+	private static boolean isIpPort(String portName) {
+		int colon = portName.indexOf(':');
+		if (colon < 0) {
+			return false;
+		}
+		try {
+			String portNum = portName.substring(colon + 1);
+			Integer.parseInt(portNum);
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	/**
+	 * Decreases the count of the {@link CommPort#open(String)} callers that have
+	 * been returned this {@code CommPort}. If zero is reached, the port is
 	 * {@link CommPort#close() closed}.
 	 * 
 	 * @throws CommPortException
@@ -181,8 +212,7 @@ public abstract class CommPort {
 	public abstract void clear() throws CommPortException;
 
 	/**
-	 * Sets the specified {@code CommPortListener} as the listener for this
-	 * port.
+	 * Sets the specified {@code CommPortListener} as the listener for this port.
 	 * 
 	 * @param listener
 	 *            the {@code CommPortListener} to be set
@@ -194,11 +224,10 @@ public abstract class CommPort {
 	/**
 	 * Removes the previously set listener.
 	 * <p>
-	 * This method should be called from the
-	 * {@link CommPortListener#onRead(byte[])} method implementation to assure
-	 * that subsequent data is not consumed from the listener. Otherwise, after
-	 * calling this method, the listener may still consume some data and call
-	 * {@link CommPortListener#onRead(byte[])} once more.
+	 * This method should be called from the {@link CommPortListener#onRead(byte[])}
+	 * method implementation to assure that subsequent data is not consumed from the
+	 * listener. Otherwise, after calling this method, the listener may still
+	 * consume some data and call {@link CommPortListener#onRead(byte[])} once more.
 	 * </p>
 	 * 
 	 * @throws CommPortException
@@ -236,8 +265,8 @@ public abstract class CommPort {
 	public abstract void writeBytes(byte[] bytes) throws CommPortException;
 
 	/**
-	 * Writes all the bytes in the specified array to this port. For each value
-	 * in the array the byte sent corresponds to its eight low-order bits.
+	 * Writes all the bytes in the specified array to this port. For each value in
+	 * the array the byte sent corresponds to its eight low-order bits.
 	 * 
 	 * @param bytes
 	 *            the data to write
@@ -247,8 +276,8 @@ public abstract class CommPort {
 	public abstract void writeBytes(int[] bytes) throws CommPortException;
 
 	/**
-	 * Writes the bytes resulting from encoding the specified {@code string}
-	 * using the specified {@link Charset} to this port.
+	 * Writes the bytes resulting from encoding the specified {@code string} using
+	 * the specified {@link Charset} to this port.
 	 * 
 	 * @param string
 	 *            the data to write
@@ -260,29 +289,34 @@ public abstract class CommPort {
 	public abstract void writeString(String string, Charset charset) throws CommPortException;
 
 	/**
-	 * Removes the eventually added listener and closes the connection to the
-	 * port.
+	 * Removes the eventually added listener and closes the connection to the port.
 	 * 
 	 * @throws CommPortException
 	 *             if an error occurs
 	 */
 	public synchronized void close() throws CommPortException {
-		synchronized (openPorts) {
-			openPorts.remove(portName);
+		doClose();
+		synchronized (openLocalPorts) {
+			openLocalPorts.remove(portName);
 		}
 		openCount = 0;
 	}
 
 	/**
+	 * 
+	 */
+	protected abstract void doClose() throws CommPortException;
+
+	/**
 	 * <p>
 	 * Reads up to {@code len} bytes of data from the input stream into the
-	 * specified byte array starting from the index specified by {@code offset}.
-	 * An attempt is made to read as many as {@code len} bytes, but a smaller
-	 * number may be read. The number of bytes actually read is returned.
+	 * specified byte array starting from the index specified by {@code offset}. An
+	 * attempt is made to read as many as {@code len} bytes, but a smaller number
+	 * may be read. The number of bytes actually read is returned.
 	 * </p>
 	 * <p>
-	 * This method blocks until input data is available or it is no longer
-	 * possible to read data.
+	 * This method blocks until input data is available or it is no longer possible
+	 * to read data.
 	 * </p>
 	 * <p>
 	 * Elements {@code b[0]} through {@code b[offset]} and elements
@@ -292,12 +326,11 @@ public abstract class CommPort {
 	 * @param b
 	 *            the buffer into which the data is read
 	 * @param offset
-	 *            the start offset in array {@code b} at which the data is
-	 *            written
+	 *            the start offset in array {@code b} at which the data is written
 	 * @param len
 	 *            the maximum number of bytes to read
-	 * @return the total number of bytes read into the buffer, or -1 if it was
-	 *         not possible to read data
+	 * @return the total number of bytes read into the buffer, or -1 if it was not
+	 *         possible to read data
 	 * @throws CommPortException
 	 *             if an error occurs
 	 * @throws NullPointerException
@@ -309,21 +342,20 @@ public abstract class CommPort {
 	public abstract int readBytes(byte[] b, int offset, int len) throws CommPortException;
 
 	/**
-	 * Reads data from the input stream as specified by {@link #readBytes}
-	 * waiting up to the specified time. If the timeout expires before
-	 * {@code len} bytes are read, a {@link CommPortTimeoutException} is raised.
+	 * Reads data from the input stream as specified by {@link #readBytes} waiting
+	 * up to the specified time. If the timeout expires before {@code len} bytes are
+	 * read, a {@link CommPortTimeoutException} is raised.
 	 * 
 	 * @param b
 	 *            the buffer into which the data is read
 	 * @param offset
-	 *            the start offset in array {@code b} at which the data is
-	 *            written
+	 *            the start offset in array {@code b} at which the data is written
 	 * @param len
 	 *            the maximum number of bytes to read
 	 * @param timeoutMillis
 	 *            the specified timeout, in milliseconds
-	 * @return the total number of bytes read into the buffer, or -1 if it was
-	 *         not possible to read data
+	 * @return the total number of bytes read into the buffer, or -1 if it was not
+	 *         possible to read data
 	 * @throws CommPortTimeoutException
 	 *             if the timeout expires
 	 * @throws CommPortException
