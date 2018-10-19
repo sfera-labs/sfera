@@ -24,16 +24,17 @@ package cc.sferalabs.sfera.drivers;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EventListener;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
@@ -51,8 +52,6 @@ import cc.sferalabs.sfera.util.files.FilesWatcher;
  * 
  * @author Giampiero Baggiani
  *
- * @version 1.0.0
- *
  */
 public abstract class Drivers {
 
@@ -60,7 +59,7 @@ public abstract class Drivers {
 	private static final String CONFIG_DIR = "drivers";
 	private static final Logger logger = LoggerFactory.getLogger(Drivers.class);
 
-	private static final Map<String, Driver> drivers = new HashMap<>();
+	private static final Map<String, Driver> drivers = new ConcurrentHashMap<>();
 
 	/**
 	 * Instantiate and starts all drivers defined in configuration.
@@ -107,14 +106,8 @@ public abstract class Drivers {
 										+ driverClass;
 							}
 							Class<?> clazz = PluginsClassLoader.getClass(driverClass);
-							Constructor<?> constructor = clazz.getConstructor(new Class[] { String.class });
-							Driver driverInstance = (Driver) constructor.newInstance(driverId);
+							Driver driverInstance = instantiateDriver(clazz, driverId);
 							driverInstance.setConfigFile(CONFIG_DIR + "/" + fileName);
-							drivers.put(driverId, driverInstance);
-							if (driverInstance instanceof EventListener) {
-								Bus.register((EventListener) driverInstance);
-							}
-							logger.info("Driver '{}' of type '{}' instantiated", driverId, driverClass);
 							driverInstance.start();
 						} catch (Throwable e) {
 							logger.error("Error instantiating driver '" + driverId + "'", e);
@@ -132,7 +125,7 @@ public abstract class Drivers {
 		Iterator<Driver> it = drivers.values().iterator();
 		while (it.hasNext()) {
 			Driver d = it.next();
-			if (!inConfig.contains(d.getId())) {
+			if (!inConfig.contains(d.getId()) && d.getConfigFile() != null) {
 				logger.info("Configuration file for driver '{}' deleted", d.getId());
 				toRemove.add(d);
 			}
@@ -146,6 +139,44 @@ public abstract class Drivers {
 	}
 
 	/**
+	 * @param clazz
+	 * @param driverId
+	 * @return
+	 * @throws NoSuchMethodException
+	 * @throws SecurityException
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws InvocationTargetException
+	 */
+	public static Driver instantiateDriver(Class<?> clazz, String driverId)
+			throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException {
+		Constructor<?> constructor = clazz.getConstructor(new Class[] { String.class });
+		Driver driverInstance = (Driver) constructor.newInstance(driverId);
+		if (driverInstance instanceof EventListener) {
+			Bus.register((EventListener) driverInstance);
+		}
+		drivers.put(driverId, driverInstance);
+		logger.info("Driver '{}' of type '{}' instantiated", driverId, clazz.getName());
+		return driverInstance;
+	}
+	
+	/**
+	 * @param driverId
+	 * @return
+	 */
+	public static boolean destroyDriver(String driverId) {
+		Driver d = drivers.remove(driverId);
+		if (d == null) {
+			return false;
+		}
+		d.quit();
+		d.destroy();
+		return true;
+	}
+
+	/**
 	 * Quits all the drivers.
 	 */
 	public synchronized static void quit() {
@@ -155,8 +186,8 @@ public abstract class Drivers {
 	}
 
 	/**
-	 * Waits for the termination of all the drivers. If the timeout expires
-	 * before termination a TimeoutException is thrown.
+	 * Waits for the termination of all the drivers. If the timeout expires before
+	 * termination a TimeoutException is thrown.
 	 * 
 	 * @param timeout
 	 *            timeout in milliseconds
@@ -182,8 +213,8 @@ public abstract class Drivers {
 	 * 
 	 * @param id
 	 *            the ID of the driver to be returned
-	 * @return the driver instance with the specified ID or {@code null} if no
-	 *         such driver is found
+	 * @return the driver instance with the specified ID or {@code null} if no such
+	 *         driver is found
 	 */
 	public synchronized static Driver getDriver(String id) {
 		return drivers.get(id);
