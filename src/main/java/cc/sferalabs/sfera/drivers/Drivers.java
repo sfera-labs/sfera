@@ -139,15 +139,24 @@ public abstract class Drivers {
 	}
 
 	/**
+	 * 
 	 * @param clazz
+	 *            the driver class
 	 * @param driverId
-	 * @return
+	 *            the driver ID
+	 * @return the driver instance
 	 * @throws NoSuchMethodException
+	 *             if thrown when constructing the class
 	 * @throws SecurityException
+	 *             if thrown when instantiating the class
 	 * @throws InstantiationException
+	 *             if thrown when instantiating the class
 	 * @throws IllegalAccessException
+	 *             if thrown when instantiating the class
 	 * @throws IllegalArgumentException
+	 *             if thrown when instantiating the class
 	 * @throws InvocationTargetException
+	 *             if thrown when instantiating the class
 	 */
 	public static Driver instantiateDriver(Class<?> clazz, String driverId)
 			throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException,
@@ -161,17 +170,17 @@ public abstract class Drivers {
 		logger.info("Driver '{}' of type '{}' instantiated", driverId, clazz.getName());
 		return driverInstance;
 	}
-	
+
 	/**
 	 * @param driverId
-	 * @return
+	 *            the driver ID
+	 * @return true if driver was found, false otherwise
 	 */
 	public static boolean destroyDriver(String driverId) {
 		Driver d = drivers.remove(driverId);
 		if (d == null) {
 			return false;
 		}
-		d.quit();
 		d.destroy();
 		return true;
 	}

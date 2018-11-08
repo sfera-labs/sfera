@@ -272,6 +272,12 @@ public abstract class Driver extends Node {
 			future.cancel(true);
 		}
 	}
+	
+	@Override
+	public void destroy() {
+		quit();
+		super.destroy();
+	}
 
 	/**
 	 * Stars the driver in a separate process.

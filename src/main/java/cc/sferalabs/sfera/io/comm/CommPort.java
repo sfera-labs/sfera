@@ -143,6 +143,7 @@ public abstract class CommPort {
 
 	/**
 	 * 
+	 * @throws CommPortException if an error occurs
 	 */
 	protected abstract void doOpen() throws CommPortException;
 
@@ -304,6 +305,7 @@ public abstract class CommPort {
 
 	/**
 	 * 
+	 * @throws CommPortException if an error occurs 
 	 */
 	protected abstract void doClose() throws CommPortException;
 

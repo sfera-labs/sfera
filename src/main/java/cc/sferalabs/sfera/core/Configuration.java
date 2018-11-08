@@ -88,7 +88,6 @@ public class Configuration {
 	 * 
 	 * @param map
 	 *            the configuraiton map
-	 * @throws IOException
 	 */
 	public Configuration(Map<String, Object> map) {
 		config = map;

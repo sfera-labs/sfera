@@ -116,9 +116,10 @@ public class IPCommPort extends CommPort {
 		}
 
 	}
-	
+
 	/**
 	 * @param portName
+	 *            the port name
 	 */
 	protected IPCommPort(String portName) {
 		super(portName);

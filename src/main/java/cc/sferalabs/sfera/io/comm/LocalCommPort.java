@@ -42,9 +42,10 @@ import jssc.SerialPortTimeoutException;
 public class LocalCommPort extends CommPort {
 
 	private final SerialPort serialPort;
-	
+
 	/**
 	 * @param portName
+	 *            the port name
 	 */
 	protected LocalCommPort(String portName) {
 		super(portName);
