@@ -113,7 +113,7 @@ public class JsonMessage {
 	 * @throws JSONException
 	 *             If the object contains an invalid number
 	 */
-	protected String toJsonString() throws JSONException {
+	public String toJsonString() throws JSONException {
 		return obj.toString(0);
 	}
 

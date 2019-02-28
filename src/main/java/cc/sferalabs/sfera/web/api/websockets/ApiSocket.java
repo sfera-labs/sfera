@@ -308,7 +308,7 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 				break;
 			}
 		} catch (Throwable e) {
-			logger.warn("Error processing WebSocket message '" + message + "'", e);
+			logger.warn("Error processing WebSocket message '" + message.toJsonString() + "'", e);
 			try {
 				reply.sendErrors(new ErrorMessage(0, "Server error: " + e.getMessage()));
 			} catch (Exception e1) {
