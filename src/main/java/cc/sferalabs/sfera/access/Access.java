@@ -93,8 +93,8 @@ public class Access extends Node {
 				line = line.trim();
 				if (line.length() > 0) {
 					try {
-						String[] splitted = line.split(":");
-						String username = splitted[0];
+						String[] splitted = line.split("(?<!\\\\):");
+						String username = splitted[0].replace("\\:", ":");
 						String hashedPassword = splitted[1];
 						String salt = splitted[2];
 						String[] roles;
@@ -226,7 +226,7 @@ public class Access extends Node {
 	 * @return
 	 */
 	private static String getUserLine(User user) {
-		StringBuilder line = new StringBuilder(user.getUsername());
+		StringBuilder line = new StringBuilder(user.getUsername().replace(":", "\\:"));
 		line.append(':');
 		line.append(Base64.getEncoder().encodeToString(user.getHashedPassword()));
 		line.append(':');
