@@ -25,7 +25,9 @@
  */
 package cc.sferalabs.sfera.web;
 
+import java.util.ArrayList;
 import java.util.EventListener;
+import java.util.List;
 
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
@@ -53,22 +55,25 @@ public class HttpSessionDestroyer implements HttpSessionListener, EventListener 
 
 	private static final Logger logger = LoggerFactory.getLogger(HttpSessionDestroyer.class);
 
-	private HttpSession session;
+	private List<HttpSession> activeSessions = new ArrayList<>();
+
+	HttpSessionDestroyer() {
+		Bus.register(this);
+	}
 
 	@Override
 	public void sessionCreated(HttpSessionEvent se) {
 		logger.debug("Creted new session: {}", se.getSession().getId());
-		this.session = se.getSession();
-		Bus.register(this);
+		activeSessions.add(se.getSession());
 	}
 
 	@Subscribe
 	public void onAccessChangeEvent(AccessChangeEvent e) {
-		if (session != null) {
-			String username = (String) session.getAttribute(AuthenticationRequestWrapper.SESSION_ATTR_USERNAME);
+		for (HttpSession s : new ArrayList<>(activeSessions)) {
+			String username = (String) s.getAttribute(AuthenticationRequestWrapper.SESSION_ATTR_USERNAME);
 			if (username != null && username.equals(e.getValue())) {
 				try {
-					session.invalidate();
+					s.invalidate();
 				} catch (Exception ex) {
 				}
 			}
@@ -77,17 +82,14 @@ public class HttpSessionDestroyer implements HttpSessionListener, EventListener 
 
 	@Override
 	public void sessionDestroyed(HttpSessionEvent se) {
-		try {
-			Bus.unregister(this);
-		} catch (Exception e) {
-		}
 		HttpSession session = se.getSession();
+		this.activeSessions.remove(session);
 		ConnectionsSet connections = (ConnectionsSet) session.getAttribute(ConnectServlet.SESSION_ATTR_CONNECTIONS);
 		if (connections != null) {
 			for (Connection connection : connections.values()) {
 				connection.destroy();
 			}
 		}
-		logger.debug("Session '{}' destroyed", se.getSession().getId());
+		logger.debug("Session '{}' destroyed", session.getId());
 	}
 }
