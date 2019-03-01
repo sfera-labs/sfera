@@ -258,7 +258,8 @@ public class ApiSocket extends WebSocketAdapter {
 					reply.sendErrors(new ErrorMessage(0, "Attribute 'id' not found"));
 					return;
 				}
-				String value = message.get("value").toString();
+				Object valObj = message.get("value");
+				String value = valObj == null ? null : valObj.toString();
 				try {
 					WebApiEvent remoteEvent = new WebApiEvent(id, value, originalRequest, connectionId);
 					Bus.post(remoteEvent);
