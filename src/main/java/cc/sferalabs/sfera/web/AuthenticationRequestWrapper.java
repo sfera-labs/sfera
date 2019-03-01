@@ -42,7 +42,7 @@ import cc.sferalabs.sfera.access.User;
  */
 public class AuthenticationRequestWrapper extends HttpServletRequestWrapper {
 
-	private static final String SESSION_ATTR_USERNAME = "user";
+	static final String SESSION_ATTR_USERNAME = "user";
 
 	private User user;
 

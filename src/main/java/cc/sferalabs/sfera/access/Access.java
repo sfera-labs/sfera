@@ -87,8 +87,7 @@ public class Access extends Node {
 	public synchronized static void init() throws IOException {
 		Console.addHandler(AccessConsoleCommandHandler.INSTANCE);
 		try {
-			List<String> lines = Files.readAllLines(Paths.get(USERS_FILE_PATH),
-					StandardCharsets.UTF_8);
+			List<String> lines = Files.readAllLines(Paths.get(USERS_FILE_PATH), StandardCharsets.UTF_8);
 			int lineNum = 0;
 			for (String line : lines) {
 				line = line.trim();
@@ -108,9 +107,7 @@ public class Access extends Node {
 						users.put(u.getUsername(), u);
 						logger.debug("User '{}' loaded. Roles: {}", u.getUsername(), u.getRoles());
 					} catch (Exception e) {
-						logger.error(
-								"Error reading file '" + USERS_FILE_PATH + "' on line " + lineNum,
-								e);
+						logger.error("Error reading file '" + USERS_FILE_PATH + "' on line " + lineNum, e);
 					}
 				}
 				lineNum++;
@@ -148,15 +145,15 @@ public class Access extends Node {
 		users.put(username, u);
 		writeUsers();
 
-		triggerChangeEvent();
+		triggerChangeEvent(username);
 		logger.info("User '{}' added. Roles: {}", username, roles);
 	}
 
 	/**
 	 * 
 	 */
-	private static void triggerChangeEvent() {
-		Bus.post(new AccessChangeEvent(INSTANCE));
+	private static void triggerChangeEvent(String username) {
+		Bus.post(new AccessChangeEvent(INSTANCE, username));
 	}
 
 	/**
@@ -173,8 +170,8 @@ public class Access extends Node {
 	 * @throws UserNotFoundException
 	 *             if no user with the specified username exists
 	 */
-	public synchronized static void updateUser(String username, String plainPassword,
-			String[] roles) throws IOException, UserNotFoundException {
+	public synchronized static void updateUser(String username, String plainPassword, String[] roles)
+			throws IOException, UserNotFoundException {
 		User user = users.get(username);
 		if (user == null) {
 			throw new UserNotFoundException();
@@ -197,7 +194,7 @@ public class Access extends Node {
 		users.put(username, newUser);
 		writeUsers();
 
-		triggerChangeEvent();
+		triggerChangeEvent(username);
 		logger.info("User '{}' updated. Roles: {}", username, roles);
 	}
 
@@ -257,26 +254,25 @@ public class Access extends Node {
 	 * @throws UserNotFoundException
 	 *             if no user with the specified username exists
 	 */
-	public synchronized static void removeUser(String username)
-			throws IOException, UserNotFoundException {
+	public synchronized static void removeUser(String username) throws IOException, UserNotFoundException {
 		User removed = users.remove(username);
 		if (removed == null) {
 			throw new UserNotFoundException();
 		}
 		writeUsers();
 
-		triggerChangeEvent();
+		triggerChangeEvent(username);
 		logger.info("User '{}' removed", username);
 	}
 
 	/**
-	 * Returns the user with the specified username, or {@code null} if no user
-	 * with the specified username exists.
+	 * Returns the user with the specified username, or {@code null} if no user with
+	 * the specified username exists.
 	 * 
 	 * @param username
 	 *            the username
-	 * @return the user with the specified username, or {@code null} if no user
-	 *         with the specified username exists
+	 * @return the user with the specified username, or {@code null} if no user with
+	 *         the specified username exists
 	 * 
 	 */
 	public synchronized static User getUser(String username) {

@@ -37,10 +37,10 @@ public class AccessChangeEvent extends ObjectEvent {
 	/**
 	 * 
 	 * @param source
-	 *            the source node
+	 * @param username
 	 */
-	AccessChangeEvent(Node source) {
-		super(source, "change", null);
+	AccessChangeEvent(Node source, String username) {
+		super(source, "change", username);
 	}
 
 }

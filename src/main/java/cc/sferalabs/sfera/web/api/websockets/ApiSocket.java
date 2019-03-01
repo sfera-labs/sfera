@@ -23,7 +23,6 @@
 package cc.sferalabs.sfera.web.api.websockets;
 
 import java.io.IOException;
-import java.util.EventListener;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -40,10 +39,7 @@ import org.eclipse.jetty.websocket.servlet.UpgradeHttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.eventbus.Subscribe;
-
 import cc.sferalabs.sfera.access.Access;
-import cc.sferalabs.sfera.access.AccessChangeEvent;
 import cc.sferalabs.sfera.access.User;
 import cc.sferalabs.sfera.core.services.Task;
 import cc.sferalabs.sfera.core.services.TasksManager;
@@ -61,7 +57,7 @@ import cc.sferalabs.sfera.web.api.WebApiEvent;
  * @version 1.0.0
  *
  */
-public class ApiSocket extends WebSocketAdapter implements EventListener {
+public class ApiSocket extends WebSocketAdapter {
 
 	private static final Logger logger = LoggerFactory.getLogger(ApiSocket.class);
 	private static final AtomicLong count = new AtomicLong(77);
@@ -125,7 +121,6 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 				resp.put("responseTimeout", respTimeout);
 				resp.send();
 				ping();
-				Bus.register(this);
 				logger.debug("Socket connected - Host: {}", hostname);
 			} else {
 				logger.warn("Unauthorized WebSocket connection from {}", hostname);
@@ -133,13 +128,6 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 			}
 		} catch (Exception e) {
 			onWebSocketError(new Exception("Connection error", e));
-		}
-	}
-
-	@Subscribe
-	public void checkUser(AccessChangeEvent e) {
-		if (!isAuthorized(false)) {
-			closeSocket(StatusCode.POLICY_VIOLATION, "Unauthorized");
 		}
 	}
 
@@ -333,7 +321,6 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 		if (consoleSession != null) {
 			consoleSession.quit();
 		}
-		Bus.unregister(this);
 		logger.debug("Socket Closed: [{}] {} - Host: {}", statusCode, reason, hostname);
 	}
 
