@@ -77,7 +77,10 @@ public class HttpSessionDestroyer implements HttpSessionListener, EventListener 
 
 	@Override
 	public void sessionDestroyed(HttpSessionEvent se) {
-		Bus.unregister(this);
+		try {
+			Bus.unregister(this);
+		} catch (Exception e) {
+		}
 		HttpSession session = se.getSession();
 		ConnectionsSet connections = (ConnectionsSet) session.getAttribute(ConnectServlet.SESSION_ATTR_CONNECTIONS);
 		if (connections != null) {
