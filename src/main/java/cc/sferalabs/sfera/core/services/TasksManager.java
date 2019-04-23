@@ -40,8 +40,8 @@ public class TasksManager {
 	private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool();
 
 	/**
-	 * Creates a {@link Task} object with the specified name and
-	 * {@code Runnable} task and executes it.
+	 * Creates a {@link Task} object with the specified name and {@code Runnable}
+	 * task and executes it.
 	 * 
 	 * @param name
 	 *            the name of the task to create
@@ -63,9 +63,9 @@ public class TasksManager {
 	}
 
 	/**
-	 * Creates a {@link Task} object with the specified name and
-	 * {@code Runnable} task and submits it for execution. Returns a
-	 * {@code Future} representing that task.
+	 * Creates a {@link Task} object with the specified name and {@code Runnable}
+	 * task and submits it for execution. Returns a {@code Future} representing that
+	 * task.
 	 * 
 	 * @param name
 	 *            the name of the task to create
@@ -90,10 +90,9 @@ public class TasksManager {
 	}
 
 	/**
-	 * Creates a {@link Task} object with the specified name and
-	 * {@code Runnable} task end executes it at system level. Sfera life cycle
-	 * will interrupt this task only after all the regular tasks have been
-	 * interrupted.
+	 * Creates a {@link Task} object with the specified name and {@code Runnable}
+	 * task end executes it at system level. Sfera life cycle will interrupt this
+	 * task only after all the regular tasks have been interrupted.
 	 * 
 	 * @param name
 	 *            the name of the task to create
@@ -130,30 +129,57 @@ public class TasksManager {
 
 	/**
 	 * Attempts to stop all actively executing tasks and halts the processing of
-	 * waiting tasks. There are no guarantees beyond best-effort attempts to
-	 * stop processing actively executing tasks.
+	 * waiting tasks. There are no guarantees beyond best-effort attempts to stop
+	 * processing actively executing tasks.
 	 */
 	public static void shutdownTasksNow() {
 		EXECUTOR_SERVICE.shutdownNow();
 	}
 
 	/**
-	 * Blocks until all tasks have completed execution after a shutdown request,
-	 * or the timeout occurs, or the current thread is interrupted, whichever
-	 * happens first.
+	 * Blocks until all tasks have completed execution after a shutdown request, or
+	 * the timeout occurs, or the current thread is interrupted, whichever happens
+	 * first.
 	 * 
 	 * @param timeout
 	 *            the maximum time to wait
 	 * @param unit
 	 *            the time unit of the timeout argument
-	 * @return {@code true} if tasks execution terminated and {@code false} if
-	 *         the timeout elapsed before termination
+	 * @return {@code true} if tasks execution terminated and {@code false} if the
+	 *         timeout elapsed before termination
 	 * @throws InterruptedException
 	 *             if interrupted while waiting
 	 */
-	public static boolean awaitTasksTermination(long timeout, TimeUnit unit)
-			throws InterruptedException {
+	public static boolean awaitTasksTermination(long timeout, TimeUnit unit) throws InterruptedException {
 		return EXECUTOR_SERVICE.awaitTermination(timeout, unit);
+	}
+
+	/**
+	 * Blocks until the specified future completed, or the timeout occurs, or the
+	 * current thread is interrupted, whichever happens first.
+	 * 
+	 * @param task
+	 *            the task to wait for
+	 * @param timeoutMillis
+	 *            the maximum time to wait (in milliseconds)
+	 * @param checkIntervalMillis
+	 *            the interval (in milliseconds) between subsequent task completion
+	 *            checks
+	 * @return {@code true} if task execution terminated and {@code false} if the
+	 *         timeout elapsed before termination
+	 * @throws InterruptedException
+	 *             if interrupted while waiting
+	 */
+	public static boolean awaitTermination(Future<?> task, long timeoutMillis, long checkIntervalMillis)
+			throws InterruptedException {
+		long giveUpTime = System.currentTimeMillis() + timeoutMillis;
+		while (!task.isDone()) {
+			if (System.currentTimeMillis() > giveUpTime) {
+				return false;
+			}
+			Thread.sleep(checkIntervalMillis);
+		}
+		return true;
 	}
 
 }
