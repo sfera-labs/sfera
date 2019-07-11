@@ -269,10 +269,13 @@ public abstract class Driver extends Node {
 		quit = true;
 		if (future != null) {
 			log.debug("Stopping driver...");
-			future.cancel(true);
+			try {
+				future.cancel(true);
+			} catch (NullPointerException e) {
+			}
 		}
 	}
-	
+
 	@Override
 	public void destroy() {
 		quit();
