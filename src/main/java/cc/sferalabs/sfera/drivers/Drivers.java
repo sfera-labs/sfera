@@ -158,7 +158,7 @@ public abstract class Drivers {
 	 * @throws InvocationTargetException
 	 *             if thrown when instantiating the class
 	 */
-	public static Driver instantiateDriver(Class<?> clazz, String driverId)
+	public synchronized static Driver instantiateDriver(Class<?> clazz, String driverId)
 			throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException,
 			IllegalArgumentException, InvocationTargetException {
 		Constructor<?> constructor = clazz.getConstructor(new Class[] { String.class });
@@ -172,6 +172,8 @@ public abstract class Drivers {
 	}
 
 	/**
+	 * Destroys the specified driver.
+	 * 
 	 * @param driverId
 	 *            the driver ID
 	 * @return true if driver was found, false otherwise

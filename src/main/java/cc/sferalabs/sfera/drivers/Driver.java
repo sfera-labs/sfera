@@ -276,6 +276,9 @@ public abstract class Driver extends Node {
 		}
 	}
 
+	/**
+	 * Unless you know what you are doing, use {@link Drivers#destroyDriver(String)}
+	 */
 	@Override
 	public void destroy() {
 		quit();
