@@ -53,6 +53,11 @@ public class LocalCommPort extends CommPort {
 	}
 
 	@Override
+	public boolean isOpen() {
+		return serialPort.isOpened();
+	}
+
+	@Override
 	protected void doOpen() throws CommPortException {
 		try {
 			if (!serialPort.openPort()) {

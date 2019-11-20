@@ -75,13 +75,22 @@ public class IPCommPort extends CommPort {
 				socket.setSoTimeout(5000);
 			} catch (Throwable t) {
 				onError(t);
+				try {
+					close();
+				} catch (CommPortException e) {
+				}
 				return;
 			}
 			while (run) {
 				try {
 					int b = in.read();
 					if (b < 0) {
-						throw new IOException("End of stream is reached");
+						onError(new IOException("End of stream is reached"));
+						try {
+							close();
+						} catch (CommPortException e) {
+						}
+						return;
 					}
 					int len = in.available();
 					byte[] bytes = new byte[len + 1];
@@ -123,6 +132,11 @@ public class IPCommPort extends CommPort {
 	 */
 	protected IPCommPort(String portName) {
 		super(portName);
+	}
+
+	@Override
+	public boolean isOpen() {
+		return !closed;
 	}
 
 	@Override
@@ -168,11 +182,11 @@ public class IPCommPort extends CommPort {
 	}
 
 	@Override
-	public synchronized void setListener(CommPortListener reader) throws CommPortException {
+	public synchronized void setListener(CommPortListener listener) throws CommPortException {
 		if (readerTask != null) {
-			throw new CommPortException("Comm port reader already set");
+			throw new CommPortException("Comm port listener already set");
 		}
-		readerTask = new ReaderTask(reader);
+		readerTask = new ReaderTask(listener);
 		TasksManager.execute(readerTask);
 	}
 

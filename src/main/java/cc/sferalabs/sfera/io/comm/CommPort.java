@@ -142,8 +142,16 @@ public abstract class CommPort {
 	}
 
 	/**
+	 * Returns whether or not this port is open.
 	 * 
-	 * @throws CommPortException if an error occurs
+	 * @return {@code true} if this port is open, {@code false} otherwise
+	 */
+	public abstract boolean isOpen();
+
+	/**
+	 * 
+	 * @throws CommPortException
+	 *             if an error occurs
 	 */
 	protected abstract void doOpen() throws CommPortException;
 
@@ -305,7 +313,8 @@ public abstract class CommPort {
 
 	/**
 	 * 
-	 * @throws CommPortException if an error occurs 
+	 * @throws CommPortException
+	 *             if an error occurs
 	 */
 	protected abstract void doClose() throws CommPortException;
 
