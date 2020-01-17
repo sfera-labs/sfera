@@ -33,7 +33,7 @@ import cc.sferalabs.sfera.access.Access;
 import cc.sferalabs.sfera.access.User;
 
 /**
- * {@link HttpServletRequestWrapper} for authenticating requests.
+ * {@link HttpServletRequestWrapper} adding authentication information.
  * 
  * @author Giampiero Baggiani
  *
@@ -44,7 +44,7 @@ public class AuthenticationRequestWrapper extends HttpServletRequestWrapper {
 
 	static final String SESSION_ATTR_USERNAME = "user";
 
-	private User user;
+	private String savedUsername;
 
 	/**
 	 * Construct a AuthenticationRequestWrapper.
@@ -65,36 +65,32 @@ public class AuthenticationRequestWrapper extends HttpServletRequestWrapper {
 	 * @return the user
 	 */
 	private User getUser() {
-		if (user != null) {
-			return user;
-		}
-		HttpSession session = getSession(false);
-		if (session == null) {
-			return null;
-		}
-		String username = (String) session.getAttribute(SESSION_ATTR_USERNAME);
+		String username = getRemoteUser();
 		if (username == null) {
 			return null;
 		}
-		user = Access.getUser(username);
-		return user;
+
+		return Access.getUser(username);
 	}
 
 	@Override
 	public void login(String username, String password) throws ServletException {
-		user = Access.authenticate(username, password);
+		savedUsername = null;
+		User user = Access.authenticate(username, password);
 		if (user == null) {
 			throw new ServletException("Authentication failed for username '" + username + "'");
 		}
+		savedUsername = username;
 		HttpSession session = getSession(true);
 		session.setAttribute(SESSION_ATTR_USERNAME, username);
 	}
 
 	@Override
 	public void logout() throws ServletException {
-		user = null;
+		savedUsername = null;
 		HttpSession session = getSession(false);
 		if (session != null) {
+			session.removeAttribute(SESSION_ATTR_USERNAME);
 			session.invalidate();
 		}
 	}
@@ -110,8 +106,8 @@ public class AuthenticationRequestWrapper extends HttpServletRequestWrapper {
 
 	@Override
 	public Principal getUserPrincipal() {
-		User user = getUser();
-		if (user == null) {
+		String username = getRemoteUser();
+		if (username == null) {
 			return null;
 		}
 
@@ -119,14 +115,21 @@ public class AuthenticationRequestWrapper extends HttpServletRequestWrapper {
 
 			@Override
 			public String getName() {
-				return user.getUsername();
+				return username;
 			}
 		};
 	}
 
 	@Override
 	public String getRemoteUser() {
-		User user = getUser();
-		return user == null ? null : user.getUsername();
+		if (savedUsername == null) {
+			HttpSession session = getSession(false);
+			if (session == null) {
+				return null;
+			}
+			savedUsername = (String) session.getAttribute(SESSION_ATTR_USERNAME);
+		}
+		return savedUsername;
 	}
+
 }
