@@ -34,12 +34,12 @@ public class AuthenticationSessionCache extends DefaultSessionCache implements E
 	@Subscribe
 	public void onAccessChangeEvent(AccessChangeEvent e) {
 		for (HttpSession s : _sessions.values()) {
-			String username = (String) s.getAttribute(AuthenticationRequestWrapper.SESSION_ATTR_USERNAME);
-			if (username != null && username.equals(e.getValue())) {
-				try {
+			try {
+				String username = (String) s.getAttribute(AuthenticationRequestWrapper.SESSION_ATTR_USERNAME);
+				if (username != null && username.equals(e.getValue())) {
 					s.invalidate();
-				} catch (Exception ex) {
 				}
+			} catch (Exception ex) {
 			}
 		}
 	}
