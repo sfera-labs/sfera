@@ -46,8 +46,8 @@ import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
-import org.eclipse.jetty.server.session.DefaultSessionCache;
 import org.eclipse.jetty.server.session.FileSessionDataStoreFactory;
+import org.eclipse.jetty.server.session.NullSessionDataStore;
 import org.eclipse.jetty.server.session.SessionCache;
 import org.eclipse.jetty.server.session.SessionDataStore;
 //import org.eclipse.jetty.server.session.HashSessionManager;
@@ -182,18 +182,20 @@ public class WebServer implements AutoStartService {
 		int maxInactiveInterval = config.get("http_session_max_inactive", 3600);
 		sessionHandler.setMaxInactiveInterval(maxInactiveInterval);
 		sessionHandler.addEventListener(new HttpSessionDestroyer());
+		SessionCache sessionCache = new AuthenticationSessionCache(sessionHandler);
+		sessionCache.setRemoveUnloadableSessions(true);
 		boolean persistSessions = config.get("http_session_persist", false);
 		if (persistSessions) {
-			SessionCache sessionCache = new DefaultSessionCache(sessionHandler);
-			sessionHandler.setSessionCache(sessionCache);
-			sessionCache.setRemoveUnloadableSessions(true);
 			FileSessionDataStoreFactory dataStoreFactory = new FileSessionDataStoreFactory();
 			dataStoreFactory.setStoreDir(new File(SESSIONS_STORE_DIR));
 			dataStoreFactory.setDeleteUnrestorableFiles(true);
 			dataStoreFactory.setSavePeriodSec(maxInactiveInterval / 2);
 			SessionDataStore dataStore = dataStoreFactory.getSessionDataStore(sessionHandler);
 			sessionCache.setSessionDataStore(dataStore);
+		} else {
+			sessionCache.setSessionDataStore(new NullSessionDataStore());
 		}
+		sessionHandler.setSessionCache(sessionCache);
 
 		contexts = new ServletContextHandler(server, "/", ServletContextHandler.SESSIONS);
 		contexts.setInitParameter(SessionHandler.__MaxAgeProperty, config.get("http_session_max_age", -1).toString());
@@ -332,8 +334,8 @@ public class WebServer implements AutoStartService {
 	}
 
 	/**
-	 * Registers the servlet contained by the servlet holder to handle the
-	 * requests on paths matching the specified path spec
+	 * Registers the servlet contained by the servlet holder to handle the requests
+	 * on paths matching the specified path spec
 	 * 
 	 * @param servlet
 	 *            the servlet holder
