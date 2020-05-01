@@ -122,6 +122,7 @@ public abstract class CommPort {
 
 		synchronized (commPort) {
 			if (commPort.openCount > 0) {
+				commPort.openCount++;
 				return commPort;
 			}
 			try {

@@ -60,13 +60,14 @@ public abstract class Bus {
 			String event = context.getEvent().getClass().getSimpleName();
 
 			Logger logger = LoggerFactory.getLogger(listenerClass);
-			logger.error("Error dispatching event '" + event + "' to '"
-					+ listenerClass.getSimpleName() + "." + method + "'", exception);
+			logger.error(
+					"Error dispatching event '" + event + "' to '" + listenerClass.getSimpleName() + "." + method + "'",
+					exception);
 		}
 	};
 
-	private static final EventBus EVENT_BUS = new AsyncEventBus(
-			TasksManager.getTasksExecutorService(), SUBSCRIBER_EXCEPTION_HANDLER);
+	private static final EventBus EVENT_BUS = new AsyncEventBus(TasksManager.getTasksExecutorService(),
+			SUBSCRIBER_EXCEPTION_HANDLER);
 	private static final Map<String, Event> EVENTS_MAP = new HashMap<String, Event>();
 
 	static {
@@ -110,24 +111,43 @@ public abstract class Bus {
 	}
 
 	/**
-	 * Posts the specified event to the bus only if the last event with the same
-	 * ID that was posted had a different value or there was no such event. The
+	 * Posts the specified event to the bus only if the last event with the same ID
+	 * that was posted had a different value or there was no such event. The
 	 * comparison of the values is done by means of the {@code equals()} method.
 	 * 
 	 * @param event
 	 *            the event to post
 	 */
 	public static void postIfChanged(Event event) {
+		if (valueChanged(event)) {
+			post(event);
+		}
+	}
+
+	/**
+	 * Checks whether the value of the specified event corresponds to the last
+	 * posted one.
+	 * 
+	 * @param event
+	 *            the event to check
+	 * 
+	 * @return {@code true} if the value of the specified events is different from
+	 *         the last posted event with same ID or if there was no such previous
+	 *         event; {@code false} otherwise.
+	 */
+	public static boolean valueChanged(Event event) {
 		Object currVal = getValueOf(event.getId());
 		Object newVal = event.getValue();
 
 		if (currVal == null) {
 			if (newVal != null) {
-				post(event);
+				return true;
 			}
 		} else if (!currVal.equals(newVal)) {
-			post(event);
+			return true;
 		}
+
+		return false;
 	}
 
 	/**
@@ -142,8 +162,7 @@ public abstract class Bus {
 	 *         specified ID
 	 * 
 	 * @throws ClassCastException
-	 *             if attempting to cast the returned value to an incompatible
-	 *             class
+	 *             if attempting to cast the returned value to an incompatible class
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T getValueOf(String id) throws ClassCastException {
@@ -166,11 +185,11 @@ public abstract class Bus {
 	}
 
 	/**
-	 * Returns a map with all the events ID posted mapped to the last
-	 * corresponding event instance posted.
+	 * Returns a map with all the events ID posted mapped to the last corresponding
+	 * event instance posted.
 	 * 
-	 * @return a map with all the events ID posted mapped to the last
-	 *         corresponding event instance posted
+	 * @return a map with all the events ID posted mapped to the last corresponding
+	 *         event instance posted
 	 */
 	public static Map<String, Event> getCurrentState() {
 		return new HashMap<>(EVENTS_MAP);

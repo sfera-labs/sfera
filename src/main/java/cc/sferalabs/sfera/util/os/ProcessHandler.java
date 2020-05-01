@@ -34,8 +34,8 @@ public class ProcessHandler {
 	private final AtomicInteger terminatedStreamReaders = new AtomicInteger();
 
 	/**
-	 * Constructs a process handler with the specified operating system program
-	 * and arguments.
+	 * Constructs a process handler with the specified operating system program and
+	 * arguments.
 	 * 
 	 * @param name
 	 *            a descriptive name for this process handler
@@ -45,6 +45,15 @@ public class ProcessHandler {
 	public ProcessHandler(String name, String... command) {
 		this.name = Objects.requireNonNull(name, "name must be not null");
 		this.processBuilder = new ProcessBuilder(command);
+	}
+
+	/**
+	 * Returns whether or not this process is running.
+	 * 
+	 * @return {@code true} if the process is running, {@code false} otherwise
+	 */
+	public boolean isRunning() {
+		return running;
 	}
 
 	/**
@@ -141,15 +150,16 @@ public class ProcessHandler {
 				int t = terminatedStreamReaders.incrementAndGet();
 				if (t == 2) {
 					listener.onTerminated();
+					doQuit();
 				}
 			}
 		}
 	}
 
 	/**
-	 * Kills the process.
+	 * 
 	 */
-	public void quit() {
+	private void doQuit() {
 		running = false;
 		try {
 			out.close();
@@ -166,6 +176,13 @@ public class ProcessHandler {
 		if (process != null) {
 			process.destroyForcibly();
 		}
+	}
+
+	/**
+	 * Kills the process.
+	 */
+	public void quit() {
+		doQuit();
 	}
 
 }
