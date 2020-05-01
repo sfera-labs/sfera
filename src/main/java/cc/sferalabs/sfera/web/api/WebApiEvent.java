@@ -35,14 +35,12 @@ import cc.sferalabs.sfera.events.StringEvent;
  * 
  * @author Giampiero Baggiani
  *
- * @version 1.0.0
- *
  */
 public class WebApiEvent extends StringEvent {
 
 	private final HttpServletRequest request;
 	private final String connectionId;
-	private final User user;
+	private final String username;
 
 	/**
 	 * Construct a RemoteEvent
@@ -63,7 +61,7 @@ public class WebApiEvent extends StringEvent {
 		super(WebNode.getInstance(), Objects.requireNonNull(id, "id must not be null"), value);
 		this.request = Objects.requireNonNull(request, "request must not be null");
 		this.connectionId = connectionId;
-		this.user = Access.getUser(request.getRemoteUser());
+		this.username = Objects.requireNonNull(request.getRemoteUser(), "request not authenticated");
 	}
 
 	/**
@@ -72,7 +70,7 @@ public class WebApiEvent extends StringEvent {
 	 * @return the user
 	 */
 	public User getUser() {
-		return user;
+		return Access.getUser(username);
 	}
 
 	/**

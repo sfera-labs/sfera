@@ -72,11 +72,7 @@ public class DriversConsoleCommandHandler implements ConsoleCommandHandler {
 			return "Started";
 
 		case "restart":
-			try {
-				d.restart();
-			} catch (InterruptedException e) {
-				return "Interrupted";
-			}
+			d.restart();
 			return "Restarted";
 
 		default:

@@ -45,14 +45,21 @@ public class LocalCommPort extends CommPort {
 
 	/**
 	 * @param portName
-	 *            local port name
-	 * @throws CommPortException
-	 *             if an error occurs when creating or opening the port
+	 *            the port name
 	 */
-	LocalCommPort(String portName) throws CommPortException {
+	protected LocalCommPort(String portName) {
 		super(portName);
+		this.serialPort = new SerialPort(portName);
+	}
+
+	@Override
+	public boolean isOpen() {
+		return serialPort.isOpened();
+	}
+
+	@Override
+	protected void doOpen() throws CommPortException {
 		try {
-			this.serialPort = new SerialPort(portName);
 			if (!serialPort.openPort()) {
 				throw new CommPortException("open failed");
 			}
@@ -177,7 +184,7 @@ public class LocalCommPort extends CommPort {
 	}
 
 	@Override
-	public void close() throws CommPortException {
+	protected void doClose() throws CommPortException {
 		try {
 			removeListener();
 		} catch (Exception e) {

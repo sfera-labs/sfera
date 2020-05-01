@@ -49,12 +49,20 @@ public class Configuration {
 	private final Object config;
 
 	/**
+	 * Construct an empty configuration.
+	 */
+	public Configuration() {
+		this.path = null;
+		this.config = null;
+	}
+
+	/**
 	 * Construct a configuration from the specified file. The specified path is
 	 * considered relative to the configuration directory
 	 * 
 	 * @param configFile
-	 *            the path of the configuration file relative to the
-	 *            configuration directory
+	 *            the path of the configuration file relative to the configuration
+	 *            directory
 	 * @throws IOException
 	 *             if an I/O error occurs opening the configuration file
 	 */
@@ -76,6 +84,17 @@ public class Configuration {
 	}
 
 	/**
+	 * Construct a configuration from the specified map
+	 * 
+	 * @param map
+	 *            the configuraiton map
+	 */
+	public Configuration(Map<String, Object> map) {
+		config = map;
+		path = null;
+	}
+
+	/**
 	 * 
 	 * @return the corresponding Java object loaded from the configuration file
 	 * @throws IOException
@@ -89,8 +108,7 @@ public class Configuration {
 	}
 
 	/**
-	 * Parses the configuration file and produces an object of the specified
-	 * class.
+	 * Parses the configuration and produces an object of the specified class.
 	 * 
 	 * @param <T>
 	 *            Class of the object specified by the {@code clazz} parameter
@@ -101,9 +119,16 @@ public class Configuration {
 	 *             if an I/O error occurs opening the configuration file
 	 */
 	public <T> T loadAs(Class<T> clazz) throws IOException {
-		CustomClassLoaderConstructor constr = new CustomClassLoaderConstructor(
-				clazz.getClassLoader());
+		if (path == null && config == null) {
+			return null;
+		}
+		CustomClassLoaderConstructor constr = new CustomClassLoaderConstructor(clazz.getClassLoader());
 		Yaml yaml = new Yaml(constr);
+
+		if (path == null) {
+			return yaml.loadAs(yaml.dumpAsMap(config), clazz);
+		}
+
 		try (BufferedReader r = Files.newBufferedReader(path)) {
 			return yaml.loadAs(r, clazz);
 		}
@@ -139,16 +164,15 @@ public class Configuration {
 
 	/**
 	 * Returns the value to which the specified key is mapped, or
-	 * {@code defaultValue} if this configuration contains no mapping for the
-	 * key.
+	 * {@code defaultValue} if this configuration contains no mapping for the key.
 	 * 
 	 * @param <T>
 	 *            the type of the object to be returned
 	 * @param key
 	 *            the key whose associated value is to be returned
 	 * @param defaultValue
-	 *            the default value to be returned if this configuration
-	 *            contains no mapping for the key
+	 *            the default value to be returned if this configuration contains no
+	 *            mapping for the key
 	 * @return the value to which the specified key is mapped, or
 	 *         {@code defaultValue} if this map contains no mapping for the key.
 	 */

@@ -25,6 +25,8 @@
  */
 package cc.sferalabs.sfera.web;
 
+import java.util.EventListener;
+
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
@@ -40,10 +42,9 @@ import cc.sferalabs.sfera.web.api.http.servlets.ConnectServlet;
  *
  * @author Giampiero Baggiani
  *
- * @version 1.0.0
  *
  */
-public class HttpSessionDestroyer implements HttpSessionListener {
+public class HttpSessionDestroyer implements HttpSessionListener, EventListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(HttpSessionDestroyer.class);
 
@@ -55,13 +56,12 @@ public class HttpSessionDestroyer implements HttpSessionListener {
 	@Override
 	public void sessionDestroyed(HttpSessionEvent se) {
 		HttpSession session = se.getSession();
-		ConnectionsSet connections = (ConnectionsSet) session
-				.getAttribute(ConnectServlet.SESSION_ATTR_CONNECTIONS);
+		ConnectionsSet connections = (ConnectionsSet) session.getAttribute(ConnectServlet.SESSION_ATTR_CONNECTIONS);
 		if (connections != null) {
 			for (Connection connection : connections.values()) {
 				connection.destroy();
 			}
 		}
-		logger.debug("Session '{}' destroyed", se.getSession().getId());
+		logger.debug("Session '{}' destroyed", session.getId());
 	}
 }

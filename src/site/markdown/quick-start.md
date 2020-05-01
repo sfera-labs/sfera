@@ -7,7 +7,7 @@ If you can't wait to try Sfera, here is how to get a ready-to-use installation:
 
 ```
 ~ $ cd sfera
-~/sfera $ sudo java -jar sfera.jar
+~/sfera $ sudo java -jar sfera-*-jar-with-dependencies.jar
 ```
 
 If you're running into problems, ensure you have all the [requirements installed](installation.html).

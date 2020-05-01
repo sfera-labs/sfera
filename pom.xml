@@ -4,7 +4,7 @@
 
 	<groupId>cc.sferalabs.sfera</groupId>
 	<artifactId>sfera</artifactId>
-	<version>1.2.1</version>
+	<version>1.3.10</version>
 
 	<name>Sfera</name>
 	<description>The Sfera Framework for Home/Building Automation and IoT Integration</description>
@@ -26,8 +26,8 @@
 	</licenses>
 
 	<properties>
-		<latestDeployedVersion>1.2.1</latestDeployedVersion>
-		<jetty-version>9.4.5.v20170502</jetty-version>
+		<latestDeployedVersion>1.3.7</latestDeployedVersion>
+		<jetty-version>9.4.7.v20170914</jetty-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
@@ -83,7 +83,7 @@
 			<extension>
 				<groupId>org.apache.maven.wagon</groupId>
 				<artifactId>wagon-ssh</artifactId>
-				<version>2.10</version>
+				<version>3.3.4</version>
 			</extension>
 		</extensions>
 
@@ -254,7 +254,7 @@
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-			<version>20151123</version>
+			<version>20170516</version>
 		</dependency>
 		<dependency>
 			<groupId>org.yaml</groupId>

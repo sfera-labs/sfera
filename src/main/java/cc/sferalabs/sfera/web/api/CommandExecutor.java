@@ -47,18 +47,21 @@ public abstract class CommandExecutor {
 
 	private static final Logger logger = LoggerFactory.getLogger(CommandExecutor.class);
 
-	public static Object exec(String cmd, HttpServletRequest httpRequest, String connectionId,
-			String user) throws IllegalArgumentException, ScriptException {
+	public static Object exec(String cmd, HttpServletRequest httpRequest, String connectionId, String user)
+			throws IllegalArgumentException, ScriptException {
 		logger.info("Command: {} User: {}", cmd, user);
 		Map<String, Object> b = new HashMap<>();
 		b.put("httpRequest", httpRequest);
 		b.put("connectionId", connectionId);
 		try {
 			return ScriptsEngine.evalNodeAction(cmd, b);
-		} catch (IllegalArgumentException | ScriptException e) {
-			throw e;
 		} catch (Exception e) {
-			throw new ScriptException(e);
+			logger.warn("Command execution error", e);
+			if (e instanceof IllegalArgumentException || e instanceof ScriptException) {
+				throw e;
+			} else {
+				throw new ScriptException(e);
+			}
 		}
 	}
 

@@ -29,6 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
@@ -56,8 +57,10 @@ import cc.sferalabs.sfera.util.files.FilesWatcher;
 public abstract class Driver extends Node {
 
 	private String configFile;
+	private Configuration config;
 	private DriverTask driverExecutor = new DriverTask();
 	private volatile boolean quit = false;
+	private volatile boolean restart = false;
 	private Future<?> future;
 	private Class<? extends Event>[] driverEventsInterfaces = getDriverEventsInterfaces();
 
@@ -82,16 +85,19 @@ public abstract class Driver extends Node {
 		@Override
 		protected void execute() {
 			while (!quit) {
-				Configuration config = null;
 				UUID configWatcherId = null;
 				try {
 					log.info("Starting...");
-					config = new Configuration(configFile);
-					try {
-						configWatcherId = FilesWatcher.register(config.getRealPath(),
-								"Driver config reload", this::reloadConfiguration, false, false);
-					} catch (IOException e) {
-						log.error("Error watching config file", e);
+					if (configFile != null) {
+						config = new Configuration(configFile);
+						try {
+							configWatcherId = FilesWatcher.register(config.getRealPath(), "Driver config reload",
+									this::reloadConfiguration, false, false);
+						} catch (IOException e) {
+							log.error("Error watching config file", e);
+						}
+					} else if (config == null) {
+						config = new Configuration();
 					}
 					postDriverStateEvent("init");
 					if (onInit(config)) {
@@ -105,9 +111,9 @@ public abstract class Driver extends Node {
 									}
 								} catch (InterruptedException ie) {
 									if (quit) {
-										log.debug("Driver interrupted");
+										log.info("Driver interrupted");
 									} else {
-										log.debug("Driver interrupted but not quitted");
+										log.info("Driver interrupted but not quitted");
 									}
 								}
 							}
@@ -144,6 +150,10 @@ public abstract class Driver extends Node {
 			}
 
 			future = null;
+			if (restart) {
+				restart = false;
+				start();
+			}
 		}
 
 		/**
@@ -158,7 +168,7 @@ public abstract class Driver extends Node {
 					log.debug("Configuration file deleted");
 					return;
 				}
-				log.info("Configuration changed");
+				log.info("Configuration file changed");
 				onConfigChange(config);
 			} catch (Throwable t) {
 				log.error("Error reloading configuration", t);
@@ -188,8 +198,8 @@ public abstract class Driver extends Node {
 			Class<? extends Driver> clazz = getClass();
 			String packageName = clazz.getPackage().getName() + ".events";
 			String className = clazz.getSimpleName() + "Event";
-			driverEventsInterface = (Class<? extends Event>) Class
-					.forName(packageName + "." + className);
+			driverEventsInterface = (Class<? extends Event>) Class.forName(packageName + "." + className, true,
+					getClass().getClassLoader());
 		} catch (Exception e) {
 			driverEventsInterface = null;
 		}
@@ -205,12 +215,12 @@ public abstract class Driver extends Node {
 	private void postDriverStateEvent(String state) {
 		StringEvent wrappedEvent = new StringEvent(this, "driverState", state) {
 		};
-		Event ev = (Event) java.lang.reflect.Proxy.newProxyInstance(getClass().getClassLoader(),
-				driverEventsInterfaces, new InvocationHandler() {
+		Event ev = (Event) java.lang.reflect.Proxy.newProxyInstance(getClass().getClassLoader(), driverEventsInterfaces,
+				new InvocationHandler() {
 
 					@Override
-					public Object invoke(Object proxy, java.lang.reflect.Method method,
-							Object[] args) throws java.lang.Throwable {
+					public Object invoke(Object proxy, java.lang.reflect.Method method, Object[] args)
+							throws java.lang.Throwable {
 						Method wrappedMethod = wrappedEvent.getClass().getMethod(method.getName(),
 								method.getParameterTypes());
 						return wrappedMethod.invoke(wrappedEvent, args);
@@ -231,20 +241,57 @@ public abstract class Driver extends Node {
 	}
 
 	/**
+	 * Returns the path of the configuration file relative to the configuration
+	 * directory.
+	 * 
+	 * @return the path of the configuration file relative to the configuration
+	 *         directory, {@code null} if not set
+	 */
+	String getConfigFile() {
+		return this.configFile;
+	}
+
+	/**
+	 * Sets the driver configuration
+	 * 
+	 * @param map
+	 *            the configuration map
+	 */
+	public synchronized void setConfiguration(Map<String, Object> map) {
+		this.config = new Configuration(map);
+		onConfigChange(this.config);
+	}
+
+	/**
 	 * Interrupts the driver process.
 	 */
 	public synchronized void quit() {
 		quit = true;
 		if (future != null) {
-			log.debug("Interrupting driver...");
-			future.cancel(true);
+			log.debug("Stopping driver...");
+			try {
+				future.cancel(true);
+			} catch (NullPointerException e) {
+			}
 		}
 	}
 
 	/**
-	 * Stars the driver in a separate process.
+	 * Unless you know what you are doing, use {@link Drivers#destroyDriver(String)}
 	 */
-	public synchronized void start() {
+	@Override
+	public void destroy() {
+		quit();
+		super.destroy();
+	}
+
+	/**
+	 * Stars the driver in a separate process.
+	 * 
+	 * @throws IllegalStateException
+	 *             if the driver is already running
+	 */
+	public synchronized void start() throws IllegalStateException {
 		if (future == null) {
 			quit = false;
 			future = TasksManager.submit(driverExecutor);
@@ -255,22 +302,19 @@ public abstract class Driver extends Node {
 
 	/**
 	 * Gracefully restarts the driver process.
-	 * 
-	 * @throws InterruptedException
-	 *             if interrupted while waiting for the driver to quit
 	 */
-	public synchronized void restart() throws InterruptedException {
-		quit();
-		try {
-			waitTermination(30000);
-		} catch (TimeoutException e) {
+	public synchronized void restart() {
+		if (future != null) {
+			restart = true;
+			quit();
+		} else {
+			start();
 		}
-		start();
 	}
 
 	/**
-	 * Waits for the termination of the driver task. If the timeout expires
-	 * before termination a TimeoutException is thrown.
+	 * Waits for the termination of the driver task. If the timeout expires before
+	 * termination a TimeoutException is thrown.
 	 * 
 	 * @param timeout
 	 *            timeout in milliseconds
@@ -294,18 +338,16 @@ public abstract class Driver extends Node {
 	 * Callback method called when the driver configuration has changed.
 	 * </p>
 	 * <p>
-	 * The default implementation simple restarts the driver. Subclasses can
-	 * override this method to optimize the handling of configuration change.
+	 * The default implementation simply restarts the driver, if running. Subclasses
+	 * can override this method to optimize the handling of configuration change.
 	 * </p>
 	 * 
 	 * @param config
 	 *            the new configuration
 	 */
 	protected void onConfigChange(Configuration config) {
-		try {
+		if (future != null) {
 			restart();
-		} catch (InterruptedException e) {
-			log.warn("onConfigChange() interrupted");
 		}
 	}
 
@@ -322,11 +364,11 @@ public abstract class Driver extends Node {
 	protected abstract boolean onInit(Configuration config) throws InterruptedException;
 
 	/**
-	 * Callback method continuously called after a successful initialization
-	 * until {@code false} is returned.
+	 * Callback method continuously called after a successful initialization until
+	 * {@code false} is returned.
 	 * 
-	 * @return {@code true} if this method has to be called again, {@code false}
-	 *         to quit the drivers
+	 * @return {@code true} if this method has to be called again, {@code false} to
+	 *         quit the drivers
 	 * @throws InterruptedException
 	 *             if interrupted while executing
 	 */
@@ -338,11 +380,11 @@ public abstract class Driver extends Node {
 	protected abstract void onQuit();
 
 	/**
-	 * Returns the path to the directory to be used to store data for all
-	 * instances of this driver.
+	 * Returns the path to the directory to be used to store data for all instances
+	 * of this driver.
 	 * 
-	 * @return the path to the directory to be used to store data for all
-	 *         instances of this driver
+	 * @return the path to the directory to be used to store data for all instances
+	 *         of this driver
 	 * @throws IOException
 	 *             if an I/O error occurs creating the directory
 	 */

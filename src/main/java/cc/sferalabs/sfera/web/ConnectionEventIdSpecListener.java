@@ -68,6 +68,9 @@ public abstract class ConnectionEventIdSpecListener extends EventIdSpecListener 
 
 	@Override
 	protected boolean matches(Event event) {
+		if (event.isLoacal()) {
+			return false;
+		}
 		if (event instanceof ConnectionEvent) {
 			if (!connectionId.equals(((ConnectionEvent) event).getConnectionId())) {
 				return false;

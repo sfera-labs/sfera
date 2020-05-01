@@ -146,8 +146,7 @@ public class SystemNode extends Node {
 
 		Plugins.load();
 
-		ServiceLoader<AutoStartService> autoStartServices = ServiceLoader
-				.load(AutoStartService.class);
+		ServiceLoader<AutoStartService> autoStartServices = ServiceLoader.load(AutoStartService.class);
 		Iterator<AutoStartService> it = autoStartServices.iterator();
 		while (it.hasNext()) {
 			try {
@@ -201,8 +200,7 @@ public class SystemNode extends Node {
 						if (TasksManager.awaitTasksTermination(15, TimeUnit.SECONDS)) {
 							logger.debug("Tasks terminated");
 						} else {
-							logger.debug(
-									"Some tasks are taking too long to terminate. We gave them a chance...");
+							logger.debug("Some tasks are taking too long to terminate. We gave them a chance...");
 						}
 					} catch (InterruptedException e) {
 					}
@@ -248,21 +246,46 @@ public class SystemNode extends Node {
 	}
 
 	/**
-	 * Returns the InetAddress of one of the site local interfaces on this
-	 * machine.
+	 * Returns a site local InetAddress of the specified network interface.
 	 * 
-	 * @return the InetAddress of one of the site local interfaces on this
-	 *         machine, or {@code null} if not found.
+	 * @param interfaceName
+	 *            the name of the network interface to search on
+	 * @return a site local InetAddress of the specified network interface, or
+	 *         {@code null} if not found
+	 * @throws SocketException
+	 *             if an error occurs
+	 */
+	public static InetAddress getSiteLocalAddress(String interfaceName) throws SocketException {
+		NetworkInterface ni = NetworkInterface.getByName(interfaceName);
+		if (ni == null) {
+			return null;
+		}
+		for (InterfaceAddress ia : ni.getInterfaceAddresses()) {
+			InetAddress addr = ia.getAddress();
+			if (addr.isSiteLocalAddress()) {
+				return addr;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns a site local InetAddress of a network interface on this machine.
+	 * 
+	 * @return a site local InetAddress of a network interface on this machine, or
+	 *         {@code null} if not found
 	 * @throws SocketException
 	 *             if an error occurs
 	 */
 	public static InetAddress getSiteLocalAddress() throws SocketException {
 		Enumeration<NetworkInterface> nis = NetworkInterface.getNetworkInterfaces();
 		while (nis.hasMoreElements()) {
-			for (InterfaceAddress ni : nis.nextElement().getInterfaceAddresses())
-				if (ni.getAddress().isSiteLocalAddress()) {
-					return ni.getAddress();
+			for (InterfaceAddress ia : nis.nextElement().getInterfaceAddresses()) {
+				InetAddress addr = ia.getAddress();
+				if (addr.isSiteLocalAddress()) {
+					return addr;
 				}
+			}
 		}
 		return null;
 	}

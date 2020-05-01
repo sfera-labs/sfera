@@ -52,6 +52,15 @@ import java.util.zip.ZipOutputStream;
 public abstract class FilesUtil {
 
 	/**
+	 * Returns Sfera's root directory.
+	 * 
+	 * @return Sfera's root directory
+	 */
+	public static Path getRoot() {
+		return Paths.get(".").toAbsolutePath().normalize();
+	}
+
+	/**
 	 * Returns whether or not the specified path in inside Sfera's root
 	 * directory.
 	 * 
@@ -61,8 +70,18 @@ public abstract class FilesUtil {
 	 *         directory
 	 */
 	public static boolean isInRoot(Path path) {
-		Path root = Paths.get(".").toAbsolutePath().normalize();
-		return path.toAbsolutePath().normalize().startsWith(root);
+		return path.toAbsolutePath().normalize().startsWith(getRoot());
+	}
+
+	/**
+	 * Returns the specified path resolved against Sfera's root directory.
+	 * 
+	 * @param path
+	 *            the path to resolve
+	 * @return the resolved path
+	 */
+	public static Path resolveAgainstRoot(String path) {
+		return getRoot().resolve("./" + path).normalize();
 	}
 
 	/**
@@ -93,8 +112,7 @@ public abstract class FilesUtil {
 	 * @throws IOException
 	 *             if an I/O error occurs
 	 */
-	public static void zip(Collection<Path> sources, Path zipTarget, OpenOption... options)
-			throws IOException {
+	public static void zip(Collection<Path> sources, Path zipTarget, OpenOption... options) throws IOException {
 		try (OutputStream fos = Files.newOutputStream(zipTarget, options);
 				ZipOutputStream zos = new ZipOutputStream(fos)) {
 			for (Path source : sources) {
@@ -103,8 +121,7 @@ public abstract class FilesUtil {
 				Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
 
 					@Override
-					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-							throws IOException {
+					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 						String name;
 						if (sourceParent != null) {
 							name = sourceParent.relativize(file).toString();
@@ -118,8 +135,7 @@ public abstract class FilesUtil {
 					}
 
 					@Override
-					public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
-							throws IOException {
+					public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
 						String name;
 						if (sourceParent != null) {
 							name = sourceParent.relativize(dir).toString();
@@ -164,15 +180,13 @@ public abstract class FilesUtil {
 				}
 
 				@Override
-				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
-						throws IOException {
+				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
 					Files.createDirectories(getDestination(dir));
 					return FileVisitResult.CONTINUE;
 				}
 
 				@Override
-				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-						throws IOException {
+				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 					Files.copy(file, getDestination(file), options);
 					return FileVisitResult.CONTINUE;
 				}
@@ -192,8 +206,7 @@ public abstract class FilesUtil {
 		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
 
 			@Override
-			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-					throws IOException {
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 				Files.delete(file);
 				return FileVisitResult.CONTINUE;
 			}
@@ -205,8 +218,7 @@ public abstract class FilesUtil {
 			}
 
 			@Override
-			public FileVisitResult postVisitDirectory(Path dir, IOException exc)
-					throws IOException {
+			public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
 				Files.delete(dir);
 				return FileVisitResult.CONTINUE;
 			}
@@ -229,16 +241,14 @@ public abstract class FilesUtil {
 		Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
 
 			@Override
-			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
-					throws IOException {
+			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
 				Path newdir = target.resolve(source.relativize(dir));
 				Files.copy(dir, newdir, options);
 				return FileVisitResult.CONTINUE;
 			}
 
 			@Override
-			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-					throws IOException {
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 				Files.copy(file, target.resolve(source.relativize(file)), options);
 				return FileVisitResult.CONTINUE;
 			}

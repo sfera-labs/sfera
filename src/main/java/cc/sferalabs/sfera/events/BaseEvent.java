@@ -77,4 +77,9 @@ public abstract class BaseEvent implements Event {
 	public Object getSimpleValue() {
 		return getValue();
 	}
+	
+	@Override
+	public boolean isLoacal() {
+		return false;
+	}
 }

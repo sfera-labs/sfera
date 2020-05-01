@@ -69,36 +69,78 @@ public class IPCommPort extends CommPort {
 
 		@Override
 		protected void execute() {
+			InputStream in;
+			try {
+				in = socket.getInputStream();
+				socket.setSoTimeout(5000);
+			} catch (Throwable t) {
+				onError(t);
+				try {
+					close();
+				} catch (CommPortException e) {
+				}
+				return;
+			}
 			while (run) {
 				try {
-					InputStream in = socket.getInputStream();
-					byte b = (byte) in.read();
+					int b = in.read();
+					if (b < 0) {
+						onError(new IOException("End of stream is reached"));
+						try {
+							close();
+						} catch (CommPortException e) {
+						}
+						return;
+					}
 					int len = in.available();
 					byte[] bytes = new byte[len + 1];
-					bytes[0] = b;
+					bytes[0] = (byte) b;
 					if (len > 0) {
-						readBytes(bytes, 1, len);
+						in.read(bytes, 1, len);
 					}
-					if (!closed) {
-						reader.onRead(bytes);
-					}
+					onRead(bytes);
+				} catch (SocketTimeoutException e) {
 				} catch (Throwable t) {
-					if (!closed) {
-						reader.onError(t);
-					}
+					onError(t);
 				}
 			}
 		}
+
+		/**
+		 * @param bytes
+		 */
+		private void onRead(byte[] bytes) {
+			if (!closed && run) {
+				reader.onRead(bytes);
+			}
+		}
+
+		/**
+		 * @param t
+		 */
+		private void onError(Throwable t) {
+			if (!closed && run) {
+				reader.onError(t);
+			}
+		}
+
 	}
 
 	/**
 	 * @param portName
-	 *            local port name
-	 * @throws CommPortException
-	 *             if an error occurs when creating or opening the port
+	 *            the port name
 	 */
-	IPCommPort(String portName) throws CommPortException {
+	protected IPCommPort(String portName) {
 		super(portName);
+	}
+
+	@Override
+	public boolean isOpen() {
+		return !closed;
+	}
+
+	@Override
+	protected void doOpen() throws CommPortException {
 		int colon = portName.indexOf(':');
 		if (colon < 0) {
 			throw new CommPortException("port name format error");
@@ -114,8 +156,7 @@ public class IPCommPort extends CommPort {
 		try {
 			address = new InetSocketAddress(host, port);
 		} catch (Exception e) {
-			throw new CommPortException("error instantiating socket: " + e.getLocalizedMessage(),
-					e);
+			throw new CommPortException("error instantiating socket: " + e.getLocalizedMessage(), e);
 		}
 		try {
 			socket = new Socket();
@@ -141,11 +182,11 @@ public class IPCommPort extends CommPort {
 	}
 
 	@Override
-	public synchronized void setListener(CommPortListener reader) throws CommPortException {
+	public synchronized void setListener(CommPortListener listener) throws CommPortException {
 		if (readerTask != null) {
-			throw new CommPortException("Comm port reader already set");
+			throw new CommPortException("Comm port listener already set");
 		}
-		readerTask = new ReaderTask(reader);
+		readerTask = new ReaderTask(listener);
 		TasksManager.execute(readerTask);
 	}
 
@@ -209,7 +250,7 @@ public class IPCommPort extends CommPort {
 	}
 
 	@Override
-	public void close() throws CommPortException {
+	protected void doClose() throws CommPortException {
 		closed = true;
 		try {
 			removeListener();

@@ -11,12 +11,14 @@ The system configuration file is `config/sfera.yml`
 | --------- | ---------- | ------------- | ----------- |
 | `http_port` | Integer |  | If set the Web server will accept HTTP connections on the specified port. The value must be an available port number on the server |
 | `https_port` | Integer |  | If set the Web server will accept HTTPS connections on the specified port. The value must be an available port number on the server. Enabling HTTPS requires a SSL key store file for the certificate to be placed in `data/http/sfera.keys`. If this file is not found, a self-signed certificate will be automatically generated |
-| `keystore_password` | String | | If HTTPS is enabled and a custom certificate is used (`data/http/sfera.keys`), this parameter must be set to the key store password |
-| `keymanager_password` | String | | If HTTPS is enabled and a custom certificate is used (`data/http/sfera.keys`), this parameter must be set to the password (if any) for the specific key within the key store |
+| `https_cert_cn` | String | sferaserver | CN value to be used in the auto-generated self-signed certificate |
+| `https_cert_storepass` | String | | If HTTPS is enabled and a custom certificate is used (`data/http/sfera.keys`), this parameter must be set to the key store password |
+| `https_cert_keypass` | String | | If HTTPS is enabled and a custom certificate is used (`data/http/sfera.keys`), this parameter must be set to the password (if any) for the specific key within the key store |
 | `http_max_threads` | Integer | 128 * _CPUs_ | Max number of threads created by the thread pool used by the Web server to process requests. The default value is equal to 128 times the number of processors available to the Java virtual machine |
 | `http_min_threads` | Integer | 8 | Min number of threads kept ready by the thread pool used by the Web server to process requests |
 | `http_threads_idle_timeout` | Integer | 60000 | Max thread idle time in milliseconds. Threads that are idle for longer than this period may be stopped |
 | `http_session_max_inactive` | Integer | 3600 | Max period of inactivity, after which a session is invalidated, in seconds |
+| `http_session_max_age` | Integer | -1 | Max age value used for the session cookie, in seconds. If a negative value is set, the cookie will expire at the end of the session (client dependent) |
 | `http_session_persist` | Boolean | false | If set to `true` the active HTTP sessions are persisted and restored in case of restart |
 | `ws_ping_interval` | Integer | 10000 | Time interval in milliseconds for ping messages in WebSocket connections |
 | `ws_response_timeout` | Integer | 5000 | Max waiting time in milliseconds for WebSocket responses after which the connection is closed by the server |

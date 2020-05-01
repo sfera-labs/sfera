@@ -59,11 +59,13 @@ public abstract class ConnectionRequiredApiServlet extends AuthenticatedUserServ
 			if (connections == null) {
 				resp.sendErrors(HttpServletResponse.SC_BAD_REQUEST,
 						new ErrorMessage(0, "No connections instantiated"));
+				return;
 			}
 			Connection connection = connections.get(cid);
 			if (connection == null) {
 				resp.sendErrors(HttpServletResponse.SC_BAD_REQUEST,
 						new ErrorMessage(0, "Connection '" + cid + "' not found"));
+				return;
 			}
 
 			processConnectionRequest(req, resp, connection);

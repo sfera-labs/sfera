@@ -23,7 +23,6 @@
 package cc.sferalabs.sfera.web.api.websockets;
 
 import java.io.IOException;
-import java.util.EventListener;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -40,10 +39,7 @@ import org.eclipse.jetty.websocket.servlet.UpgradeHttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.eventbus.Subscribe;
-
 import cc.sferalabs.sfera.access.Access;
-import cc.sferalabs.sfera.access.AccessChangeEvent;
 import cc.sferalabs.sfera.access.User;
 import cc.sferalabs.sfera.core.services.Task;
 import cc.sferalabs.sfera.core.services.TasksManager;
@@ -61,7 +57,7 @@ import cc.sferalabs.sfera.web.api.WebApiEvent;
  * @version 1.0.0
  *
  */
-public class ApiSocket extends WebSocketAdapter implements EventListener {
+public class ApiSocket extends WebSocketAdapter {
 
 	private static final Logger logger = LoggerFactory.getLogger(ApiSocket.class);
 	private static final AtomicLong count = new AtomicLong(77);
@@ -93,8 +89,7 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 	 *            the responses timeout
 	 */
 	ApiSocket(ServletUpgradeRequest request, long pingInterval, long respTimeout) {
-		this.originalRequest = ((UpgradeHttpServletRequest) request.getHttpServletRequest())
-				.getHttpServletRequest();
+		this.originalRequest = ((UpgradeHttpServletRequest) request.getHttpServletRequest()).getHttpServletRequest();
 		this.hostname = request.getRemoteHostName();
 		String connectionId = originalRequest.getParameter("connectionId");
 		session = originalRequest.getSession();
@@ -126,7 +121,6 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 				resp.put("responseTimeout", respTimeout);
 				resp.send();
 				ping();
-				Bus.register(this);
 				logger.debug("Socket connected - Host: {}", hostname);
 			} else {
 				logger.warn("Unauthorized WebSocket connection from {}", hostname);
@@ -134,13 +128,6 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 			}
 		} catch (Exception e) {
 			onWebSocketError(new Exception("Connection error", e));
-		}
-	}
-
-	@Subscribe
-	public void checkUser(AccessChangeEvent e) {
-		if (!isAuthorized(false)) {
-			closeSocket(StatusCode.POLICY_VIOLATION, "Unauthorized");
 		}
 	}
 
@@ -232,6 +219,7 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 						nodesSubscription.destroy();
 					}
 					nodesSubscription = new WsEventListener(this, nodes, connectionId);
+					nodesSubscription.sendCurrentSate();
 					ok = true;
 				}
 				if (files != null) {
@@ -270,10 +258,10 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 					reply.sendErrors(new ErrorMessage(0, "Attribute 'id' not found"));
 					return;
 				}
-				String value = message.get("value").toString();
+				Object valObj = message.get("value");
+				String value = valObj == null ? null : valObj.toString();
 				try {
-					WebApiEvent remoteEvent = new WebApiEvent(id, value, originalRequest,
-							connectionId);
+					WebApiEvent remoteEvent = new WebApiEvent(id, value, originalRequest, connectionId);
 					Bus.post(remoteEvent);
 					reply.sendResult("ok");
 				} catch (Exception e) {
@@ -309,7 +297,7 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 				break;
 			}
 		} catch (Throwable e) {
-			logger.warn("Error processing WebSocket message '" + message + "'", e);
+			logger.warn("Error processing WebSocket message '" + message.toJsonString() + "'", e);
 			try {
 				reply.sendErrors(new ErrorMessage(0, "Server error: " + e.getMessage()));
 			} catch (Exception e1) {
@@ -334,7 +322,6 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 		if (consoleSession != null) {
 			consoleSession.quit();
 		}
-		Bus.unregister(this);
 		logger.debug("Socket Closed: [{}] {} - Host: {}", statusCode, reason, hostname);
 	}
 
@@ -363,6 +350,9 @@ public class ApiSocket extends WebSocketAdapter implements EventListener {
 	 *             if unable to send the text message
 	 */
 	void send(String text) throws IOException {
+		if (text == null) {
+			throw new NullPointerException("null text");
+		}
 		RemoteEndpoint remote = getRemote();
 		if (remote != null) {
 			// FIXME this log creates a recursion when using
