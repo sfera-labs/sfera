@@ -112,7 +112,9 @@ public class PollingSubscription extends ConnectionEventIdSpecListener {
 
 	@Override
 	protected void handleEvent(Event event) {
-		changes.add(event);
+		if (changes != null) {
+			changes.add(event);
+		}
 	}
 
 }

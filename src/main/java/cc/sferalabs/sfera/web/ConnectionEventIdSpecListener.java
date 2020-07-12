@@ -72,6 +72,9 @@ public abstract class ConnectionEventIdSpecListener extends EventIdSpecListener 
 			return false;
 		}
 		if (event instanceof ConnectionEvent) {
+			if (connectionId == null) {
+				return false;
+			}
 			if (!connectionId.equals(((ConnectionEvent) event).getConnectionId())) {
 				return false;
 			}

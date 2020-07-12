@@ -49,9 +49,9 @@ public abstract class EventIdSpecListener implements EventListener {
 	 *            the event ID specification
 	 */
 	public EventIdSpecListener(String spec) {
-		Bus.register(this);
 		this.predicate = EventsUtil.getEventIdSpecMatchingPredicate(
 				Objects.requireNonNull(spec, "spec must not be null"));
+		Bus.register(this);
 	}
 
 	@Subscribe
@@ -71,6 +71,9 @@ public abstract class EventIdSpecListener implements EventListener {
 	 *         {@code false} otherwise.
 	 */
 	protected boolean matches(Event event) {
+		if (predicate == null) {
+			return false;
+		}
 		return predicate.test(event);
 	}
 
