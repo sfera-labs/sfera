@@ -141,7 +141,7 @@ public abstract class Bus {
 	 */
 	public static void postIfChanged(Event event) {
 		Event prev = EVENTS_MAP.put(event.getId(), event);
-		if (differ(event.getValue(), prev.getValue())) {
+		if (prev == null || differ(event.getValue(), prev.getValue())) {
 			doPost(event);
 		}
 	}
