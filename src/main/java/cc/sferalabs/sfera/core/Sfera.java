@@ -22,6 +22,8 @@
 
 package cc.sferalabs.sfera.core;
 
+import java.security.Security;
+
 import cc.sferalabs.sfera.logging.LoggerUtils;
 
 /**
@@ -49,6 +51,8 @@ public class Sfera {
 	 */
 	public static void main(String[] args) {
 		System.setProperty("java.awt.headless", "true");
+		Security.setProperty("networkaddress.cache.ttl", "30");
+		Security.setProperty("networkaddress.cache.negative.ttl", "10");
 		LoggerUtils.init();
 		Thread.setDefaultUncaughtExceptionHandler(new SystemExceptionHandler());
 		SystemNode.getInstance().start();
