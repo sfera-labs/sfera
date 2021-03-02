@@ -74,6 +74,7 @@ public abstract class Plugins {
 		try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(DIR_PATH))) {
 			for (Path file : stream) {
 				try {
+					logger.info("Loading plugin file '{}'", file);
 					if (!Files.isHidden(file)) {
 						Plugin p = new Plugin(file);
 						plugins.put(p.getId(), p);
