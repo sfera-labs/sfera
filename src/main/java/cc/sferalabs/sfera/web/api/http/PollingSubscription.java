@@ -44,9 +44,9 @@ import cc.sferalabs.sfera.web.api.http.servlets.SubscribeServlet;
  */
 public class PollingSubscription extends ConnectionEventIdSpecListener {
 
-	private final BlockingQueue<Event> changes = new LinkedBlockingQueue<Event>();
+	private final BlockingQueue<Event> changes = new LinkedBlockingQueue<>();
 	private long lastAckTs;
-	private Map<String, Event> lastPolled = new HashMap<String, Event>();
+	private Map<String, Event> lastPolled = new HashMap<>();
 
 	/**
 	 * Constructs a PollingSubscription.
@@ -67,13 +67,12 @@ public class PollingSubscription extends ConnectionEventIdSpecListener {
 	/**
 	 * <p>
 	 * Returns a collection of all the events not acknowledged. An event is
-	 * considered acknowledged if after being returned by this method a
-	 * subsequent call is made with an {@code ack} value greater than the
-	 * previous one.
+	 * considered acknowledged if after being returned by this method a subsequent
+	 * call is made with an {@code ack} value greater than the previous one.
 	 * </p>
 	 * <p>
-	 * The collection will be empty if the timeout expires before any new event
-	 * is collected.
+	 * The collection will be empty if the timeout expires before any new event is
+	 * collected.
 	 * </p>
 	 * 
 	 * @param ack
@@ -91,9 +90,9 @@ public class PollingSubscription extends ConnectionEventIdSpecListener {
 			throws InterruptedException {
 		Map<String, Event> map;
 		if (ack > lastAckTs) {
-			map = new HashMap<String, Event>();
+			map = new HashMap<>();
 		} else {
-			map = lastPolled;
+			map = new HashMap<>(lastPolled);
 			if (map.size() > 0) {
 				timeout = 0;
 			}
