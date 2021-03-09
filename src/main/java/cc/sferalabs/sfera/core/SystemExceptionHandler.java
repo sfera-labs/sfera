@@ -42,8 +42,5 @@ public class SystemExceptionHandler implements UncaughtExceptionHandler {
 	@Override
 	public void uncaughtException(Thread t, Throwable e) {
 		logger.error("Uncaught exception in thread: " + t.getName(), e);
-		if (e instanceof OutOfMemoryError) {
-			SystemNode.getInstance().quit();
-		}
 	}
 }
