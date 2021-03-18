@@ -143,7 +143,7 @@ public class WebServer implements AutoStartService {
 
 		if (httpsPort != null) {
 			try {
-				SslContextFactory sslContextFactory = new SslContextFactory();
+				SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
 				sslContextFactory.setKeyStorePath(KEYSTORE_PATH);
 				String cn = config.get("https_cert_cn", DEFAULT_CN);
 				String storePassword = config.get("https_cert_storepass", DEFAULT_KEY_STORE_PASSWORD);
