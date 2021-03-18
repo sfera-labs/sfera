@@ -44,7 +44,8 @@ import cc.sferalabs.sfera.web.api.http.servlets.SubscribeServlet;
  */
 public class PollingSubscription extends ConnectionEventIdSpecListener {
 
-	private final BlockingQueue<Event> changes = new LinkedBlockingQueue<>();
+	private final Connection connection;
+	private final BlockingQueue<Event> changes = new LinkedBlockingQueue<>(2000);
 	private long lastAckTs;
 	private Map<String, Event> lastPolled = new HashMap<>();
 
@@ -54,11 +55,12 @@ public class PollingSubscription extends ConnectionEventIdSpecListener {
 	 * @param spec
 	 *            specification of the event IDs matched by this subscription
 	 * 
-	 * @param connectionId
-	 *            the connection ID
+	 * @param connection
+	 *            the parent connection
 	 */
-	PollingSubscription(String spec, String connectionId) {
-		super(spec, connectionId);
+	PollingSubscription(String spec, Connection connection) {
+		super(spec, connection.getId());
+		this.connection = connection;
 		for (Event e : Bus.getCurrentState().values()) {
 			process(e);
 		}
@@ -111,8 +113,9 @@ public class PollingSubscription extends ConnectionEventIdSpecListener {
 
 	@Override
 	protected void handleEvent(Event event) {
-		if (changes != null) {
-			changes.add(event);
+		if (!changes.offer(event)) {
+			connection.destroy();
+			throw new IllegalStateException("Too many unpolled changes - subscription destroyed");
 		}
 	}
 

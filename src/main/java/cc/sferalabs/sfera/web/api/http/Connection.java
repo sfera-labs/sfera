@@ -67,7 +67,7 @@ public class Connection {
 		if (subscription != null) {
 			subscription.destroy();
 		}
-		subscription = new PollingSubscription(nodes, id);
+		subscription = new PollingSubscription(nodes, this);
 	}
 
 	/**
@@ -76,6 +76,7 @@ public class Connection {
 	public void destroy() {
 		if (subscription != null) {
 			subscription.destroy();
+			subscription = null;
 		}
 	}
 

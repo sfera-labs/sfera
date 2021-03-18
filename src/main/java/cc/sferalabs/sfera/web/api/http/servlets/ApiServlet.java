@@ -143,11 +143,11 @@ public abstract class ApiServlet extends HttpServlet {
 			resp.setCharacterEncoding("UTF-8");
 			processRequest(req, rr);
 		} catch (Throwable t) {
-			logger.error("Exception processing HTTP API request: " + req.getRequestURI(), t);
+			logger.warn("Exception processing HTTP API request: " + req.getRequestURI(), t);
 			try {
 				rr.sendServerError(t.toString());
 			} catch (Exception e) {
-				logger.error("Error sending response", e);
+				logger.warn("Error sending response", e);
 			}
 		}
 	}
