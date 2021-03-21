@@ -39,7 +39,7 @@ import com.google.common.eventbus.Subscribe;
  */
 public abstract class EventIdSpecListener implements EventListener {
 
-	private final Predicate<Event> predicate;
+	private Predicate<Event> predicate;
 
 	/**
 	 * Construct an EventIdSpecListener with the specified specification and
@@ -49,8 +49,8 @@ public abstract class EventIdSpecListener implements EventListener {
 	 *            the event ID specification
 	 */
 	public EventIdSpecListener(String spec) {
-		this.predicate = EventsUtil.getEventIdSpecMatchingPredicate(
-				Objects.requireNonNull(spec, "spec must not be null"));
+		this.predicate = EventsUtil
+				.getEventIdSpecMatchingPredicate(Objects.requireNonNull(spec, "spec must not be null"));
 		Bus.register(this);
 	}
 
@@ -62,8 +62,8 @@ public abstract class EventIdSpecListener implements EventListener {
 	}
 
 	/**
-	 * Returns a boolean representing whether the specified event has an ID
-	 * matching the specification.
+	 * Returns a boolean representing whether the specified event has an ID matching
+	 * the specification.
 	 * 
 	 * @param event
 	 *            the event to test
@@ -81,6 +81,7 @@ public abstract class EventIdSpecListener implements EventListener {
 	 * Clears the resources used by this listener.
 	 */
 	public void destroy() {
+		predicate = null;
 		Bus.unregister(this);
 	}
 

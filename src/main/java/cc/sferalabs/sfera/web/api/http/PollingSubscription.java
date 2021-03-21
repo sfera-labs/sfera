@@ -114,8 +114,9 @@ public class PollingSubscription extends ConnectionEventIdSpecListener {
 	@Override
 	protected void handleEvent(Event event) {
 		if (!changes.offer(event)) {
-			connection.destroy();
-			throw new IllegalStateException("Too many unpolled changes - subscription destroyed");
+			connection.unsubscribe();
+			throw new IllegalStateException("Too many unpolled changes - session '" + connection.getSession().getId()
+					+ "' connection '" + connection.getId() + "' unsubscribed");
 		}
 	}
 

@@ -63,7 +63,7 @@ public class ConnectServlet extends AuthenticatedUserServlet {
 			session.setAttribute(SESSION_ATTR_CONNECTIONS, connections);
 			logger.debug("Created new connections set for session '{}'", sessionId);
 		}
-		Connection connection = new Connection();
+		Connection connection = new Connection(session);
 		connections.put(connection);
 		String cid = connection.getId();
 		logger.debug("Connected - session '{}' connection '{}'", sessionId, cid);
