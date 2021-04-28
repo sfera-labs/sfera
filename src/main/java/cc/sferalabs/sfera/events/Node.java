@@ -44,6 +44,9 @@ public abstract class Node {
 	 *             if a node with the same ID has been already created
 	 */
 	public Node(String id) throws IllegalArgumentException {
+		if (id.contains(".")) {
+			throw new IllegalArgumentException("Nodes' IDs cannot contain a '.'");
+		}
 		this.id = id;
 		Nodes.put(this);
 	}
