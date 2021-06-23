@@ -27,7 +27,7 @@
 
 	<properties>
 		<latestDeployedVersion>1.3.7</latestDeployedVersion>
-		<jetty-version>9.4.7.v20170914</jetty-version>
+		<jetty-version>9.4.41.v20210516</jetty-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
