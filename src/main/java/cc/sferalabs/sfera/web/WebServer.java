@@ -103,7 +103,8 @@ public class WebServer implements AutoStartService {
 
 	private static final Logger logger = LoggerFactory.getLogger(WebServer.class);
 	private static final String[] EXCLUDED_PROTOCOLS = { "SSL", "SSLv2", "SSLv2Hello", "SSLv3" };
-	private static final String[] EXCLUDED_CIPHER_SUITES = { ".*NULL.*", ".*RC4.*", ".*MD5.*", ".*DES.*", ".*DSS.*" };
+	private static final String[] EXCLUDED_CIPHER_SUITES = { ".*NULL.*", ".*RC4.*", ".*MD5.*", ".*DES.*", ".*DSS.*",
+			"^.*_(MD5|SHA|SHA1)$", "^TLS_RSA_.*$" };
 	private static final String DEFAULT_CN = "sferaserver";
 	private static final String DEFAULT_KEY_STORE_PASSWORD = "sferapass";
 
@@ -277,7 +278,8 @@ public class WebServer implements AutoStartService {
 		Files.createDirectories(keystorePath.getParent());
 		String[] cmd = { "keytool", "-genkeypair", "-dname", "cn=" + cn, "-alias", "sferaservergen", "-keystore",
 				KEYSTORE_PATH, "-storepass", storePassword, "-keypass", keyPassword, "-validity", "73000", "-keyalg",
-				"RSA", "-keysize", "2048" };
+				"RSA", "-keysize", "2048", "-ext", "BC:critical=ca:false", "-ext",
+				"KU:critical=digitalSignature,keyEncipherment", "-ext", "EKU:critical=serverAuth" };
 		Process p = new ProcessBuilder(cmd).start();
 		if (p.waitFor() != 0) {
 			throw new IOException("keytool termination error");
