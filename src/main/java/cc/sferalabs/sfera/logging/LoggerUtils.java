@@ -53,6 +53,7 @@ public abstract class LoggerUtils {
 		if (Files.exists(log4j2Config)) {
 			System.setProperty("log4j.configurationFile", log4j2Config.toString());
 		}
+		getContext().reconfigure();
 		Console.addHandler(LogConsoleCommandHandler.INSTANCE);
 	}
 
