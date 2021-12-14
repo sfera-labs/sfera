@@ -122,8 +122,15 @@ public class Configuration {
 		if (path == null && config == null) {
 			return null;
 		}
-		CustomClassLoaderConstructor constr = new CustomClassLoaderConstructor(clazz.getClassLoader());
-		Yaml yaml = new Yaml(constr);
+
+		Yaml yaml;
+		ClassLoader cl = clazz.getClassLoader();
+		if (cl == null) {
+			yaml = new Yaml();
+		} else {
+			CustomClassLoaderConstructor constr = new CustomClassLoaderConstructor(cl);
+			yaml = new Yaml(constr);
+		}
 
 		if (path == null) {
 			return yaml.loadAs(yaml.dumpAsMap(config), clazz);
