@@ -284,7 +284,14 @@ public class WebServer implements AutoStartService {
 				KEYSTORE_PATH, "-storepass", storePassword, "-keypass", keyPassword, "-validity", "73000", "-keyalg",
 				"RSA", "-keysize", "2048", "-ext", "BC:critical=ca:false", "-ext",
 				"KU:critical=digitalSignature,keyEncipherment", "-ext", "EKU:critical=serverAuth" };
-		Process p = new ProcessBuilder(cmd).start();
+		ProcessBuilder pb = new ProcessBuilder(cmd);
+		// To make sure keytool is run using the same java version as Sfera's process so
+		// to create a compatible keystore
+		String javaVersion = System.getProperty("java.version");
+		if (javaVersion != null) {
+			pb.environment().put("JAVA_VERSION", javaVersion);
+		}
+		Process p = pb.start();
 		if (p.waitFor() != 0) {
 			throw new IOException("keytool termination error");
 		}
