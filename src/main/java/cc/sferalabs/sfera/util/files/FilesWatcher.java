@@ -158,7 +158,7 @@ public final class FilesWatcher extends LazyService {
 					}
 				}
 
-				key.cancel();
+				key.reset();
 			}
 
 			executeTasks(toExecute);
