@@ -62,7 +62,7 @@ public abstract class MultipartServlet extends AuthorizedAdminApiServlet {
 	protected void processAuthorizedRequest(HttpServletRequest req, HttpResponse resp)
 			throws ServletException, IOException {
 		try {
-			req.setAttribute(Request.__MULTIPART_CONFIG_ELEMENT, MULTIPART_CONFIG);
+			req.setAttribute(Request.MULTIPART_CONFIG_ELEMENT, MULTIPART_CONFIG);
 			processMultipartRequest(req, resp);
 		} finally {
 			try {

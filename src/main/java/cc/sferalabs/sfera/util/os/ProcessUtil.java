@@ -9,13 +9,25 @@ import java.util.concurrent.TimeoutException;
 public class ProcessUtil {
 
 	/**
+	 * 
+	 */
+	public static class ProcessResult {
+		public final int exitVal;
+		public final String output;
+
+		private ProcessResult(int exitVal, String output) {
+			this.exitVal = exitVal;
+			this.output = output;
+		}
+	}
+
+	/**
 	 * Constructs and runs a process.
 	 * 
 	 * @param timeout
-	 *            the maximum time to wait for the process to terminate. If set
-	 *            to 0 this method returns immediately after starting the
-	 *            process and no correct termination is checked nor output is
-	 *            collected
+	 *            the maximum time to wait for the process to terminate. If set to 0
+	 *            this method returns immediately after starting the process and no
+	 *            correct termination is checked nor output is collected
 	 * @param unit
 	 *            the time unit of the {@code timeout} argument
 	 * @param getOutput
@@ -26,14 +38,17 @@ public class ProcessUtil {
 	 *            a string array containing the program and its arguments
 	 * @return if {@code timeout} is greater than 0 it returns an Object array
 	 *         containing the process exit value as first element and, if
-	 *         {@code getOutput} is {@code true}, the String containing the
-	 *         process output as second element. {@code null} otherwise
+	 *         {@code getOutput} is {@code true}, the String containing the process
+	 *         output as second element. {@code null} otherwise
 	 * @throws IOException
 	 *             if an I/O error occurs
 	 * @throws InterruptedException
 	 *             if the current thread is interrupted while waiting
 	 * @throws TimeoutException
 	 *             if the timeout expires before termination
+	 * 
+	 * @deprecated use {@link #exec(long, TimeUnit, boolean, boolean, String...)
+	 *             exec()} instead
 	 */
 	public static Object[] execute(long timeout, TimeUnit unit, boolean getOutput, boolean killOnTimeout,
 			String... command) throws IOException, InterruptedException, TimeoutException {
@@ -68,6 +83,39 @@ public class ProcessUtil {
 			}
 		}
 		return ret;
+	}
+
+	/**
+	 * Constructs and runs a process.
+	 * 
+	 * @param timeout
+	 *            the maximum time to wait for the process to terminate. If set to 0
+	 *            this method returns immediately after starting the process and no
+	 *            correct termination is checked nor output is collected
+	 * @param unit
+	 *            the time unit of the {@code timeout} argument
+	 * @param getOutput
+	 *            whether or not to collect and return the process output
+	 * @param killOnTimeout
+	 *            whether or not to kill the process if the timeout expires
+	 * @param command
+	 *            a string array containing the program and its arguments
+	 * @return if {@code timeout} is greater than 0 it returns a
+	 *         {@link ProcessResult} containing the exit value
+	 *         ({@link ProcessResult#exitVal}) and, if {@code getOutput} is
+	 *         {@code true}, the process output String
+	 *         ({@link ProcessResult#output}). {@code null} otherwise
+	 * @throws IOException
+	 *             if an I/O error occurs
+	 * @throws InterruptedException
+	 *             if the current thread is interrupted while waiting
+	 * @throws TimeoutException
+	 *             if the timeout expires before termination
+	 */
+	public static ProcessResult exec(long timeout, TimeUnit unit, boolean getOutput, boolean killOnTimeout,
+			String... command) throws IOException, InterruptedException, TimeoutException {
+		Object[] ret = execute(timeout, unit, getOutput, killOnTimeout, command);
+		return new ProcessResult((int) ret[0], (String) ret[1]);
 	}
 
 }

@@ -27,6 +27,8 @@ package cc.sferalabs.sfera.web.api.http;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import javax.servlet.http.HttpSession;
+
 /**
  *
  * @author Giampiero Baggiani
@@ -39,13 +41,18 @@ public class Connection {
 	private static final AtomicLong count = new AtomicLong(77);
 
 	private final String id;
+	private final HttpSession session;
 	private PollingSubscription subscription;
 
 	/**
 	 * Constructs a {@code Connection}.
+	 * 
+	 * @param session
+	 *            the session owning this connection
 	 */
-	public Connection() {
+	public Connection(HttpSession session) {
 		this.id = "" + count.getAndIncrement();
+		this.session = session;
 	}
 
 	/**
@@ -58,25 +65,50 @@ public class Connection {
 	}
 
 	/**
+	 * Returns the session owning this connection.
+	 * 
+	 * @return the session owning this connection
+	 */
+	public HttpSession getSession() {
+		return session;
+	}
+
+	/**
 	 * Creates a subscription to the specified nodes.
 	 * 
 	 * @param nodes
 	 *            the nodes IDs specification
 	 */
 	public void subscribe(String nodes) {
+		unsubscribe();
+		subscription = new PollingSubscription(nodes, this);
+	}
+
+	/**
+	 * Terminates the current subscription (if any).
+	 */
+	public void unsubscribe() {
 		if (subscription != null) {
 			subscription.destroy();
+			subscription = null;
 		}
-		subscription = new PollingSubscription(nodes, id);
+	}
+
+	/**
+	 * Returns whether this connection has a subscription.
+	 * 
+	 * @return {@code true} if this connection has a subscription, {@code false}
+	 *         otherwise
+	 */
+	public boolean isSubscribed() {
+		return subscription != null;
 	}
 
 	/**
 	 * Destroys this connection.
 	 */
 	public void destroy() {
-		if (subscription != null) {
-			subscription.destroy();
-		}
+		unsubscribe();
 	}
 
 	/**

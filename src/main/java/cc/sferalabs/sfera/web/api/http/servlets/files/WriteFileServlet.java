@@ -30,11 +30,11 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Formatter;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.bind.DatatypeConverter;
 
 import cc.sferalabs.sfera.util.files.FilesUtil;
 import cc.sferalabs.sfera.web.api.ErrorMessage;
@@ -61,33 +61,28 @@ public class WriteFileServlet extends MultipartServlet {
 		String md5 = getMultipartParameter("md5", req);
 
 		if (path == null) {
-			resp.sendErrors(HttpServletResponse.SC_BAD_REQUEST,
-					new ErrorMessage(0, "Param 'path' not specified"));
+			resp.sendErrors(HttpServletResponse.SC_BAD_REQUEST, new ErrorMessage(0, "Param 'path' not specified"));
 			return;
 		}
 		if (content == null) {
-			resp.sendErrors(HttpServletResponse.SC_BAD_REQUEST,
-					new ErrorMessage(0, "Param 'content' not specified"));
+			resp.sendErrors(HttpServletResponse.SC_BAD_REQUEST, new ErrorMessage(0, "Param 'content' not specified"));
 			return;
 		}
 
 		Path target = Paths.get(".", path);
 		if (!FilesUtil.isInRoot(target)) {
-			resp.sendErrors(HttpServletResponse.SC_FORBIDDEN,
-					new ErrorMessage(0, "File outside root dir"));
+			resp.sendErrors(HttpServletResponse.SC_FORBIDDEN, new ErrorMessage(0, "File outside root dir"));
 			return;
 		}
 		try {
 			if (Files.isHidden(target)) {
-				resp.sendErrors(HttpServletResponse.SC_FORBIDDEN,
-						new ErrorMessage(0, "Cannot write hidden files"));
+				resp.sendErrors(HttpServletResponse.SC_FORBIDDEN, new ErrorMessage(0, "Cannot write hidden files"));
 				return;
 			}
 		} catch (Exception e) {
 		}
 		if (!writeToFile(content, target, md5)) {
-			resp.sendErrors(HttpServletResponse.SC_BAD_REQUEST,
-					new ErrorMessage(0, "md5 mismatch"));
+			resp.sendErrors(HttpServletResponse.SC_BAD_REQUEST, new ErrorMessage(0, "md5 mismatch"));
 			return;
 		}
 		resp.sendResult("ok");
@@ -142,7 +137,12 @@ public class WriteFileServlet extends MultipartServlet {
 			throw new RuntimeException(e);
 		}
 		byte[] digest = md.digest(bytes);
-		return DatatypeConverter.printHexBinary(digest);
+		try (Formatter formatter = new Formatter()) {
+			for (byte b : digest) {
+				formatter.format("%02x", b);
+			}
+			return formatter.toString();
+		}
 	}
 
 }

@@ -130,7 +130,7 @@ public final class FilesWatcher extends LazyService {
 			Set<WatchKey> keys = new HashSet<WatchKey>();
 			do { // in case there are other events combined
 				keys.add(wkey);
-			} while ((wkey = WATCHER.poll(200, TimeUnit.MILLISECONDS)) != null
+			} while ((wkey = WATCHER.poll(10, TimeUnit.MILLISECONDS)) != null
 					&& keys.size() < 500);
 
 			Set<WatcherTask> toExecute = new HashSet<>();
@@ -141,7 +141,7 @@ public final class FilesWatcher extends LazyService {
 					Set<WatcherTask> ts = PATHS_TASKS_MAP.remove(path);
 					if (ts != null) {
 						if (toExecute.addAll(ts)) {
-							logger.info("Directory '{}' modified", path);
+							logger.debug("Directory '{}' modified", path);
 						}
 					}
 					for (WatchEvent<?> event : key.pollEvents()) {
@@ -151,14 +151,14 @@ public final class FilesWatcher extends LazyService {
 							ts = PATHS_TASKS_MAP.remove(changed);
 							if (ts != null) {
 								if (toExecute.addAll(ts)) {
-									logger.info("File '{}' modified", changed);
+									logger.debug("File '{}' modified", changed);
 								}
 							}
 						}
 					}
 				}
 
-				key.cancel();
+				key.reset();
 			}
 
 			executeTasks(toExecute);

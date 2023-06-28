@@ -103,9 +103,11 @@ public class WebServer implements AutoStartService {
 
 	private static final Logger logger = LoggerFactory.getLogger(WebServer.class);
 	private static final String[] EXCLUDED_PROTOCOLS = { "SSL", "SSLv2", "SSLv2Hello", "SSLv3" };
-	private static final String[] EXCLUDED_CIPHER_SUITES = { ".*NULL.*", ".*RC4.*", ".*MD5.*", ".*DES.*", ".*DSS.*" };
+	private static final String[] EXCLUDED_CIPHER_SUITES = { ".*NULL.*", ".*RC4.*", ".*MD5.*", ".*DES.*", ".*DSS.*",
+			"^.*_(MD5|SHA|SHA1)$", "^TLS_RSA_.*$" };
 	private static final String DEFAULT_CN = "sferaserver";
 	private static final String DEFAULT_KEY_STORE_PASSWORD = "sferapass";
+	private static final int MAX_HEADER_SIZE = 16384;
 
 	private static Server server;
 	private static ServletContextHandler contexts;
@@ -134,7 +136,9 @@ public class WebServer implements AutoStartService {
 		server = new Server(threadPool);
 
 		if (httpPort != null) {
-			ServerConnector http = new ServerConnector(server);
+			HttpConfiguration http_config = new HttpConfiguration();
+			http_config.setRequestHeaderSize(MAX_HEADER_SIZE);
+			ServerConnector http = new ServerConnector(server, new HttpConnectionFactory(http_config));
 			http.setName("http");
 			http.setPort(httpPort);
 			server.addConnector(http);
@@ -143,7 +147,7 @@ public class WebServer implements AutoStartService {
 
 		if (httpsPort != null) {
 			try {
-				SslContextFactory sslContextFactory = new SslContextFactory();
+				SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
 				sslContextFactory.setKeyStorePath(KEYSTORE_PATH);
 				String cn = config.get("https_cert_cn", DEFAULT_CN);
 				String storePassword = config.get("https_cert_storepass", DEFAULT_KEY_STORE_PASSWORD);
@@ -163,6 +167,7 @@ public class WebServer implements AutoStartService {
 				HttpConfiguration https_config = new HttpConfiguration();
 				https_config.setSecurePort(httpsPort);
 				https_config.addCustomizer(new SecureRequestCustomizer());
+				https_config.setRequestHeaderSize(MAX_HEADER_SIZE);
 
 				ServerConnector https = new ServerConnector(server,
 						new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString()),
@@ -277,8 +282,16 @@ public class WebServer implements AutoStartService {
 		Files.createDirectories(keystorePath.getParent());
 		String[] cmd = { "keytool", "-genkeypair", "-dname", "cn=" + cn, "-alias", "sferaservergen", "-keystore",
 				KEYSTORE_PATH, "-storepass", storePassword, "-keypass", keyPassword, "-validity", "73000", "-keyalg",
-				"RSA", "-keysize", "2048" };
-		Process p = new ProcessBuilder(cmd).start();
+				"RSA", "-keysize", "2048", "-ext", "BC:critical=ca:false", "-ext",
+				"KU:critical=digitalSignature,keyEncipherment", "-ext", "EKU:critical=serverAuth" };
+		ProcessBuilder pb = new ProcessBuilder(cmd);
+		// To make sure keytool is run using the same java version as Sfera's process so
+		// to create a compatible keystore
+		String javaVersion = System.getProperty("java.version");
+		if (javaVersion != null) {
+			pb.environment().put("JAVA_VERSION", javaVersion);
+		}
+		Process p = pb.start();
 		if (p.waitFor() != 0) {
 			throw new IOException("keytool termination error");
 		}

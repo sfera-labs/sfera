@@ -113,7 +113,7 @@ public class Plugin {
 								if (event.isCharacters()) {
 									description = event.asCharacters().getData();
 								}
-							} else if (description == null && elName.equals("version")) {
+							} else if (version == null && elName.equals("version")) {
 								event = eventReader.nextEvent();
 								if (event.isCharacters()) {
 									version = event.asCharacters().getData();

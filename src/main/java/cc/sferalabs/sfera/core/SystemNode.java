@@ -225,7 +225,7 @@ public class SystemNode extends Node {
 					} catch (InterruptedException e) {
 					}
 
-					logger.info("Quitted");
+					logger.warn("Quitted");
 
 				} finally {
 					System.exit(0);

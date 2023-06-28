@@ -40,6 +40,8 @@ public class ConnectionsSet implements Serializable {
 
 	private static final long serialVersionUID = 4456127014431500700L;
 
+	private static final int CONNECTIONS_MAX = 500;
+
 	private transient Map<String, Connection> map;
 
 	/**
@@ -65,6 +67,9 @@ public class ConnectionsSet implements Serializable {
 	public void put(Connection connection) {
 		if (map == null) {
 			map = new HashMap<>();
+		}
+		if (map.size() >= CONNECTIONS_MAX) {
+			throw new IllegalStateException("Too many connections");
 		}
 		map.put(connection.getId(), connection);
 	}

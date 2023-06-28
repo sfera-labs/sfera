@@ -22,6 +22,8 @@
 
 package cc.sferalabs.sfera.events;
 
+import java.lang.ref.WeakReference;
+
 /**
  * Base {@link Event} implementation.
  * 
@@ -32,14 +34,14 @@ package cc.sferalabs.sfera.events;
  */
 public abstract class BaseEvent implements Event {
 
-	private final Node source;
+	private final WeakReference<Node> source;
 	private final String id;
 	private final String subId;
 	private final long timestamp;
 
 	/**
-	 * Constructs a {@code BaseEvent} event with the specified ID and the
-	 * specified {@code Node} as source.
+	 * Constructs a {@code BaseEvent} event with the specified ID and the specified
+	 * {@code Node} as source.
 	 * 
 	 * @param source
 	 *            the source node
@@ -48,7 +50,7 @@ public abstract class BaseEvent implements Event {
 	 */
 	public BaseEvent(Node source, String id) {
 		this.timestamp = System.currentTimeMillis();
-		this.source = source;
+		this.source = new WeakReference<Node>(source);
 		this.id = source.getId() + "." + id;
 		this.subId = id;
 	}
@@ -65,7 +67,7 @@ public abstract class BaseEvent implements Event {
 
 	@Override
 	public Node getSource() {
-		return source;
+		return source.get();
 	}
 
 	@Override
@@ -77,7 +79,7 @@ public abstract class BaseEvent implements Event {
 	public Object getSimpleValue() {
 		return getValue();
 	}
-	
+
 	@Override
 	public boolean isLoacal() {
 		return false;

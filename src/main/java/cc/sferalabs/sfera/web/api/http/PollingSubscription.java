@@ -44,9 +44,10 @@ import cc.sferalabs.sfera.web.api.http.servlets.SubscribeServlet;
  */
 public class PollingSubscription extends ConnectionEventIdSpecListener {
 
-	private final BlockingQueue<Event> changes = new LinkedBlockingQueue<Event>();
+	private final Connection connection;
+	private final BlockingQueue<Event> changes = new LinkedBlockingQueue<>(2000);
 	private long lastAckTs;
-	private Map<String, Event> lastPolled = new HashMap<String, Event>();
+	private Map<String, Event> lastPolled = new HashMap<>();
 
 	/**
 	 * Constructs a PollingSubscription.
@@ -54,11 +55,12 @@ public class PollingSubscription extends ConnectionEventIdSpecListener {
 	 * @param spec
 	 *            specification of the event IDs matched by this subscription
 	 * 
-	 * @param connectionId
-	 *            the connection ID
+	 * @param connection
+	 *            the parent connection
 	 */
-	PollingSubscription(String spec, String connectionId) {
-		super(spec, connectionId);
+	PollingSubscription(String spec, Connection connection) {
+		super(spec, connection.getId());
+		this.connection = connection;
 		for (Event e : Bus.getCurrentState().values()) {
 			process(e);
 		}
@@ -67,13 +69,12 @@ public class PollingSubscription extends ConnectionEventIdSpecListener {
 	/**
 	 * <p>
 	 * Returns a collection of all the events not acknowledged. An event is
-	 * considered acknowledged if after being returned by this method a
-	 * subsequent call is made with an {@code ack} value greater than the
-	 * previous one.
+	 * considered acknowledged if after being returned by this method a subsequent
+	 * call is made with an {@code ack} value greater than the previous one.
 	 * </p>
 	 * <p>
-	 * The collection will be empty if the timeout expires before any new event
-	 * is collected.
+	 * The collection will be empty if the timeout expires before any new event is
+	 * collected.
 	 * </p>
 	 * 
 	 * @param ack
@@ -91,9 +92,9 @@ public class PollingSubscription extends ConnectionEventIdSpecListener {
 			throws InterruptedException {
 		Map<String, Event> map;
 		if (ack > lastAckTs) {
-			map = new HashMap<String, Event>();
+			map = new HashMap<>();
 		} else {
-			map = lastPolled;
+			map = new HashMap<>(lastPolled);
 			if (map.size() > 0) {
 				timeout = 0;
 			}
@@ -112,7 +113,11 @@ public class PollingSubscription extends ConnectionEventIdSpecListener {
 
 	@Override
 	protected void handleEvent(Event event) {
-		changes.add(event);
+		if (!changes.offer(event)) {
+			connection.unsubscribe();
+			throw new IllegalStateException("Too many unpolled changes - session '" + connection.getSession().getId()
+					+ "' connection '" + connection.getId() + "' unsubscribed");
+		}
 	}
 
 }

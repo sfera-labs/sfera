@@ -99,6 +99,14 @@ public abstract class Bus {
 	}
 
 	/**
+	 * @param event
+	 */
+	private static void doPost(Event event) {
+		EVENT_BUS.post(event);
+		logger.info("Event: {} = {}", event.getId(), event.getValue());
+	}
+
+	/**
 	 * Posts the specified event to the bus.
 	 * 
 	 * @param event
@@ -106,8 +114,21 @@ public abstract class Bus {
 	 */
 	public static void post(Event event) {
 		EVENTS_MAP.put(event.getId(), event);
-		EVENT_BUS.post(event);
-		logger.info("Event: {} = {}", event.getId(), event.getValue());
+		doPost(event);
+	}
+
+	/**
+	 * Posts the specified event to the bus only if there was a previous event with
+	 * the same ID posted.
+	 * 
+	 * @param event
+	 *            the event to post
+	 */
+	public static void postIfNotFirst(Event event) {
+		Event prev = EVENTS_MAP.put(event.getId(), event);
+		if (prev != null) {
+			doPost(event);
+		}
 	}
 
 	/**
@@ -119,8 +140,24 @@ public abstract class Bus {
 	 *            the event to post
 	 */
 	public static void postIfChanged(Event event) {
-		if (valueChanged(event)) {
-			post(event);
+		Event prev = EVENTS_MAP.put(event.getId(), event);
+		if (prev == null || differ(event.getValue(), prev.getValue())) {
+			doPost(event);
+		}
+	}
+
+	/**
+	 * Posts the specified event to the bus only if there was a previous event with
+	 * the same ID posted and it had a different value. The comparison of the values
+	 * is done by means of the {@code equals()} method.
+	 * 
+	 * @param event
+	 *            the event to post
+	 */
+	public static void postIfChangedAndNotFirst(Event event) {
+		Event prev = EVENTS_MAP.put(event.getId(), event);
+		if (prev != null && differ(event.getValue(), prev.getValue())) {
+			doPost(event);
 		}
 	}
 
@@ -136,18 +173,21 @@ public abstract class Bus {
 	 *         event; {@code false} otherwise.
 	 */
 	public static boolean valueChanged(Event event) {
-		Object currVal = getValueOf(event.getId());
+		Object prevVal = getValueOf(event.getId());
 		Object newVal = event.getValue();
+		return differ(prevVal, newVal);
+	}
 
-		if (currVal == null) {
-			if (newVal != null) {
-				return true;
-			}
-		} else if (!currVal.equals(newVal)) {
-			return true;
+	/**
+	 * @param obj1
+	 * @param obj2
+	 * @return
+	 */
+	private static boolean differ(Object obj1, Object obj2) {
+		if (obj1 == null) {
+			return obj2 != null;
 		}
-
-		return false;
+		return !obj1.equals(obj2);
 	}
 
 	/**

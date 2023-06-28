@@ -62,8 +62,8 @@ public class ScriptsConsoleCommandHandler implements ConsoleCommandHandler {
 				}
 				script = script.substring(1, script.length() - 1).trim();
 				try {
-					ScriptsEngine.eval(script, null);
-					return null;
+					Object res = ScriptsEngine.eval(script, null);
+					return res == null ? "null" : res.toString();
 				} catch (ScriptException e) {
 					return "Error evaluating script: " + e;
 				}

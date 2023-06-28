@@ -22,6 +22,8 @@
 
 package cc.sferalabs.sfera.events;
 
+import java.util.Objects;
+
 /**
  * Class representing a Node.
  * 
@@ -33,6 +35,16 @@ package cc.sferalabs.sfera.events;
 public abstract class Node {
 
 	private final String id;
+	
+	/**
+	 * @param id
+	 * @param subId
+	 * @throws IllegalArgumentException
+	 */
+	Node(String id, String subId) throws IllegalArgumentException {
+		this.id = checkId(id) + "." + checkId(subId);
+		Nodes.put(this);
+	}
 
 	/**
 	 * Constructs a {@code Node} with the specified ID and adds it to the list
@@ -44,8 +56,20 @@ public abstract class Node {
 	 *             if a node with the same ID has been already created
 	 */
 	public Node(String id) throws IllegalArgumentException {
-		this.id = id;
+		this.id = checkId(id);
 		Nodes.put(this);
+	}
+
+	/**
+	 * @param id
+	 * @return
+	 */
+	private static String checkId(String id) {
+		Objects.requireNonNull(id, "ID cannot be null");
+		if (id.contains(".")) {
+			throw new IllegalArgumentException("Nodes' IDs cannot contain a '.'");
+		}
+		return id;
 	}
 
 	/**
