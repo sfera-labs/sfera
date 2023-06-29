@@ -20,18 +20,18 @@
 		</license>
 	</licenses>
 	<properties>
-		<latestDeployedVersion>1.3.7</latestDeployedVersion>
+		<latestDeployedVersion>1.7.0</latestDeployedVersion>
 		<jetty-version>9.4.38.v20210224</jetty-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<distributionManagement>
 		<repository>
 			<id>sferalabs.cc</id>
-			<url>scp://sferalabs.cc/var/www/sfera.sferalabs/mvn-repo/</url>
+			<url>scpexe://sferalabs.cc/var/www/sfera.sferalabs/mvn-repo/</url>
 		</repository>
 		<site>
 			<id>sferalabs.cc</id>
-			<url>scp://sferalabs.cc/var/www/sfera.sferalabs/docs/sfera/</url>
+			<url>scpexe://sferalabs.cc/var/www/sfera.sferalabs/docs/sfera/</url>
 		</site>
 	</distributionManagement>
 	<reporting>
@@ -72,8 +72,8 @@
 		<extensions>
 			<extension>
 				<groupId>org.apache.maven.wagon</groupId>
-				<artifactId>wagon-ssh</artifactId>
-				<version>3.3.4</version>
+				<artifactId>wagon-ssh-external</artifactId>
+				<version>3.5.3</version>
 			</extension>
 		</extensions>
 		<resources>
