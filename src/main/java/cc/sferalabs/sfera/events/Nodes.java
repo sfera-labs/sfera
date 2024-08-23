@@ -56,7 +56,7 @@ public abstract class Nodes {
 	 * @throws IllegalArgumentException
 	 *             if a node with the same ID has been already added
 	 */
-	synchronized static void put(Node node) throws IllegalArgumentException {
+	public synchronized static void put(Node node) throws IllegalArgumentException {
 		String id = node.getId();
 		if (nodes.containsKey(id)) {
 			throw new IllegalArgumentException("Node with ID '" + id + "' already exists");
@@ -82,7 +82,8 @@ public abstract class Nodes {
 	}
 
 	/**
-	 * Removes the node with the specified ID if it is present.
+	 * Removes the node with the specified ID if it is present, together with all
+	 * its SubNode's
 	 * 
 	 * @param id
 	 *            the ID of the node to be removed
@@ -94,6 +95,15 @@ public abstract class Nodes {
 		Node n = nodes.remove(id);
 		if (n != null) {
 			logger.debug("Node '{}' removed", id);
+			nodes.entrySet().removeIf(e -> {
+				Node sn = e.getValue();
+				if ((sn instanceof SubNode) && ((SubNode) sn).getParent() == n) {
+					logger.debug("SubNode '{}' removed", sn.getId());
+					ScriptsEngine.removeFromGlobalScope(sn.getId());
+					return true;
+				}
+				return false;
+			});
 		}
 		return n;
 	}

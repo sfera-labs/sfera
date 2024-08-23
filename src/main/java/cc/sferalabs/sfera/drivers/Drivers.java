@@ -133,7 +133,6 @@ public abstract class Drivers {
 
 		for (Driver d : toRemove) {
 			drivers.remove(d.getId());
-			d.quit();
 			d.destroy();
 		}
 	}

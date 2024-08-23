@@ -43,6 +43,7 @@ import cc.sferalabs.sfera.core.services.TasksManager;
 import cc.sferalabs.sfera.events.Bus;
 import cc.sferalabs.sfera.events.Event;
 import cc.sferalabs.sfera.events.Node;
+import cc.sferalabs.sfera.events.Nodes;
 import cc.sferalabs.sfera.events.StringEvent;
 import cc.sferalabs.sfera.util.files.FilesWatcher;
 
@@ -99,6 +100,10 @@ public abstract class Driver extends Node {
 					} else if (config == null) {
 						config = new Configuration();
 					}
+					Node dn = Nodes.get(getId());
+					if (dn != Driver.this) {
+						Nodes.put(Driver.this);
+					}
 					postDriverStateEvent("init");
 					if (onInit(config)) {
 						log.info("Started");
@@ -142,6 +147,7 @@ public abstract class Driver extends Node {
 				}
 
 				if (!quit) {
+					Driver.super.destroy();
 					try {
 						Thread.sleep(5000);
 					} catch (InterruptedException e) {
@@ -306,7 +312,7 @@ public abstract class Driver extends Node {
 	public synchronized void restart() {
 		if (future != null) {
 			restart = true;
-			quit();
+			destroy();
 		} else {
 			start();
 		}
