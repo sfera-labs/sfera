@@ -75,6 +75,10 @@ public class DriversConsoleCommandHandler implements ConsoleCommandHandler {
 			d.restart();
 			return "Restarted";
 
+		case "destroy":
+			d.destroy();
+			return "Restarted";
+
 		default:
 			return "Unkown command";
 		}
