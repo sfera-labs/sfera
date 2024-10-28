@@ -168,7 +168,7 @@ public abstract class FilesUtil {
 	 *             if an I/O error occurs
 	 */
 	public static void unzip(Path source, Path dir, CopyOption... options) throws IOException {
-		try (FileSystem zipFs = FileSystems.newFileSystem(source, null)) {
+		try (FileSystem zipFs = FileSystems.newFileSystem(source, null, null)) {
 			Files.walkFileTree(zipFs.getPath("/"), new SimpleFileVisitor<Path>() {
 
 				/**
