@@ -136,7 +136,7 @@ public class ScriptsLoader implements EventListener {
 	private void loadFiles(String filesExtension, Consumer<Path> action) throws IOException {
 		loadFilesIn(FileSystems.getDefault(), filesExtension, action);
 		for (Plugin plugin : Plugins.getAll().values()) {
-			try (FileSystem pluginFs = FileSystems.newFileSystem(plugin.getPath(), null)) {
+			try (FileSystem pluginFs = FileSystems.newFileSystem(plugin.getPath(), (ClassLoader) null)) {
 				loadFilesIn(pluginFs, filesExtension, action);
 			}
 		}

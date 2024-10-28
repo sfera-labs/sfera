@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>cc.sferalabs.sfera</groupId>
 	<artifactId>sfera</artifactId>
-	<version>1.8.0</version>
+	<version>1.8.2</version>
 	<name>Sfera</name>
 	<description>The Sfera Framework for Home/Building Automation and IoT Integration</description>
 	<url>http://www.sferalabs.cc/sfera</url>

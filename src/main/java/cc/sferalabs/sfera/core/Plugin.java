@@ -75,7 +75,7 @@ public class Plugin {
 		String name = null;
 		String description = null;
 		String version = null;
-		try (FileSystem pluginFileSystem = FileSystems.newFileSystem(jarFile, null)) {
+		try (FileSystem pluginFileSystem = FileSystems.newFileSystem(jarFile, (ClassLoader) null)) {
 			XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 			XMLEventReader eventReader = null;
 			try (BufferedReader br = Files
