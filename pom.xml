@@ -1,12 +1,15 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>cc.sferalabs.sfera</groupId>
 	<artifactId>sfera</artifactId>
 	<version>1.8.2</version>
 	<name>Sfera</name>
-	<description>The Sfera Framework for Home/Building Automation and IoT Integration</description>
-	<url>http://www.sferalabs.cc/sfera</url>
+	<description>
+		The Sfera Framework for Home/Building Automation and IoT Integration
+	</description>
+	<url>https://sfera.sferalabs.cc/docs/sfera/</url>
 	<organization>
 		<name>Sfera Labs S.r.l.</name>
 		<url>http://www.sferalabs.cc</url>
@@ -20,18 +23,22 @@
 		</license>
 	</licenses>
 	<properties>
-		<latestDeployedVersion>1.7.0</latestDeployedVersion>
+		<latestDeployedVersion>1.8.2</latestDeployedVersion>
 		<jetty-version>9.4.38.v20210224</jetty-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<distributionManagement>
 		<repository>
 			<id>sferalabs.cc</id>
-			<url>scpexe://sferalabs.cc/var/www/sfera.sferalabs/mvn-repo/</url>
+			<url>
+				scpexe://sferalabs.cc:18765/home/customer/www/sfera.sferalabs.cc/public_html/mvn-repo/
+			</url>
 		</repository>
 		<site>
 			<id>sferalabs.cc</id>
-			<url>scpexe://sferalabs.cc/var/www/sfera.sferalabs/docs/sfera/</url>
+			<url>
+				scpexe://sferalabs.cc:18765/home/customer/www/sfera.sferalabs.cc/public_html/docs/sfera/
+			</url>
 		</site>
 	</distributionManagement>
 	<reporting>
@@ -39,7 +46,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.10.3</version>
+				<version>3.11.2</version>
 				<configuration>
 					<show>public</show>
 				</configuration>
@@ -55,13 +62,13 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>2.9</version>
+				<version>3.8.0</version>
 				<reportSets>
 					<reportSet>
 						<reports>
-							<report>dependencies</report>
-							<report>license</report>
 							<report>summary</report>
+							<report>licenses</report>
+							<report>dependencies</report>
 						</reports>
 					</reportSet>
 				</reportSets>
@@ -94,7 +101,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
-				<version>2.4</version>
+				<version>3.3.1</version>
 				<executions>
 					<execution>
 						<id>attach-sources</id>
@@ -107,7 +114,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.4.1</version>
+				<version>3.11.2</version>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>
@@ -119,7 +126,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.6</version>
+				<version>3.7.1</version>
 				<executions>
 					<execution>
 						<id>make-assembly</id>
@@ -145,7 +152,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
-				<version>2.10</version>
+				<version>3.8.1</version>
 				<executions>
 					<execution>
 						<id>copy-dependencies</id>
@@ -165,7 +172,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.6</version>
+				<version>3.4.2</version>
 				<configuration>
 					<archive>
 						<manifest>
@@ -179,14 +186,18 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>license-maven-plugin</artifactId>
-				<version>1.9</version>
+				<version>2.5.0</version>
 				<configuration>
 					<licenseName>lgpl_v3</licenseName>
 					<addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
 					<emptyLineAfterHeader>true</emptyLineAfterHeader>
 					<sectionDelimiter>---</sectionDelimiter>
-					<processStartTag>+======================================================================+</processStartTag>
-					<processEndTag>-======================================================================-</processEndTag>
+					<processStartTag>
+						+======================================================================+
+					</processStartTag>
+					<processEndTag>
+						-======================================================================-
+					</processEndTag>
 					<roots>
 						<root>src/main/java</root>
 						<root>src/test/java</root>

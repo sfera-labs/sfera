@@ -6,7 +6,7 @@
 	<skin>
 		<groupId>org.apache.maven.skins</groupId>
 		<artifactId>maven-fluido-skin</artifactId>
-		<version>1.4</version>
+		<version>1.11.1</version>
 	</skin>
 
 	<poweredBy>
@@ -16,8 +16,8 @@
 
 	<body>
 		<links>
-			<item name="Sfera" href="http://www.sferalabs.cc/sfera/" />
-			<item name="Sfera Labs" href="http://www.sferalabs.cc/" />
+			<item name="Sfera" href="https://sfera.sferalabs.cc/docs/sfera/" />
+			<item name="Sfera Labs" href="https://www.sferalabs.cc/" />
 		</links>
 
 		<menu name="Sfera">
